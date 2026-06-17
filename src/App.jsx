@@ -7,7 +7,6 @@ import {
   CreditCard,
   LayoutDashboard,
   LockKeyhole,
-  Mail,
   MapPin,
   Menu,
   Plane,
@@ -24,6 +23,7 @@ const ROUTES = {
   experiences: '/experiences',
   'getting-here': '/getting-here',
   'vip-package': '/exclusive-offer',
+  booking: '/booking',
   contact: '/contact',
   'guest-login': '/guest',
   'guest-portal': '/guest/portal',
@@ -39,6 +39,7 @@ const PATH_TO_VIEW = {
   '/getting-here': 'getting-here',
   '/exclusive-offer': 'vip-package',
   '/vip-package': 'vip-package',
+  '/booking': 'booking',
   '/contact': 'contact',
   '/guest': 'guest-login',
   '/guest/portal': 'guest-portal',
@@ -52,6 +53,7 @@ const PAGE_META = {
   experiences: ['Experiences | Pueblo La Perla Boracay', 'Water activities, wellness rituals, private dining, and island experiences arranged through Pueblo La Perla Boracay.'],
   'getting-here': ['Getting Here | Pueblo La Perla Boracay', 'Arrival guidance through Caticlan or Kalibo with port pickup and transfer coordination.'],
   'vip-package': ['VIP Wellness Package | Pueblo La Perla Boracay', 'A five-year Pueblo La Perla VIP Wellness offer with four nights annually and a private digital entitlement ledger.'],
+  booking: ['Book Your Stay | Pueblo La Perla Boracay', 'Request a Pueblo La Perla Boracay reservation and receive payment details by email after submitting your booking request.'],
   contact: ['Reserve and Inquire | Pueblo La Perla Boracay', 'Send a private reservation or VIP Wellness Package inquiry to the Pueblo La Perla Boracay team.'],
 };
 
@@ -113,8 +115,8 @@ const EXPERIENCE_GROUPS = [
 ];
 
 const INITIAL_BOOKINGS = [
-  { id: 'BKG-001', guest: 'Demo Guest', unit: 'Grand Ocean Villa', checkIn: '2026-07-01', checkOut: '2026-07-04', paymentStatus: 'Paid', amount: 120000 },
-  { id: 'BKG-002', guest: 'Sample Lead', unit: 'Sunset Suite', checkIn: '2026-07-05', checkOut: '2026-07-07', paymentStatus: 'Deposit Required', amount: 36000 },
+  { id: 'BKG-001', reference: 'BKG-001', guest: 'Demo Guest', unit: 'Grand Ocean Villa', checkIn: '2026-07-01', checkOut: '2026-07-04', status: 'Confirmed', paymentStatus: 'Paid', amount: 120000 },
+  { id: 'BKG-002', reference: 'BKG-002', guest: 'Sample Lead', unit: 'Sunset Suite', checkIn: '2026-07-05', checkOut: '2026-07-07', status: 'Pending Payment', paymentStatus: 'Deposit Required', amount: 36000 },
 ];
 
 const INITIAL_VIP_MEMBERS = [
@@ -138,6 +140,14 @@ function getInitialView() {
 
 function formatMoney(value) {
   return `₱${Number(value || 0).toLocaleString('en-PH')}`;
+}
+
+function countNights(checkIn, checkOut) {
+  const start = new Date(`${checkIn}T00:00:00`);
+  const end = new Date(`${checkOut}T00:00:00`);
+  const diff = end.getTime() - start.getTime();
+  if (!Number.isFinite(diff) || diff <= 0) return 0;
+  return Math.round(diff / 86400000);
 }
 
 function SectionDivider() {
@@ -171,7 +181,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
     ['experiences', 'Experiences'],
     ['vip-package', 'Exclusive Offer'],
     ['getting-here', 'Getting Here'],
-    ['contact', 'Reserve'],
+    ['booking', 'Reserve'],
   ];
 
   return (
@@ -199,10 +209,11 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
         <div className='fixed inset-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] lg:hidden'>
           <div className='flex flex-col items-center space-y-8 pt-16 text-sm uppercase tracking-[0.2em] text-[#1A1A1A]'>
             {links.map(([id, label]) => (
-              <button key={id} onClick={() => navigate(id)} className={id === 'contact' ? 'mt-8 text-[#9A8A5A]' : ''}>
+              <button key={id} onClick={() => navigate(id)} className={id === 'booking' ? 'mt-8 text-[#9A8A5A]' : ''}>
                 {label}
               </button>
             ))}
+            <button onClick={() => navigate('contact')} className='text-[10px] text-stone-400 hover:text-stone-600'>Contact Inquiry</button>
             <div className='my-8 h-12 w-px bg-stone-300' />
             <button onClick={() => navigate('guest-login')} className='text-[10px] text-stone-400 hover:text-stone-600'>Guest Portal</button>
           </div>
@@ -232,7 +243,8 @@ function PublicFooter({ navigate }) {
         <div>
           <p className='mb-5 text-[10px] uppercase tracking-[0.2em] text-[#9A8A5A]'>Inquiries</p>
           <p className='text-sm text-white/60'>plpvillas@gmail.com</p>
-          <button onClick={() => navigate('contact')} className='mt-6 border-b border-white pb-1 text-[11px] uppercase tracking-[0.2em] transition-colors hover:border-[#9A8A5A] hover:text-[#9A8A5A]'>Reserve</button>
+          <button onClick={() => navigate('booking')} className='mt-6 border-b border-white pb-1 text-[11px] uppercase tracking-[0.2em] transition-colors hover:border-[#9A8A5A] hover:text-[#9A8A5A]'>Reserve</button>
+          <button onClick={() => navigate('contact')} className='mt-4 block text-xs text-white/40 hover:text-white'>General inquiry</button>
         </div>
       </div>
     </footer>
@@ -282,7 +294,7 @@ function HomeView({ navigate }) {
           <div className='flex flex-col items-center gap-5 text-[11px] font-medium uppercase tracking-[0.2em] sm:flex-row sm:space-x-8'>
             <button onClick={() => navigate('accommodations')} className='text-white transition-colors hover:text-white/70'>Explore the resort</button>
             <div className='hidden h-1 w-1 rounded-full bg-white/30 sm:block' />
-            <button onClick={() => navigate('contact')} className='text-white transition-colors hover:text-white/70'>Reserve your stay</button>
+            <button onClick={() => navigate('booking')} className='text-white transition-colors hover:text-white/70'>Reserve your stay</button>
           </div>
         </div>
       </section>
@@ -341,7 +353,7 @@ function AccommodationsView({ navigate }) {
                 <div className='mb-10 flex flex-wrap gap-2'>
                   {acc.features.map((feature) => <span key={feature} className='bg-stone-100 px-3 py-1.5 text-[10px] uppercase tracking-[0.1em] text-[#1A1A1A]'>{feature}</span>)}
                 </div>
-                <button onClick={() => navigate('contact')} className='self-start border-b border-[#1A1A1A] pb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-[#1A1A1A] transition-colors hover:border-[#9A8A5A] hover:text-[#9A8A5A]'>Inquire & Reserve</button>
+                <button onClick={() => navigate('booking')} className='self-start border-b border-[#1A1A1A] pb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-[#1A1A1A] transition-colors hover:border-[#9A8A5A] hover:text-[#9A8A5A]'>Inquire & Reserve</button>
               </div>
             </div>
           ))}
@@ -382,6 +394,98 @@ function GettingHereView() {
           <div><Anchor className='mb-6 h-5 w-5 text-[#9A8A5A]' /><h3 className='mb-4 font-serif text-2xl'>By Port</h3><p className='text-sm leading-relaxed text-[#4A4A4A]'>Our team can assist with port coordination and arrival timing.</p></div>
           <div><MapPin className='mb-6 h-5 w-5 text-[#9A8A5A]' /><h3 className='mb-4 font-serif text-2xl'>To the Retreat</h3><p className='text-sm leading-relaxed text-[#4A4A4A]'>Pueblo La Perla is located in High Boracay, minutes from Station 2.</p></div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function BookingRequestView({ onCreateBooking }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', accommodation: 'Grand Ocean Villa', checkIn: '', checkOut: '', guests: 2, message: '' });
+  const [status, setStatus] = useState({ tone: '', message: '' });
+  const selected = ACCOMMODATIONS.find((item) => item.name === form.accommodation) || ACCOMMODATIONS[0];
+  const nights = countNights(form.checkIn, form.checkOut);
+  const amount = nights * selected.rate;
+  const deposit = Math.ceil(amount * 0.3);
+  const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+
+  const submit = async (event) => {
+    event.preventDefault();
+    setStatus({ tone: 'neutral', message: 'Submitting booking request and preparing email...' });
+
+    let bookingPayload = null;
+    let guestEmailSent = false;
+
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result?.error || 'Booking API failed');
+      bookingPayload = result.booking;
+      guestEmailSent = Boolean(result.guestEmailSent);
+    } catch {
+      bookingPayload = {
+        reference: `PLP-${String(Date.now()).slice(-8)}`,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        accommodation: form.accommodation,
+        checkIn: form.checkIn,
+        checkOut: form.checkOut,
+        guests: Number(form.guests),
+        nights,
+        amount,
+        deposit,
+        status: 'Pending Payment Instructions',
+      };
+    }
+
+    onCreateBooking(bookingPayload);
+    setStatus({
+      tone: 'success',
+      message: guestEmailSent
+        ? `Booking request ${bookingPayload.reference} received. Payment details were emailed to the guest.`
+        : `Booking request ${bookingPayload.reference} received. Configure booking email variables in Vercel to send payment details automatically.`,
+    });
+    setForm({ name: '', email: '', phone: '', accommodation: 'Grand Ocean Villa', checkIn: '', checkOut: '', guests: 2, message: '' });
+  };
+
+  return (
+    <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'>
+      <div className='mx-auto grid max-w-[1200px] grid-cols-1 gap-20 px-6 md:px-12 lg:grid-cols-2'>
+        <div>
+          <p className='mb-6 text-[10px] uppercase tracking-[0.2em] text-[#9A8A5A]'>Booking Request</p>
+          <h1 className='mb-8 font-serif text-5xl text-[#1A1A1A] md:text-6xl'>Reserve your stay.</h1>
+          <p className='mb-10 leading-relaxed text-[#4A4A4A]'>Submit your preferred dates and guest details. The booking remains pending until the resort confirms availability and verifies payment.</p>
+          <div className='border-l border-[#9A8A5A] pl-6 text-sm leading-relaxed text-[#4A4A4A]'>
+            After submission, the guest receives an email with the booking reference, estimated total, suggested deposit, and payment instructions.
+          </div>
+          <div className='mt-12 border-t border-stone-200 pt-8 text-sm text-[#4A4A4A]'>
+            <p className='mb-2 font-medium text-[#1A1A1A]'>Estimate</p>
+            <p>{selected.name}</p>
+            <p>{nights > 0 ? `${nights} night${nights > 1 ? 's' : ''} × ${formatMoney(selected.rate)} = ${formatMoney(amount)}` : 'Select dates to calculate estimated total.'}</p>
+            {nights > 0 && <p>Suggested deposit: {formatMoney(deposit)}</p>}
+          </div>
+        </div>
+
+        <form onSubmit={submit} className='space-y-6'>
+          <select value={form.accommodation} onChange={(event) => update('accommodation', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 text-[#4A4A4A] outline-none transition-colors focus:border-[#9A8A5A]'>
+            {ACCOMMODATIONS.map((item) => <option key={item.name}>{item.name}</option>)}
+          </select>
+          <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+            <label className='text-[10px] uppercase tracking-[0.2em] text-stone-500'>Check-in<input type='date' value={form.checkIn} onChange={(event) => update('checkIn', event.target.value)} className='mt-2 w-full border-b border-stone-300 bg-transparent py-4 text-base normal-case tracking-normal text-[#1A1A1A] outline-none focus:border-[#9A8A5A]' required /></label>
+            <label className='text-[10px] uppercase tracking-[0.2em] text-stone-500'>Check-out<input type='date' value={form.checkOut} onChange={(event) => update('checkOut', event.target.value)} className='mt-2 w-full border-b border-stone-300 bg-transparent py-4 text-base normal-case tracking-normal text-[#1A1A1A] outline-none focus:border-[#9A8A5A]' required /></label>
+          </div>
+          <input type='number' min='1' max={selected.capacity} placeholder='Number of guests' value={form.guests} onChange={(event) => update('guests', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none transition-colors focus:border-[#9A8A5A]' required />
+          <input placeholder='Full name' value={form.name} onChange={(event) => update('name', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none transition-colors focus:border-[#9A8A5A]' required />
+          <input type='email' placeholder='Email for payment details' value={form.email} onChange={(event) => update('email', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none transition-colors focus:border-[#9A8A5A]' required />
+          <input placeholder='Phone / WhatsApp' value={form.phone} onChange={(event) => update('phone', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none transition-colors focus:border-[#9A8A5A]' required />
+          <textarea placeholder='Arrival notes, special requests, or VIP package interest' rows={5} value={form.message} onChange={(event) => update('message', event.target.value)} className='w-full resize-none border-b border-stone-300 bg-transparent py-4 outline-none transition-colors focus:border-[#9A8A5A]' />
+          <button type='submit' className='border border-[#1A1A1A] px-8 py-4 text-[11px] uppercase tracking-[0.2em] transition-colors hover:bg-[#1A1A1A] hover:text-white'>Submit Booking Request</button>
+          {status.message && <p className={`text-sm ${status.tone === 'success' ? 'text-emerald-700' : 'text-[#4A4A4A]'}`}>{status.message}</p>}
+        </form>
       </div>
     </div>
   );
@@ -429,9 +533,9 @@ function ContactReserveView({ onCreateLead }) {
     <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'>
       <div className='mx-auto grid max-w-[1200px] grid-cols-1 gap-20 px-6 md:px-12 lg:grid-cols-2'>
         <div>
-          <p className='mb-6 text-[10px] uppercase tracking-[0.2em] text-[#9A8A5A]'>Reserve</p>
-          <h1 className='mb-8 font-serif text-5xl text-[#1A1A1A] md:text-6xl'>Begin your stay.</h1>
-          <p className='mb-10 leading-relaxed text-[#4A4A4A]'>Share your preferred dates, accommodation interest, and arrival needs. Our team will arrange the details privately.</p>
+          <p className='mb-6 text-[10px] uppercase tracking-[0.2em] text-[#9A8A5A]'>General Inquiry</p>
+          <h1 className='mb-8 font-serif text-5xl text-[#1A1A1A] md:text-6xl'>Begin the conversation.</h1>
+          <p className='mb-10 leading-relaxed text-[#4A4A4A]'>For confirmed date requests, use the booking page. For other questions, private events, VIP package questions, or custom arrangements, send an inquiry here.</p>
           <div className='space-y-4 text-sm text-[#4A4A4A]'>
             <p>Email: plpvillas@gmail.com</p>
             <p>Location: High Boracay, minutes from Station 2</p>
@@ -477,7 +581,7 @@ function VIPPackageView({ navigate }) {
                 <div key={roman} className='flex items-start'><span className='mr-6 font-serif text-lg text-[#9A8A5A]'>{roman}</span><div><h3 className='mb-1 font-medium text-[#1A1A1A]'>{title}</h3><p className='text-sm text-[#4A4A4A]'>{body}</p></div></div>
               ))}
             </div>
-            <button onClick={() => navigate('contact')} className='self-start border border-[#1A1A1A] px-8 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#1A1A1A] transition-colors hover:bg-[#1A1A1A] hover:text-white'>Inquire with our team</button>
+            <button onClick={() => navigate('booking')} className='self-start border border-[#1A1A1A] px-8 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-[#1A1A1A] transition-colors hover:bg-[#1A1A1A] hover:text-white'>Request Booking</button>
           </div>
         </div>
       </div>
@@ -503,7 +607,7 @@ function GuestPortalView({ navigate }) {
   return (
     <div className='flex min-h-screen flex-col items-center bg-stone-100 px-6 pb-24 pt-24'>
       <div className='mb-12 flex w-full max-w-4xl items-end justify-between border-b border-stone-300 pb-6'><div><p className='mb-2 text-[10px] uppercase tracking-[0.2em] text-[#9A8A5A]'>Welcome Back</p><h1 className='font-serif text-3xl text-[#1A1A1A]'>{member.name}</h1></div><button onClick={() => navigate('home')} className='text-xs text-stone-500 hover:text-stone-800'>Logout</button></div>
-      <div className='mb-8 grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-3'><div className='border border-stone-200 bg-white p-8'><p className='mb-2 text-xs uppercase tracking-wider text-stone-500'>Entitlement</p><p className='font-serif text-3xl text-[#1A1A1A]'>{member.remainingNights} <span className='text-base text-stone-400'>/ {member.totalEntitlement}</span></p><p className='mt-4 text-xs text-stone-400'>Valid until {member.validUntil}</p></div><div className='flex flex-col justify-center border border-stone-200 bg-white p-8 md:col-span-2'><p className='mb-4 text-sm text-[#4A4A4A]'>To redeem nights or arrange concierge services, please contact our team directly.</p><button onClick={() => navigate('contact')} className='self-start bg-[#1A1A1A] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-stone-800'>Request Booking</button></div></div>
+      <div className='mb-8 grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-3'><div className='border border-stone-200 bg-white p-8'><p className='mb-2 text-xs uppercase tracking-wider text-stone-500'>Entitlement</p><p className='font-serif text-3xl text-[#1A1A1A]'>{member.remainingNights} <span className='text-base text-stone-400'>/ {member.totalEntitlement}</span></p><p className='mt-4 text-xs text-stone-400'>Valid until {member.validUntil}</p></div><div className='flex flex-col justify-center border border-stone-200 bg-white p-8 md:col-span-2'><p className='mb-4 text-sm text-[#4A4A4A]'>To redeem nights or arrange concierge services, please contact our team directly.</p><button onClick={() => navigate('booking')} className='self-start bg-[#1A1A1A] px-6 py-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-stone-800'>Request Booking</button></div></div>
       <div className='w-full max-w-4xl border border-stone-200 bg-white'><div className='border-b border-stone-200 p-6'><h3 className='font-medium text-[#1A1A1A]'>Digital Ledger</h3></div><div className='space-y-6 p-6'>{INITIAL_VIP_LEDGER.map((item) => <div key={item.id} className='flex items-start justify-between border-b border-stone-100 pb-4 last:border-0 last:pb-0'><div><p className='mb-1 font-medium text-[#1A1A1A]'>{item.label}</p><p className='text-xs text-stone-500'>{item.date}</p></div><div className={`font-serif text-lg ${item.type === 'credit' ? 'text-emerald-600' : 'text-amber-600'}`}>{item.type === 'credit' ? '+' : '-'}{item.nights}</div></div>)}</div></div>
     </div>
   );
@@ -523,7 +627,7 @@ function AdminOSView({ bookings, vipMembers, leads, navigate }) {
   return (
     <div className='flex min-h-screen bg-slate-50'>
       <aside className='flex w-64 flex-col bg-slate-900 text-slate-300'><div className='flex items-center justify-between border-b border-slate-800 p-6'><div><p className='font-mono text-xl tracking-wider text-white'>RESORT OS</p><p className='mt-1 text-[10px] uppercase tracking-widest text-emerald-500'>Admin Control</p></div><button onClick={() => navigate('home')} className='text-slate-500 hover:text-white'><X className='h-4 w-4' /></button></div><nav className='flex-1 space-y-1 p-4 text-sm font-medium'>{tabs.map(([id, label, Icon]) => <button key={id} onClick={() => setAdminTab(id)} className={`flex w-full items-center rounded p-3 transition-colors ${adminTab === id ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800'}`}><Icon className='mr-3 h-4 w-4' />{label}</button>)}</nav></aside>
-      <main className='h-screen flex-1 overflow-y-auto p-8'><div className='mb-8 border-b border-slate-200 pb-4'><h1 className='text-2xl font-bold capitalize text-slate-900'>{adminTab}</h1><p className='mt-1 text-sm text-slate-500'>Demo dashboard. Production requires real auth, database-backed records, and audit logs.</p></div>{adminTab === 'overview' && <div className='grid grid-cols-1 gap-6 md:grid-cols-3'><StatCard label='System Status' value='Operational' icon={CheckCircle2} tone='emerald' /><StatCard label='Pending Payments' value='1 Action' icon={CreditCard} tone='amber' /><StatCard label='Open Leads' value={`${leads.length} Active`} icon={ClipboardList} tone='blue' /></div>}{adminTab === 'bookings' && <AdminTable title='Active Bookings' headers={['ID', 'Guest', 'Unit', 'Dates', 'Payment', 'Amount']} rows={bookings.map((booking) => [booking.id, booking.guest, booking.unit, `${booking.checkIn} → ${booking.checkOut}`, booking.paymentStatus, formatMoney(booking.amount)])} />}{adminTab === 'vip' && <AdminTable title='Strict Liability Ledger' headers={['Member', 'Contract Value', 'Entitlement', 'Used', 'Remaining']} rows={vipMembers.map((member) => [member.name, formatMoney(member.contractValue), member.totalEntitlement, member.usedNights, member.remainingNights])} />}{adminTab === 'crm' && <AdminTable title='Sales Pipeline' headers={['Lead Name', 'Email', 'Interest', 'Value', 'Status', 'Next Step']} rows={leads.map((lead) => [lead.name, lead.email || '-', lead.interest, lead.value > 0 ? formatMoney(lead.value) : '-', lead.status, lead.nextStep])} />}</main>
+      <main className='h-screen flex-1 overflow-y-auto p-8'><div className='mb-8 border-b border-slate-200 pb-4'><h1 className='text-2xl font-bold capitalize text-slate-900'>{adminTab}</h1><p className='mt-1 text-sm text-slate-500'>Demo dashboard. Production requires real auth, database-backed records, and audit logs.</p></div>{adminTab === 'overview' && <div className='grid grid-cols-1 gap-6 md:grid-cols-3'><StatCard label='System Status' value='Operational' icon={CheckCircle2} tone='emerald' /><StatCard label='Pending Payments' value={`${bookings.filter((item) => item.status !== 'Confirmed').length} Action`} icon={CreditCard} tone='amber' /><StatCard label='Open Leads' value={`${leads.length} Active`} icon={ClipboardList} tone='blue' /></div>}{adminTab === 'bookings' && <AdminTable title='Active Bookings' headers={['Ref', 'Guest', 'Unit', 'Dates', 'Status', 'Amount']} rows={bookings.map((booking) => [booking.reference || booking.id, booking.guest || booking.name, booking.unit || booking.accommodation, `${booking.checkIn} → ${booking.checkOut}`, booking.paymentStatus || booking.status, formatMoney(booking.amount)])} />}{adminTab === 'vip' && <AdminTable title='Strict Liability Ledger' headers={['Member', 'Contract Value', 'Entitlement', 'Used', 'Remaining']} rows={vipMembers.map((member) => [member.name, formatMoney(member.contractValue), member.totalEntitlement, member.usedNights, member.remainingNights])} />}{adminTab === 'crm' && <AdminTable title='Sales Pipeline' headers={['Lead Name', 'Email', 'Interest', 'Value', 'Status', 'Next Step']} rows={leads.map((lead) => [lead.name, lead.email || '-', lead.interest, lead.value > 0 ? formatMoney(lead.value) : '-', lead.status, lead.nextStep])} />}</main>
     </div>
   );
 }
@@ -543,15 +647,24 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showDevTools, setShowDevTools] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [bookings] = useState(INITIAL_BOOKINGS);
+  const [bookings, setBookings] = useState(INITIAL_BOOKINGS);
   const [leads, setLeads] = useState(INITIAL_LEADS);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('plp_leads');
-    if (stored) {
+    const storedLeads = window.localStorage.getItem('plp_leads');
+    const storedBookings = window.localStorage.getItem('plp_bookings');
+    if (storedLeads) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(storedLeads);
         if (Array.isArray(parsed)) setLeads((existing) => [...parsed, ...existing]);
+      } catch {
+        // ignore malformed demo data
+      }
+    }
+    if (storedBookings) {
+      try {
+        const parsed = JSON.parse(storedBookings);
+        if (Array.isArray(parsed)) setBookings((existing) => [...parsed, ...existing]);
       } catch {
         // ignore malformed demo data
       }
@@ -594,6 +707,32 @@ export default function App() {
     });
   };
 
+  const handleCreateBooking = (newBooking) => {
+    const bookingRow = {
+      id: newBooking.reference,
+      reference: newBooking.reference,
+      guest: newBooking.name,
+      email: newBooking.email,
+      phone: newBooking.phone,
+      unit: newBooking.accommodation,
+      checkIn: newBooking.checkIn,
+      checkOut: newBooking.checkOut,
+      guests: newBooking.guests,
+      nights: newBooking.nights,
+      status: newBooking.status || 'Pending Payment Instructions',
+      paymentStatus: 'Payment Instructions Sent',
+      amount: newBooking.amount,
+      deposit: newBooking.deposit,
+      source: 'Website Booking',
+    };
+
+    setBookings((prev) => {
+      const next = [bookingRow, ...prev];
+      window.localStorage.setItem('plp_bookings', JSON.stringify(next.filter((booking) => booking.source === 'Website Booking').slice(0, 50)));
+      return next;
+    });
+  };
+
   const isPublicView = !['guest-login', 'guest-portal', 'admin-login', 'admin-dashboard'].includes(currentView);
 
   return (
@@ -605,6 +744,7 @@ export default function App() {
         {currentView === 'experiences' && <ExperiencesView />}
         {currentView === 'getting-here' && <GettingHereView />}
         {currentView === 'vip-package' && <VIPPackageView navigate={navigate} />}
+        {currentView === 'booking' && <BookingRequestView onCreateBooking={handleCreateBooking} />}
         {currentView === 'contact' && <ContactReserveView onCreateLead={handleCreateLead} />}
         {currentView === 'guest-login' && <GuestLoginView navigate={navigate} />}
         {currentView === 'guest-portal' && <GuestPortalView navigate={navigate} />}
