@@ -1,0 +1,16 @@
+{
+  "name": "Pueblo La Perla Boracay",
+  "short_name": "Pueblo La Perla",
+  "description": "Private villas, wellness, and island experiences in Boracay.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#FAFAF7",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
