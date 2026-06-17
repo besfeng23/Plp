@@ -47,3 +47,24 @@ section.h-screen.bg-stone-900 {
   background-size: cover;
   background-position: center center;
 }
+
+section.h-screen.bg-stone-900 > div:nth-child(2) {
+  display: none;
+}
+
+.bg-stone-200 {
+  background-image: url('/images/plp-villa-close-aerial.jpeg');
+  background-size: cover;
+  background-position: center center;
+}
+
+.bg-stone-200 > div {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  section.h-screen.bg-stone-900 {
+    background-image: url('/images/plp-hillside-villas-mobile.jpeg');
+    background-position: center center;
+  }
+}
