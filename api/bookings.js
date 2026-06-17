@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     }
 
     const amount = nights * selected.rate;
-    const deposit = Math.ceil(amount * 0.3);
+    const paymentDue = amount;
     const reference = `PLP-${Date.now().toString().slice(-8)}`;
 
     const booking = {
@@ -87,14 +87,15 @@ export default async function handler(req, res) {
       nights,
       rate: selected.rate,
       amount,
-      deposit,
-      status: 'Pending Payment Instructions',
+      paymentDue,
+      deposit: paymentDue,
+      status: 'Pending Full Payment Instructions',
       message: String(body.message || '').slice(0, 1200),
       receivedAt: new Date().toISOString(),
     };
 
     const paymentInstructions = process.env.PAYMENT_INSTRUCTIONS || [
-      'Payment instructions are pending final confirmation from Pueblo La Perla.',
+      'Full payment instructions are pending final confirmation from Pueblo La Perla.',
       'Please wait for the resort team to confirm availability before sending payment.',
       'Once confirmed, the team will send the official bank, wallet, or transfer details.',
     ].join('\n');
@@ -102,7 +103,7 @@ export default async function handler(req, res) {
     const guestText = [
       `Dear ${booking.name},`,
       '',
-      'Thank you for your Pueblo La Perla Boracay booking request. Your reservation is not yet confirmed until payment is verified by the resort team.',
+      'Thank you for your Pueblo La Perla Boracay booking request. Your reservation is not yet confirmed until full payment is verified by the resort team.',
       '',
       `Booking reference: ${booking.reference}`,
       `Accommodation: ${booking.accommodation}`,
@@ -110,10 +111,9 @@ export default async function handler(req, res) {
       `Check-out: ${booking.checkOut}`,
       `Nights: ${booking.nights}`,
       `Guests: ${booking.guests}`,
-      `Indicative total: ${currency(booking.amount)}`,
-      `Suggested reservation deposit: ${currency(booking.deposit)}`,
+      `Total amount due: ${currency(booking.amount)}`,
       '',
-      'Payment details:',
+      'Full payment details:',
       paymentInstructions,
       '',
       'After sending payment, please reply with proof of payment and your booking reference.',
@@ -133,8 +133,7 @@ export default async function handler(req, res) {
       `Dates: ${booking.checkIn} to ${booking.checkOut}`,
       `Nights: ${booking.nights}`,
       `Guests: ${booking.guests}`,
-      `Total: ${currency(booking.amount)}`,
-      `Deposit: ${currency(booking.deposit)}`,
+      `Full payment due: ${currency(booking.amount)}`,
       '',
       `Message: ${booking.message || '-'}`,
     ].join('\n');
@@ -156,7 +155,7 @@ export default async function handler(req, res) {
       guestEmailSent,
       adminEmailSent,
       note: guestEmailSent
-        ? 'Booking request accepted and guest email sent.'
+        ? 'Booking request accepted and full payment email sent.'
         : 'Booking request accepted. Add RESEND_API_KEY and booking email variables in Vercel to enable email delivery.',
     });
   } catch (error) {
