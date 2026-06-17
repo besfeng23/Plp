@@ -41,13 +41,3 @@ button {
   background: #9A8A5A;
   color: #ffffff;
 }
-
-section.h-screen.bg-stone-900 {
-  background-image: url('/images/plp-hillside-villas.jpeg');
-  background-size: cover;
-  background-position: center center;
-}
-
-section.h-screen.bg-stone-900 > div:nth-child(2) {
-  display: none;
-}
