@@ -1,0 +1,1 @@
+Photo assets for Pueblo La Perla website.
