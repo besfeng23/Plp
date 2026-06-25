@@ -3,7 +3,6 @@ import { Anchor, CheckCircle2, MapPin, Menu, Plane, Star, Users, X } from 'lucid
 import VideoSection from './VideoSection.jsx';
 
 const SITE_URL = 'https://plp-boracay.vercel.app';
-const DEPOSIT_RATE = 0.3;
 
 const ROUTES = {
   home: '/',
@@ -28,7 +27,7 @@ const PAGE_META = {
   'getting-here': ['Getting Here | Pueblo La Perla Boracay', 'Arrival guidance through Caticlan or Kalibo with port pickup and private transfer coordination.'],
   'vip-package': ['Exclusive Offer | Pueblo La Perla Boracay', 'A private long-stay wellness offer for guests who return to Boracay every year.'],
   booking: ['Reserve Your Stay | Pueblo La Perla Boracay', 'Send a private reservation request for Pueblo La Perla Boracay villas, suites, and smart rooms.'],
-  'payment-success': ['Reservation Verification | Pueblo La Perla Boracay', 'Your reservation return page. Final confirmation follows payment verification and resort review.'],
+  'payment-success': ['Reservation Verification | Pueblo La Perla Boracay', 'Your reservation return page. Final confirmation follows provider verification and resort review.'],
   'payment-cancel': ['Reservation Not Completed | Pueblo La Perla Boracay', 'Continue your Pueblo La Perla reservation or contact concierge for assistance.'],
   contact: ['Contact | Pueblo La Perla Boracay', 'Contact Pueblo La Perla Boracay for villa reservations, wellness stays, transfers, and private inquiries.'],
 };
@@ -39,41 +38,9 @@ const IMAGES = {
 };
 
 const ACCOMMODATIONS = [
-  {
-    id: 1,
-    name: 'Grand Ocean Villa',
-    type: 'Villa',
-    rate: 40000,
-    capacity: 8,
-    bedrooms: 4,
-    description: 'A private hillside sanctuary with sweeping sea views, four bedrooms, generous living space, and a setting designed for families or private groups.',
-    features: ['Private Pool', 'Beach View', 'Kitchen', 'Living Room', 'Personalized Service'],
-    imageTag: 'Villa',
-    imageSrc: IMAGES.grandVilla,
-    imageAlt: 'Aerial view of Pueblo La Perla Grand Ocean Villa with private pool and hillside greenery',
-  },
-  {
-    id: 2,
-    name: 'Sunset Suite',
-    type: 'Suite',
-    rate: 18000,
-    capacity: 4,
-    bedrooms: 2,
-    description: 'A refined retreat framed by quiet Boracay horizons, made for guests who want privacy while staying close to the island center.',
-    features: ['Balcony', 'Living Room', 'Local Dining', 'Shuttle Access'],
-    imageTag: 'Suite',
-  },
-  {
-    id: 3,
-    name: 'Smart Room Premium',
-    type: 'Smart Room',
-    rate: 8000,
-    capacity: 2,
-    bedrooms: 1,
-    description: 'A quiet modern base for solo travelers or couples, with intelligent controls, work comfort, and a calm hillside atmosphere.',
-    features: ['IoT Controls', 'Work Desk', 'WiFi', 'Air-conditioning'],
-    imageTag: 'Smart Room',
-  },
+  { id: 1, name: 'Grand Ocean Villa', type: 'Villa', rate: 40000, capacity: 8, bedrooms: 4, description: 'A private hillside sanctuary with sweeping sea views, four bedrooms, generous living space, and a setting designed for families or private groups.', bestFor: 'Families, private groups, longer stays, and private pool living.', features: ['Private Pool', 'Beach View', 'Kitchen', 'Living Room', 'Personalized Service'], imageTag: 'Villa', imageSrc: IMAGES.grandVilla, imageAlt: 'Aerial view of Pueblo La Perla Grand Ocean Villa with private pool and hillside greenery' },
+  { id: 2, name: 'Sunset Suite', type: 'Suite', rate: 18000, capacity: 4, bedrooms: 2, description: 'A refined retreat framed by quiet Boracay horizons, made for guests who want privacy while staying close to the island center.', bestFor: 'Couples, small families, and quiet stays close to the island center.', features: ['Balcony', 'Living Room', 'Local Dining', 'Shuttle Access'], imageTag: 'Suite' },
+  { id: 3, name: 'Smart Room Premium', type: 'Smart Room', rate: 8000, capacity: 2, bedrooms: 1, description: 'A quiet modern base for solo travelers or couples, with intelligent controls, work comfort, and a calm hillside atmosphere.', bestFor: 'Couples, solo travelers, short stays, and work-friendly island trips.', features: ['IoT Controls', 'Work Desk', 'WiFi', 'Air-conditioning'], imageTag: 'Smart Room' },
 ];
 
 const EXPERIENCE_GROUPS = [
@@ -88,25 +55,11 @@ function getInitialView() {
   return PATH_TO_VIEW[path] || 'home';
 }
 
-function formatMoney(value) {
-  return `₱${Number(value || 0).toLocaleString('en-PH')}`;
-}
-
-function countNights(checkIn, checkOut) {
-  const diff = new Date(`${checkOut}T00:00:00`) - new Date(`${checkIn}T00:00:00`);
-  return Number.isFinite(diff) && diff > 0 ? Math.round(diff / 86400000) : 0;
-}
-
-function SectionDivider() {
-  return <div className='flex w-full justify-center py-16 md:py-20'><div className='h-16 w-px bg-stone-300' /></div>;
-}
+function formatMoney(value) { return `₱${Number(value || 0).toLocaleString('en-PH')}`; }
+function SectionDivider() { return <div className='flex w-full justify-center py-16 md:py-20'><div className='h-16 w-px bg-stone-300' /></div>; }
 
 function ImageBlock({ label, ratio = 'aspect-[4/5]', src, alt }) {
-  return (
-    <div className={`relative w-full overflow-hidden bg-stone-200 ${ratio}`}>
-      {src ? <img src={src} alt={alt || label} className='absolute inset-0 h-full w-full object-cover' loading='lazy' /> : <div className='absolute inset-0 flex items-center justify-center px-8 text-center font-serif text-sm uppercase tracking-widest text-stone-500'>{label}</div>}
-    </div>
-  );
+  return <div className={`relative w-full overflow-hidden bg-stone-200 ${ratio}`}>{src ? <img src={src} alt={alt || label} className='absolute inset-0 h-full w-full object-cover' loading='lazy' /> : <div className='absolute inset-0 flex items-center justify-center px-8 text-center font-serif text-sm uppercase tracking-widest text-stone-500'>{label}</div>}</div>;
 }
 
 function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
@@ -115,68 +68,15 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
   const logoColor = solid ? 'text-[#1A1A1A]' : 'text-white';
   const itemColor = solid ? 'text-[#1A1A1A] hover:text-[#7A6A3A]' : 'text-white hover:text-white/80';
   const links = [['home', 'Overview'], ['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['vip-package', 'Exclusive Offer'], ['getting-here', 'Getting Here'], ['booking', 'Reserve']];
-  return (
-    <header className={`fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}>
-      <div className='mx-auto flex h-24 max-w-[1400px] items-center justify-between px-6 md:px-12'>
-        <button onClick={() => navigate('home')} className={`flex flex-col items-center ${logoColor}`} aria-label='Pueblo La Perla home'>
-          <span className='font-serif text-2xl font-medium tracking-[0.15em]'>PUEBLO LA PERLA</span>
-          <span className='mt-1 text-[10px] uppercase tracking-[0.3em] opacity-80'>Boracay</span>
-        </button>
-        <nav className='hidden items-center space-x-10 text-[11px] font-semibold uppercase tracking-[0.2em] lg:flex'>
-          {links.map(([id, label]) => <button key={id} onClick={() => navigate(id)} className={`transition-colors ${itemColor}`}>{label}</button>)}
-        </nav>
-        <button onClick={() => setIsOpen(!isOpen)} className='p-2 lg:hidden' aria-label='Open menu'>{isOpen ? <X className={`h-6 w-6 ${logoColor}`} /> : <Menu className={`h-6 w-6 ${logoColor}`} />}</button>
-      </div>
-      {isOpen && (
-        <div className='fixed inset-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] lg:hidden'>
-          <div className='flex flex-col items-center space-y-8 pt-16 text-sm font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]'>
-            {links.map(([id, label]) => <button key={id} onClick={() => navigate(id)} className={id === 'booking' ? 'mt-8 text-[#7A6A3A]' : ''}>{label}</button>)}
-            <button onClick={() => navigate('contact')} className='text-xs text-stone-600 hover:text-stone-900'>Contact Inquiry</button>
-          </div>
-        </div>
-      )}
-    </header>
-  );
+  return <header className={`fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}><div className='mx-auto flex h-24 max-w-[1400px] items-center justify-between px-6 md:px-12'><button onClick={() => navigate('home')} className={`flex flex-col items-center ${logoColor}`} aria-label='Pueblo La Perla home'><span className='font-serif text-2xl font-medium tracking-[0.15em]'>PUEBLO LA PERLA</span><span className='mt-1 text-[10px] uppercase tracking-[0.3em] opacity-80'>Boracay</span></button><nav className='hidden items-center space-x-10 text-[11px] font-semibold uppercase tracking-[0.2em] lg:flex'>{links.map(([id, label]) => <button key={id} onClick={() => navigate(id)} className={`transition-colors ${itemColor}`}>{label}</button>)}</nav><button onClick={() => setIsOpen(!isOpen)} className='p-2 lg:hidden' aria-label='Open menu'>{isOpen ? <X className={`h-6 w-6 ${logoColor}`} /> : <Menu className={`h-6 w-6 ${logoColor}`} />}</button></div>{isOpen && <div className='fixed inset-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] lg:hidden'><div className='flex flex-col items-center space-y-8 pt-16 text-sm font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]'>{links.map(([id, label]) => <button key={id} onClick={() => navigate(id)} className={id === 'booking' ? 'mt-8 text-[#7A6A3A]' : ''}>{label}</button>)}<button onClick={() => navigate('contact')} className='text-xs text-stone-600 hover:text-stone-900'>Contact Inquiry</button></div></div>}</header>;
 }
 
 function PublicFooter({ navigate }) {
-  return (
-    <footer className='bg-[#1A1A1A] px-6 pb-32 pt-20 text-white md:px-12 md:pb-20'>
-      <div className='mx-auto grid max-w-[1400px] grid-cols-1 gap-12 md:grid-cols-4'>
-        <div className='md:col-span-2'>
-          <h3 className='mb-4 font-serif text-2xl tracking-[0.15em]'>PUEBLO LA PERLA</h3>
-          <p className='max-w-md text-sm leading-relaxed text-white/75'>A private hillside retreat in Boracay, designed for villa living, wellness, and quiet island experiences.</p>
-        </div>
-        <div>
-          <p className='mb-5 text-[10px] uppercase tracking-[0.2em] text-[#D0BE7A]'>Explore</p>
-          <div className='space-y-3 text-sm text-white/75'>
-            <button onClick={() => navigate('accommodations')} className='block hover:text-white'>Accommodation</button>
-            <button onClick={() => navigate('experiences')} className='block hover:text-white'>Experiences</button>
-            <button onClick={() => navigate('vip-package')} className='block hover:text-white'>Exclusive Offer</button>
-            <button onClick={() => navigate('getting-here')} className='block hover:text-white'>Getting Here</button>
-          </div>
-        </div>
-        <div>
-          <p className='mb-5 text-[10px] uppercase tracking-[0.2em] text-[#D0BE7A]'>Inquiries</p>
-          <p className='text-sm text-white/75'>plpvillas@gmail.com</p>
-          <button onClick={() => navigate('booking')} className='mt-6 border-b border-white pb-1 text-[11px] uppercase tracking-[0.2em] hover:border-[#D0BE7A] hover:text-[#D0BE7A]'>Reserve</button>
-          <button onClick={() => navigate('contact')} className='mt-4 block text-xs text-white/70 hover:text-white'>General inquiry</button>
-        </div>
-      </div>
-    </footer>
-  );
+  return <footer className='bg-[#1A1A1A] px-6 pb-32 pt-20 text-white md:px-12 md:pb-20'><div className='mx-auto grid max-w-[1400px] grid-cols-1 gap-12 md:grid-cols-4'><div className='md:col-span-2'><h3 className='mb-4 font-serif text-2xl tracking-[0.15em]'>PUEBLO LA PERLA</h3><p className='max-w-md text-sm leading-relaxed text-white/75'>A private hillside retreat in Boracay, designed for villa living, wellness, and quiet island experiences.</p></div><div><p className='mb-5 text-[10px] uppercase tracking-[0.2em] text-[#D0BE7A]'>Explore</p><div className='space-y-3 text-sm text-white/75'><button onClick={() => navigate('accommodations')} className='block hover:text-white'>Accommodation</button><button onClick={() => navigate('experiences')} className='block hover:text-white'>Experiences</button><button onClick={() => navigate('vip-package')} className='block hover:text-white'>Exclusive Offer</button><button onClick={() => navigate('getting-here')} className='block hover:text-white'>Getting Here</button></div></div><div><p className='mb-5 text-[10px] uppercase tracking-[0.2em] text-[#D0BE7A]'>Inquiries</p><p className='text-sm text-white/75'>plpvillas@gmail.com</p><button onClick={() => navigate('booking')} className='mt-6 border-b border-white pb-1 text-[11px] uppercase tracking-[0.2em] hover:border-[#D0BE7A] hover:text-[#D0BE7A]'>Reserve</button><button onClick={() => navigate('contact')} className='mt-4 block text-xs text-white/70 hover:text-white'>General inquiry</button></div></div></footer>;
 }
 
 function MobileActionBar({ navigate }) {
-  return (
-    <div className='fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-[#FAFAF7]/95 px-4 py-3 shadow-[0_-12px_30px_rgba(0,0,0,0.06)] backdrop-blur md:hidden'>
-      <div className='grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em]'>
-        <button onClick={() => navigate('booking')} className='bg-[#1A1A1A] px-3 py-3 text-white'>Reserve</button>
-        <a href='mailto:plpvillas@gmail.com' className='border border-stone-300 px-3 py-3 text-[#1A1A1A]'>Email</a>
-        <button onClick={() => navigate('contact')} className='border border-stone-300 px-3 py-3 text-[#1A1A1A]'>Concierge</button>
-      </div>
-    </div>
-  );
+  return <div className='fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-[#FAFAF7]/95 px-4 py-3 shadow-[0_-12px_30px_rgba(0,0,0,0.06)] backdrop-blur md:hidden'><div className='grid grid-cols-3 gap-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em]'><button onClick={() => navigate('booking')} className='bg-[#1A1A1A] px-3 py-3 text-white'>Reserve</button><a href='mailto:plpvillas@gmail.com' className='border border-stone-300 px-3 py-3 text-[#1A1A1A]'>Email</a><button onClick={() => navigate('contact')} className='border border-stone-300 px-3 py-3 text-[#1A1A1A]'>Concierge</button></div></div>;
 }
 
 function EditorialSection({ label, title, text, imagePlaceholder, imageSrc, imageAlt, align = 'right' }) {
@@ -186,215 +86,19 @@ function EditorialSection({ label, title, text, imagePlaceholder, imageSrc, imag
 }
 
 function HomeView({ navigate }) {
-  return (
-    <div className='min-h-screen bg-[#FAFAF7]'>
-      <section className='relative flex h-screen w-full items-center justify-center overflow-hidden bg-stone-900'>
-        <div className='absolute inset-0 bg-[#050505]' />
-        <div className='absolute inset-0 flex items-center justify-center font-serif text-xs uppercase tracking-[0.5em] text-stone-700'>[ Cinematic Aerial of Hillside Villas ]</div>
-        <div className='relative z-10 mt-20 flex flex-col items-center px-6 text-center'>
-          <p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/90'>Boracay, Philippines</p>
-          <h1 className='mb-8 font-serif text-5xl tracking-wide text-white md:text-7xl'>Pueblo La Perla</h1>
-          <p className='mb-12 max-w-lg text-sm font-light leading-relaxed text-white md:text-base'>A private hillside retreat above Boracay’s white sands, where villa living, wellness, and island experiences unfold in quiet seclusion.</p>
-          <div className='flex flex-col items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.2em] sm:flex-row sm:space-x-8'>
-            <button onClick={() => navigate('accommodations')} className='text-white hover:text-white/80'>Explore the resort</button>
-            <div className='hidden h-1 w-1 rounded-full bg-white/40 sm:block' />
-            <button onClick={() => navigate('booking')} className='border border-white px-7 py-4 text-white transition hover:bg-white hover:text-[#1A1A1A]'>Reserve your stay</button>
-          </div>
-        </div>
-      </section>
-      <section className='mx-auto max-w-3xl px-6 py-28 text-center md:py-32'>
-        <p className='font-serif text-2xl leading-relaxed text-[#1A1A1A] md:text-4xl'>Elevated above the island&apos;s vibrant center, Pueblo La Perla is a sanctuary of grand villas and suites. High Boracay living, just minutes from Station 2.</p>
-      </section>
-      <VideoSection />
-      <EditorialSection label='Resort Atmosphere' title='The hillside, alive through the day.' text='From quiet mornings to rain, dusk, and evening light, the retreat is designed to feel private without feeling far away.' imagePlaceholder='[ Hillside Atmosphere ]' align='left' />
-      <EditorialSection label='Accommodation' title='Private pool villas, elevated suites, and quiet spaces.' text='Five grand villas stand as the centerpiece of the retreat, offering spacious bedrooms, private living areas, fully equipped kitchens, and sweeping beach views. For shorter stays, our suites and smart rooms provide intelligent comfort and quiet.' imagePlaceholder='[ Villa Interior View ]' imageSrc={IMAGES.homeAccommodation} imageAlt='Pueblo La Perla white villas surrounded by Boracay hillside greenery' />
-      <SectionDivider />
-      <EditorialSection label='Experiences' title='Curated island moments, from water to wellness.' text='The surrounding waters offer a canvas for exploration. Island hopping, paraw sailing, diving, private dining, and wellness rituals can be arranged around the rhythm of your stay.' imagePlaceholder='[ Curated Island Experience ]' align='left' />
-    </div>
-  );
+  return <div className='min-h-screen bg-[#FAFAF7]'><section className='relative flex h-screen w-full items-center justify-center overflow-hidden bg-stone-900'><div className='absolute inset-0 bg-[#050505]' /><div className='absolute inset-0 flex items-center justify-center font-serif text-xs uppercase tracking-[0.5em] text-stone-700'>[ Cinematic Aerial of Hillside Villas ]</div><div className='relative z-10 mt-20 flex flex-col items-center px-6 text-center'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.3em] text-white/90'>Boracay, Philippines</p><h1 className='mb-8 font-serif text-5xl tracking-wide text-white md:text-7xl'>Pueblo La Perla</h1><p className='mb-12 max-w-xl text-sm font-light leading-relaxed text-white md:text-base'>A private hillside retreat above Boracay’s white sands, where villa living, wellness, and island experiences unfold in quiet seclusion.</p><div className='flex flex-col items-center gap-5 text-[11px] font-semibold uppercase tracking-[0.2em] sm:flex-row sm:space-x-8'><button onClick={() => navigate('accommodations')} className='text-white hover:text-white/80'>Explore the resort</button><div className='hidden h-1 w-1 rounded-full bg-white/40 sm:block' /><button onClick={() => navigate('booking')} className='border border-white px-7 py-4 text-white transition hover:bg-white hover:text-[#1A1A1A]'>Reserve your stay</button></div></div></section><section className='mx-auto max-w-[1120px] px-6 py-24 text-center md:py-32'><p className='mb-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Private Hillside Retreat</p><p className='font-serif text-3xl leading-tight text-[#1A1A1A] md:text-5xl'>Set above Boracay’s vibrant center, Pueblo La Perla is a quiet retreat of villas, suites, wellness rituals, and island days arranged with discretion.</p></section><VideoSection /><section className='border-y border-stone-200 bg-[#F3EFE6]/60 px-6 py-12 md:px-12'><div className='mx-auto grid max-w-[1400px] grid-cols-1 gap-8 md:grid-cols-4'>{[['Private Hillside Villas','Space and seclusion above the island rhythm.'],['Concierge Arrival','Transfers and port timing can be quietly coordinated.'],['Wellness and Island Days','Sea, spa, and dining experiences shaped around the stay.'],['Reviewed Reservations','Preferred dates are checked before final confirmation.']].map(([title,text])=><div key={title} className='border-l border-[#7A6A3A]/40 pl-5'><p className='mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#6A5A2D]'>{title}</p><p className='text-sm leading-relaxed text-[#3F3F3F]'>{text}</p></div>)}</div></section><section className='mx-auto max-w-[1400px] px-6 py-24 md:px-12 md:py-32'><div className='grid grid-cols-1 gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-24'><ImageBlock label='[ Grand Ocean Villa ]' ratio='aspect-[16/11]' src={IMAGES.grandVilla} alt='Grand Ocean Villa at Pueblo La Perla Boracay' /><div className='flex flex-col justify-center'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Signature Stay</p><h2 className='mb-8 font-serif text-4xl leading-tight md:text-6xl'>Grand Ocean Villa</h2><p className='mb-8 text-base leading-relaxed text-[#3F3F3F]'>The resort’s private villa expression: generous bedrooms, living spaces, kitchen comfort, private pool atmosphere, and hillside views shaped for family stays and discreet gatherings.</p><div className='mb-10 grid grid-cols-2 gap-4 border-y border-stone-200 py-6 text-sm text-[#3F3F3F]'><p>Up to 8 guests</p><p>4 bedrooms</p><p>Private pool</p><p>From {formatMoney(40000)} / night</p></div><button onClick={() => navigate('accommodations')} className='self-start border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>View accommodation</button></div></div></section><section className='bg-[#1A1A1A] px-6 py-24 text-white md:px-12 md:py-32'><div className='mx-auto max-w-[1400px]'><div className='mb-16 grid grid-cols-1 gap-8 md:grid-cols-[0.85fr_1.15fr]'><p className='text-[10px] font-semibold uppercase tracking-[0.2em] text-[#D0BE7A]'>Experiences</p><h2 className='font-serif text-4xl leading-tight md:text-6xl'>Island days arranged with discretion.</h2></div><div className='grid grid-cols-1 gap-6 md:grid-cols-3'>{[['Water','Paraw sailing, island hopping, snorkeling, diving, and quiet sea days arranged around the guest.'],['Wellness','In-room massage, spa treatments, and calm recovery rituals after sun, sea, and travel.'],['Private Dining','Sunset dinners, in-villa meals, local dining details, and intimate celebration setups.']].map(([title,text])=><div key={title} className='border border-white/15 p-8'><p className='mb-14 font-serif text-3xl'>{title}</p><p className='text-sm leading-relaxed text-white/75'>{text}</p></div>)}</div><button onClick={() => navigate('experiences')} className='mt-12 border-b border-white pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#D0BE7A] hover:text-[#D0BE7A]'>Explore experiences</button></div></section><section className='mx-auto max-w-[1400px] px-6 py-24 md:px-12 md:py-28'><div className='grid grid-cols-1 gap-12 border-t border-stone-200 pt-16 md:grid-cols-3'><div><p className='mb-5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Getting Here</p><h2 className='font-serif text-4xl leading-tight md:text-5xl'>Arrival, quietly arranged.</h2></div><div className='md:col-span-2'><p className='mb-8 max-w-2xl text-base leading-relaxed text-[#3F3F3F]'>Guests may arrive through Caticlan or Kalibo. The team can assist with port timing, pickup coordination, and the final approach to the retreat in High Boracay.</p><button onClick={() => navigate('getting-here')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>Plan arrival</button></div></div></section><EditorialSection label='Resort Atmosphere' title='The hillside, alive through the day.' text='From quiet mornings to rain, dusk, and evening light, the retreat is designed to feel private without feeling far away.' imagePlaceholder='[ Hillside Atmosphere ]' align='left' /><SectionDivider /><section className='px-6 pb-28 pt-8 md:px-12 md:pb-36'><div className='mx-auto max-w-[1200px] border border-stone-200 bg-white/65 px-8 py-16 text-center md:px-16 md:py-24'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Private Reservation</p><h2 className='mx-auto mb-8 max-w-3xl font-serif text-4xl leading-tight md:text-6xl'>A quieter way to stay in Boracay.</h2><p className='mx-auto mb-10 max-w-2xl text-sm leading-relaxed text-[#3F3F3F] md:text-base'>Share your preferred accommodation, dates, and arrival details. The team will review availability and prepare the stay with private resort discretion.</p><button onClick={() => navigate('booking')} className='border border-[#1A1A1A] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] transition hover:bg-[#1A1A1A] hover:text-white'>Begin private reservation</button></div></section></div>;
 }
 
-function AccommodationsView({ navigate }) {
-  return (
-    <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'>
-      <div className='mx-auto max-w-[1400px] px-6 md:px-12'>
-        <div className='mb-20 max-w-3xl md:mb-24'><h1 className='mb-6 font-serif text-5xl md:text-6xl'>Accommodation</h1><p className='text-lg leading-relaxed text-[#3F3F3F]'>Spacious, private, and deeply connected to the island landscape. From grand villas to quiet premium rooms.</p></div>
-        <div className='space-y-28 md:space-y-32'>
-          {ACCOMMODATIONS.map((acc, index) => <div key={acc.id} className={`flex flex-col gap-12 lg:gap-24 ${index % 2 !== 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}><div className='w-full lg:w-3/5'><ImageBlock label={`[ ${acc.name} Image ]`} ratio='aspect-[16/10]' src={acc.imageSrc} alt={acc.imageAlt || `${acc.name} at Pueblo La Perla Boracay`} /></div><div className='flex w-full flex-col justify-center lg:w-2/5'><p className='mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>{acc.imageTag}</p><h2 className='mb-6 font-serif text-3xl md:text-4xl'>{acc.name}</h2><p className='mb-8 leading-relaxed text-[#3F3F3F]'>{acc.description}</p><div className='mb-8 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-stone-200 pt-6 text-sm text-[#3F3F3F]'><div className='flex items-center'><Users className='mr-3 h-4 w-4 text-stone-500' /> Up to {acc.capacity} Guests</div><div className='flex items-center'><MapPin className='mr-3 h-4 w-4 text-stone-500' /> {acc.bedrooms} Bedrooms</div><div className='col-span-2 text-[#1A1A1A]'>From {formatMoney(acc.rate)} / night</div></div><div className='mb-10 flex flex-wrap gap-2'>{acc.features.map((feature) => <span key={feature} className='bg-stone-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]'>{feature}</span>)}</div><button onClick={() => navigate('booking')} className='self-start border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>Request dates</button></div></div>)}
-        </div>
-      </div>
-    </div>
-  );
-}
+function AccommodationsView({ navigate }) { return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1400px] px-6 md:px-12'><div className='mb-20 max-w-3xl md:mb-24'><h1 className='mb-6 font-serif text-5xl md:text-6xl'>Accommodation</h1><p className='text-lg leading-relaxed text-[#3F3F3F]'>Spacious, private, and deeply connected to the island landscape. From grand villas to quiet premium rooms.</p></div><div className='space-y-28 md:space-y-32'>{ACCOMMODATIONS.map((acc,index)=><div key={acc.id} className={`flex flex-col gap-12 lg:gap-24 ${index % 2 !== 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}><div className='w-full lg:w-3/5'><ImageBlock label={`[ ${acc.name} Image ]`} ratio='aspect-[16/10]' src={acc.imageSrc} alt={acc.imageAlt || `${acc.name} at Pueblo La Perla Boracay`} /></div><div className='flex w-full flex-col justify-center lg:w-2/5'><p className='mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>{acc.imageTag}</p><h2 className='mb-6 font-serif text-3xl md:text-4xl'>{acc.name}</h2><p className='mb-5 leading-relaxed text-[#3F3F3F]'>{acc.description}</p><p className='mb-8 border-l border-[#7A6A3A]/50 pl-5 text-sm leading-relaxed text-[#3F3F3F]'>Best for: {acc.bestFor}</p><div className='mb-8 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-stone-200 pt-6 text-sm text-[#3F3F3F]'><div className='flex items-center'><Users className='mr-3 h-4 w-4 text-stone-500' /> Up to {acc.capacity} Guests</div><div className='flex items-center'><MapPin className='mr-3 h-4 w-4 text-stone-500' /> {acc.bedrooms} Bedrooms</div><div className='col-span-2 text-[#1A1A1A]'>From {formatMoney(acc.rate)} / night</div></div><div className='mb-10 flex flex-wrap gap-2'>{acc.features.map((feature)=><span key={feature} className='bg-stone-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]'>{feature}</span>)}</div><button onClick={()=>navigate('booking')} className='self-start border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>Request dates</button></div></div>)}</div></div></div>; }
 
-function ExperiencesView() {
-  return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1400px] px-6 md:px-12'><div className='mb-20 max-w-3xl md:mb-24'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Experiences</p><h1 className='mb-6 font-serif text-5xl md:text-6xl'>Days shaped by island rhythm.</h1><p className='text-lg leading-relaxed text-[#3F3F3F]'>From water adventures to wellness rituals and private dining, each stay can be quietly arranged around the guest.</p></div><div className='space-y-28 md:space-y-32'>{EXPERIENCE_GROUPS.map(([label, title, text, image], index) => <EditorialSection key={label} label={label} title={title} text={text} imagePlaceholder={image} align={index % 2 === 0 ? 'right' : 'left'} />)}</div></div></div>;
-}
+function ExperiencesView() { return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1400px] px-6 md:px-12'><div className='mb-20 max-w-3xl md:mb-24'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Experiences</p><h1 className='mb-6 font-serif text-5xl md:text-6xl'>Days shaped by island rhythm.</h1><p className='text-lg leading-relaxed text-[#3F3F3F]'>From water adventures to wellness rituals and private dining, each stay can be quietly arranged around the guest.</p></div><div className='space-y-28 md:space-y-32'>{EXPERIENCE_GROUPS.map(([label,title,text,image],index)=><EditorialSection key={label} label={label} title={title} text={text} imagePlaceholder={image} align={index % 2 === 0 ? 'right' : 'left'} />)}</div></div></div>; }
+function GettingHereView() { return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1200px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Getting Here</p><h1 className='mb-10 font-serif text-5xl md:text-6xl'>Arrival, quietly arranged.</h1><p className='mb-20 max-w-3xl text-lg leading-relaxed text-[#3F3F3F]'>Guests may arrive through Caticlan or Kalibo. The team can coordinate port pickup, transfers, and private arrival assistance to Pueblo La Perla in High Boracay.</p><div className='grid grid-cols-1 gap-10 border-t border-stone-200 pt-12 md:grid-cols-3'><div><Plane className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>By Air</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Fly into Caticlan for the shortest transfer, or Kalibo for wider flight options.</p></div><div><Anchor className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>By Port</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>The team can assist with port coordination and arrival timing.</p></div><div><MapPin className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>To the Retreat</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Pueblo La Perla is located in High Boracay, minutes from Station 2.</p></div></div></div></div>; }
+function BookingRedirectView(){ useEffect(()=>{ window.location.href='/booking'; },[]); return <div className='min-h-screen bg-[#FAFAF7] px-6 pt-40 text-center'><p className='font-serif text-4xl'>Opening private reservation...</p></div>; }
+function PaymentSuccessView({navigate}){ const [stored,setStored]=useState(null); useEffect(()=>{const raw=window.localStorage.getItem('plp_pending_payment'); if(raw){try{setStored(JSON.parse(raw));}catch{}}},[]); const reference=stored?.booking?.reference || new URLSearchParams(window.location.search).get('bookingId') || 'Pending reference'; return <div className='min-h-screen bg-[#FAFAF7] px-6 pb-24 pt-40 md:px-12'><div className='mx-auto max-w-3xl text-center'><CheckCircle2 className='mx-auto mb-8 h-10 w-10 text-[#7A6A3A]' /><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Reservation Return</p><h1 className='mb-8 font-serif text-5xl'>Your reservation is being verified.</h1><p className='mx-auto mb-10 max-w-2xl leading-relaxed text-[#3F3F3F]'>Thank you. Final booking confirmation is issued after provider verification and PLP availability review.</p><div className='mx-auto mb-10 max-w-xl border border-stone-200 bg-white/70 p-8 text-left text-sm text-[#3F3F3F]'><p className='mb-2 font-medium text-[#1A1A1A]'>Booking Reference</p><p className='mb-6 font-serif text-2xl text-[#1A1A1A]'>{reference}</p><p>Please keep this reference for concierge communication.</p></div><button onClick={()=>navigate('home')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em]'>Return to resort</button></div></div>; }
+function PaymentCancelView({navigate}){ return <div className='min-h-screen bg-[#FAFAF7] px-6 pb-24 pt-40 md:px-12'><div className='mx-auto max-w-3xl text-center'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Reservation Paused</p><h1 className='mb-8 font-serif text-5xl'>Your reservation was not completed.</h1><p className='mx-auto mb-10 max-w-2xl leading-relaxed text-[#3F3F3F]'>No final booking confirmation has been issued. You may try again or contact concierge for direct assistance.</p><div className='flex flex-col items-center justify-center gap-4 sm:flex-row'><button onClick={()=>navigate('booking')} className='border border-[#1A1A1A] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] hover:bg-[#1A1A1A] hover:text-white'>Try again</button><button onClick={()=>navigate('contact')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em]'>Contact PLP</button></div></div></div>; }
+function VipPackageView({navigate}){ return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1200px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Exclusive Offer</p><h1 className='mb-8 max-w-4xl font-serif text-5xl leading-tight md:text-6xl'>A private wellness return to Boracay, year after year.</h1><p className='mb-16 max-w-3xl text-lg leading-relaxed text-[#3F3F3F]'>A limited long-stay wellness package for guests who want a recurring private escape with Pueblo La Perla.</p><div className='grid grid-cols-1 gap-6 md:grid-cols-3'>{['Five-year access','Annual four-night stay','Private guest ledger'].map((item)=><div key={item} className='border border-stone-200 bg-white/60 p-8'><Star className='mb-8 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>{item}</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Details are reviewed privately with the PLP team and confirmed through direct concierge communication.</p></div>)}</div><button onClick={()=>navigate('contact')} className='mt-12 border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>Request private details</button></div></div>; }
+function ContactView(){ return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[900px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Contact</p><h1 className='mb-8 font-serif text-5xl md:text-6xl'>Speak with the team.</h1><p className='mb-12 text-lg leading-relaxed text-[#3F3F3F]'>For private stays, transfers, wellness arrangements, and longer-stay inquiries, contact Pueblo La Perla directly.</p><div className='border-t border-stone-200 pt-10 text-[#3F3F3F]'><p className='mb-3 text-sm uppercase tracking-[0.2em] text-stone-600'>Email</p><a href='mailto:plpvillas@gmail.com' className='font-serif text-3xl text-[#1A1A1A]'>plpvillas@gmail.com</a></div></div></div>; }
 
-function GettingHereView() {
-  return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1200px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Getting Here</p><h1 className='mb-10 font-serif text-5xl md:text-6xl'>Arrival, quietly arranged.</h1><p className='mb-20 max-w-3xl text-lg leading-relaxed text-[#3F3F3F]'>Guests may arrive through Caticlan or Kalibo. The team can coordinate port pickup, transfers, and private arrival assistance to Pueblo La Perla in High Boracay.</p><div className='grid grid-cols-1 gap-10 border-t border-stone-200 pt-12 md:grid-cols-3'><div><Plane className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>By Air</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Fly into Caticlan for the shortest transfer, or Kalibo for wider flight options.</p></div><div><Anchor className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>By Port</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>The team can assist with port coordination and arrival timing.</p></div><div><MapPin className='mb-6 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>To the Retreat</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Pueblo La Perla is located in High Boracay, minutes from Station 2.</p></div></div></div></div>;
-}
-
-function AvailabilityNote({ state }) {
-  if (!state.message) return null;
-  const tone = state.tone === 'available' ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : state.tone === 'unavailable' ? 'border-red-200 bg-red-50 text-red-800' : 'border-stone-200 bg-white/70 text-[#3F3F3F]';
-  return <p className={`border px-4 py-3 text-sm ${tone}`}>{state.message}</p>;
-}
-
-function BookingRequestView({ onCreateBooking }) {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', accommodation: 'Grand Ocean Villa', checkIn: '', checkOut: '', guests: 2, message: '' });
-  const [status, setStatus] = useState({ tone: '', message: '' });
-  const [availability, setAvailability] = useState({ tone: '', message: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const selected = ACCOMMODATIONS.find((item) => item.name === form.accommodation) || ACCOMMODATIONS[0];
-  const nights = countNights(form.checkIn, form.checkOut);
-  const amount = nights * selected.rate;
-  const deposit = Math.round(amount * DEPOSIT_RATE);
-  const balance = Math.max(amount - deposit, 0);
-  const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
-
-  useEffect(() => {
-    if (nights < 1 || !form.checkIn || !form.checkOut) {
-      setAvailability({ tone: '', message: '' });
-      return;
-    }
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      setAvailability({ tone: 'checking', message: 'Checking resort availability...' });
-      try {
-        const response = await fetch('/api/check-availability', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accommodation: form.accommodation, checkIn: form.checkIn, checkOut: form.checkOut }) });
-        const result = await response.json().catch(() => null);
-        if (cancelled) return;
-        if (response.ok && result?.available) setAvailability({ tone: 'available', message: 'These dates are currently clear for request.' });
-        else setAvailability({ tone: 'unavailable', message: 'These dates appear unavailable. Please adjust your stay or contact concierge.' });
-      } catch {
-        if (!cancelled) setAvailability({ tone: 'checking', message: 'Availability will be verified when you submit.' });
-      }
-    }, 450);
-    return () => { cancelled = true; clearTimeout(timer); };
-  }, [form.accommodation, form.checkIn, form.checkOut, nights]);
-
-  const submit = async (event) => {
-    event.preventDefault();
-    if (nights < 1) { setStatus({ tone: 'error', message: 'Check-out date must be after check-in date.' }); return; }
-    if (availability.tone === 'unavailable') { setStatus({ tone: 'error', message: 'Please choose available dates before continuing.' }); return; }
-    setIsSubmitting(true);
-    setStatus({ tone: 'neutral', message: 'Preparing your private reservation request...' });
-    let bookingPayload = null;
-    try {
-      const response = await fetch('/api/bookings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const result = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(result?.error || 'Reservation request could not be created');
-      bookingPayload = result.booking;
-      onCreateBooking(bookingPayload);
-      const checkoutResponse = await fetch('/api/xendit/create-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ booking: bookingPayload }) });
-      const checkout = await checkoutResponse.json().catch(() => null);
-      if (!checkoutResponse.ok || !checkout?.checkoutUrl) throw new Error(checkout?.error || 'Deposit checkout is not configured yet.');
-      window.localStorage.setItem('plp_pending_payment', JSON.stringify({ booking: bookingPayload, checkout, savedAt: new Date().toISOString() }));
-      window.location.href = checkout.checkoutUrl;
-    } catch (error) {
-      setStatus({ tone: 'error', message: bookingPayload ? `${bookingPayload.reference} was created, but the reservation deposit step could not start: ${error.message}` : error.message });
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'>
-      <div className='mx-auto grid max-w-[1200px] grid-cols-1 gap-16 px-6 md:px-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20'>
-        <div>
-          <p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Private Reservation</p>
-          <h1 className='mb-8 font-serif text-5xl md:text-6xl'>Reserve your stay.</h1>
-          <p className='mb-10 leading-relaxed text-[#3F3F3F]'>Choose your preferred room and dates. The resort team will verify the stay details and issue final confirmation after the reservation process is completed.</p>
-          <div className='border-l border-[#7A6A3A] pl-6 text-sm leading-relaxed text-[#3F3F3F]'>A reservation deposit may be requested to hold dates while concierge completes final review. It is attached to your booking reference and verified before confirmation.</div>
-          <div className='mt-12 border-t border-stone-200 pt-8 text-sm text-[#3F3F3F]'><p className='mb-4 font-medium text-[#1A1A1A]'>Stay Estimate</p><div className='space-y-2'><p>{selected.name}</p><p>{nights > 0 ? `${nights} night${nights > 1 ? 's' : ''} × ${formatMoney(selected.rate)} = ${formatMoney(amount)}` : 'Select dates to calculate estimated total.'}</p>{nights > 0 && <><p>Reservation deposit estimate: <span className='text-[#1A1A1A]'>{formatMoney(deposit)}</span></p><p>Estimated balance after deposit: {formatMoney(balance)}</p></>}</div></div>
-        </div>
-        <form onSubmit={submit} className='space-y-6'>
-          <select value={form.accommodation} onChange={(event) => update('accommodation', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 text-[#3F3F3F] outline-none focus:border-[#7A6A3A]'>{ACCOMMODATIONS.map((item) => <option key={item.name}>{item.name}</option>)}</select>
-          <div className='grid grid-cols-1 gap-6 md:grid-cols-2'><label className='text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600'>Check-in<input type='date' value={form.checkIn} onChange={(event) => update('checkIn', event.target.value)} className='mt-2 w-full border-b border-stone-300 bg-transparent py-4 text-base normal-case tracking-normal text-[#1A1A1A] outline-none focus:border-[#7A6A3A]' required /></label><label className='text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-600'>Check-out<input type='date' value={form.checkOut} onChange={(event) => update('checkOut', event.target.value)} className='mt-2 w-full border-b border-stone-300 bg-transparent py-4 text-base normal-case tracking-normal text-[#1A1A1A] outline-none focus:border-[#7A6A3A]' required /></label></div>
-          <AvailabilityNote state={availability} />
-          <input type='number' min='1' max={selected.capacity} placeholder='Number of guests' value={form.guests} onChange={(event) => update('guests', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none focus:border-[#7A6A3A]' required />
-          <input placeholder='Full name' value={form.name} onChange={(event) => update('name', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none focus:border-[#7A6A3A]' required />
-          <input type='email' placeholder='Email for confirmation' value={form.email} onChange={(event) => update('email', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none focus:border-[#7A6A3A]' required />
-          <input placeholder='Phone / WhatsApp' value={form.phone} onChange={(event) => update('phone', event.target.value)} className='w-full border-b border-stone-300 bg-transparent py-4 outline-none focus:border-[#7A6A3A]' required />
-          <textarea placeholder='Arrival notes, special requests, or VIP package interest' rows={5} value={form.message} onChange={(event) => update('message', event.target.value)} className='w-full resize-none border-b border-stone-300 bg-transparent py-4 outline-none focus:border-[#7A6A3A]' />
-          <div className='border border-stone-200 bg-white/70 p-6 text-sm text-[#3F3F3F]'><p className='mb-2 font-medium text-[#1A1A1A]'>Reservation Summary</p><div className='space-y-1'><p>Total stay: {nights > 0 ? formatMoney(amount) : 'Select dates'}</p><p>Reservation deposit estimate: {nights > 0 ? formatMoney(deposit) : '—'}</p><p>Balance after deposit: {nights > 0 ? formatMoney(balance) : '—'}</p></div></div>
-          <button type='submit' disabled={isSubmitting || availability.tone === 'unavailable'} className='w-full border border-[#1A1A1A] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] transition hover:bg-[#1A1A1A] hover:text-white disabled:cursor-not-allowed disabled:opacity-60'>{isSubmitting ? 'Preparing Request...' : 'Submit Reservation Request'}</button>
-          {status.message && <p className={`text-sm ${status.tone === 'error' ? 'text-red-700' : status.tone === 'success' ? 'text-emerald-700' : 'text-[#3F3F3F]'}`}>{status.message}</p>}
-          <p className='text-xs leading-relaxed text-stone-600'>Online deposit processing is handled securely by the payment provider after your booking reference is created.</p>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function PaymentSuccessView({ navigate }) {
-  const [stored, setStored] = useState(null);
-  useEffect(() => { const raw = window.localStorage.getItem('plp_pending_payment'); if (raw) { try { setStored(JSON.parse(raw)); } catch {} } }, []);
-  const reference = stored?.booking?.reference || new URLSearchParams(window.location.search).get('bookingId') || 'Pending reference';
-  return <div className='min-h-screen bg-[#FAFAF7] px-6 pb-24 pt-40 md:px-12'><div className='mx-auto max-w-3xl text-center'><CheckCircle2 className='mx-auto mb-8 h-10 w-10 text-[#7A6A3A]' /><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Reservation Return</p><h1 className='mb-8 font-serif text-5xl'>Your reservation is being verified.</h1><p className='mx-auto mb-10 max-w-2xl leading-relaxed text-[#3F3F3F]'>Thank you. Final booking confirmation is issued after payment verification and PLP availability review.</p><div className='mx-auto mb-10 max-w-xl border border-stone-200 bg-white/70 p-8 text-left text-sm text-[#3F3F3F]'><p className='mb-2 font-medium text-[#1A1A1A]'>Booking Reference</p><p className='mb-6 font-serif text-2xl text-[#1A1A1A]'>{reference}</p><p>Please keep this reference for concierge communication.</p></div><button onClick={() => navigate('home')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em]'>Return to resort</button></div></div>;
-}
-
-function PaymentCancelView({ navigate }) {
-  return <div className='min-h-screen bg-[#FAFAF7] px-6 pb-24 pt-40 md:px-12'><div className='mx-auto max-w-3xl text-center'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Reservation Paused</p><h1 className='mb-8 font-serif text-5xl'>Your reservation was not completed.</h1><p className='mx-auto mb-10 max-w-2xl leading-relaxed text-[#3F3F3F]'>No final booking confirmation has been issued. You may try again or contact concierge for direct assistance.</p><div className='flex flex-col items-center justify-center gap-4 sm:flex-row'><button onClick={() => navigate('booking')} className='border border-[#1A1A1A] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] hover:bg-[#1A1A1A] hover:text-white'>Try again</button><button onClick={() => navigate('contact')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em]'>Contact PLP</button></div></div></div>;
-}
-
-function VipPackageView({ navigate }) {
-  return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1200px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Exclusive Offer</p><h1 className='mb-8 max-w-4xl font-serif text-5xl leading-tight md:text-6xl'>A private wellness return to Boracay, year after year.</h1><p className='mb-16 max-w-3xl text-lg leading-relaxed text-[#3F3F3F]'>A limited long-stay wellness package for guests who want a recurring private escape with Pueblo La Perla.</p><div className='grid grid-cols-1 gap-6 md:grid-cols-3'>{['Five-year access', 'Annual four-night stay', 'Private guest ledger'].map((item) => <div key={item} className='border border-stone-200 bg-white/60 p-8'><Star className='mb-8 h-5 w-5 text-[#7A6A3A]' /><h3 className='mb-4 font-serif text-2xl'>{item}</h3><p className='text-sm leading-relaxed text-[#3F3F3F]'>Details are reviewed privately with the PLP team and confirmed through direct concierge communication.</p></div>)}</div><button onClick={() => navigate('contact')} className='mt-12 border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>Request private details</button></div></div>;
-}
-
-function ContactView() {
-  return <div className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[900px] px-6 md:px-12'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Contact</p><h1 className='mb-8 font-serif text-5xl md:text-6xl'>Speak with the team.</h1><p className='mb-12 text-lg leading-relaxed text-[#3F3F3F]'>For private stays, transfers, wellness arrangements, and longer-stay inquiries, contact Pueblo La Perla directly.</p><div className='border-t border-stone-200 pt-10 text-[#3F3F3F]'><p className='mb-3 text-sm uppercase tracking-[0.2em] text-stone-600'>Email</p><a href='mailto:plpvillas@gmail.com' className='font-serif text-3xl text-[#1A1A1A]'>plpvillas@gmail.com</a></div></div></div>;
-}
-
-function App() {
-  const [view, setView] = useState(getInitialView);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [bookings, setBookings] = useState([]);
-
-  const navigate = (target) => {
-    const path = ROUTES[target] || '/';
-    window.history.pushState({}, '', path);
-    setView(target);
-    setIsOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 40);
-    const onPop = () => setView(getInitialView());
-    onScroll();
-    window.addEventListener('scroll', onScroll);
-    window.addEventListener('popstate', onPop);
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('popstate', onPop); };
-  }, []);
-
-  useEffect(() => {
-    const meta = PAGE_META[view] || PAGE_META.home;
-    document.title = meta[0];
-    let description = document.querySelector('meta[name="description"]');
-    if (!description) { description = document.createElement('meta'); description.setAttribute('name', 'description'); document.head.appendChild(description); }
-    description.setAttribute('content', meta[1]);
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) { canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical'); document.head.appendChild(canonical); }
-    canonical.setAttribute('href', `${SITE_URL}${ROUTES[view] || '/'}`);
-  }, [view]);
-
-  const content = useMemo(() => {
-    switch (view) {
-      case 'accommodations': return <AccommodationsView navigate={navigate} />;
-      case 'experiences': return <ExperiencesView />;
-      case 'getting-here': return <GettingHereView />;
-      case 'vip-package': return <VipPackageView navigate={navigate} />;
-      case 'booking': return <BookingRequestView onCreateBooking={(booking) => setBookings((current) => [booking, ...current])} />;
-      case 'payment-success': return <PaymentSuccessView navigate={navigate} />;
-      case 'payment-cancel': return <PaymentCancelView navigate={navigate} />;
-      case 'contact': return <ContactView />;
-      default: return <HomeView navigate={navigate} />;
-    }
-  }, [view, bookings.length]);
-
-  return <><PublicNavbar view={view} navigate={navigate} isScrolled={isScrolled} isOpen={isOpen} setIsOpen={setIsOpen} />{content}<PublicFooter navigate={navigate} /><MobileActionBar navigate={navigate} /></>;
-}
+function App(){ const [view,setView]=useState(getInitialView); const [isScrolled,setIsScrolled]=useState(false); const [isOpen,setIsOpen]=useState(false); const navigate=(target)=>{ if(target==='booking'){ window.location.href='/booking'; return; } const path=ROUTES[target] || '/'; window.history.pushState({},'',path); setView(target); setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }; useEffect(()=>{ const onScroll=()=>setIsScrolled(window.scrollY>40); const onPop=()=>setView(getInitialView()); onScroll(); window.addEventListener('scroll',onScroll); window.addEventListener('popstate',onPop); return()=>{window.removeEventListener('scroll',onScroll); window.removeEventListener('popstate',onPop);};},[]); useEffect(()=>{ const meta=PAGE_META[view]||PAGE_META.home; document.title=meta[0]; let description=document.querySelector('meta[name="description"]'); if(!description){description=document.createElement('meta'); description.setAttribute('name','description'); document.head.appendChild(description);} description.setAttribute('content',meta[1]); let canonical=document.querySelector('link[rel="canonical"]'); if(!canonical){canonical=document.createElement('link'); canonical.setAttribute('rel','canonical'); document.head.appendChild(canonical);} canonical.setAttribute('href',`${SITE_URL}${ROUTES[view] || '/'}`);},[view]); const content=useMemo(()=>{ switch(view){ case 'accommodations': return <AccommodationsView navigate={navigate}/>; case 'experiences': return <ExperiencesView/>; case 'getting-here': return <GettingHereView/>; case 'vip-package': return <VipPackageView navigate={navigate}/>; case 'booking': return <BookingRedirectView/>; case 'payment-success': return <PaymentSuccessView navigate={navigate}/>; case 'payment-cancel': return <PaymentCancelView navigate={navigate}/>; case 'contact': return <ContactView/>; default: return <HomeView navigate={navigate}/>; }},[view]); return <><PublicNavbar view={view} navigate={navigate} isScrolled={isScrolled} isOpen={isOpen} setIsOpen={setIsOpen}/>{content}<PublicFooter navigate={navigate}/><MobileActionBar navigate={navigate}/></>; }
 
 export default App;
