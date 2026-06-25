@@ -117,7 +117,7 @@
   }
 
   function loadContent() {
-    fetch('/api/content', { headers: { Accept: 'application/json' } })
+    fetch('/api/plp?action=content', { headers: { Accept: 'application/json' } })
       .then(function (response) { return response.json(); })
       .then(function (data) { applyContent(data.content || {}); })
       .catch(function () {});
