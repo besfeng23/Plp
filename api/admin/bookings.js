@@ -1,4 +1,4 @@
-import { getSupabaseConfigError, isSupabaseConfigured, listPaymentReconciliation } from '../_supabase.js';
+import { getSupabaseConfigError, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation } from '../_supabase.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -12,7 +12,8 @@ export default async function handler(req, res) {
 
   try {
     const rows = await listPaymentReconciliation(100);
-    return res.status(200).json({ ok: true, rows });
+    const exceptions = await listPaymentExceptions(100);
+    return res.status(200).json({ ok: true, rows, exceptions });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Unable to load bookings', detail: error.message });
   }
