@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Content Ops | Pueblo La Perla</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+    :root{--cream:#FAFAF7;--ink:#1A1A1A;--muted:#4f4b44;--gold:#6A5A2D;--line:#ded8cd;--soft:#F3EFE6;--ok:#0f766e;--bad:#991b1b;font-family:Inter,system-ui,sans-serif;background:var(--cream);color:var(--ink)}*{box-sizing:border-box}body{margin:0;background:var(--cream)}.wrap{max-width:1220px;margin:0 auto;padding:0 24px}.nav{height:84px;border-bottom:1px solid var(--line);display:flex;align-items:center}.brand{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;letter-spacing:.12em}.hero{padding:54px 0 30px}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:800;color:var(--gold)}h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:58px;line-height:.95;font-weight:500;margin:10px 0 18px}p{color:var(--muted);line-height:1.75}.grid{display:grid;grid-template-columns:330px 1fr;gap:24px;align-items:start;padding-bottom:80px}.panel{border:1px solid var(--line);background:rgba(255,255,255,.72);padding:24px}.panel h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:500;margin:0 0 18px}.label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#746e63;margin:18px 0 8px}input,select,textarea{width:100%;border:1px solid var(--line);background:white;padding:13px;font:inherit;color:var(--ink)}textarea{min-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.65}.btn{width:100%;border:1px solid var(--ink);background:var(--ink);color:white;padding:14px 16px;margin-top:14px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;cursor:pointer}.btn.secondary{background:transparent;color:var(--ink)}.status{margin-top:16px;font-size:14px;line-height:1.6}.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}.list{display:grid;gap:10px}.item{border:1px solid var(--line);background:white;padding:14px;text-align:left;cursor:pointer}.item strong{display:block}.item span{font-size:12px;color:var(--muted)}.item.active{border-color:var(--gold);box-shadow:0 0 0 3px rgba(106,90,45,.12)}.help{font-size:13px;color:var(--muted);line-height:1.65}.footer{border-top:1px solid var(--line);padding:28px 0 38px;color:var(--muted);font-size:13px}@media(max-width:900px){.grid{grid-template-columns:1fr}h1{font-size:42px}textarea{min-height:340px}}
+  </style>
+</head>
+<body>
+  <nav class="nav"><div class="wrap brand">PUEBLO LA PERLA · CONTENT OPS</div></nav>
+  <main class="wrap">
+    <section class="hero"><p class="eyebrow">Staff Workflow</p><h1>Site content control.</h1><p>Edit structured content sections for the PLP website. Keep JSON valid. Publish only after review.</p></section>
+    <section class="grid">
+      <aside class="panel">
+        <h2>Access</h2>
+        <label class="label" for="staffCode">Staff code</label>
+        <input id="staffCode" type="password" autocomplete="off" placeholder="Enter PLP staff code" />
+        <button class="btn" id="loadBtn">Load content</button>
+        <p class="help">The staff code is stored only in this browser's local storage for convenience.</p>
+        <h2 style="margin-top:34px">Sections</h2>
+        <div id="sectionList" class="list"></div>
+      </aside>
+      <section class="panel">
+        <h2>Edit section</h2>
+        <label class="label" for="sectionName">Section key</label>
+        <input id="sectionName" placeholder="homepage, accommodation, experiences, policies, testimonials, gallery" />
+        <label class="label" for="status">Status</label>
+        <select id="status"><option>DRAFT</option><option>PUBLISHED</option><option>ARCHIVED</option></select>
+        <label class="label" for="updatedBy">Updated by</label>
+        <input id="updatedBy" placeholder="Staff name or initials" />
+        <label class="label" for="contentJson">Content JSON</label>
+        <textarea id="contentJson" spellcheck="false">{
+  "example": "Edit this JSON object"
+}</textarea>
+        <button class="btn" id="saveBtn">Save section</button>
+        <button class="btn secondary" id="formatBtn">Format JSON</button>
+        <div id="statusText" class="status" role="status" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+  <footer class="footer"><div class="wrap">Pueblo La Perla Boracay · Staff content operations</div></footer>
+  <script>
+    const $ = id => document.getElementById(id);
+    let rows = [];
+    let selected = null;
+    $('staffCode').value = localStorage.getItem('plp_staff_code') || '';
+
+    function setStatus(text, ok) {
+      $('statusText').className = 'status ' + (ok ? 'ok' : 'bad');
+      $('statusText').textContent = text;
+    }
+
+    function headers() {
+      const code = $('staffCode').value.trim();
+      if (code) localStorage.setItem('plp_staff_code', code);
+      return { 'Content-Type': 'application/json', 'x-plp-staff-code': code };
+    }
+
+    function renderList() {
+      $('sectionList').innerHTML = rows.map(row => `<button class="item ${selected && selected.section === row.section ? 'active' : ''}" data-section="${row.section}"><strong>${row.section}</strong><span>${row.status || 'DRAFT'} · ${row.updated_at || 'not saved'}</span></button>`).join('') || '<p class="help">No content sections loaded.</p>';
+      document.querySelectorAll('.item').forEach(button => button.onclick = () => {
+        selected = rows.find(row => row.section === button.dataset.section);
+        loadIntoEditor(selected);
+        renderList();
+      });
+    }
+
+    function loadIntoEditor(row) {
+      $('sectionName').value = row?.section || '';
+      $('status').value = row?.status || 'DRAFT';
+      $('updatedBy').value = row?.updated_by || '';
+      $('contentJson').value = JSON.stringify(row?.content || {}, null, 2);
+    }
+
+    async function loadContent() {
+      setStatus('Loading content...', true);
+      const response = await fetch('/api/admin/content', { headers: headers() });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Unable to load content.');
+      rows = data.content || [];
+      selected = rows[0] || null;
+      renderList();
+      if (selected) loadIntoEditor(selected);
+      setStatus('Content loaded.', true);
+    }
+
+    async function saveContent() {
+      let content;
+      try { content = JSON.parse($('contentJson').value); }
+      catch { throw new Error('Content JSON is not valid.'); }
+      if (!content || Array.isArray(content) || typeof content !== 'object') throw new Error('Content must be a JSON object.');
+      setStatus('Saving content...', true);
+      const response = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: headers(),
+        body: JSON.stringify({
+          section: $('sectionName').value,
+          status: $('status').value,
+          updatedBy: $('updatedBy').value,
+          content
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Unable to save content.');
+      setStatus('Saved. Reloading list...', true);
+      await loadContent();
+    }
+
+    $('loadBtn').onclick = () => loadContent().catch(error => setStatus(error.message, false));
+    $('saveBtn').onclick = () => saveContent().catch(error => setStatus(error.message, false));
+    $('formatBtn').onclick = () => {
+      try { $('contentJson').value = JSON.stringify(JSON.parse($('contentJson').value), null, 2); setStatus('JSON formatted.', true); }
+      catch { setStatus('Content JSON is not valid.', false); }
+    };
+  </script>
+</body>
+</html>
