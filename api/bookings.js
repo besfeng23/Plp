@@ -1,3 +1,5 @@
+import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
+
 const DEPOSIT_RATE = 0.3;
 
 const accommodations = {
@@ -97,7 +99,18 @@ export default async function handler(req, res) {
       status: 'Pending Deposit',
       message: String(body.message || '').slice(0, 1200),
       receivedAt: new Date().toISOString(),
+      persisted: false,
     };
+
+    let databaseRecord = null;
+    let databaseWarning = null;
+    if (isSupabaseConfigured()) {
+      databaseRecord = await createBookingRecord(booking);
+      booking.databaseId = databaseRecord.id;
+      booking.persisted = true;
+    } else {
+      databaseWarning = getSupabaseConfigError();
+    }
 
     const guestText = [
       `Dear ${booking.name},`,
@@ -134,6 +147,7 @@ export default async function handler(req, res) {
       `Estimated total stay: ${currency(booking.amount)}`,
       `Deposit due now: ${currency(booking.deposit)}`,
       `Estimated balance: ${currency(booking.balance)}`,
+      `Database status: ${booking.persisted ? 'Persisted to Supabase' : databaseWarning || 'Not persisted'}`,
       '',
       `Message: ${booking.message || '-'}`,
     ].join('\n');
@@ -152,11 +166,15 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       booking,
+      databaseRecord,
+      databaseWarning,
       guestEmailSent,
       adminEmailSent,
-      note: 'Booking request accepted. Continue to Xendit deposit checkout.',
+      note: booking.persisted
+        ? 'Booking request accepted and persisted. Continue to Xendit deposit checkout.'
+        : 'Booking request accepted but not persisted. Add Supabase environment variables in Vercel.',
     });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: 'Booking request failed' });
+    return res.status(500).json({ ok: false, error: 'Booking request failed', detail: error.message });
   }
 }
