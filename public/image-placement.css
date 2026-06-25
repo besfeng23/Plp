@@ -1,59 +1,70 @@
 /*
   Pueblo La Perla image placement map
 
-  Design correction:
-  The UUID PNG uploads are not used as semantic room images until visually verified.
-  The public accommodation page now uses verified, named PLP resort assets first.
+  Visual classification source: photo-library screenshots reviewed by image content.
+  Do not assign by filename order. Each file below is mapped by what it shows.
 
-  Confirmed named assets:
-  - plp-property-overview-wide.webp / .jpeg: broad property / arrival / hillside context
-  - plp-grand-ocean-villa-aerial.webp / .jpeg: Grand Ocean Villa aerial
-  - plp-villa-close-aerial.webp / .jpeg: closer villa exterior / pool-adjacent atmosphere
-  - plp-hillside-villas.webp / .jpeg: hillside villa context
-  - plp-hillside-villas-mobile.webp / .jpeg: mobile/cropped hillside context
-
-  UUID images remain in /public/images and should be classified through /photo-library.html
-  before being assigned to exact roles like room, bathroom, dining, or wellness.
+  Key roles:
+  - hero/location: wide aerials with ocean, hillside, and villas
+  - villa: exterior and pool-facing villa angles
+  - pool/deck: pool, deck, balcony, and sea-view outdoor areas
+  - room: bedrooms and interior guest spaces
+  - bath: bathrooms with tub/shower/vanity
+  - dining: breakfast/private dining setup
+  - evening: sunset and night ambience
 */
 
 :root {
-  --plp-img-hero: url('/images/plp-property-overview-wide.webp');
-  --plp-img-grand: url('/images/plp-grand-ocean-villa-aerial.webp');
-  --plp-img-villa-close: url('/images/plp-villa-close-aerial.webp');
-  --plp-img-hillside: url('/images/plp-hillside-villas.webp');
-  --plp-img-hillside-mobile: url('/images/plp-hillside-villas-mobile.webp');
+  --plp-hero-sunset: url('/images/6EC53159-C897-425D-AA82-5FA8A0C6C0BC.png');
+  --plp-hero-day: url('/images/E189E36D-ED32-48D3-A25E-E33503655583.png');
+  --plp-hero-evening: url('/images/F40304DC-06CB-42FE-A444-D2611AF79A95.png');
+  --plp-villa-primary: url('/images/5ABEDA33-793C-43B6-915C-B8B6C33C4546.png');
+  --plp-villa-secondary: url('/images/1375C22C-3194-4407-98C9-328CB0D4735B.png');
+  --plp-villa-exterior: url('/images/82975C82-90B9-4FC1-84C8-BA54FE9E2F02.png');
+  --plp-pool-ocean: url('/images/32F47C10-1722-4299-8B4B-FA06578B61FE.png');
+  --plp-pool-amenity: url('/images/553A5CE3-46C3-4638-A869-69F2F099EFCA.png');
+  --plp-balcony-day: url('/images/F7C8F7C9-3DFF-42AB-8189-E7589F8CC3C8.png');
+  --plp-balcony-sunset: url('/images/755D3B48-3A45-40EF-BCF9-4B37FD22E501.png');
+  --plp-rooftop-sunset: url('/images/9D2D33E5-35ED-4DE2-B165-32C0AB61282C.png');
+  --plp-bedroom-master: url('/images/75F4A199-45DA-409B-9897-B3C529C6B17E.png');
+  --plp-bedroom-twin: url('/images/1B72F8A3-1B90-41B0-9149-BE648B8445C8.png');
+  --plp-bedroom-view: url('/images/B351D3FB-800D-49F2-9754-9DE02B22B7CA.png');
+  --plp-bath-tub: url('/images/126CD191-00B2-4F4C-874B-9AF869C6FBE5.png');
+  --plp-bath-vanity: url('/images/2BE826C9-F4BE-4662-A723-89743F98D24C.png');
+  --plp-bath-spa: url('/images/AD41677B-C11D-4A55-BDD2-C65A944ACB33.png');
+  --plp-dining-breakfast: url('/images/0F0744BE-6DA0-4EB3-A735-5D87C5816187.png');
 }
 
-/* Homepage / React shell */
+/* Homepage */
 section.h-screen.bg-stone-900::before {
   background:
-    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.7)),
-    var(--plp-img-hero) center / cover no-repeat !important;
+    linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.72)),
+    var(--plp-hero-sunset) center / cover no-repeat !important;
 }
 
 .bg-stone-200 {
   background:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.38)),
-    var(--plp-img-grand) center / cover no-repeat !important;
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.38)),
+    var(--plp-villa-primary) center / cover no-repeat !important;
 }
 
-/* Booking room cards: use verified resort context, not random UUID guesses. */
+/* Booking room cards */
 .rooms .room:nth-child(1) .room-visual {
   background-image:
     linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
-    var(--plp-img-grand) !important;
+    var(--plp-villa-primary) !important;
 }
 
 .rooms .room:nth-child(2) .room-visual {
   background-image:
     linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
-    var(--plp-img-villa-close) !important;
+    var(--plp-balcony-sunset) !important;
 }
 
 .rooms .room:nth-child(3) .room-visual {
   background-image:
     linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
-    var(--plp-img-hillside) !important;
+    var(--plp-bedroom-twin) !important;
 }
 
 .rooms .room .room-visual {
@@ -69,75 +80,75 @@ section.h-screen.bg-stone-900::before {
 
 #grand-ocean-villa .visual.main {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.48)),
-    var(--plp-img-grand) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.44)),
+    var(--plp-villa-primary) !important;
 }
 
 #grand-ocean-villa .side-gallery .visual:nth-child(1) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-villa-close) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.38)),
+    var(--plp-pool-ocean) !important;
 }
 
 #grand-ocean-villa .side-gallery .visual:nth-child(2) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-hillside) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.38)),
+    var(--plp-bedroom-master) !important;
 }
 
 #sunset-suite .visual.main {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.46)),
-    var(--plp-img-villa-close) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.44)),
+    var(--plp-balcony-sunset) !important;
 }
 
 #sunset-suite .side-gallery .visual:nth-child(1) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
-    var(--plp-img-property, var(--plp-img-hero)) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.38)),
+    var(--plp-balcony-day) !important;
 }
 
 #sunset-suite .side-gallery .visual:nth-child(2) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
-    var(--plp-img-hillside) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.38)),
+    var(--plp-rooftop-sunset) !important;
 }
 
 #smart-room-premium .visual.main {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.46)),
-    var(--plp-img-hillside) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.42)),
+    var(--plp-bedroom-twin) !important;
 }
 
 #smart-room-premium .side-gallery .visual:nth-child(1) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
-    var(--plp-img-villa-close) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.36)),
+    var(--plp-bedroom-view) !important;
 }
 
 #smart-room-premium .side-gallery .visual:nth-child(2) {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
-    var(--plp-img-hillside-mobile) !important;
+    linear-gradient(180deg, rgba(5,5,5,.04), rgba(5,5,5,.36)),
+    var(--plp-bath-vanity) !important;
 }
 
-/* Experiences page: use only broad context until specific lifestyle photos are verified. */
+/* Experiences page */
 #water .visual {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
-    var(--plp-img-hero) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.46)),
+    var(--plp-pool-amenity) !important;
 }
 
 #wellness .visual {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
-    var(--plp-img-hillside) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.46)),
+    var(--plp-bath-spa) !important;
 }
 
 #private-dining .visual {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
-    var(--plp-img-villa-close) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.46)),
+    var(--plp-dining-breakfast) !important;
 }
 
 /* Static SEO landing visual blocks */
@@ -145,24 +156,24 @@ section.h-screen.bg-stone-900::before {
 .visual[aria-label*='Grand Ocean Villa'],
 .visual[aria-label*='Family villa'] {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-grand) !important;
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.44)),
+    var(--plp-villa-secondary) !important;
 }
 
 .visual[aria-label*='private pool'] {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-villa-close) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.42)),
+    var(--plp-pool-ocean) !important;
 }
 
 .visual[aria-label*='wellness'] {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-hillside) !important;
+    linear-gradient(180deg, rgba(5,5,5,.06), rgba(5,5,5,.42)),
+    var(--plp-bath-tub) !important;
 }
 
 .visual[aria-label*='High Boracay'] {
   background-image:
-    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
-    var(--plp-img-hero) !important;
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.46)),
+    var(--plp-hero-day) !important;
 }
