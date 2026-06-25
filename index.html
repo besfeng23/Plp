@@ -92,6 +92,10 @@
             window.location.href = '/booking';
             return;
           }
+          if (url === '/accommodation' || url === 'accommodation' || url === '/accommodations' || url === 'accommodations') {
+            window.location.href = '/accommodation';
+            return;
+          }
           return nativePushState.apply(window.history, arguments);
         };
       })();
