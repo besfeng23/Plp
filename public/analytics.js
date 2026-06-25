@@ -28,7 +28,7 @@
 
   function track(eventName, payload) {
     try {
-      window.fetch('/api/analytics', {
+      window.fetch('/api/plp?action=analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
