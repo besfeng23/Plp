@@ -9,7 +9,23 @@
       "destination": "/booking.html"
     },
     {
-      "source": "/((?!api/|booking.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
+      "source": "/accommodation",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodation/",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodations",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodations/",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/((?!api/|booking.html|accommodation.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
       "destination": "/index.html"
     }
   ]
