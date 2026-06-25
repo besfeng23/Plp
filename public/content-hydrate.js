@@ -1,4 +1,6 @@
 (function () {
+  var SITE_EMAIL = 'plpvillas@gmail.com';
+
   function ensureImagePlacementStylesheet() {
     if (document.querySelector('link[data-plp-image-placement]')) return;
     var link = document.createElement('link');
@@ -10,6 +12,88 @@
 
   function getPath() {
     return window.location.pathname.replace(/\/$/, '') || '/';
+  }
+
+  function skipUxLayer() {
+    var path = getPath();
+    return path === '/' || path.indexOf('/api') === 0 || path.indexOf('/photo-library') === 0 || path.indexOf('/admin') === 0 || path.indexOf('/content-ops') === 0 || path.indexOf('/availability-ops') === 0;
+  }
+
+  function addTrustItem(parent, label, value) {
+    var item = document.createElement('div');
+    var small = document.createElement('span');
+    var strong = document.createElement('strong');
+    small.textContent = label;
+    strong.textContent = value;
+    item.appendChild(small);
+    item.appendChild(strong);
+    parent.appendChild(item);
+  }
+
+  function ensureTrustStrip() {
+    if (skipUxLayer() || document.querySelector('[data-plp-trust-strip]')) return;
+    var strip = document.createElement('section');
+    var inner = document.createElement('div');
+    strip.className = 'plp-trust-strip';
+    strip.setAttribute('data-plp-trust-strip', 'true');
+    strip.setAttribute('aria-label', 'Reservation trust details');
+    inner.className = 'plp-trust-strip__inner';
+    addTrustItem(inner, 'Location', 'High Boracay');
+    addTrustItem(inner, 'Reservation', 'Reviewed privately');
+    addTrustItem(inner, 'Arrival', 'Port transfer support');
+    addTrustItem(inner, 'Concierge', SITE_EMAIL);
+    strip.appendChild(inner);
+    var nav = document.querySelector('nav.nav, header');
+    if (nav && nav.parentNode) nav.parentNode.insertBefore(strip, nav.nextSibling);
+    else document.body.insertBefore(strip, document.body.firstChild);
+  }
+
+  function ensureMobileAction() {
+    if (skipUxLayer() || document.querySelector('[data-plp-mobile-action]')) return;
+    var bar = document.createElement('nav');
+    bar.className = 'plp-mobile-action';
+    bar.setAttribute('data-plp-mobile-action', 'true');
+    bar.setAttribute('aria-label', 'Quick reservation actions');
+    var reserve = document.createElement('a');
+    reserve.href = '/booking';
+    reserve.textContent = 'Reserve';
+    var email = document.createElement('a');
+    email.href = 'mailto:' + SITE_EMAIL;
+    email.textContent = 'Email';
+    var contact = document.createElement('a');
+    contact.href = '/contact';
+    contact.textContent = 'Concierge';
+    bar.appendChild(reserve);
+    bar.appendChild(email);
+    bar.appendChild(contact);
+    document.body.appendChild(bar);
+  }
+
+  function ensureBookingAssurance() {
+    if (getPath() !== '/booking' || document.querySelector('[data-plp-booking-assurance]')) return;
+    var note = document.getElementById('reservationNote') || document.querySelector('.summary .note');
+    if (!note || !note.parentNode) return;
+    var box = document.createElement('div');
+    box.className = 'plp-booking-assurance';
+    box.setAttribute('data-plp-booking-assurance', 'true');
+    var title = document.createElement('strong');
+    title.textContent = 'Before you continue';
+    var list = document.createElement('ul');
+    ['This creates a private reservation request before final confirmation.', 'Availability is reviewed by the PLP team before the stay is treated as final.', 'For urgent dates or special arrangements, email ' + SITE_EMAIL + '.'].forEach(function (text) {
+      var li = document.createElement('li');
+      li.textContent = text;
+      list.appendChild(li);
+    });
+    box.appendChild(title);
+    box.appendChild(list);
+    note.parentNode.insertBefore(box, note.nextSibling);
+  }
+
+  function ensureProductionLayer() {
+    ensureImagePlacementStylesheet();
+    ensureTrustStrip();
+    ensureMobileAction();
+    ensureBookingAssurance();
   }
 
   function getValue(object, path) {
@@ -142,7 +226,7 @@
 
   function applyContent(content) {
     if (!content) return;
-    ensureImagePlacementStylesheet();
+    ensureProductionLayer();
     hydrateBoundElements(content);
     applyHome(content);
     applyAccommodation(content);
@@ -153,25 +237,25 @@
   }
 
   function loadContent() {
-    ensureImagePlacementStylesheet();
+    ensureProductionLayer();
     fetch('/api/plp?action=content', { headers: { Accept: 'application/json' } })
       .then(function (response) { return response.json(); })
       .then(function (data) { applyContent(data.content || {}); })
-      .catch(function () { applyImageCaptions(); });
+      .catch(function () { applyImageCaptions(); ensureProductionLayer(); });
   }
 
   window.plpHydrateContent = applyContent;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      ensureImagePlacementStylesheet();
+      ensureProductionLayer();
       applyImageCaptions();
       loadContent();
       setTimeout(loadContent, 700);
       setTimeout(loadContent, 1800);
     });
   } else {
-    ensureImagePlacementStylesheet();
+    ensureProductionLayer();
     applyImageCaptions();
     loadContent();
     setTimeout(loadContent, 700);
