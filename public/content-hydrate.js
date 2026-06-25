@@ -48,6 +48,31 @@
     }
   }
 
+  function setCaption(selector, text) {
+    var el = document.querySelector(selector);
+    if (el) el.textContent = text;
+  }
+
+  function applyImageCaptions() {
+    var path = getPath();
+    if (path === '/accommodation' || path === '/accommodations') {
+      setCaption('#grand-ocean-villa .visual.main span', 'Grand Ocean Villa exterior and pool');
+      setCaption('#grand-ocean-villa .side-gallery .visual:nth-child(1) span', 'Pool deck with ocean view');
+      setCaption('#grand-ocean-villa .side-gallery .visual:nth-child(2) span', 'Master bedroom view');
+      setCaption('#sunset-suite .visual.main span', 'Sunset balcony lounge');
+      setCaption('#sunset-suite .side-gallery .visual:nth-child(1) span', 'Day balcony and sea view');
+      setCaption('#sunset-suite .side-gallery .visual:nth-child(2) span', 'Rooftop evening lounge');
+      setCaption('#smart-room-premium .visual.main span', 'Bright twin room with sea view');
+      setCaption('#smart-room-premium .side-gallery .visual:nth-child(1) span', 'Bedroom corner and balcony outlook');
+      setCaption('#smart-room-premium .side-gallery .visual:nth-child(2) span', 'Bathroom vanity and shower');
+    }
+    if (path === '/experiences') {
+      setCaption('#water .visual span', 'Poolside breakfast and water view');
+      setCaption('#wellness .visual span', 'Wellness bath ritual');
+      setCaption('#private-dining .visual span', 'Private breakfast by the pool');
+    }
+  }
+
   function hydrateBoundElements(content) {
     document.querySelectorAll('[data-content-key]').forEach(function (el) {
       var value = getValue(content, el.getAttribute('data-content-key'));
@@ -123,6 +148,7 @@
     applyAccommodation(content);
     applyExperiences(content);
     applyBooking(content);
+    applyImageCaptions();
     window.dispatchEvent(new CustomEvent('plp:content', { detail: content }));
   }
 
@@ -131,7 +157,7 @@
     fetch('/api/plp?action=content', { headers: { Accept: 'application/json' } })
       .then(function (response) { return response.json(); })
       .then(function (data) { applyContent(data.content || {}); })
-      .catch(function () {});
+      .catch(function () { applyImageCaptions(); });
   }
 
   window.plpHydrateContent = applyContent;
@@ -139,12 +165,14 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       ensureImagePlacementStylesheet();
+      applyImageCaptions();
       loadContent();
       setTimeout(loadContent, 700);
       setTimeout(loadContent, 1800);
     });
   } else {
     ensureImagePlacementStylesheet();
+    applyImageCaptions();
     loadContent();
     setTimeout(loadContent, 700);
     setTimeout(loadContent, 1800);
