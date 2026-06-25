@@ -1,3 +1,4 @@
+import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 
 const DEPOSIT_RATE = 0.3;
@@ -22,30 +23,6 @@ function countNights(checkIn, checkOut) {
   return Math.round(diff / 86400000);
 }
 
-function currency(value) {
-  return `PHP ${Number(value || 0).toLocaleString('en-PH')}`;
-}
-
-async function sendEmail({ to, subject, text }) {
-  if (!process.env.RESEND_API_KEY) return false;
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: process.env.BOOKINGS_FROM_EMAIL || process.env.LEADS_FROM_EMAIL || 'Pueblo La Perla <onboarding@resend.dev>',
-      to: [to],
-      subject,
-      text,
-    }),
-  });
-
-  return response.ok;
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -61,9 +38,7 @@ export default async function handler(req, res) {
     }
 
     const selected = accommodations[body.accommodation];
-    if (!selected) {
-      return res.status(400).json({ ok: false, error: 'Invalid accommodation selected' });
-    }
+    if (!selected) return res.status(400).json({ ok: false, error: 'Invalid accommodation selected' });
 
     const guests = Number(body.guests);
     if (!Number.isFinite(guests) || guests < 1 || guests > selected.capacity) {
@@ -71,9 +46,7 @@ export default async function handler(req, res) {
     }
 
     const nights = countNights(body.checkIn, body.checkOut);
-    if (nights < 1) {
-      return res.status(400).json({ ok: false, error: 'Check-out date must be after check-in date' });
-    }
+    if (nights < 1) return res.status(400).json({ ok: false, error: 'Check-out date must be after check-in date' });
 
     const amount = nights * selected.rate;
     const deposit = Math.round(amount * DEPOSIT_RATE);
@@ -112,64 +85,21 @@ export default async function handler(req, res) {
       databaseWarning = getSupabaseConfigError();
     }
 
-    const guestText = [
-      `Dear ${booking.name},`,
-      '',
-      'Thank you for your Pueblo La Perla Boracay reservation request. Your booking reference has been created and will be attached to your secure Xendit deposit checkout.',
-      '',
-      `Booking reference: ${booking.reference}`,
-      `Accommodation: ${booking.accommodation}`,
-      `Check-in: ${booking.checkIn}`,
-      `Check-out: ${booking.checkOut}`,
-      `Nights: ${booking.nights}`,
-      `Guests: ${booking.guests}`,
-      `Estimated total stay: ${currency(booking.amount)}`,
-      `Reservation deposit due now: ${currency(booking.deposit)}`,
-      `Estimated balance after deposit: ${currency(booking.balance)}`,
-      '',
-      'Your reservation is not final until payment is verified and the resort confirms availability.',
-      '',
-      'Pueblo La Perla Boracay',
-      'plpvillas@gmail.com',
-    ].join('\n');
-
-    const adminText = [
-      'New Pueblo La Perla reservation deposit request received.',
-      '',
-      `Reference: ${booking.reference}`,
-      `Guest: ${booking.name}`,
-      `Email: ${booking.email}`,
-      `Phone: ${booking.phone}`,
-      `Accommodation: ${booking.accommodation}`,
-      `Dates: ${booking.checkIn} to ${booking.checkOut}`,
-      `Nights: ${booking.nights}`,
-      `Guests: ${booking.guests}`,
-      `Estimated total stay: ${currency(booking.amount)}`,
-      `Deposit due now: ${currency(booking.deposit)}`,
-      `Estimated balance: ${currency(booking.balance)}`,
-      `Database status: ${booking.persisted ? 'Persisted to Supabase' : databaseWarning || 'Not persisted'}`,
-      '',
-      `Message: ${booking.message || '-'}`,
-    ].join('\n');
-
-    const guestEmailSent = await sendEmail({
-      to: booking.email,
-      subject: `Pueblo La Perla reservation ${booking.reference}`,
-      text: guestText,
-    });
-
-    const adminTo = process.env.BOOKINGS_TO_EMAIL || process.env.LEADS_TO_EMAIL;
-    const adminEmailSent = adminTo
-      ? await sendEmail({ to: adminTo, subject: `New deposit reservation ${booking.reference}`, text: adminText })
-      : false;
+    let notifications = null;
+    if (booking.persisted) {
+      try {
+        notifications = await notifyBookingCreated({ booking, databaseRecord });
+      } catch (error) {
+        notifications = { ok: false, error: error.message };
+      }
+    }
 
     return res.status(200).json({
       ok: true,
       booking,
       databaseRecord,
       databaseWarning,
-      guestEmailSent,
-      adminEmailSent,
+      notifications,
       note: booking.persisted
         ? 'Booking request accepted and persisted. Continue to Xendit deposit checkout.'
         : 'Booking request accepted but not persisted. Add Supabase environment variables in Vercel.',
