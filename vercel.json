@@ -1,40 +1,33 @@
 {
-  "rewrites": [
+  "headers": [
     {
-      "source": "/booking",
-      "destination": "/booking.html"
+      "source": "/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     },
     {
-      "source": "/booking/",
-      "destination": "/booking.html"
+      "source": "/videos/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     },
     {
-      "source": "/accommodation",
-      "destination": "/accommodation.html"
-    },
-    {
-      "source": "/accommodation/",
-      "destination": "/accommodation.html"
-    },
-    {
-      "source": "/accommodations",
-      "destination": "/accommodation.html"
-    },
-    {
-      "source": "/accommodations/",
-      "destination": "/accommodation.html"
-    },
-    {
-      "source": "/experiences",
-      "destination": "/experiences.html"
-    },
-    {
-      "source": "/experiences/",
-      "destination": "/experiences.html"
-    },
-    {
-      "source": "/((?!api/|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
-      "destination": "/index.html"
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     }
+  ],
+  "rewrites": [
+    { "source": "/booking", "destination": "/booking.html" },
+    { "source": "/booking/", "destination": "/booking.html" },
+    { "source": "/accommodation", "destination": "/accommodation.html" },
+    { "source": "/accommodation/", "destination": "/accommodation.html" },
+    { "source": "/accommodations", "destination": "/accommodation.html" },
+    { "source": "/accommodations/", "destination": "/accommodation.html" },
+    { "source": "/experiences", "destination": "/experiences.html" },
+    { "source": "/experiences/", "destination": "/experiences.html" },
+    { "source": "/((?!api/|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)", "destination": "/index.html" }
   ]
 }
