@@ -13,6 +13,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -29,6 +30,11 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: rgba(122, 106, 58, 0.14);
 }
 
 button {
@@ -99,6 +105,10 @@ section.h-screen.bg-stone-900 > img {
 }
 
 @media (max-width: 768px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   section.h-screen.bg-stone-900 {
     min-height: 82vh;
   }
@@ -109,5 +119,69 @@ section.h-screen.bg-stone-900 > img {
 
   .bg-stone-200 {
     min-height: 320px;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    overflow-wrap: anywhere;
+  }
+
+  button,
+  a {
+    min-height: 44px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  .tracking-\[0\.2em\],
+  .tracking-\[0\.18em\],
+  .tracking-\[0\.15em\],
+  .tracking-\[0\.3em\] {
+    letter-spacing: 0.12em !important;
+  }
+
+  .leading-relaxed {
+    line-height: 1.78 !important;
+  }
+
+  .fixed.inset-x-0.bottom-0 {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 430px) {
+  .text-5xl {
+    font-size: 2.55rem !important;
+    line-height: 0.98 !important;
+  }
+
+  .text-4xl {
+    font-size: 2.15rem !important;
+    line-height: 1.04 !important;
+  }
+
+  .px-6 {
+    padding-left: 1.125rem !important;
+    padding-right: 1.125rem !important;
+  }
+
+  .py-24,
+  .py-28,
+  .py-32 {
+    padding-top: 4.5rem !important;
+    padding-bottom: 4.5rem !important;
+  }
+
+  .gap-16,
+  .gap-14,
+  .gap-12 {
+    gap: 2.25rem !important;
   }
 }
