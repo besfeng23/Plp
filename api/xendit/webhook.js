@@ -1,3 +1,5 @@
+import { getSupabaseConfigError, isSupabaseConfigured, recordXenditWebhook } from '../_supabase.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -18,34 +20,48 @@ export default async function handler(req, res) {
     const data = event.data || event;
     const webhookId = req.headers['webhook-id'] || event.id || data.id;
     const eventType = event.event || event.event_type || event.type || 'unknown';
-    const bookingReference = data.reference_id || data.metadata?.booking_reference || event.reference_id;
-    const paymentId = data.payment_id || data.payment_request_id || data.capture_id || data.payment_session_id;
+    const reference = data.reference_id || data.metadata?.booking_reference || event.reference_id;
+    const providerPaymentId = data.payment_id || data.payment_request_id || data.capture_id || data.payment_session_id;
     const amount = data.request_amount || data.amount || data.capture_amount;
     const currency = data.currency;
     const status = data.status;
 
-    // Production note:
-    // Persist webhookId/paymentId in a database before updating booking state.
-    // This demo endpoint verifies authenticity and returns fast acknowledgement.
-    console.log('Xendit webhook received', {
+    if (!isSupabaseConfigured()) {
+      return res.status(202).json({
+        ok: true,
+        received: true,
+        persisted: false,
+        warning: getSupabaseConfigError(),
+        webhookId,
+        eventType,
+        reference,
+        providerPaymentId,
+      });
+    }
+
+    const persisted = await recordXenditWebhook({
       webhookId,
       eventType,
-      bookingReference,
-      paymentId,
+      reference,
+      providerPaymentId,
       amount,
       currency,
       status,
+      payload: event,
     });
 
     return res.status(200).json({
       ok: true,
       received: true,
+      persisted: true,
+      duplicate: persisted.duplicate,
+      paymentStatus: persisted.paymentStatus,
       webhookId,
       eventType,
-      bookingReference,
-      paymentId,
+      reference,
+      providerPaymentId,
     });
   } catch (error) {
-    return res.status(400).json({ ok: false, error: 'Invalid webhook payload' });
+    return res.status(400).json({ ok: false, error: 'Invalid webhook payload', detail: error.message });
   }
 }
