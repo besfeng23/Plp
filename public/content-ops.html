@@ -15,107 +15,28 @@
   <main class="wrap">
     <section class="hero"><p class="eyebrow">Staff Workflow</p><h1>Site content control.</h1><p>Edit structured content sections for the PLP website. Keep JSON valid. Publish only after review.</p></section>
     <section class="grid">
-      <aside class="panel">
-        <h2>Access</h2>
-        <label class="label" for="staffCode">Staff code</label>
-        <input id="staffCode" type="password" autocomplete="off" placeholder="Enter PLP staff code" />
-        <button class="btn" id="loadBtn">Load content</button>
-        <p class="help">The staff code is stored only in this browser's local storage for convenience.</p>
-        <h2 style="margin-top:34px">Sections</h2>
-        <div id="sectionList" class="list"></div>
-      </aside>
-      <section class="panel">
-        <h2>Edit section</h2>
-        <label class="label" for="sectionName">Section key</label>
-        <input id="sectionName" placeholder="homepage, accommodation, experiences, policies, testimonials, gallery" />
-        <label class="label" for="status">Status</label>
-        <select id="status"><option>DRAFT</option><option>PUBLISHED</option><option>ARCHIVED</option></select>
-        <label class="label" for="updatedBy">Updated by</label>
-        <input id="updatedBy" placeholder="Staff name or initials" />
-        <label class="label" for="contentJson">Content JSON</label>
-        <textarea id="contentJson" spellcheck="false">{
+      <aside class="panel"><h2>Access</h2><label class="label" for="staffCode">Staff code</label><input id="staffCode" type="password" autocomplete="off" placeholder="Enter PLP staff code" /><button class="btn" id="loadBtn">Load content</button><p class="help">The staff code is stored only in this browser's local storage for convenience.</p><h2 style="margin-top:34px">Sections</h2><div id="sectionList" class="list"></div></aside>
+      <section class="panel"><h2>Edit section</h2><label class="label" for="sectionName">Section key</label><input id="sectionName" placeholder="homepage, accommodation, experiences, policies, testimonials, gallery" /><label class="label" for="status">Status</label><select id="status"><option>DRAFT</option><option>PUBLISHED</option><option>ARCHIVED</option></select><label class="label" for="updatedBy">Updated by</label><input id="updatedBy" placeholder="Staff name or initials" /><label class="label" for="contentJson">Content JSON</label><textarea id="contentJson" spellcheck="false">{
   "example": "Edit this JSON object"
-}</textarea>
-        <button class="btn" id="saveBtn">Save section</button>
-        <button class="btn secondary" id="formatBtn">Format JSON</button>
-        <div id="statusText" class="status" role="status" aria-live="polite"></div>
-      </section>
+}</textarea><button class="btn" id="saveBtn">Save section</button><button class="btn secondary" id="formatBtn">Format JSON</button><div id="statusText" class="status" role="status" aria-live="polite"></div></section>
     </section>
   </main>
   <footer class="footer"><div class="wrap">Pueblo La Perla Boracay · Staff content operations</div></footer>
   <script>
+    const endpoint = '/api/admin?action=content';
     const $ = id => document.getElementById(id);
     let rows = [];
     let selected = null;
     $('staffCode').value = localStorage.getItem('plp_staff_code') || '';
-
-    function setStatus(text, ok) {
-      $('statusText').className = 'status ' + (ok ? 'ok' : 'bad');
-      $('statusText').textContent = text;
-    }
-
-    function headers() {
-      const code = $('staffCode').value.trim();
-      if (code) localStorage.setItem('plp_staff_code', code);
-      return { 'Content-Type': 'application/json', 'x-plp-staff-code': code };
-    }
-
-    function renderList() {
-      $('sectionList').innerHTML = rows.map(row => `<button class="item ${selected && selected.section === row.section ? 'active' : ''}" data-section="${row.section}"><strong>${row.section}</strong><span>${row.status || 'DRAFT'} · ${row.updated_at || 'not saved'}</span></button>`).join('') || '<p class="help">No content sections loaded.</p>';
-      document.querySelectorAll('.item').forEach(button => button.onclick = () => {
-        selected = rows.find(row => row.section === button.dataset.section);
-        loadIntoEditor(selected);
-        renderList();
-      });
-    }
-
-    function loadIntoEditor(row) {
-      $('sectionName').value = row?.section || '';
-      $('status').value = row?.status || 'DRAFT';
-      $('updatedBy').value = row?.updated_by || '';
-      $('contentJson').value = JSON.stringify(row?.content || {}, null, 2);
-    }
-
-    async function loadContent() {
-      setStatus('Loading content...', true);
-      const response = await fetch('/api/admin/content', { headers: headers() });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'Unable to load content.');
-      rows = data.content || [];
-      selected = rows[0] || null;
-      renderList();
-      if (selected) loadIntoEditor(selected);
-      setStatus('Content loaded.', true);
-    }
-
-    async function saveContent() {
-      let content;
-      try { content = JSON.parse($('contentJson').value); }
-      catch { throw new Error('Content JSON is not valid.'); }
-      if (!content || Array.isArray(content) || typeof content !== 'object') throw new Error('Content must be a JSON object.');
-      setStatus('Saving content...', true);
-      const response = await fetch('/api/admin/content', {
-        method: 'POST',
-        headers: headers(),
-        body: JSON.stringify({
-          section: $('sectionName').value,
-          status: $('status').value,
-          updatedBy: $('updatedBy').value,
-          content
-        })
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || 'Unable to save content.');
-      setStatus('Saved. Reloading list...', true);
-      await loadContent();
-    }
-
+    function setStatus(text, ok) { $('statusText').className = 'status ' + (ok ? 'ok' : 'bad'); $('statusText').textContent = text; }
+    function headers() { const code = $('staffCode').value.trim(); if (code) localStorage.setItem('plp_staff_code', code); return { 'Content-Type': 'application/json', 'x-plp-staff-code': code }; }
+    function renderList() { $('sectionList').innerHTML = rows.map(row => `<button class="item ${selected && selected.section === row.section ? 'active' : ''}" data-section="${row.section}"><strong>${row.section}</strong><span>${row.status || 'DRAFT'} · ${row.updated_at || 'not saved'}</span></button>`).join('') || '<p class="help">No content sections loaded.</p>'; document.querySelectorAll('.item').forEach(button => button.onclick = () => { selected = rows.find(row => row.section === button.dataset.section); loadIntoEditor(selected); renderList(); }); }
+    function loadIntoEditor(row) { $('sectionName').value = row?.section || ''; $('status').value = row?.status || 'DRAFT'; $('updatedBy').value = row?.updated_by || ''; $('contentJson').value = JSON.stringify(row?.content || {}, null, 2); }
+    async function loadContent() { setStatus('Loading content...', true); const response = await fetch(endpoint, { headers: headers() }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || 'Unable to load content.'); rows = data.content || []; selected = rows[0] || null; renderList(); if (selected) loadIntoEditor(selected); setStatus('Content loaded.', true); }
+    async function saveContent() { let content; try { content = JSON.parse($('contentJson').value); } catch { throw new Error('Content JSON is not valid.'); } if (!content || Array.isArray(content) || typeof content !== 'object') throw new Error('Content must be a JSON object.'); setStatus('Saving content...', true); const response = await fetch(endpoint, { method: 'POST', headers: headers(), body: JSON.stringify({ section: $('sectionName').value, status: $('status').value, updatedBy: $('updatedBy').value, content }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || 'Unable to save content.'); setStatus('Saved. Reloading list...', true); await loadContent(); }
     $('loadBtn').onclick = () => loadContent().catch(error => setStatus(error.message, false));
     $('saveBtn').onclick = () => saveContent().catch(error => setStatus(error.message, false));
-    $('formatBtn').onclick = () => {
-      try { $('contentJson').value = JSON.stringify(JSON.parse($('contentJson').value), null, 2); setStatus('JSON formatted.', true); }
-      catch { setStatus('Content JSON is not valid.', false); }
-    };
+    $('formatBtn').onclick = () => { try { $('contentJson').value = JSON.stringify(JSON.parse($('contentJson').value), null, 2); setStatus('JSON formatted.', true); } catch { setStatus('Content JSON is not valid.', false); } };
   </script>
 </body>
 </html>
