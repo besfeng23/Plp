@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLP Admin Operations</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #0f172a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: #f8fafc; }
+    header { background: #020617; color: white; padding: 28px 32px; }
+    header .eyebrow { color: #34d399; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; }
+    header h1 { margin: 8px 0 0; font-size: 28px; letter-spacing: -0.03em; }
+    header p { margin: 8px 0 0; color: #94a3b8; max-width: 760px; }
+    main { padding: 28px 32px 56px; }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); }
+    .card span { display: block; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; }
+    .card strong { display: block; margin-top: 8px; font-size: 28px; }
+    .toolbar { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+    .toolbar input { width: min(420px, 100%); border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; }
+    button { border: 0; border-radius: 12px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
+    .primary { background: #059669; color: white; }
+    .dark { background: #020617; color: white; }
+    .ghost { background: #e2e8f0; color: #0f172a; }
+    .danger { background: #fee2e2; color: #991b1b; }
+    .warn { background: #fef3c7; color: #92400e; }
+    .ok { background: #dcfce7; color: #166534; }
+    section { margin-top: 24px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    .table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 18px; background: white; }
+    table { border-collapse: collapse; width: 100%; min-width: 1120px; font-size: 13px; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; color: #64748b; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+    tr:hover td { background: #f8fafc; }
+    .pill { display: inline-flex; border-radius: 999px; padding: 5px 9px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .muted { color: #64748b; }
+    .error { margin: 16px 0; padding: 14px 16px; border-radius: 14px; background: #fee2e2; color: #991b1b; }
+    .notice { margin: 16px 0; padding: 14px 16px; border-radius: 14px; background: #ecfdf5; color: #065f46; }
+    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } main, header { padding-left: 18px; padding-right: 18px; } }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">Pueblo La Perla</div>
+    <h1>Admin Operations</h1>
+    <p>Live booking, payment reconciliation, and exception handling. A booking should only be confirmed after verified deposit payment and availability review.</p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <input id="staffCode" type="password" placeholder="Enter PLP staff code" />
+      <div class="actions">
+        <button class="primary" onclick="saveCode()">Save Code</button>
+        <button class="dark" onclick="loadData()">Refresh</button>
+        <button class="ghost" onclick="clearCode()">Clear</button>
+      </div>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="grid">
+      <div class="card"><span>Total bookings</span><strong id="kpiBookings">—</strong></div>
+      <div class="card"><span>Verified deposits</span><strong id="kpiVerified">—</strong></div>
+      <div class="card"><span>Need review</span><strong id="kpiReview">—</strong></div>
+      <div class="card"><span>Exceptions</span><strong id="kpiExceptions">—</strong></div>
+    </div>
+
+    <section>
+      <h2>Payment Exceptions</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Reference</th><th>Issue</th><th>Expected</th><th>Received</th><th>Event</th><th>Notes</th></tr></thead>
+          <tbody id="exceptionsBody"><tr><td colspan="6" class="muted">No data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bookings & Payments</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Guest</th><th>Stay</th><th>Amounts</th><th>Booking</th><th>Payment</th><th>Verification</th><th>Actions</th></tr></thead>
+          <tbody id="rowsBody"><tr><td colspan="8" class="muted">No data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+    const staffInput = document.getElementById('staffCode');
+    staffInput.value = localStorage.getItem('plp_staff_code') || '';
+
+    function setMessage(text, type = 'notice') {
+      document.getElementById('message').innerHTML = text ? `<div class="${type}">${text}</div>` : '';
+    }
+
+    function getStaffCode() {
+      return staffInput.value || localStorage.getItem('plp_staff_code') || '';
+    }
+
+    function saveCode() {
+      localStorage.setItem('plp_staff_code', staffInput.value);
+      setMessage('Staff code saved on this device.');
+      loadData();
+    }
+
+    function clearCode() {
+      localStorage.removeItem('plp_staff_code');
+      staffInput.value = '';
+      setMessage('Staff code cleared.');
+    }
+
+    function pill(value) {
+      const label = value || '—';
+      const text = String(label).toUpperCase();
+      const cls = text.includes('VERIFIED') || text.includes('CONFIRMED') || text.includes('SUCCEEDED') ? 'ok' : text.includes('MISMATCH') || text.includes('UNMATCHED') || text.includes('FAILED') || text.includes('CANCELLED') ? 'danger' : 'warn';
+      return `<span class="pill ${cls}">${label}</span>`;
+    }
+
+    function renderRows(rows) {
+      const body = document.getElementById('rowsBody');
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="8" class="muted">No bookings yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = rows.map((row) => `
+        <tr>
+          <td><strong>${row.booking_reference || '—'}</strong><br><span class="muted">${row.provider || 'XENDIT'}</span></td>
+          <td>${row.guest_name || '—'}<br><span class="muted">${row.guest_email || ''}</span></td>
+          <td>${row.accommodation_name || '—'}<br><span class="muted">${row.check_in || '—'} → ${row.check_out || '—'}</span></td>
+          <td>Total: ${money(row.total_amount_php)}<br>Deposit: ${money(row.deposit_amount_php)}<br>Balance: ${money(row.balance_amount_php)}</td>
+          <td>${pill(row.booking_status)}</td>
+          <td>${pill(row.payment_status || row.booking_payment_status)}<br><span class="muted">${row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td>
+          <td>${pill(row.payment_verification_status)}<br><span class="muted">${row.verification_error || ''}</span></td>
+          <td><div class="actions">
+            <button class="primary" onclick="updateBooking('${row.booking_reference}', 'CONFIRMED')">Confirm</button>
+            <button class="warn" onclick="updateBooking('${row.booking_reference}', 'PAYMENT_PROCESSING')">Review</button>
+            <button class="danger" onclick="updateBooking('${row.booking_reference}', 'CANCELLED')">Cancel</button>
+          </div></td>
+        </tr>`).join('');
+    }
+
+    function renderExceptions(exceptions) {
+      const body = document.getElementById('exceptionsBody');
+      if (!exceptions.length) {
+        body.innerHTML = '<tr><td colspan="6" class="muted">No payment exceptions.</td></tr>';
+        return;
+      }
+      body.innerHTML = exceptions.map((row) => `
+        <tr>
+          <td><strong>${row.booking_reference || row.provider_reference_id || '—'}</strong></td>
+          <td>${pill(row.verification_status)}</td>
+          <td>${money(row.expected_amount_php)} ${row.expected_currency || 'PHP'}</td>
+          <td>${money(row.amount_php)} ${row.currency || ''}</td>
+          <td>${row.event_type || '—'}<br><span class="muted">${row.provider_event_id || ''}</span></td>
+          <td>${row.verification_notes || '—'}</td>
+        </tr>`).join('');
+    }
+
+    async function loadData() {
+      setMessage('Loading operations data...');
+      try {
+        const response = await fetch('/api/admin/operations', { headers: { 'x-plp-staff-code': getStaffCode() } });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to load operations data');
+        const rows = data.rows || [];
+        const exceptions = data.exceptions || [];
+        document.getElementById('kpiBookings').textContent = rows.length;
+        document.getElementById('kpiVerified').textContent = rows.filter((row) => row.payment_verification_status === 'VERIFIED').length;
+        document.getElementById('kpiReview').textContent = rows.filter((row) => !['CONFIRMED', 'FULLY_PAID', 'CANCELLED'].includes(row.booking_status)).length;
+        document.getElementById('kpiExceptions').textContent = exceptions.length;
+        renderRows(rows);
+        renderExceptions(exceptions);
+        setMessage('Operations data loaded.');
+      } catch (error) {
+        setMessage(error.message, 'error');
+      }
+    }
+
+    async function updateBooking(reference, nextStatus) {
+      if (!confirm(`Update ${reference} to ${nextStatus}?`)) return;
+      setMessage(`Updating ${reference}...`);
+      try {
+        const response = await fetch('/api/admin/booking-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-plp-staff-code': getStaffCode() },
+          body: JSON.stringify({ reference, nextStatus }),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to update booking');
+        setMessage(`${reference} updated to ${nextStatus}.`);
+        loadData();
+      } catch (error) {
+        setMessage(error.message, 'error');
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
