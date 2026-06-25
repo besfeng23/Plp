@@ -1,4 +1,13 @@
 (function () {
+  function ensureImagePlacementStylesheet() {
+    if (document.querySelector('link[data-plp-image-placement]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/image-placement.css';
+    link.setAttribute('data-plp-image-placement', 'true');
+    document.head.appendChild(link);
+  }
+
   function getPath() {
     return window.location.pathname.replace(/\/$/, '') || '/';
   }
@@ -108,6 +117,7 @@
 
   function applyContent(content) {
     if (!content) return;
+    ensureImagePlacementStylesheet();
     hydrateBoundElements(content);
     applyHome(content);
     applyAccommodation(content);
@@ -117,6 +127,7 @@
   }
 
   function loadContent() {
+    ensureImagePlacementStylesheet();
     fetch('/api/plp?action=content', { headers: { Accept: 'application/json' } })
       .then(function (response) { return response.json(); })
       .then(function (data) { applyContent(data.content || {}); })
@@ -127,11 +138,13 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
+      ensureImagePlacementStylesheet();
       loadContent();
       setTimeout(loadContent, 700);
       setTimeout(loadContent, 1800);
     });
   } else {
+    ensureImagePlacementStylesheet();
     loadContent();
     setTimeout(loadContent, 700);
     setTimeout(loadContent, 1800);
