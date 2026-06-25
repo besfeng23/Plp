@@ -3,21 +3,54 @@ import { insertRow, isSupabaseConfigured, selectRows } from './_supabase.js';
 const DEFAULT_CONTENT = {
   homepage: {
     heroTitle: 'Pueblo La Perla',
-    heroSubtitle: 'A private hillside retreat above Boracay’s white sands.',
+    heroSubtitle: 'A private hillside retreat above Boracay’s white sands, shaped around villa living, wellness, and quiet island days.',
     primaryCta: 'Reserve your stay'
   },
   accommodation: {
-    grandOceanVilla: { name: 'Grand Ocean Villa', rate: 40000, capacity: 8, bedrooms: 4 },
-    sunsetSuite: { name: 'Sunset Suite', rate: 18000, capacity: 4, bedrooms: 2 },
-    smartRoomPremium: { name: 'Smart Room Premium', rate: 8000, capacity: 2, bedrooms: 1 }
+    grandOceanVilla: {
+      name: 'Grand Ocean Villa',
+      rate: 40000,
+      capacity: 8,
+      bedrooms: 4,
+      type: 'Signature Villa',
+      bestForShort: 'Groups',
+      bestFor: 'Families, private groups, longer stays, and guests who want generous living space with a private villa rhythm.',
+      description: 'A private hillside villa for families, long stays, and discreet gatherings. The villa is designed around space, pool atmosphere, and the quiet distance of High Boracay.',
+      arrangements: ['Airport and port transfer coordination', 'In-villa dining and celebrations', 'Water activities and wellness rituals']
+    },
+    sunsetSuite: {
+      name: 'Sunset Suite',
+      rate: 18000,
+      capacity: 4,
+      bedrooms: 2,
+      type: 'Elevated Suite',
+      bestForShort: 'Couples',
+      bestFor: 'Couples, small families, and guests who want a quieter stay close to Boracay’s center.',
+      description: 'A refined retreat for guests who want privacy, ease, and a quieter Boracay stay without feeling removed from the island.',
+      arrangements: ['Sunset dining reservations', 'Wellness schedule requests', 'Port timing and local transfer support']
+    },
+    smartRoomPremium: {
+      name: 'Smart Room Premium',
+      rate: 8000,
+      capacity: 2,
+      bedrooms: 1,
+      type: 'Premium Room',
+      bestForShort: 'Short stay',
+      bestFor: 'Couples, solo travelers, work-friendly island trips, and guests who want a quiet premium room instead of a full villa.',
+      description: 'A calm modern base for short stays, couples, solo travelers, and guests who want comfort, intelligent controls, and easy access to the island.',
+      arrangements: ['Arrival support', 'Wellness requests', 'Island activity coordination']
+    }
   },
   experiences: {
-    water: 'Paraw sailing, island hopping, snorkeling, and curated water activities.',
-    wellness: 'Quiet recovery days and rest-focused island rhythm.',
-    privateDining: 'Sunset dinners, in-villa meals, and intimate celebration arrangements.'
+    water: 'Sea days can be shaped around timing, privacy, family pace, and the light: paraw sailing, island hopping, snorkeling, and curated water activities.',
+    waterItems: ['Paraw sailing', 'Island hopping', 'Snorkeling and dive preparation', 'Jet ski and water activity coordination', 'Private boat timing where available'],
+    wellness: 'Quiet recovery days, slow mornings, and a rest-focused island rhythm can be built into the stay.',
+    wellnessItems: ['Quiet recovery days', 'Long-stay wellness rhythm', 'Slow mornings', 'Private rituals around arrival or departure'],
+    privateDining: 'Meals can become part of the stay: sunset dinners, in-villa meals, local seafood, family celebrations, or a quiet meal after the island day.',
+    privateDiningItems: ['Sunset dinner coordination', 'In-villa dining', 'Local seafood and island dining suggestions', 'Celebration setups', 'Family meal arrangements']
   },
   policies: {
-    reservationNote: 'Final confirmation follows availability review and reservation completion.'
+    reservationNote: 'A reservation hold may be requested only after your booking reference is created. Final confirmation is issued by the PLP team after review.'
   }
 };
 
