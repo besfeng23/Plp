@@ -84,6 +84,18 @@
         ]
       }
     </script>
+    <script>
+      (function () {
+        var nativePushState = window.history.pushState;
+        window.history.pushState = function (state, title, url) {
+          if (url === '/booking' || url === 'booking') {
+            window.location.href = '/booking';
+            return;
+          }
+          return nativePushState.apply(window.history, arguments);
+        };
+      })();
+    </script>
 
     <title>Pueblo La Perla Boracay</title>
   </head>
