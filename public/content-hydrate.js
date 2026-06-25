@@ -3,8 +3,23 @@
     return window.location.pathname.replace(/\/$/, '') || '/';
   }
 
+  function getValue(object, path) {
+    if (!object || !path) return undefined;
+    return String(path).split('.').reduce(function (current, part) {
+      if (current && Object.prototype.hasOwnProperty.call(current, part)) return current[part];
+      return undefined;
+    }, object);
+  }
+
   function money(value) {
     return '₱' + Number(value || 0).toLocaleString('en-PH');
+  }
+
+  function normalText(value) {
+    if (value == null) return '';
+    if (Array.isArray(value)) return value.join(', ');
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
   }
 
   function setText(selector, value) {
@@ -22,6 +37,36 @@
         return;
       }
     }
+  }
+
+  function hydrateBoundElements(content) {
+    document.querySelectorAll('[data-content-key]').forEach(function (el) {
+      var value = getValue(content, el.getAttribute('data-content-key'));
+      if (value == null) return;
+      el.textContent = normalText(value);
+    });
+
+    document.querySelectorAll('[data-content-money]').forEach(function (el) {
+      var value = getValue(content, el.getAttribute('data-content-money'));
+      if (value == null) return;
+      el.textContent = money(value);
+    });
+
+    document.querySelectorAll('[data-content-template]').forEach(function (el) {
+      var key = el.getAttribute('data-content-key') || el.getAttribute('data-content-money');
+      var value = getValue(content, key);
+      if (value == null) return;
+      var renderedValue = el.hasAttribute('data-content-money') ? money(value) : normalText(value);
+      el.textContent = el.getAttribute('data-content-template').replace(/\{\{value\}\}/g, renderedValue);
+    });
+
+    document.querySelectorAll('[data-content-list]').forEach(function (el) {
+      var value = getValue(content, el.getAttribute('data-content-list'));
+      if (value == null) return;
+      var items = Array.isArray(value) ? value : String(value).split('|').map(function (item) { return item.trim(); }).filter(Boolean);
+      if (!items.length) return;
+      el.innerHTML = items.map(function (item) { return '<li>' + String(item).replace(/[<>]/g, '') + '</li>'; }).join('');
+    });
   }
 
   function applyHome(content) {
@@ -63,6 +108,7 @@
 
   function applyContent(content) {
     if (!content) return;
+    hydrateBoundElements(content);
     applyHome(content);
     applyAccommodation(content);
     applyExperiences(content);
@@ -76,6 +122,8 @@
       .then(function (data) { applyContent(data.content || {}); })
       .catch(function () {});
   }
+
+  window.plpHydrateContent = applyContent;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
