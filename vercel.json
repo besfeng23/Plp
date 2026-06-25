@@ -25,7 +25,15 @@
       "destination": "/accommodation.html"
     },
     {
-      "source": "/((?!api/|booking.html|accommodation.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
+      "source": "/experiences",
+      "destination": "/experiences.html"
+    },
+    {
+      "source": "/experiences/",
+      "destination": "/experiences.html"
+    },
+    {
+      "source": "/((?!api/|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
       "destination": "/index.html"
     }
   ]
