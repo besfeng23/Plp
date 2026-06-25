@@ -46,8 +46,28 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #7A6A3A;
+  outline: 2px solid #6A5A2D;
   outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 9999;
+  transform: translateY(-140%);
+  background: #1A1A1A;
+  color: #ffffff;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .font-serif {
@@ -55,7 +75,7 @@ textarea:focus-visible {
 }
 
 ::selection {
-  background: #7A6A3A;
+  background: #6A5A2D;
   color: #ffffff;
 }
 
@@ -86,7 +106,7 @@ section.h-screen.bg-stone-900 > img {
 }
 
 .bg-stone-200 .text-stone-500 {
-  color: rgba(255,255,255,.86) !important;
+  color: rgba(255,255,255,.9) !important;
   text-shadow: 0 1px 18px rgba(0,0,0,.45);
 }
 
@@ -97,11 +117,30 @@ section.h-screen.bg-stone-900 > img {
 .text-stone-600,
 .text-stone-500,
 .text-stone-400 {
-  color: #5D584F !important;
+  color: #4F4A42 !important;
 }
 
 .text-\[\#7A6A3A\] {
-  color: #6A5A2D !important;
+  color: #5E4F28 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  video {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
