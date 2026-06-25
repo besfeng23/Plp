@@ -1,3 +1,4 @@
+import { notifyBookingStatus } from '../_notifications.js';
 import { selectRows, updateRows } from '../_supabase.js';
 
 function hasStaffAccess(req) {
@@ -52,7 +53,14 @@ export default async function handler(req, res) {
     }
 
     const updated = await updateRows('plp_bookings', `booking_reference=eq.${encodeURIComponent(reference)}`, payload);
-    return res.status(200).json({ ok: true, row: updated?.[0] || null });
+    let notifications = null;
+    try {
+      notifications = await notifyBookingStatus(reference, nextStatus);
+    } catch (error) {
+      notifications = { ok: false, error: error.message };
+    }
+
+    return res.status(200).json({ ok: true, row: updated?.[0] || null, notifications });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Booking status update failed', detail: error.message });
   }
