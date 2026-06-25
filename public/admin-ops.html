@@ -13,7 +13,7 @@
     header h1 { margin: 8px 0 0; font-size: 28px; letter-spacing: -0.03em; }
     header p { margin: 8px 0 0; color: #94a3b8; max-width: 760px; }
     main { padding: 28px 32px 56px; }
-    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
     .card { background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 20px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); }
     .card span { display: block; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; }
     .card strong { display: block; margin-top: 8px; font-size: 28px; }
@@ -38,7 +38,7 @@
     .muted { color: #64748b; }
     .error { margin: 16px 0; padding: 14px 16px; border-radius: 14px; background: #fee2e2; color: #991b1b; }
     .notice { margin: 16px 0; padding: 14px 16px; border-radius: 14px; background: #ecfdf5; color: #065f46; }
-    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } main, header { padding-left: 18px; padding-right: 18px; } }
+    @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } main, header { padding-left: 18px; padding-right: 18px; } }
     @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -46,7 +46,7 @@
   <header>
     <div class="eyebrow">Pueblo La Perla</div>
     <h1>Admin Operations</h1>
-    <p>Live booking, payment reconciliation, and exception handling. A booking should only be confirmed after verified deposit payment and availability review.</p>
+    <p>Live booking, payment reconciliation, exception handling, and notification activity. A booking should only be confirmed after verified deposit payment and availability review.</p>
   </header>
 
   <main>
@@ -66,6 +66,7 @@
       <div class="card"><span>Verified deposits</span><strong id="kpiVerified">—</strong></div>
       <div class="card"><span>Need review</span><strong id="kpiReview">—</strong></div>
       <div class="card"><span>Exceptions</span><strong id="kpiExceptions">—</strong></div>
+      <div class="card"><span>Notifications</span><strong id="kpiNotifications">—</strong></div>
     </div>
 
     <section>
@@ -84,6 +85,16 @@
         <table>
           <thead><tr><th>Ref</th><th>Guest</th><th>Stay</th><th>Amounts</th><th>Booking</th><th>Payment</th><th>Verification</th><th>Actions</th></tr></thead>
           <tbody id="rowsBody"><tr><td colspan="8" class="muted">No data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Notification Activity</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Reference</th><th>Recipient</th><th>Subject</th><th>Status</th><th>Sent</th><th>Error</th></tr></thead>
+          <tbody id="notificationsBody"><tr><td colspan="6" class="muted">No notifications loaded.</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -117,7 +128,7 @@
     function pill(value) {
       const label = value || '—';
       const text = String(label).toUpperCase();
-      const cls = text.includes('VERIFIED') || text.includes('CONFIRMED') || text.includes('SUCCEEDED') ? 'ok' : text.includes('MISMATCH') || text.includes('UNMATCHED') || text.includes('FAILED') || text.includes('CANCELLED') ? 'danger' : 'warn';
+      const cls = text.includes('SENT') || text.includes('VERIFIED') || text.includes('CONFIRMED') || text.includes('SUCCEEDED') ? 'ok' : text.includes('FAILED') || text.includes('MISMATCH') || text.includes('UNMATCHED') || text.includes('CANCELLED') ? 'danger' : 'warn';
       return `<span class="pill ${cls}">${label}</span>`;
     }
 
@@ -161,20 +172,46 @@
         </tr>`).join('');
     }
 
+    function renderNotifications(rows) {
+      const body = document.getElementById('notificationsBody');
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="6" class="muted">No notification activity.</td></tr>';
+        return;
+      }
+      body.innerHTML = rows.map((row) => `
+        <tr>
+          <td><strong>${row.booking_reference || '—'}</strong><br><span class="muted">${row.notification_key || ''}</span></td>
+          <td>${row.recipient_type || '—'}<br><span class="muted">${row.recipient_email || 'No recipient'}</span></td>
+          <td>${row.subject || '—'}</td>
+          <td>${pill(row.status)}</td>
+          <td>${row.sent_at || row.created_at || '—'}</td>
+          <td>${row.error || '—'}</td>
+        </tr>`).join('');
+    }
+
     async function loadData() {
       setMessage('Loading operations data...');
       try {
-        const response = await fetch('/api/admin/operations', { headers: { 'x-plp-staff-code': getStaffCode() } });
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error(data.error || 'Unable to load operations data');
+        const headers = { 'x-plp-staff-code': getStaffCode() };
+        const [operationsResponse, notificationsResponse] = await Promise.all([
+          fetch('/api/admin/operations', { headers }),
+          fetch('/api/admin/notifications', { headers }),
+        ]);
+        const data = await operationsResponse.json();
+        const notificationData = await notificationsResponse.json();
+        if (!operationsResponse.ok || !data.ok) throw new Error(data.error || 'Unable to load operations data');
+        if (!notificationsResponse.ok || !notificationData.ok) throw new Error(notificationData.error || 'Unable to load notifications');
         const rows = data.rows || [];
         const exceptions = data.exceptions || [];
+        const notifications = notificationData.rows || [];
         document.getElementById('kpiBookings').textContent = rows.length;
         document.getElementById('kpiVerified').textContent = rows.filter((row) => row.payment_verification_status === 'VERIFIED').length;
         document.getElementById('kpiReview').textContent = rows.filter((row) => !['CONFIRMED', 'FULLY_PAID', 'CANCELLED'].includes(row.booking_status)).length;
         document.getElementById('kpiExceptions').textContent = exceptions.length;
+        document.getElementById('kpiNotifications').textContent = notifications.length;
         renderRows(rows);
         renderExceptions(exceptions);
+        renderNotifications(notifications);
         setMessage('Operations data loaded.');
       } catch (error) {
         setMessage(error.message, 'error');
