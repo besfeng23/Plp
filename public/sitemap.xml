@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://plp-boracay.vercel.app/</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/accommodation</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/experiences</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/exclusive-offer</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/getting-here</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/booking</loc><lastmod>2026-06-25</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://plp-boracay.vercel.app/contact</loc><lastmod>2026-06-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/accommodation</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/booking</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/private-villas-boracay</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/boracay-villa-with-private-pool</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/boracay-family-villa</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.84</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/boracay-wellness-stay</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.82</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/high-boracay-location</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/experiences</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/exclusive-offer</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/getting-here</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/contact</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/reservation-policy</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.55</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/privacy</loc><lastmod>2026-06-26</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/terms</loc><lastmod>2026-06-26</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
 </urlset>
