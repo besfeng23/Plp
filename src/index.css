@@ -33,12 +33,21 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #7A6A3A;
+  outline-offset: 4px;
+}
+
 .font-serif {
   font-family: "Cormorant Garamond", Georgia, serif;
 }
 
 ::selection {
-  background: #9A8A5A;
+  background: #7A6A3A;
   color: #ffffff;
 }
 
@@ -48,8 +57,4 @@ section.h-screen.bg-stone-900 > img {
 
 section.h-screen.bg-stone-900 {
   background: #050505;
-}
-
-section[class*="bg-[#F3F0E8]"] {
-  display: none;
 }
