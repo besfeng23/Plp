@@ -1,3 +1,5 @@
+const DEPOSIT_RATE = 0.3;
+
 const accommodations = {
   'Grand Ocean Villa': { rate: 40000, capacity: 8 },
   'Sunset Suite': { rate: 18000, capacity: 4 },
@@ -72,7 +74,8 @@ export default async function handler(req, res) {
     }
 
     const amount = nights * selected.rate;
-    const paymentDue = amount;
+    const deposit = Math.round(amount * DEPOSIT_RATE);
+    const balance = Math.max(amount - deposit, 0);
     const reference = `PLP-${Date.now().toString().slice(-8)}`;
 
     const booking = {
@@ -87,23 +90,19 @@ export default async function handler(req, res) {
       nights,
       rate: selected.rate,
       amount,
-      paymentDue,
-      deposit: paymentDue,
-      status: 'Pending Full Payment Instructions',
+      deposit,
+      balance,
+      paymentDue: deposit,
+      paymentStatus: 'Awaiting Xendit Checkout',
+      status: 'Pending Deposit',
       message: String(body.message || '').slice(0, 1200),
       receivedAt: new Date().toISOString(),
     };
 
-    const paymentInstructions = process.env.PAYMENT_INSTRUCTIONS || [
-      'Full payment instructions are pending final confirmation from Pueblo La Perla.',
-      'Please wait for the resort team to confirm availability before sending payment.',
-      'Once confirmed, the team will send the official bank, wallet, or transfer details.',
-    ].join('\n');
-
     const guestText = [
       `Dear ${booking.name},`,
       '',
-      'Thank you for your Pueblo La Perla Boracay booking request. Your reservation is not yet confirmed until full payment is verified by the resort team.',
+      'Thank you for your Pueblo La Perla Boracay reservation request. Your booking reference has been created and will be attached to your secure Xendit deposit checkout.',
       '',
       `Booking reference: ${booking.reference}`,
       `Accommodation: ${booking.accommodation}`,
@@ -111,19 +110,18 @@ export default async function handler(req, res) {
       `Check-out: ${booking.checkOut}`,
       `Nights: ${booking.nights}`,
       `Guests: ${booking.guests}`,
-      `Total amount due: ${currency(booking.amount)}`,
+      `Estimated total stay: ${currency(booking.amount)}`,
+      `Reservation deposit due now: ${currency(booking.deposit)}`,
+      `Estimated balance after deposit: ${currency(booking.balance)}`,
       '',
-      'Full payment details:',
-      paymentInstructions,
-      '',
-      'After sending payment, please reply with proof of payment and your booking reference.',
+      'Your reservation is not final until payment is verified and the resort confirms availability.',
       '',
       'Pueblo La Perla Boracay',
       'plpvillas@gmail.com',
     ].join('\n');
 
     const adminText = [
-      'New Pueblo La Perla booking request received.',
+      'New Pueblo La Perla reservation deposit request received.',
       '',
       `Reference: ${booking.reference}`,
       `Guest: ${booking.name}`,
@@ -133,20 +131,22 @@ export default async function handler(req, res) {
       `Dates: ${booking.checkIn} to ${booking.checkOut}`,
       `Nights: ${booking.nights}`,
       `Guests: ${booking.guests}`,
-      `Full payment due: ${currency(booking.amount)}`,
+      `Estimated total stay: ${currency(booking.amount)}`,
+      `Deposit due now: ${currency(booking.deposit)}`,
+      `Estimated balance: ${currency(booking.balance)}`,
       '',
       `Message: ${booking.message || '-'}`,
     ].join('\n');
 
     const guestEmailSent = await sendEmail({
       to: booking.email,
-      subject: `Pueblo La Perla booking request ${booking.reference}`,
+      subject: `Pueblo La Perla reservation ${booking.reference}`,
       text: guestText,
     });
 
     const adminTo = process.env.BOOKINGS_TO_EMAIL || process.env.LEADS_TO_EMAIL;
     const adminEmailSent = adminTo
-      ? await sendEmail({ to: adminTo, subject: `New booking request ${booking.reference}`, text: adminText })
+      ? await sendEmail({ to: adminTo, subject: `New deposit reservation ${booking.reference}`, text: adminText })
       : false;
 
     return res.status(200).json({
@@ -154,9 +154,7 @@ export default async function handler(req, res) {
       booking,
       guestEmailSent,
       adminEmailSent,
-      note: guestEmailSent
-        ? 'Booking request accepted and full payment email sent.'
-        : 'Booking request accepted. Add RESEND_API_KEY and booking email variables in Vercel to enable email delivery.',
+      note: 'Booking request accepted. Continue to Xendit deposit checkout.',
     });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Booking request failed' });
