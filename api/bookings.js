@@ -1,3 +1,4 @@
+import { requireAvailability } from './availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 
@@ -77,7 +78,12 @@ export default async function handler(req, res) {
 
     let databaseRecord = null;
     let databaseWarning = null;
+    let availability = null;
     if (isSupabaseConfigured()) {
+      availability = await requireAvailability({ accommodationName: booking.accommodation, checkIn: booking.checkIn, checkOut: booking.checkOut });
+      if (!availability.available) {
+        return res.status(409).json({ ok: false, error: availability.error, conflictCount: availability.conflictCount });
+      }
       databaseRecord = await createBookingRecord(booking);
       booking.databaseId = databaseRecord.id;
       booking.persisted = true;
@@ -97,11 +103,12 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       booking,
+      availabilityChecked: Boolean(availability),
       databaseRecord,
       databaseWarning,
       notifications,
       note: booking.persisted
-        ? 'Booking request accepted and persisted. Continue to Xendit deposit checkout.'
+        ? 'Booking request accepted, availability-held, and persisted. Continue to Xendit deposit checkout.'
         : 'Booking request accepted but not persisted. Add Supabase environment variables in Vercel.',
     });
   } catch (error) {
