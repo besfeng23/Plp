@@ -56,6 +56,8 @@ export default async function handler(req, res) {
       persisted: true,
       duplicate: persisted.duplicate,
       paymentStatus: persisted.paymentStatus,
+      verificationStatus: persisted.verificationStatus,
+      verificationNote: persisted.verificationNote,
       webhookId,
       eventType,
       reference,
