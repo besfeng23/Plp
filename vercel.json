@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
+      "source": "/booking",
+      "destination": "/booking.html"
+    },
+    {
+      "source": "/booking/",
+      "destination": "/booking.html"
+    },
+    {
+      "source": "/((?!api/|booking.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
       "destination": "/index.html"
     }
   ]
