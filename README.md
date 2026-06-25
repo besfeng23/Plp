@@ -53,8 +53,23 @@ LEADS_TO_EMAIL=
 2. `/api/bookings` validates the request, calculates a 30% deposit, creates or updates the guest in Supabase, and creates a booking record.
 3. `/api/xendit/create-session` creates the Xendit hosted checkout and records the payment session in Supabase.
 4. Guest is redirected to Xendit.
-5. `/api/xendit/webhook` verifies the Xendit callback token, stores the payment event, updates the payment record, and updates the booking payment state.
-6. Admin can read booking/payment reconciliation through `/api/admin/bookings`.
+5. `/api/xendit/webhook` verifies the Xendit callback token, stores the payment event, validates the reference/amount/currency, updates the payment record, and only moves the booking to paid state when verification passes.
+6. Admin can read booking/payment reconciliation and payment exceptions through `/api/admin/bookings`.
+
+## Payment verification rules
+
+The success redirect page is not treated as proof of payment. Real status changes come from the Xendit webhook.
+
+Webhook events are classified as:
+
+- `VERIFIED` — booking reference exists, payment session exists, amount matches, currency is PHP.
+- `DUPLICATE` — webhook/event ID was already processed.
+- `UNMATCHED_REFERENCE` — no booking exists for the callback reference.
+- `UNMATCHED_PAYMENT` — booking exists but no matching payment session exists.
+- `AMOUNT_MISMATCH` — callback amount does not match the expected deposit.
+- `CURRENCY_MISMATCH` — callback currency is not PHP.
+
+Only `VERIFIED` positive payment events can move a booking into `PAID_DEPOSIT`.
 
 ## Notes
 
@@ -68,6 +83,7 @@ The app includes:
 - Contact/reservation inquiry form
 - Xendit-ready reservation deposit checkout
 - Supabase-backed booking/payment tables
+- Hardened webhook verification and payment exception tracking
 - Hidden guest portal mock
 - Hidden admin Resort OS mock
 
