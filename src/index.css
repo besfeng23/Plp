@@ -49,3 +49,7 @@ section.h-screen.bg-stone-900 > img {
 section.h-screen.bg-stone-900 {
   background: #050505;
 }
+
+section[class*="bg-[#F3F0E8]"] {
+  display: none;
+}
