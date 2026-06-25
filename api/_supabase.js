@@ -15,6 +15,11 @@ function apiUrl(path) {
   return `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/${path}`;
 }
 
+function stripUndefined(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+  return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined));
+}
+
 async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=representation' } = {}) {
   if (!isSupabaseConfigured()) throw new Error(getSupabaseConfigError());
 
@@ -26,7 +31,7 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
       'Content-Type': 'application/json',
       Prefer: prefer,
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : JSON.stringify(stripUndefined(body)),
   });
 
   const text = await response.text();
@@ -125,6 +130,8 @@ export async function createPaymentRecord({ bookingReference, session, amount, c
       amount_php: Number(amount || booking.deposit_amount_php || 0),
       currency: 'PHP',
       status: 'PENDING',
+      verification_status: 'PENDING',
+      verification_error: null,
       raw_response: rawResponse || session || {},
       expires_at: session?.expiresAt || rawResponse?.expires_at || null,
     });
@@ -140,6 +147,7 @@ export async function createPaymentRecord({ bookingReference, session, amount, c
     amount_php: Number(amount || booking.deposit_amount_php || 0),
     currency: 'PHP',
     status: 'PENDING',
+    verification_status: 'PENDING',
     raw_response: rawResponse || session || {},
     expires_at: session?.expiresAt || rawResponse?.expires_at || null,
   });
@@ -154,12 +162,13 @@ export async function createPaymentRecord({ bookingReference, session, amount, c
 
 function mapXenditPaymentStatus(status, eventType) {
   const normalized = String(status || eventType || '').toUpperCase();
-  if (normalized.includes('SUCCEED') || normalized.includes('CAPTURE') || normalized === 'PAID') return 'SUCCEEDED';
+  if (normalized.includes('SUCCEED') || normalized.includes('SUCCESS') || normalized.includes('CAPTURE') || normalized === 'PAID') return 'SUCCEEDED';
   if (normalized.includes('AUTHOR')) return 'AUTHORIZED';
   if (normalized.includes('FAIL')) return 'FAILED';
   if (normalized.includes('EXPIR')) return 'EXPIRED';
   if (normalized.includes('REFUND')) return 'REFUNDED';
   if (normalized.includes('PROCESS')) return 'PROCESSING';
+  if (normalized.includes('PENDING')) return 'PENDING';
   return 'PENDING';
 }
 
@@ -171,10 +180,39 @@ function mapBookingStatus(paymentStatus) {
   return 'PAYMENT_PROCESSING';
 }
 
+function isFinalPositiveStatus(paymentStatus) {
+  return paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED';
+}
+
+function getVerificationResult({ booking, payment, amount, currency, paymentStatus }) {
+  if (!booking) {
+    return { status: 'UNMATCHED_REFERENCE', note: 'No booking was found for this Xendit reference.' };
+  }
+
+  if (!payment) {
+    return { status: 'UNMATCHED_PAYMENT', note: 'No payment session was found for this Xendit reference.' };
+  }
+
+  const expectedAmount = Number(payment.amount_php || booking.deposit_amount_php || 0);
+  const receivedAmount = Number(amount || 0);
+  const receivedCurrency = String(currency || '').toUpperCase();
+
+  if (isFinalPositiveStatus(paymentStatus)) {
+    if (receivedCurrency !== 'PHP') {
+      return { status: 'CURRENCY_MISMATCH', note: `Expected PHP but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
+    }
+    if (!receivedAmount || receivedAmount !== expectedAmount) {
+      return { status: 'AMOUNT_MISMATCH', note: `Expected ${expectedAmount} but received ${receivedAmount || 'missing amount'}.`, expectedAmount };
+    }
+  }
+
+  return { status: 'VERIFIED', note: 'Webhook matched booking reference, payment record, amount, and currency.', expectedAmount };
+}
+
 export async function recordXenditWebhook({ webhookId, eventType, reference, providerPaymentId, amount, currency, status, payload }) {
   const booking = reference ? await findBookingByReference(reference) : null;
   const paymentRows = reference
-    ? await selectRows('plp_payments', `provider=eq.XENDIT&provider_reference_id=eq.${encodeFilterValue(reference)}&select=id,booking_id&limit=1`)
+    ? await selectRows('plp_payments', `provider=eq.XENDIT&provider_reference_id=eq.${encodeFilterValue(reference)}&select=id,booking_id,amount_php,currency,status,verification_status&limit=1`)
     : [];
   const payment = paymentRows?.[0] || null;
   const paymentStatus = mapXenditPaymentStatus(status, eventType);
@@ -182,9 +220,11 @@ export async function recordXenditWebhook({ webhookId, eventType, reference, pro
   if (webhookId) {
     const existing = await selectRows('plp_payment_events', `provider=eq.XENDIT&provider_event_id=eq.${encodeFilterValue(webhookId)}&select=id&limit=1`);
     if (existing?.[0]) {
-      return { duplicate: true, booking, payment, paymentStatus };
+      return { duplicate: true, booking, payment, paymentStatus, verificationStatus: 'DUPLICATE' };
     }
   }
+
+  const verification = getVerificationResult({ booking, payment, amount, currency, paymentStatus });
 
   await insertRow('plp_payment_events', {
     payment_id: payment?.id || null,
@@ -197,31 +237,52 @@ export async function recordXenditWebhook({ webhookId, eventType, reference, pro
     amount_php: amount ? Number(amount) : null,
     currency: currency || null,
     status: status || null,
+    expected_amount_php: verification.expectedAmount || payment?.amount_php || booking?.deposit_amount_php || null,
+    expected_currency: 'PHP',
+    verification_status: verification.status,
+    verification_notes: verification.note,
     payload: payload || {},
     processed_at: new Date().toISOString(),
   });
 
   if (payment?.id) {
-    await updateRows('plp_payments', `id=eq.${payment.id}`, {
-      provider_payment_id: providerPaymentId || null,
-      amount_php: amount ? Number(amount) : undefined,
-      currency: currency || 'PHP',
-      status: paymentStatus,
-      paid_at: paymentStatus === 'SUCCEEDED' ? new Date().toISOString() : null,
-      raw_response: payload || {},
-    });
+    if (verification.status === 'VERIFIED') {
+      await updateRows('plp_payments', `id=eq.${payment.id}`, {
+        provider_payment_id: providerPaymentId || null,
+        amount_php: amount ? Number(amount) : payment.amount_php,
+        currency: currency || 'PHP',
+        status: paymentStatus,
+        verification_status: 'VERIFIED',
+        verification_error: null,
+        last_webhook_id: webhookId || null,
+        paid_at: isFinalPositiveStatus(paymentStatus) ? new Date().toISOString() : null,
+        raw_response: payload || {},
+      });
+    } else {
+      await updateRows('plp_payments', `id=eq.${payment.id}`, {
+        provider_payment_id: providerPaymentId || null,
+        verification_status: verification.status,
+        verification_error: verification.note,
+        last_webhook_id: webhookId || null,
+        raw_response: payload || {},
+      });
+    }
   }
 
-  if (booking?.id) {
+  if (booking?.id && verification.status === 'VERIFIED') {
     await updateRows('plp_bookings', `id=eq.${booking.id}`, {
       status: mapBookingStatus(paymentStatus),
       payment_status: paymentStatus,
     });
   }
 
-  return { duplicate: false, booking, payment, paymentStatus };
+  return { duplicate: false, booking, payment, paymentStatus, verificationStatus: verification.status, verificationNote: verification.note };
 }
 
 export async function listPaymentReconciliation(limit = 100) {
   return selectRows('plp_payment_reconciliation', `select=*&order=payment_created_at.desc.nullslast&limit=${Number(limit) || 100}`);
+}
+
+export async function listPaymentExceptions(limit = 100) {
+  return selectRows('plp_payment_exceptions', `select=*&order=created_at.desc&limit=${Number(limit) || 100}`);
 }
