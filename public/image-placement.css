@@ -1,0 +1,172 @@
+/*
+  Pueblo La Perla image placement map
+  The uploaded PNGs are preserved with their original filenames.
+  They are assigned by resort role to stop repeating the same fallback aerial.
+
+  Role map:
+  01 hero / arrival atmosphere
+  02 Grand Ocean Villa primary
+  03 Grand Ocean Villa pool / exterior detail
+  04 Grand Ocean Villa living / private space
+  05 Sunset Suite atmosphere
+  06 Sunset Suite light / balcony mood
+  07 Smart Room / premium room mood
+  08 Wellness / quiet resort rhythm
+  09 Private dining / evening atmosphere
+*/
+
+:root {
+  --plp-img-hero: url('/images/126CD191-00B2-4F4C-874B-9AF869C6FBE5.png');
+  --plp-img-grand: url('/images/1B72F8A3-1B90-41B0-9149-BE648B8445C8.png');
+  --plp-img-pool: url('/images/2BE826C9-F4BE-4662-A723-89743F98D24C.png');
+  --plp-img-living: url('/images/32F47C10-1722-4299-8B4B-FA06578B61FE.png');
+  --plp-img-suite: url('/images/4796004F-219A-419D-816C-44685E7B5642.png');
+  --plp-img-suite-detail: url('/images/4C6D8CDE-9525-455F-94CF-2F9EAA10F6E7.png');
+  --plp-img-smart: url('/images/75F4A199-45DA-409B-9897-B3C529C6B17E.png');
+  --plp-img-wellness: url('/images/B351D3FB-800D-49F2-9754-9DE02B22B7CA.png');
+  --plp-img-dining: url('/images/E2EFB3F8-338D-4082-9425-FCD7E70370BE.png');
+}
+
+/* Homepage / React shell */
+section.h-screen.bg-stone-900::before {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.7)),
+    var(--plp-img-hero) center / cover no-repeat !important;
+}
+
+.bg-stone-200 {
+  background:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.38)),
+    var(--plp-img-grand) center / cover no-repeat !important;
+}
+
+/* Booking room cards */
+.rooms .room:nth-child(1) .room-visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
+    var(--plp-img-grand) !important;
+}
+
+.rooms .room:nth-child(2) .room-visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
+    var(--plp-img-suite) !important;
+}
+
+.rooms .room:nth-child(3) .room-visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.05), rgba(5,5,5,.44)),
+    var(--plp-img-smart) !important;
+}
+
+.rooms .room .room-visual {
+  background-position: center center !important;
+  background-size: cover !important;
+}
+
+/* Accommodation page */
+#accommodation .visual,
+.room .visual {
+  background-position: center center !important;
+  background-size: cover !important;
+}
+
+#grand-ocean-villa .visual.main {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.48)),
+    var(--plp-img-grand) !important;
+}
+
+#grand-ocean-villa .side-gallery .visual:nth-child(1) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-pool) !important;
+}
+
+#grand-ocean-villa .side-gallery .visual:nth-child(2) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-living) !important;
+}
+
+#sunset-suite .visual.main {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.46)),
+    var(--plp-img-suite) !important;
+}
+
+#sunset-suite .side-gallery .visual:nth-child(1) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
+    var(--plp-img-suite-detail) !important;
+}
+
+#sunset-suite .side-gallery .visual:nth-child(2) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
+    var(--plp-img-hero) !important;
+}
+
+#smart-room-premium .visual.main {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.46)),
+    var(--plp-img-smart) !important;
+}
+
+#smart-room-premium .side-gallery .visual:nth-child(1) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
+    var(--plp-img-living) !important;
+}
+
+#smart-room-premium .side-gallery .visual:nth-child(2) {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.44)),
+    var(--plp-img-suite-detail) !important;
+}
+
+/* Experiences page */
+#water .visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
+    var(--plp-img-hero) !important;
+}
+
+#wellness .visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
+    var(--plp-img-wellness) !important;
+}
+
+#private-dining .visual {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.5)),
+    var(--plp-img-dining) !important;
+}
+
+/* Static SEO landing visual blocks */
+.visual[aria-label*='private hillside villa'],
+.visual[aria-label*='Grand Ocean Villa'],
+.visual[aria-label*='Family villa'] {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-grand) !important;
+}
+
+.visual[aria-label*='private pool'] {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-pool) !important;
+}
+
+.visual[aria-label*='wellness'] {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-wellness) !important;
+}
+
+.visual[aria-label*='High Boracay'] {
+  background-image:
+    linear-gradient(180deg, rgba(5,5,5,.1), rgba(5,5,5,.45)),
+    var(--plp-img-hero) !important;
+}
