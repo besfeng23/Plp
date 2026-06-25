@@ -1,3 +1,4 @@
+import { notifyPaymentException, notifyPaymentVerified } from '../_notifications.js';
 import { getSupabaseConfigError, isSupabaseConfigured, recordXenditWebhook } from '../_supabase.js';
 
 export default async function handler(req, res) {
@@ -50,6 +51,25 @@ export default async function handler(req, res) {
       payload: event,
     });
 
+    let notifications = null;
+    if (!persisted.duplicate && reference) {
+      try {
+        if (persisted.verificationStatus === 'VERIFIED' && ['SUCCEEDED', 'CAPTURED'].includes(persisted.paymentStatus)) {
+          notifications = await notifyPaymentVerified(reference);
+        } else if (persisted.verificationStatus && !['VERIFIED', 'DUPLICATE'].includes(persisted.verificationStatus)) {
+          notifications = await notifyPaymentException({
+            reference,
+            verificationStatus: persisted.verificationStatus,
+            verificationNote: persisted.verificationNote,
+            webhookId,
+            eventType,
+          });
+        }
+      } catch (error) {
+        notifications = { ok: false, error: error.message };
+      }
+    }
+
     return res.status(200).json({
       ok: true,
       received: true,
@@ -58,6 +78,7 @@ export default async function handler(req, res) {
       paymentStatus: persisted.paymentStatus,
       verificationStatus: persisted.verificationStatus,
       verificationNote: persisted.verificationNote,
+      notifications,
       webhookId,
       eventType,
       reference,
