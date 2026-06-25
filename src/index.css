@@ -98,6 +98,10 @@ section.h-screen.bg-stone-900 > img {
   display: none;
 }
 
+section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center.justify-center {
+  display: none !important;
+}
+
 .bg-stone-200 {
   background:
     linear-gradient(180deg, rgba(5,5,5,.12), rgba(5,5,5,.38)),
