@@ -1,3 +1,5 @@
+import { createPaymentRecord, getSupabaseConfigError, isSupabaseConfigured } from '../_supabase.js';
+
 function getBaseUrl(req) {
   if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL.replace(/\/$/, '');
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -117,15 +119,35 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ ok: false, error: 'Xendit session creation failed', details: data });
     }
 
-    return res.status(201).json({
-      ok: true,
+    const session = {
       checkoutUrl: data.payment_link_url,
       paymentSessionId: data.payment_session_id,
       referenceId: data.reference_id,
       status: data.status,
       expiresAt: data.expires_at,
+    };
+
+    let databasePayment = null;
+    let databaseWarning = null;
+    if (isSupabaseConfigured()) {
+      databasePayment = await createPaymentRecord({
+        bookingReference: reference,
+        session,
+        amount,
+        checkoutUrl: session.checkoutUrl,
+        rawResponse: data,
+      });
+    } else {
+      databaseWarning = getSupabaseConfigError();
+    }
+
+    return res.status(201).json({
+      ok: true,
+      ...session,
+      databasePayment,
+      databaseWarning,
     });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: 'Unable to create Xendit checkout session' });
+    return res.status(500).json({ ok: false, error: 'Unable to create Xendit checkout session', detail: error.message });
   }
 }
