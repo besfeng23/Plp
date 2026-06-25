@@ -20,6 +20,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #FAFAF7;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -51,10 +53,61 @@ textarea:focus-visible {
   color: #ffffff;
 }
 
+section.h-screen.bg-stone-900 {
+  background: #050505;
+}
+
+section.h-screen.bg-stone-900::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.68)),
+    url('/images/plp-villa-close-aerial.jpeg') center / cover no-repeat;
+  opacity: .52;
+  transform: scale(1.02);
+}
+
 section.h-screen.bg-stone-900 > img {
   display: none;
 }
 
-section.h-screen.bg-stone-900 {
-  background: #050505;
+.bg-stone-200 {
+  background:
+    linear-gradient(180deg, rgba(5,5,5,.12), rgba(5,5,5,.38)),
+    url('/images/plp-grand-ocean-villa-aerial.jpeg') center / cover no-repeat !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
+}
+
+.bg-stone-200 .text-stone-500 {
+  color: rgba(255,255,255,.86) !important;
+  text-shadow: 0 1px 18px rgba(0,0,0,.45);
+}
+
+.bg-stone-100 {
+  background-color: #F3EFE6 !important;
+}
+
+.text-stone-600,
+.text-stone-500,
+.text-stone-400 {
+  color: #5D584F !important;
+}
+
+.text-\[\#7A6A3A\] {
+  color: #6A5A2D !important;
+}
+
+@media (max-width: 768px) {
+  section.h-screen.bg-stone-900 {
+    min-height: 82vh;
+  }
+
+  section.h-screen.bg-stone-900::before {
+    opacity: .44;
+  }
+
+  .bg-stone-200 {
+    min-height: 320px;
+  }
 }
