@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/optimize-plp-images.mjs && vite build",
+    "build": "node scripts/optimize-plp-images.mjs && node scripts/prepare-plp-static-pages.mjs && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
