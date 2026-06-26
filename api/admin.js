@@ -37,6 +37,20 @@ function cleanStatus(value) {
   return ALLOWED_CONTENT_STATUSES.has(status) ? status : 'DRAFT';
 }
 
+async function handleHealth(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  return json(res, 200, {
+    ok: true,
+    environment: process.env.VERCEL_ENV || process.env.NODE_ENV || 'local',
+    supabase: isSupabaseConfigured() ? 'connected' : 'missing',
+    xendit: process.env.XENDIT_SECRET_KEY ? 'configured' : 'missing',
+    resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
+    webhookToken: process.env.XENDIT_WEBHOOK_TOKEN ? 'configured' : 'missing',
+    adminAccess: process.env.PLP_STAFF_CODE ? 'configured' : 'missing',
+    checkedAt: new Date().toISOString(),
+  });
+}
+
 async function handleOperations(req, res) {
   if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
   const rows = await listPaymentReconciliation(100);
@@ -136,10 +150,13 @@ async function handleContent(req, res) {
 
 export default async function handler(req, res) {
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
-  if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });
 
   try {
     const action = actionOf(req);
+    if (action === 'health') return await handleHealth(req, res);
+
+    if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });
+
     if (action === 'operations') return await handleOperations(req, res);
     if (action === 'notifications') return await handleNotifications(req, res);
     if (action === 'booking-status') return await handleBookingStatus(req, res);
