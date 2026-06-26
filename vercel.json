@@ -20,6 +20,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/", "destination": "/admin.html" },
     { "source": "/booking", "destination": "/booking.html" },
     { "source": "/booking/", "destination": "/booking.html" },
     { "source": "/accommodation", "destination": "/accommodation.html" },
@@ -38,6 +40,6 @@
     { "source": "/boracay-wellness-stay/", "destination": "/boracay-wellness-stay/index.html" },
     { "source": "/high-boracay-location", "destination": "/high-boracay-location/index.html" },
     { "source": "/high-boracay-location/", "destination": "/high-boracay-location/index.html" },
-    { "source": "/((?!api/|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|admin.html|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)", "destination": "/index.html" }
   ]
 }
