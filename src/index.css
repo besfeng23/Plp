@@ -20,6 +20,11 @@ html[data-admin-experience="plp-resort-command-v3"] body {
   background: linear-gradient(135deg, #F7F2EA, #EFE7DA);
 }
 
+html[data-admin-experience="plp-resort-command-v3"] section,
+html[data-admin-experience="plp-resort-command-v3"] article {
+  border-radius: 1rem;
+}
+
 html[data-admin-experience="plp-resort-command-v3"] table {
   font-variant-numeric: tabular-nums;
 }
