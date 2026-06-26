@@ -58,173 +58,26 @@ textarea:focus-visible {
   transform: translateY(-140%);
   background: #1A1A1A;
   color: #ffffff;
-  padding: 0.85rem 1rem;
-  text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
-.skip-link:focus {
-  transform: translateY(0);
-}
-
-.font-serif {
-  font-family: "Cormorant Garamond", Georgia, serif;
-}
-
-::selection {
-  background: #6A5A2D;
-  color: #ffffff;
-}
-
-section.h-screen.bg-stone-900 {
-  background: #050505;
-}
-
-section.h-screen.bg-stone-900::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.68)),
-    url('/images/plp-villa-close-aerial.jpeg') center / cover no-repeat;
-  opacity: .52;
-  transform: scale(1.02);
-}
-
-section.h-screen.bg-stone-900 > img {
-  display: none;
-}
-
-section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center.justify-center {
-  display: none !important;
-}
-
-.bg-stone-200 {
-  background:
-    linear-gradient(180deg, rgba(5,5,5,.12), rgba(5,5,5,.38)),
-    url('/images/plp-grand-ocean-villa-aerial.jpeg') center / cover no-repeat !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
-}
-
-.bg-stone-200 .text-stone-500 {
-  color: rgba(255,255,255,.9) !important;
-  text-shadow: 0 1px 18px rgba(0,0,0,.45);
-}
-
-.bg-stone-100 {
-  background-color: #F3EFE6 !important;
-}
-
-.text-stone-600,
-.text-stone-500,
-.text-stone-400 {
-  color: #4F4A42 !important;
-}
-
-.text-\[\#7A6A3A\] {
-  color: #5E4F28 !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+@layer components {
+  .inputish {
+    @apply w-full bg-white border border-[#E5E0D8] text-[#17130F] rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-[#B8977E] focus:ring-1 focus:ring-[#B8977E] transition-colors placeholder:text-[#6A645B];
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
+  .btnish {
+    @apply inline-flex items-center justify-center gap-2 border border-[#E5E0D8] bg-white text-[#17130F] px-3 py-1.5 rounded-sm text-xs font-medium hover:bg-[#F4F0E8] disabled:bg-[#F4F0E8] disabled:text-[#6A645B] disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
-  video {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  body {
-    padding-bottom: env(safe-area-inset-bottom);
+  .btnish.danger {
+    @apply border-red-100 bg-red-50 text-red-700 hover:bg-red-100;
   }
 
-  section.h-screen.bg-stone-900 {
-    min-height: 82vh;
+  .tinyhead {
+    @apply text-[10px] tracking-widest text-[#6A645B] uppercase font-semibold;
   }
 
-  section.h-screen.bg-stone-900::before {
-    opacity: .44;
-  }
-
-  .bg-stone-200 {
-    min-height: 320px;
-  }
-
-  h1,
-  h2,
-  h3,
-  p {
-    overflow-wrap: anywhere;
-  }
-
-  button,
-  a {
-    min-height: 44px;
-  }
-
-  input,
-  select,
-  textarea {
-    min-height: 46px;
-    font-size: 16px;
-  }
-
-  .tracking-\[0\.2em\],
-  .tracking-\[0\.18em\],
-  .tracking-\[0\.15em\],
-  .tracking-\[0\.3em\] {
-    letter-spacing: 0.12em !important;
-  }
-
-  .leading-relaxed {
-    line-height: 1.78 !important;
-  }
-
-  .fixed.inset-x-0.bottom-0 {
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-  }
-}
-
-@media (max-width: 430px) {
-  .text-5xl {
-    font-size: 2.55rem !important;
-    line-height: 0.98 !important;
-  }
-
-  .text-4xl {
-    font-size: 2.15rem !important;
-    line-height: 1.04 !important;
-  }
-
-  .px-6 {
-    padding-left: 1.125rem !important;
-    padding-right: 1.125rem !important;
-  }
-
-  .py-24,
-  .py-28,
-  .py-32 {
-    padding-top: 4.5rem !important;
-    padding-bottom: 4.5rem !important;
-  }
-
-  .gap-16,
-  .gap-14,
-  .gap-12 {
-    gap: 2.25rem !important;
+  .drawer-action {
+    @apply w-full text-left px-4 py-2.5 rounded-sm hover:bg-[#F4F0E8] text-[#17130F] text-sm transition-colors border border-transparent hover:border-[#E5E0D8];
   }
 }
