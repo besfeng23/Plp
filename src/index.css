@@ -20,6 +20,21 @@ html[data-admin-experience="plp-resort-command-v3"] body {
   background: linear-gradient(135deg, #F7F2EA, #EFE7DA);
 }
 
+html[data-admin-experience="plp-resort-command-v3"] table {
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-admin-experience="plp-resort-command-v3"] .cell {
+  padding: 1rem 1.25rem;
+  vertical-align: top;
+  line-height: 1.55;
+}
+
+html[data-admin-experience="plp-resort-command-v3"] .muted {
+  color: #6A645B;
+  font-size: 0.75rem;
+}
+
 body {
   margin: 0;
   min-width: 320px;
