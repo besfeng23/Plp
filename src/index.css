@@ -16,6 +16,10 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html[data-admin-experience="plp-resort-command-v3"] body {
+  background: linear-gradient(135deg, #F7F2EA, #EFE7DA);
+}
+
 body {
   margin: 0;
   min-width: 320px;
