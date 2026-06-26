@@ -71,17 +71,20 @@ export default function OpsAdminApp() {
     setError('');
     setMessage('Loading reservation and payment reconciliation rows from database...');
     try {
-      const [operations, notificationData] = await Promise.all([
-        adminFetch('operations', nextKey),
-        adminFetch('notifications', nextKey),
-      ]);
+      const operations = await adminFetch('operations', nextKey);
       setRows(operations.rows || []);
       setExceptions(operations.exceptions || []);
-      setNotifications(notificationData.rows || []);
       setLastSync(new Date());
       setActiveTab('bookings');
-      setMessage('Reservations loaded from the database.');
       setUnlocked(true);
+      try {
+        const notificationData = await adminFetch('notifications', nextKey);
+        setNotifications(notificationData.rows || []);
+        setMessage(`Reservations loaded from the database. Notifications loaded too.`);
+      } catch {
+        setNotifications([]);
+        setMessage(`Reservations loaded from the database. Notifications can be retried later.`);
+      }
     } catch (err) {
       setError(err.message || 'Unable to load reservation data.');
       setMessage('');
