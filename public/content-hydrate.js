@@ -39,7 +39,7 @@
     strip.setAttribute('aria-label', 'Reservation trust details');
     inner.className = 'plp-trust-strip__inner';
     addTrustItem(inner, 'Location', 'High Boracay');
-    addTrustItem(inner, 'Reservation', 'Reviewed privately');
+    addTrustItem(inner, 'Booking', 'Room + dates first');
     addTrustItem(inner, 'Arrival', 'Port transfer support');
     addTrustItem(inner, 'Concierge', SITE_EMAIL);
     strip.appendChild(inner);
@@ -53,19 +53,19 @@
     var bar = document.createElement('nav');
     bar.className = 'plp-mobile-action';
     bar.setAttribute('data-plp-mobile-action', 'true');
-    bar.setAttribute('aria-label', 'Quick reservation actions');
-    var reserve = document.createElement('a');
-    reserve.href = '/booking';
-    reserve.textContent = 'Reserve';
-    var email = document.createElement('a');
-    email.href = 'mailto:' + SITE_EMAIL;
-    email.textContent = 'Email';
-    var contact = document.createElement('a');
-    contact.href = '/contact';
-    contact.textContent = 'Concierge';
-    bar.appendChild(reserve);
-    bar.appendChild(email);
-    bar.appendChild(contact);
+    bar.setAttribute('aria-label', 'Quick site navigation');
+    var book = document.createElement('a');
+    book.href = '/booking';
+    book.textContent = 'Book';
+    var rooms = document.createElement('a');
+    rooms.href = '/accommodation';
+    rooms.textContent = 'Rooms';
+    var help = document.createElement('a');
+    help.href = '/contact';
+    help.textContent = 'Help';
+    bar.appendChild(book);
+    bar.appendChild(rooms);
+    bar.appendChild(help);
     document.body.appendChild(bar);
   }
 
@@ -79,7 +79,7 @@
     var title = document.createElement('strong');
     title.textContent = 'Before you continue';
     var list = document.createElement('ul');
-    ['This creates a private reservation request before final confirmation.', 'Availability is reviewed by the PLP team before the stay is treated as final.', 'For urgent dates or special arrangements, email ' + SITE_EMAIL + '.'].forEach(function (text) {
+    ['Pick a room and dates first. The summary updates before you send the request.', 'Availability is reviewed by the PLP team before the stay is treated as final.', 'For urgent dates or special arrangements, email ' + SITE_EMAIL + '.'].forEach(function (text) {
       var li = document.createElement('li');
       li.textContent = text;
       list.appendChild(li);
@@ -89,11 +89,26 @@
     note.parentNode.insertBefore(box, note.nextSibling);
   }
 
+  function ensureRoomBookingLinks() {
+    var path = getPath();
+    if (path !== '/accommodation' && path !== '/accommodations') return;
+    var map = [
+      ['#grand-ocean-villa .cta-row a.btn.primary', '/booking?room=grandOceanVilla'],
+      ['#sunset-suite .cta-row a.btn.primary', '/booking?room=sunsetSuite'],
+      ['#smart-room-premium .cta-row a.btn.primary', '/booking?room=smartRoomPremium']
+    ];
+    map.forEach(function (pair) {
+      var el = document.querySelector(pair[0]);
+      if (el) el.setAttribute('href', pair[1]);
+    });
+  }
+
   function ensureProductionLayer() {
     ensureImagePlacementStylesheet();
     ensureTrustStrip();
     ensureMobileAction();
     ensureBookingAssurance();
+    ensureRoomBookingLinks();
   }
 
   function getValue(object, path) {
@@ -233,6 +248,7 @@
     applyExperiences(content);
     applyBooking(content);
     applyImageCaptions();
+    ensureRoomBookingLinks();
     window.dispatchEvent(new CustomEvent('plp:content', { detail: content }));
   }
 
