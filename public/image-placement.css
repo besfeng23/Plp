@@ -16,11 +16,11 @@
 
 :root {
   --plp-hero-sunset: url('/images/plp-hero-sunset.webp');
-  --plp-hero-day: url('/images/E189E36D-ED32-48D3-A25E-E33503655583.png');
-  --plp-hero-evening: url('/images/F40304DC-06CB-42FE-A444-D2611AF79A95.png');
+  --plp-hero-day: url('/images/plp-hero-day.webp');
+  --plp-hero-evening: url('/images/plp-hero-evening.webp');
   --plp-villa-primary: url('/images/plp-grand-villa-exterior.webp');
-  --plp-villa-secondary: url('/images/1375C22C-3194-4407-98C9-328CB0D4735B.png');
-  --plp-villa-exterior: url('/images/82975C82-90B9-4FC1-84C8-BA54FE9E2F02.png');
+  --plp-villa-secondary: url('/images/plp-villa-golden-exterior.webp');
+  --plp-villa-exterior: url('/images/plp-villa-exterior-alt.webp');
   --plp-pool-ocean: url('/images/plp-pool-ocean-view.webp');
   --plp-pool-amenity: url('/images/plp-poolside-experience.webp');
   --plp-balcony-day: url('/images/plp-day-balcony-sea-view.webp');
@@ -29,7 +29,7 @@
   --plp-bedroom-master: url('/images/plp-master-bedroom-view.webp');
   --plp-bedroom-twin: url('/images/plp-smart-room-twin-view.webp');
   --plp-bedroom-view: url('/images/plp-bedroom-balcony-outlook.webp');
-  --plp-bath-tub: url('/images/126CD191-00B2-4F4C-874B-9AF869C6FBE5.png');
+  --plp-bath-tub: url('/images/plp-bath-tub-greenery.webp');
   --plp-bath-vanity: url('/images/plp-bathroom-vanity-shower.webp');
   --plp-bath-spa: url('/images/plp-wellness-bath-ritual.webp');
   --plp-dining-breakfast: url('/images/plp-private-breakfast-pool.webp');
@@ -292,6 +292,18 @@ section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center {
   color: #fff;
 }
 
+.plp-nav-reserve {
+  display: none;
+  border: 1px solid #1a1a1a;
+  padding: 10px 14px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 760px) {
   body:has(.plp-mobile-action) {
     padding-bottom: 78px;
@@ -308,6 +320,12 @@ section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center {
 
   .plp-trust-strip strong {
     font-size: 16px;
+  }
+
+  .plp-nav-reserve {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
