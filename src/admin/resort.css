@@ -1,0 +1,22 @@
+:root {
+  --plp-pearl: #F7F2EA;
+  --plp-sand: #EFE7DA;
+  --plp-card: #FFFDF8;
+  --plp-teak: #17130F;
+  --plp-brass: #B8977E;
+  --plp-muted: #6A645B;
+  --plp-linen: #E5E0D8;
+}
+
+html[data-admin-experience="plp-resort-command-v3"] body {
+  background: linear-gradient(135deg, var(--plp-pearl), var(--plp-sand));
+}
+
+html[data-admin-experience="plp-resort-command-v3"] section,
+html[data-admin-experience="plp-resort-command-v3"] article {
+  border-radius: 18px;
+}
+
+html[data-admin-experience="plp-resort-command-v3"] table {
+  font-variant-numeric: tabular-nums;
+}
