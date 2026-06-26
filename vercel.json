@@ -20,8 +20,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/admin", "destination": "/admin-ops.html" },
-    { "source": "/admin/", "destination": "/admin-ops.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/", "destination": "/admin.html" },
     { "source": "/booking", "destination": "/booking.html" },
     { "source": "/booking/", "destination": "/booking.html" },
     { "source": "/accommodation", "destination": "/accommodation.html" },
