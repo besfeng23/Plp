@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { AlertCircle, Bell, CheckCircle2, Clock, Database, LayoutDashboard, Lock, LogOut, RefreshCw, Search, TrendingUp } from 'lucide-react';
 
 const TABS = [
-  { id: 'bookings', label: 'Bookings & Payments', icon: Database },
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'exceptions', label: 'Payment Exceptions', icon: AlertCircle },
+  { id: 'bookings', label: 'Reservations', icon: Database },
+  { id: 'dashboard', label: 'Today', icon: LayoutDashboard },
+  { id: 'exceptions', label: 'Payments', icon: AlertCircle },
   { id: 'notifications', label: 'Notifications', icon: Bell },
 ];
 
@@ -59,10 +59,10 @@ export default function OpsAdminApp() {
   }), [rows, exceptions, notifications]);
 
   async function loadData(nextKey = accessKey) {
-    if (!nextKey) return setError('Enter the PLP access key to load live operations data.');
+    if (!nextKey) return setError('Enter the PLP access key to load live resort data.');
     setLoading(true);
     setError('');
-    setMessage('Loading booking reconciliation rows from database...');
+    setMessage('Loading reservation and payment reconciliation rows from database...');
     try {
       const [operations, notificationData] = await Promise.all([
         adminFetch('operations', nextKey),
@@ -73,10 +73,10 @@ export default function OpsAdminApp() {
       setNotifications(notificationData.rows || []);
       setLastSync(new Date());
       setActiveTab('bookings');
-      setMessage('Bookings & Payments data loaded from the database.');
+      setMessage('Reservations loaded from the database.');
       setUnlocked(true);
     } catch (err) {
-      setError(err.message || 'Unable to load operations data.');
+      setError(err.message || 'Unable to load reservation data.');
       setMessage('');
     } finally {
       setLoading(false);
@@ -115,18 +115,18 @@ export default function OpsAdminApp() {
   if (!isUnlocked) return <LoginScreen accessKey={accessKey} setAccessKey={setAccessKey} onSubmit={unlock} loading={loading} error={error} />;
 
   return (
-    <div className="min-h-screen bg-[#F4F0E8] text-[#211F1B]">
+    <div className="min-h-screen bg-[#F7F2EA] text-[#211F1B]">
       <div className="bg-[#17130F] text-[#B8977E] px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase flex justify-between items-center border-b border-[#B8977E]/20">
-        <span>PLP Ops · Bookings Reconciliation</span><span className="text-[#6A645B]">Last Sync: {lastSync ? lastSync.toLocaleTimeString() : 'Not loaded'}</span>
+        <span>PLP Resort Command · Reservations</span><span className="text-[#6A645B]">Last Sync: {lastSync ? lastSync.toLocaleTimeString() : 'Not loaded'}</span>
       </div>
       <div className="grid lg:grid-cols-[260px_1fr] min-h-[calc(100vh-30px)]">
         <aside className="bg-[#17130F] text-white p-6 flex flex-col">
-          <div className="mb-8"><h1 className="text-xl tracking-[0.2em] font-light uppercase">PLP <span className="font-bold text-[#B8977E]">Ops</span></h1><p className="text-[10px] text-[#6A645B] mt-2 tracking-widest uppercase">Bookings first · live database</p></div>
+          <div className="mb-8"><p className="text-[10px] text-[#B8977E] tracking-[0.32em] uppercase">Pueblo La Perla</p><h1 className="text-3xl tracking-[-0.05em] font-light">Resort Command</h1><p className="text-[10px] text-[#6A645B] mt-2 tracking-widest uppercase">Reservations first · live database</p></div>
           <nav className="space-y-1 flex-1">{TABS.map((tab) => { const Icon = tab.icon; return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm text-sm transition ${activeTab === tab.id ? 'bg-[#B8977E]/10 text-[#B8977E]' : 'text-[#6A645B] hover:text-[#F4F0E8] hover:bg-white/5'}`}><Icon size={17} /> {tab.label}</button>; })}</nav>
           <button onClick={logout} className="border-t border-[#B8977E]/10 pt-4 w-full flex items-center justify-between text-[#6A645B] hover:text-[#B8977E] text-sm">Secure Logout <LogOut size={16} /></button>
         </aside>
         <main className="p-4 md:p-8 overflow-auto">
-          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#6A645B]">Pueblo La Perla Admin Operations</p><h2 className="text-2xl md:text-3xl font-light tracking-tight text-[#17130F]">Bookings & Payments</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">Primary view for the rows shown in your screenshot: booking ref, guest, stay, amounts, payment status, verification status, and staff actions.</p></div><div className="flex flex-wrap gap-2"><div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div><button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
+          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl md:text-4xl font-light tracking-[-0.05em] text-[#17130F]">Reservations</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">Main working view for booking ref, guest, stay, amounts, payment status, verification status, and staff actions.</p></div><div className="flex flex-wrap gap-2"><div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div><button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
           {message && <div className="mb-4 bg-green-50 border border-green-100 text-green-700 rounded-sm px-4 py-3 text-sm">{message}</div>}
           {error && <div className="mb-4 bg-red-50 border border-red-100 text-red-700 rounded-sm px-4 py-3 text-sm">{error}</div>}
           {activeTab === 'bookings' && <BookingsTable rows={filteredRows} updateBooking={updateBooking} />}
@@ -146,11 +146,11 @@ function filterRows(rows, query) {
 }
 
 function LoginScreen({ accessKey, setAccessKey, onSubmit, loading, error }) {
-  return <div className="min-h-screen bg-[#17130F] flex items-center justify-center p-4"><form onSubmit={onSubmit} className="w-full max-w-md bg-[#FBFAF7] rounded-md p-8 shadow-2xl border-t-4 border-[#B8977E]"><div className="text-center mb-8"><h1 className="text-4xl text-[#17130F] tracking-[0.2em] font-light uppercase">PLP <span className="font-bold text-[#B8977E]">Ops</span></h1><p className="text-xs text-[#6A645B] mt-3 uppercase tracking-widest">Booking Reconciliation</p></div><label className="block text-[10px] font-bold text-[#6A645B] uppercase tracking-widest mb-2">PLP Access Key</label><div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input type="password" value={accessKey} onChange={(event) => setAccessKey(event.target.value)} required className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#B8977E]" placeholder="Enter access key" /></div>{error && <div className="mt-4 bg-red-50 border border-red-100 text-red-700 rounded-sm px-3 py-2 text-xs">{error}</div>}<button disabled={loading} className="mt-6 w-full bg-[#17130F] text-[#F4F0E8] py-3 rounded-sm font-medium disabled:opacity-60">{loading ? 'Loading database...' : 'Open Bookings & Payments'}</button><p className="text-center mt-6 text-[10px] text-[#6A645B] uppercase tracking-widest">Restricted System · Authorized Personnel Only</p></form></div>;
+  return <div className="min-h-screen bg-[#17130F] flex items-center justify-center p-4"><form onSubmit={onSubmit} className="w-full max-w-md bg-[#FBFAF7] rounded-md p-8 shadow-2xl border-t-4 border-[#B8977E]"><div className="text-center mb-8"><p className="text-[10px] text-[#B8977E] tracking-[0.32em] uppercase">Pueblo La Perla</p><h1 className="text-4xl text-[#17130F] tracking-[-0.05em] font-light">Resort Command</h1><p className="text-xs text-[#6A645B] mt-3 uppercase tracking-widest">Reservation Reconciliation</p></div><label className="block text-[10px] font-bold text-[#6A645B] uppercase tracking-widest mb-2">PLP Access Key</label><div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input type="password" value={accessKey} onChange={(event) => setAccessKey(event.target.value)} required className="w-full bg-white border border-[#E5E0D8] text-[#17130F] rounded-sm pl-10 pr-4 py-3 focus:outline-none focus:border-[#B8977E] text-sm" placeholder="Enter access key" /></div>{error && <div className="mt-4 bg-red-50 border border-red-100 text-red-700 rounded-sm px-3 py-2 text-xs">{error}</div>}<button disabled={loading} className="mt-6 w-full bg-[#17130F] text-[#F4F0E8] py-3 rounded-sm font-medium disabled:opacity-60">{loading ? 'Loading database...' : 'Open Resort Command'}</button><p className="text-center mt-6 text-[10px] text-[#6A645B] uppercase tracking-widest">Authorized personnel only</p></form></div>;
 }
 
 function Dashboard({ kpis }) {
-  return <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"><Metric icon={Database} label="Total bookings" value={kpis.bookings} help="All rows from payment reconciliation" /><Metric icon={CheckCircle2} label="Verified deposits" value={kpis.verified} help="payment_verification_status = VERIFIED" /><Metric icon={Clock} label="Need review" value={kpis.review} help="Not confirmed, fully paid, or cancelled" /><Metric icon={AlertCircle} label="Exceptions" value={kpis.exceptions} help="Payment mismatches / unmatched events" tone="danger" /><Metric icon={Bell} label="Notifications" value={kpis.notifications} help="Notification activity rows" /><Metric icon={TrendingUp} label="Verified deposit total" value={money(kpis.verifiedDepositTotal)} help="Sum of verified deposits" dark /></div>;
+  return <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"><Metric icon={Database} label="Reservation Rows" value={kpis.bookings} help="All rows from payment reconciliation" /><Metric icon={CheckCircle2} label="Verified Deposits" value={kpis.verified} help="payment_verification_status = VERIFIED" /><Metric icon={Clock} label="Need Review" value={kpis.review} help="Not confirmed, fully paid, or cancelled" /><Metric icon={AlertCircle} label="Payment Exceptions" value={kpis.exceptions} help="Payment mismatches / unmatched events" tone="danger" /><Metric icon={Bell} label="Notifications" value={kpis.notifications} help="Notification activity rows" /><Metric icon={TrendingUp} label="Verified Deposit Total" value={money(kpis.verifiedDepositTotal)} help="Sum of verified deposits" dark /></div>;
 }
 
 function Metric({ icon: Icon, label, value, help, tone, dark }) {
@@ -162,7 +162,7 @@ function BookingCard({ row, updateBooking }) {
 }
 
 function BookingsTable({ rows, updateBooking }) {
-  return <Panel title="Bookings & Payments" count={rows.length}><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">No bookings loaded from database.</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text="No bookings loaded from database." /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
+  return <Panel title="Reservations" count={rows.length}><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">No reservation rows loaded from database.</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text="No reservation rows loaded from database." /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
 }
 
 function ExceptionsTable({ rows }) {
