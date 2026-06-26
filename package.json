@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/optimize-plp-images.mjs && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "lucide-react": "latest"
   },
   "devDependencies": {
+    "sharp": "latest",
     "tailwindcss": "^3.4.17",
     "postcss": "latest",
     "autoprefixer": "latest"
