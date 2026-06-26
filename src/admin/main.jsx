@@ -1,15 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Clock } from 'lucide-react';
-import AdminApp from './AdminApp.jsx';
+import OpsAdminApp from './OpsAdminApp.jsx';
 import '../index.css';
-
-globalThis.Clock = Clock;
 
 document.documentElement.dataset.adminExperience = 'plp-resort-command-v3';
 
 createRoot(document.getElementById('admin-root')).render(
   <React.StrictMode>
-    <AdminApp />
+    <OpsAdminApp />
   </React.StrictMode>
 );
