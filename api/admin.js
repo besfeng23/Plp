@@ -53,15 +53,25 @@ async function handleHealth(req, res) {
 
 async function handleOperations(req, res) {
   if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
-  const rows = await listPaymentReconciliation(100);
-  const exceptions = await listPaymentExceptions(100);
-  return json(res, 200, { ok: true, rows, exceptions });
+  const rows = await listPaymentReconciliation(1000);
+  let exceptions = [];
+  let exceptionsWarning = null;
+  try {
+    exceptions = await listPaymentExceptions(1000);
+  } catch (error) {
+    exceptionsWarning = error.message;
+  }
+  return json(res, 200, { ok: true, rows: rows || [], exceptions: exceptions || [], warnings: { exceptions: exceptionsWarning } });
 }
 
 async function handleNotifications(req, res) {
   if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
-  const rows = await selectRows('plp_notification_activity', 'select=*&limit=100');
-  return json(res, 200, { ok: true, rows });
+  try {
+    const rows = await selectRows('plp_notification_activity', 'select=*&limit=1000');
+    return json(res, 200, { ok: true, rows: rows || [] });
+  } catch (error) {
+    return json(res, 200, { ok: true, rows: [], warning: error.message });
+  }
 }
 
 async function handleBookingStatus(req, res) {
@@ -104,8 +114,12 @@ async function handleBookingStatus(req, res) {
 async function handleDateBlocks(req, res) {
   if (!['GET', 'POST', 'PATCH'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' });
   if (req.method === 'GET') {
-    const [blockedDates, calendar] = await Promise.all([listBlockedDates(200), listAvailabilityCalendar(300)]);
-    return json(res, 200, { ok: true, blockedDates, calendar });
+    try {
+      const [blockedDates, calendar] = await Promise.all([listBlockedDates(200), listAvailabilityCalendar(300)]);
+      return json(res, 200, { ok: true, blockedDates: blockedDates || [], calendar: calendar || [] });
+    } catch (error) {
+      return json(res, 200, { ok: true, blockedDates: [], calendar: [], warning: error.message });
+    }
   }
   const body = parseBody(req);
   if (req.method === 'PATCH') {
@@ -124,8 +138,12 @@ async function handleDateBlocks(req, res) {
 
 async function handleContent(req, res) {
   if (req.method === 'GET') {
-    const rows = await selectRows('plp_site_content', 'select=id,section,status,content,updated_at,updated_by&order=section.asc');
-    return json(res, 200, { content: rows || [] });
+    try {
+      const rows = await selectRows('plp_site_content', 'select=id,section,status,content,updated_at,updated_by&order=section.asc');
+      return json(res, 200, { ok: true, content: rows || [] });
+    } catch (error) {
+      return json(res, 200, { ok: true, content: [], warning: error.message });
+    }
   }
   if (req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' });
 
