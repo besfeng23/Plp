@@ -29,6 +29,20 @@ Feedback from people testing the site showed that booking and navigation were st
 - Booking links can pass a room selection through the URL, such as `/booking?room=grandOceanVilla`.
 - Accommodation-page CTA links are rewritten during build to preselect the correct room.
 
+## Calendar-first booking redesign
+
+After reviewing a luxury hotel booking reference, `/booking` was redesigned around a calendar-first path:
+
+- The page opens directly on a large calendar.
+- Future dates display the selected room's nightly rate.
+- Guests select check-in and check-out by tapping calendar days.
+- Selected dates are highlighted as a range.
+- The user can clear dates without hunting for form fields.
+- Room and guest count sit directly under the calendar.
+- The stay summary sits immediately below room and guest selection.
+- Guest contact details come after dates and stay selection.
+- Existing booking, availability, analytics, and Xendit handoff logic remain in place.
+
 ## Build-time image optimization
 
 Because the chat GitHub connector cannot upload binary WebP files directly, the project converts the selected source PNG files during build with `scripts/optimize-plp-images.mjs`.
