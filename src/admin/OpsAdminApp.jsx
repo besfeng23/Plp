@@ -1,11 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, Bell, CheckCircle2, Clock, Database, LayoutDashboard, Lock, LogOut, RefreshCw, Search, TrendingUp } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users } from 'lucide-react';
 
 const TABS = [
-  { id: 'bookings', label: 'Reservations', icon: Database },
   { id: 'dashboard', label: 'Today', icon: LayoutDashboard },
+  { id: 'bookings', label: 'Reservations', icon: Database },
   { id: 'exceptions', label: 'Payments', icon: AlertCircle },
+  { id: 'availability', label: 'Availability', icon: Calendar },
+  { id: 'guests', label: 'Guests', icon: Users },
+  { id: 'housekeeping', label: 'Housekeeping', icon: CheckCircle2 },
+  { id: 'concierge', label: 'Concierge', icon: Bell },
+  { id: 'content', label: 'Content', icon: FileText },
   { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'staff', label: 'Staff & Roles', icon: Shield },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
@@ -114,6 +121,8 @@ export default function OpsAdminApp() {
 
   if (!isUnlocked) return <LoginScreen accessKey={accessKey} setAccessKey={setAccessKey} onSubmit={unlock} loading={loading} error={error} />;
 
+  const activeLabel = TABS.find((tab) => tab.id === activeTab)?.label || 'Reservations';
+
   return (
     <div className="min-h-screen bg-[#F7F2EA] text-[#211F1B]">
       <div className="bg-[#17130F] text-[#B8977E] px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase flex justify-between items-center border-b border-[#B8977E]/20">
@@ -122,17 +131,18 @@ export default function OpsAdminApp() {
       <div className="grid lg:grid-cols-[260px_1fr] min-h-[calc(100vh-30px)]">
         <aside className="bg-[#17130F] text-white p-6 flex flex-col">
           <div className="mb-8"><p className="text-[10px] text-[#B8977E] tracking-[0.32em] uppercase">Pueblo La Perla</p><h1 className="text-3xl tracking-[-0.05em] font-light">Resort Command</h1><p className="text-[10px] text-[#6A645B] mt-2 tracking-widest uppercase">Reservations first · live database</p></div>
-          <nav className="space-y-1 flex-1">{TABS.map((tab) => { const Icon = tab.icon; return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm text-sm transition ${activeTab === tab.id ? 'bg-[#B8977E]/10 text-[#B8977E]' : 'text-[#6A645B] hover:text-[#F4F0E8] hover:bg-white/5'}`}><Icon size={17} /> {tab.label}</button>; })}</nav>
+          <nav className="space-y-1 flex-1 overflow-y-auto">{TABS.map((tab) => { const Icon = tab.icon; return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-sm text-sm transition ${activeTab === tab.id ? 'bg-[#B8977E]/10 text-[#B8977E]' : 'text-[#6A645B] hover:text-[#F4F0E8] hover:bg-white/5'}`}><Icon size={17} /> {tab.label}</button>; })}</nav>
           <button onClick={logout} className="border-t border-[#B8977E]/10 pt-4 w-full flex items-center justify-between text-[#6A645B] hover:text-[#B8977E] text-sm">Secure Logout <LogOut size={16} /></button>
         </aside>
         <main className="p-4 md:p-8 overflow-auto">
-          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl md:text-4xl font-light tracking-[-0.05em] text-[#17130F]">Reservations</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">Main working view for booking ref, guest, stay, amounts, payment status, verification status, and staff actions.</p></div><div className="flex flex-wrap gap-2"><div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div><button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
+          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl md:text-4xl font-light tracking-[-0.05em] text-[#17130F]">{activeLabel}</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">A quiet luxury command center for reservations, payments, villa readiness, guest memory, and Boracay service delivery.</p></div><div className="flex flex-wrap gap-2"><div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div><button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
           {message && <div className="mb-4 bg-green-50 border border-green-100 text-green-700 rounded-sm px-4 py-3 text-sm">{message}</div>}
           {error && <div className="mb-4 bg-red-50 border border-red-100 text-red-700 rounded-sm px-4 py-3 text-sm">{error}</div>}
           {activeTab === 'bookings' && <BookingsTable rows={filteredRows} updateBooking={updateBooking} />}
           {activeTab === 'dashboard' && <Dashboard kpis={kpis} />}
           {activeTab === 'exceptions' && <ExceptionsTable rows={filteredExceptions} />}
           {activeTab === 'notifications' && <NotificationsTable rows={filteredNotifications} />}
+          {['availability', 'guests', 'housekeeping', 'concierge', 'content', 'staff', 'settings'].includes(activeTab) && <Placeholder tab={activeLabel} rows={rows} />}
         </main>
       </div>
     </div>
@@ -173,6 +183,7 @@ function NotificationsTable({ rows }) {
   return <Panel title="Notification Activity" count={rows.length}><Table columns={['Reference', 'Recipient', 'Subject', 'Status', 'Sent', 'Error']}>{rows.length === 0 ? <Empty colSpan={6} text="No notification activity." /> : rows.map((row) => <tr key={row.id || `${row.booking_reference}-${row.notification_key}`} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.notification_key || ''}</span></td><td className="cell">{row.recipient_type || '—'}<br /><span className="muted">{row.recipient_email || 'No recipient'}</span></td><td className="cell">{row.subject || '—'}</td><td className="cell"><Pill value={row.status} /></td><td className="cell">{row.sent_at || row.created_at || '—'}</td><td className="cell">{row.error || '—'}</td></tr>)}</Table></Panel>;
 }
 
+function Placeholder({ tab, rows }) { return <Panel title={tab} count={rows.length}><div className="bg-[#F7F2EA] border border-dashed border-[#E5E0D8] rounded-xl p-8 text-center text-[#6A645B]"><p className="text-sm uppercase tracking-widest text-[#17130F]">{tab} module staged</p><p className="mt-2 text-sm">This section is now part of the Resort Command IA. It will be wired to dedicated tables/endpoints after Reservations, Payments, and Reservation 360 are stable.</p></div></Panel>; }
 function Panel({ title, count, children }) { return <section className="bg-white border border-[#E5E0D8] rounded-md shadow-sm overflow-hidden"><div className="p-5 border-b border-[#E5E0D8] bg-[#FBFAF7] flex items-center justify-between"><h3 className="text-sm tracking-widest uppercase font-semibold text-[#17130F]">{title}</h3>{count !== undefined && <span className="text-xs text-[#6A645B]">{count} rows</span>}</div><div className="p-4 md:p-5">{children}</div></section>; }
 function Table({ columns, children }) { return <div className="overflow-x-auto border border-[#E5E0D8] rounded-sm"><table className="w-full text-left border-collapse min-w-[1080px]"><thead><tr className="bg-[#F4F0E8]/60">{columns.map((column) => <th key={column} className="py-4 px-6 text-[10px] font-semibold tracking-widest text-[#6A645B] uppercase">{column}</th>)}</tr></thead><tbody className="text-sm divide-y divide-[#E5E0D8]">{children}</tbody></table></div>; }
 function Empty({ colSpan, text }) { return <tr><td colSpan={colSpan} className="py-10 px-6 text-center text-[#6A645B]">{text}</td></tr>; }
