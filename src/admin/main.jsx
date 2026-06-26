@@ -6,6 +6,8 @@ import '../index.css';
 
 globalThis.Clock = Clock;
 
+document.documentElement.dataset.adminExperience = 'plp-resort-command-v3';
+
 createRoot(document.getElementById('admin-root')).render(
   <React.StrictMode>
     <AdminApp />
