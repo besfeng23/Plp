@@ -1,12 +1,23 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /admin-ops.html
+Disallow: /availability-ops.html
+Disallow: /content-ops.html
 
 User-agent: Bingbot
 Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /admin-ops.html
+Disallow: /availability-ops.html
+Disallow: /content-ops.html
 
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 Disallow: /admin-ops.html
 Disallow: /availability-ops.html
 Disallow: /content-ops.html

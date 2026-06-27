@@ -33,7 +33,7 @@ Set these in Vercel before accepting real payments:
 NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
 XENDIT_SECRET_KEY=
 XENDIT_WEBHOOK_TOKEN=
-SUPABASE_URL=https://sxxpyyyaiylucgsylbhx.supabase.co
+SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
@@ -88,3 +88,33 @@ The app includes:
 - Hidden admin Resort OS mock
 
 The dev-only Admin OS shortcut appears only when running on localhost or 127.0.0.1.
+## Production verification
+
+Before deploying or promoting a PLP release:
+
+```bash
+npm run build
+npm run check:routes
+```
+
+Manual `/booking` checklist:
+
+- Confirm the page describes a reservation request, not instant confirmation.
+- Confirm availability is reviewed by PLP before final confirmation.
+- Confirm the next payment step is the 30% deposit and the remaining balance is clear.
+- Confirm the guest sees that final confirmation follows resort review and payment verification.
+- Confirm the form payload still includes guest name, email, phone/WhatsApp, accommodation, dates, guest count, and notes.
+
+Manual `/admin` checklist:
+
+- Open Resort Command only with the staff access key; never commit or share the key in docs.
+- Confirm Reservations search/filter/sort/count still works.
+- Confirm guest contact details, stay details, request notes, booking reference, totals, deposit, balance, and verification status are visible.
+- Confirm staff labels separate pending request, awaiting deposit, payment processing, deposit verified, confirmed, cancelled, and review-needed states.
+
+Payment verification reminders:
+
+- Xendit success redirects are not proof of payment.
+- The Xendit webhook verification result is the payment source of truth.
+- Staff should only issue final confirmation after PLP availability review and verified payment reconciliation.
+

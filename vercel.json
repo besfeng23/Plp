@@ -3,43 +3,139 @@
     {
       "source": "/images/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/videos/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/", "destination": "/admin.html" },
-    { "source": "/booking", "destination": "/booking.html" },
-    { "source": "/booking/", "destination": "/booking.html" },
-    { "source": "/accommodation", "destination": "/accommodation.html" },
-    { "source": "/accommodation/", "destination": "/accommodation.html" },
-    { "source": "/accommodations", "destination": "/accommodation.html" },
-    { "source": "/accommodations/", "destination": "/accommodation.html" },
-    { "source": "/experiences", "destination": "/experiences.html" },
-    { "source": "/experiences/", "destination": "/experiences.html" },
-    { "source": "/private-villas-boracay", "destination": "/private-villas-boracay/index.html" },
-    { "source": "/private-villas-boracay/", "destination": "/private-villas-boracay/index.html" },
-    { "source": "/boracay-villa-with-private-pool", "destination": "/boracay-villa-with-private-pool/index.html" },
-    { "source": "/boracay-villa-with-private-pool/", "destination": "/boracay-villa-with-private-pool/index.html" },
-    { "source": "/boracay-family-villa", "destination": "/boracay-family-villa/index.html" },
-    { "source": "/boracay-family-villa/", "destination": "/boracay-family-villa/index.html" },
-    { "source": "/boracay-wellness-stay", "destination": "/boracay-wellness-stay/index.html" },
-    { "source": "/boracay-wellness-stay/", "destination": "/boracay-wellness-stay/index.html" },
-    { "source": "/high-boracay-location", "destination": "/high-boracay-location/index.html" },
-    { "source": "/high-boracay-location/", "destination": "/high-boracay-location/index.html" },
-    { "source": "/((?!api/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)", "destination": "/index.html" }
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/booking",
+      "destination": "/booking.html"
+    },
+    {
+      "source": "/booking/",
+      "destination": "/booking.html"
+    },
+    {
+      "source": "/accommodation",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodation/",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodations",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/accommodations/",
+      "destination": "/accommodation.html"
+    },
+    {
+      "source": "/experiences",
+      "destination": "/experiences.html"
+    },
+    {
+      "source": "/experiences/",
+      "destination": "/experiences.html"
+    },
+    {
+      "source": "/reservation-policy",
+      "destination": "/reservation-policy.html"
+    },
+    {
+      "source": "/reservation-policy/",
+      "destination": "/reservation-policy.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/privacy/",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    },
+    {
+      "source": "/terms/",
+      "destination": "/terms.html"
+    },
+    {
+      "source": "/private-villas-boracay",
+      "destination": "/private-villas-boracay/index.html"
+    },
+    {
+      "source": "/private-villas-boracay/",
+      "destination": "/private-villas-boracay/index.html"
+    },
+    {
+      "source": "/boracay-villa-with-private-pool",
+      "destination": "/boracay-villa-with-private-pool/index.html"
+    },
+    {
+      "source": "/boracay-villa-with-private-pool/",
+      "destination": "/boracay-villa-with-private-pool/index.html"
+    },
+    {
+      "source": "/boracay-family-villa",
+      "destination": "/boracay-family-villa/index.html"
+    },
+    {
+      "source": "/boracay-family-villa/",
+      "destination": "/boracay-family-villa/index.html"
+    },
+    {
+      "source": "/boracay-wellness-stay",
+      "destination": "/boracay-wellness-stay/index.html"
+    },
+    {
+      "source": "/boracay-wellness-stay/",
+      "destination": "/boracay-wellness-stay/index.html"
+    },
+    {
+      "source": "/high-boracay-location",
+      "destination": "/high-boracay-location/index.html"
+    },
+    {
+      "source": "/high-boracay-location/",
+      "destination": "/high-boracay-location/index.html"
+    },
+    {
+      "source": "/((?!api/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
+      "destination": "/index.html"
+    }
   ]
 }
