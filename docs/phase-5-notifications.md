@@ -16,7 +16,7 @@ Existing required variables from earlier phases still apply:
 NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
 XENDIT_SECRET_KEY=
 XENDIT_WEBHOOK_TOKEN=
-SUPABASE_URL=https://sxxpyyyaiylucgsylbhx.supabase.co
+SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 PLP_STAFF_CODE=
 ```
