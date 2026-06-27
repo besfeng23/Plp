@@ -7,12 +7,21 @@
     <meta name="theme-color" content="#17130F" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>PLP Resort Command</title>
-    <script>
-      window.location.replace('/admin-ops.html');
-    </script>
   </head>
   <body>
     <p>Opening PLP Resort Command...</p>
-    <p><a href="/admin-ops.html">Continue to Resort Command</a></p>
+    <script>
+      fetch('/admin-ops.html')
+        .then((response) => response.text())
+        .then((html) => {
+          const enhanced = html.replace('</body>', '<script src="/reservation-360.js"><\\/script></body>');
+          document.open();
+          document.write(enhanced);
+          document.close();
+        })
+        .catch(() => {
+          window.location.href = '/admin-ops.html';
+        });
+    </script>
   </body>
 </html>
