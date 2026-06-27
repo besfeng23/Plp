@@ -16,6 +16,10 @@ const TABS = [
 ];
 
 const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+const RESERVATION_STATUS_OPTIONS = ['All', 'Pending', 'Confirmed', 'Checked In', 'Checked Out', 'Cancelled'];
+const STAY_FILTER_OPTIONS = ['All', 'Upcoming', 'In-house', 'Past'];
+const SORT_OPTIONS = ['Newest booking first', 'Check-in soonest', 'Guest name A-Z', 'Status A-Z'];
+
 const isReviewBooking = (row) => !['CONFIRMED', 'FULLY_PAID', 'CANCELLED'].includes(String(row.booking_status || row.status || '').toUpperCase());
 
 function statusClass(value) {
@@ -48,12 +52,16 @@ export default function OpsAdminApp() {
   const [exceptions, setExceptions] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [query, setQuery] = useState('');
+  const [reservationSearch, setReservationSearch] = useState('');
+  const [reservationStatus, setReservationStatus] = useState('All');
+  const [stayFilter, setStayFilter] = useState('All');
+  const [reservationSort, setReservationSort] = useState('Newest booking first');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [lastSync, setLastSync] = useState(null);
 
-  const filteredRows = useMemo(() => filterRows(rows, query), [rows, query]);
+  const filteredRows = useMemo(() => filterReservations(rows, { search: reservationSearch, status: reservationStatus, stay: stayFilter, sort: reservationSort }), [rows, reservationSearch, reservationStatus, stayFilter, reservationSort]);
   const filteredExceptions = useMemo(() => filterRows(exceptions, query), [exceptions, query]);
   const filteredNotifications = useMemo(() => filterRows(notifications, query), [notifications, query]);
   const kpis = useMemo(() => ({
@@ -138,10 +146,10 @@ export default function OpsAdminApp() {
           <button onClick={logout} className="border-t border-[#B8977E]/10 pt-4 w-full flex items-center justify-between text-[#6A645B] hover:text-[#B8977E] text-sm">Secure Logout <LogOut size={16} /></button>
         </aside>
         <main className="p-4 md:p-8 overflow-auto">
-          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl md:text-4xl font-light tracking-[-0.05em] text-[#17130F]">{activeLabel}</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">A quiet luxury command center for reservations, payments, villa readiness, guest memory, and Boracay service delivery.</p></div><div className="flex flex-wrap gap-2"><div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div><button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
+          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6"><div><p className="text-[10px] tracking-widest uppercase text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl md:text-4xl font-light tracking-[-0.05em] text-[#17130F]">{activeLabel}</h2><p className="text-sm text-[#6A645B] mt-2 max-w-3xl">A quiet luxury command center for reservations, payments, villa readiness, guest memory, and Boracay service delivery.</p></div><div className="flex flex-wrap gap-2">{activeTab !== 'bookings' && (<div className="relative w-full md:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full bg-white border border-[#E5E0D8] rounded-sm pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#B8977E]" /></div>)}<button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex items-center gap-2 bg-[#17130F] text-[#F4F0E8] px-4 py-2.5 rounded-sm text-sm font-medium disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div></header>
           {message && <div className="mb-4 bg-green-50 border border-green-100 text-green-700 rounded-sm px-4 py-3 text-sm">{message}</div>}
           {error && <div className="mb-4 bg-red-50 border border-red-100 text-red-700 rounded-sm px-4 py-3 text-sm">{error}</div>}
-          {activeTab === 'bookings' && <BookingsTable rows={filteredRows} updateBooking={updateBooking} />}
+          {activeTab === 'bookings' && <BookingsTable rows={filteredRows} totalRows={rows.length} controls={{ reservationSearch, setReservationSearch, reservationStatus, setReservationStatus, stayFilter, setStayFilter, reservationSort, setReservationSort }} updateBooking={updateBooking} />}
           {activeTab === 'dashboard' && <Dashboard kpis={kpis} />}
           {activeTab === 'exceptions' && <ExceptionsTable rows={filteredExceptions} />}
           {activeTab === 'notifications' && <NotificationsTable rows={filteredNotifications} />}
@@ -150,6 +158,69 @@ export default function OpsAdminApp() {
       </div>
     </div>
   );
+}
+
+
+function rowValue(row, fields) {
+  return fields.map((field) => row[field]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
+}
+
+function normalizeStatus(value) {
+  const text = String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
+  if (['CONFIRMED', 'FULLY_PAID'].includes(text)) return 'Confirmed';
+  if (['CHECKED_IN', 'IN_HOUSE', 'ARRIVED'].includes(text)) return 'Checked In';
+  if (['CHECKED_OUT', 'DEPARTED', 'COMPLETED'].includes(text)) return 'Checked Out';
+  if (['CANCELLED', 'CANCELED'].includes(text)) return 'Cancelled';
+  return 'Pending';
+}
+
+function dateOnly(value) {
+  if (!value) return null;
+  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function stayBucket(row) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkIn = dateOnly(rowValue(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']));
+  const checkOut = dateOnly(rowValue(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']));
+  if (checkIn && checkIn > today) return 'Upcoming';
+  if (checkIn && checkOut && checkIn <= today && today <= checkOut) return 'In-house';
+  if (checkOut && checkOut < today) return 'Past';
+  return 'All';
+}
+
+function reservationSearchText(row) {
+  return [
+    rowValue(row, ['guest_name', 'name', 'full_name', 'guestName']),
+    rowValue(row, ['guest_email', 'email', 'guestEmail']),
+    rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']),
+    rowValue(row, ['booking_reference', 'reference', 'booking_code', 'code']),
+    rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']),
+    rowValue(row, ['notes', 'special_requests', 'message', 'guest_notes', 'arrival_notes']),
+  ].join(' ').toLowerCase();
+}
+
+function bookingTimestamp(row) {
+  const value = rowValue(row, ['created_at', 'booking_created_at', 'booking_date', 'createdAt', 'updated_at']);
+  const time = value ? new Date(value).getTime() : NaN;
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function filterReservations(rows, controls) {
+  const needle = controls.search.trim().toLowerCase();
+  return rows
+    .filter((row) => !needle || reservationSearchText(row).includes(needle))
+    .filter((row) => controls.status === 'All' || normalizeStatus(rowValue(row, ['booking_status', 'status'])) === controls.status)
+    .filter((row) => controls.stay === 'All' || stayBucket(row) === controls.stay)
+    .slice()
+    .sort((a, b) => {
+      if (controls.sort === 'Check-in soonest') return (dateOnly(rowValue(a, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER) - (dateOnly(rowValue(b, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER);
+      if (controls.sort === 'Guest name A-Z') return String(rowValue(a, ['guest_name', 'name', 'full_name', 'guestName'])).localeCompare(String(rowValue(b, ['guest_name', 'name', 'full_name', 'guestName'])));
+      if (controls.sort === 'Status A-Z') return normalizeStatus(rowValue(a, ['booking_status', 'status'])).localeCompare(normalizeStatus(rowValue(b, ['booking_status', 'status'])));
+      return bookingTimestamp(b) - bookingTimestamp(a);
+    });
 }
 
 function filterRows(rows, query) {
@@ -174,8 +245,28 @@ function BookingCard({ row, updateBooking }) {
   return <article className="bg-white border border-[#E5E0D8] rounded-md p-4 shadow-sm space-y-3"><div className="flex items-start justify-between gap-3"><div><p className="text-lg font-bold leading-tight text-[#17130F]">{row.booking_reference || '—'}</p><p className="text-xs uppercase tracking-widest text-[#6A645B]">{row.provider || 'XENDIT'}</p></div><Pill value={row.payment_verification_status || row.booking_status} /></div><div><p className="font-medium text-[#17130F]">{row.guest_name || '—'}</p><p className="text-xs text-[#6A645B] break-all">{row.guest_email || ''}</p></div><div className="grid grid-cols-2 gap-3 text-sm"><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Stay</p><p>{row.accommodation_name || '—'}</p><p className="text-[#6A645B]">{row.check_in || '—'} → {row.check_out || '—'}</p></div><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Amounts</p><p>Total: {money(row.total_amount_php)}</p><p>Deposit: {money(row.deposit_amount_php)}</p><p>Balance: {money(row.balance_amount_php)}</p></div></div><div className="grid grid-cols-2 gap-2 text-xs"><div><span className="text-[#6A645B]">Booking</span><br /><Pill value={row.booking_status} /></div><div><span className="text-[#6A645B]">Payment</span><br /><Pill value={row.payment_status || row.booking_payment_status} /></div></div><div className="flex flex-wrap gap-2 pt-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></article>;
 }
 
-function BookingsTable({ rows, updateBooking }) {
-  return <Panel title="Reservations" count={rows.length}><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">No reservation rows loaded from database.</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text="No reservation rows loaded from database." /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
+function BookingsTable({ rows, totalRows, controls, updateBooking }) {
+  return <Panel title="Reservations" count={rows.length}><ReservationControls rowsShown={rows.length} totalRows={totalRows} controls={controls} /><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">No reservation rows loaded from database.</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text="No reservation rows loaded from database." /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
+}
+
+
+function ReservationControls({ rowsShown, totalRows, controls }) {
+  return <div className="mb-5 rounded-md border border-[#D8CEC0] bg-[#FBFAF7] p-4 shadow-sm">
+    <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <div><p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#B8977E]">Reservation desk</p><h4 className="font-serif text-2xl font-light text-[#17130F]">Find and prepare each stay</h4></div>
+      <p className="text-sm text-[#6A645B]">Showing <span className="font-semibold text-[#17130F]">{rowsShown}</span> of <span className="font-semibold text-[#17130F]">{totalRows}</span> reservations</p>
+    </div>
+    <div className="grid gap-3 lg:grid-cols-[minmax(220px,1.4fr)_repeat(3,minmax(160px,0.8fr))]">
+      <label className="block"><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#6A645B]">Search reservations</span><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B7A63]" size={16} /><input value={controls.reservationSearch} onChange={(event) => controls.setReservationSearch(event.target.value)} placeholder="Guest, email, phone, ref, villa, notes..." className="w-full rounded-sm border border-[#E5E0D8] bg-white py-2.5 pl-9 pr-3 text-sm text-[#17130F] placeholder:text-[#9B9287] focus:border-[#B8977E] focus:outline-none" /></div></label>
+      <SelectControl label="Status" value={controls.reservationStatus} onChange={controls.setReservationStatus} options={RESERVATION_STATUS_OPTIONS} />
+      <SelectControl label="Stay" value={controls.stayFilter} onChange={controls.setStayFilter} options={STAY_FILTER_OPTIONS} />
+      <SelectControl label="Sort" value={controls.reservationSort} onChange={controls.setReservationSort} options={SORT_OPTIONS} />
+    </div>
+  </div>;
+}
+
+function SelectControl({ label, value, onChange, options }) {
+  return <label className="block"><span className="mb-1.5 block text-[10px] font-bold uppercase tracking-widest text-[#6A645B]">{label}</span><select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-sm border border-[#E5E0D8] bg-white px-3 py-2.5 text-sm text-[#17130F] focus:border-[#B8977E] focus:outline-none">{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
 }
 
 function ExceptionsTable({ rows }) {
