@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "node scripts/optimize-plp-images.mjs && node scripts/prepare-plp-static-pages.mjs && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:routes": "node scripts/audit-plp-routes.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "latest",

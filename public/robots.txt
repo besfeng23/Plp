@@ -7,6 +7,7 @@ Allow: /
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 Disallow: /admin-ops.html
 Disallow: /availability-ops.html
 Disallow: /content-ops.html
