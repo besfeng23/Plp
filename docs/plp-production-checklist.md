@@ -9,6 +9,15 @@ Use this checklist after a deployment or before promoting a release. Do not past
 - Confirm `/robots.txt` disallows `/api/` and private ops surfaces.
 - Confirm `/sitemap.xml` lists guest-facing pages and does not list admin/private ops pages.
 
+
+## Mobile visual QA
+
+- Check the homepage on iPhone Safari and confirm no skip-link black strip appears above the logo.
+- Confirm the mobile menu opens, closes, and routes links correctly.
+- Confirm the Reserve CTA reaches `/booking`.
+- Confirm the bottom action bar does not cover important content.
+- Confirm the booking form remains usable on mobile.
+
 ## Booking request test
 
 - Select accommodation, check-in, and check-out dates.
