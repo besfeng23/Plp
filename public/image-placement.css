@@ -36,7 +36,7 @@
 }
 
 /* Homepage hero: target the real React background layer, not only a pseudo element. */
-section.h-screen.bg-stone-900::before {
+section.bg-stone-900::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -46,13 +46,13 @@ section.h-screen.bg-stone-900::before {
     var(--plp-hero-sunset) center / cover no-repeat !important;
 }
 
-section.h-screen.bg-stone-900 > div.absolute.inset-0.bg-\[\#050505\] {
+section.bg-stone-900 > div.absolute.inset-0.bg-\[\#050505\] {
   background:
     linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.74)),
     var(--plp-hero-sunset) center / cover no-repeat !important;
 }
 
-section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center {
+section.bg-stone-900 > div.absolute.inset-0.flex.items-center {
   display: none !important;
 }
 
