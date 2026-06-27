@@ -74,10 +74,10 @@ export default function OpsAdminApp() {
   }), [rows, exceptions, notifications]);
 
   async function loadData(nextKey = accessKey) {
-    if (!nextKey) return setError('Enter the PLP access key to load live resort data.');
+    if (!nextKey) return setError('Enter the PLP staff access key to open live reservation records.');
     setLoading(true);
     setError('');
-    setMessage('Loading reservation and payment reconciliation rows from database...');
+    setMessage('Loading live reservations and payment checks for the reservation desk...');
     try {
       const operations = await adminFetch('operations', nextKey);
       setRows(operations.rows || []);
@@ -88,13 +88,13 @@ export default function OpsAdminApp() {
       try {
         const notificationData = await adminFetch('notifications', nextKey);
         setNotifications(notificationData.rows || []);
-        setMessage(`Reservations loaded from the database. Notifications loaded too.`);
+        setMessage(`Live reservations and payment checks are ready. Notifications are ready too.`);
       } catch {
         setNotifications([]);
-        setMessage(`Reservations loaded from the database. Notifications can be retried later.`);
+        setMessage(`Live reservations and payment checks are ready. Notifications can be retried later.`);
       }
     } catch (err) {
-      setError(err.message || 'Unable to load reservation data.');
+      setError(err.message || 'Unable to load live reservation records. Please check the staff access key and try again.');
       setMessage('');
     } finally {
       setLoading(false);
@@ -246,7 +246,9 @@ function BookingCard({ row, updateBooking }) {
 }
 
 function BookingsTable({ rows, totalRows, controls, updateBooking }) {
-  return <Panel title="Reservations" count={rows.length}><ReservationControls rowsShown={rows.length} totalRows={totalRows} controls={controls} /><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">No reservation rows loaded from database.</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text="No reservation rows loaded from database." /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
+  const emptyMessage = totalRows === 0 ? 'No reservations loaded yet.' : 'No reservations match the current search or filters.';
+
+  return <Panel title="Reservations" count={rows.length}><ReservationControls rowsShown={rows.length} totalRows={totalRows} controls={controls} /><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="text-center text-[#6A645B] py-8">{emptyMessage}</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={8} text={emptyMessage} /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || ''}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
 }
 
 
