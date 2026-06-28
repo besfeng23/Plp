@@ -54,6 +54,7 @@
 
   function trackView() {
     track('view_page', { title: document.title });
+    if (window.location.pathname === '/booking') track('view_booking', { title: document.title });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', trackView);
@@ -68,5 +69,20 @@
     if (search.indexOf('reserve') >= 0 || search.indexOf('/booking') >= 0) track('click_reserve', { label: label, href: href });
     if (search.indexOf('mailto:') >= 0 || search.indexOf('email') >= 0) track('click_email', { label: label, href: href });
     if (search.indexOf('concierge') >= 0) track('click_concierge', { label: label, href: href });
+    if (window.location.pathname === '/booking' && search.indexOf('continue') >= 0) track('start_booking', { label: label });
+  });
+
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!form || form.id !== 'bookingForm') return;
+    var accommodation = document.getElementById('roomSelect');
+    var checkIn = document.getElementById('checkIn');
+    var checkOut = document.getElementById('checkOut');
+    var guests = document.getElementById('guests');
+    track('submit_booking', {
+      accommodation: accommodation && accommodation.value,
+      hasDates: Boolean(checkIn && checkIn.value && checkOut && checkOut.value),
+      guests: guests ? Number(guests.value || 0) : null
+    });
   });
 })();

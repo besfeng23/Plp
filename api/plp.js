@@ -55,8 +55,8 @@ const DEFAULT_CONTENT = {
 };
 
 const ALLOWED_EVENTS = new Set([
-  'view_page', 'click_reserve', 'click_email', 'click_concierge', 'view_booking',
-  'select_room', 'select_dates', 'check_availability', 'availability_result',
+  'view_page', 'click_reserve', 'click_email', 'click_concierge', 'view_booking', 'view_booking_calendar',
+  'select_room', 'select_dates', 'select_calendar_date', 'check_availability', 'availability_result',
   'start_booking', 'submit_booking', 'booking_created', 'start_checkout', 'checkout_error',
   'payment_return_success', 'payment_return_cancel', 'view_accommodation', 'view_experiences', 'view_seo_page'
 ]);
