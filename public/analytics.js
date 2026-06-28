@@ -1,4 +1,12 @@
 (function () {
+  var viewport = document.querySelector('meta[name="viewport"]');
+  if (viewport) {
+    var viewportContent = viewport.getAttribute('content') || '';
+    if (viewportContent.indexOf('viewport-fit=cover') === -1) {
+      viewport.setAttribute('content', viewportContent + (viewportContent ? ', ' : '') + 'viewport-fit=cover');
+    }
+  }
+
   var key = 'plp_session_id';
 
   function sessionId() {
