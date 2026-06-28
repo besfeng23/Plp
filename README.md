@@ -97,6 +97,15 @@ npm run build
 npm run check:routes
 ```
 
+
+Mobile visual QA:
+
+- Check the homepage on iPhone Safari and confirm no skip-link black strip appears above the logo.
+- Confirm the mobile menu opens, closes, and routes links correctly.
+- Confirm the Reserve CTA reaches `/booking`.
+- Confirm the bottom action bar does not cover important content.
+- Confirm the booking form remains usable on mobile.
+
 Manual `/booking` checklist:
 
 - Confirm the page describes a reservation request, not instant confirmation.
