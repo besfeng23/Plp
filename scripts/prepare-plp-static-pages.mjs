@@ -23,6 +23,14 @@ function ensureStylesheet(html) {
   return html.replace('</head>', '  <link rel="stylesheet" href="/image-placement.css" data-plp-image-placement="true" />\n</head>');
 }
 
+function ensureViewportFit(html) {
+  return html.replace(/<meta\s+name=["']viewport["']\s+content=["']([^"']*)["']\s*\/?>/i, (tag, content) => {
+    if (content.includes('viewport-fit=cover')) return tag;
+    const separator = content.trim() ? ', ' : '';
+    return tag.replace(content, `${content}${separator}viewport-fit=cover`);
+  });
+}
+
 function ensureTopReserve(html) {
   if (html.includes('class="plp-nav-reserve"')) return html;
   if (!html.includes('class="nav"')) return html;
@@ -58,6 +66,7 @@ async function main() {
     const filePath = path.join(publicDir, page.name);
     const original = await fs.readFile(filePath, 'utf8');
     let html = original;
+    html = ensureViewportFit(html);
     html = ensureStylesheet(html);
     html = ensureTopReserve(html);
     html = ensureTrustStrip(html, page.name);
