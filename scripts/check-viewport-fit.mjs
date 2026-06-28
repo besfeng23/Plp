@@ -10,13 +10,17 @@ const routeHtmlFiles = [
   { route: '/accommodation', file: 'public/accommodation.html' },
   { route: '/experiences', file: 'public/experiences.html' },
   { route: '/reservation-policy', file: 'public/reservation-policy.html' },
+  { route: '/reservation-policy/', file: 'public/reservation-policy/index.html' },
   { route: '/privacy', file: 'public/privacy.html' },
+  { route: '/privacy/', file: 'public/privacy/index.html' },
   { route: '/terms', file: 'public/terms.html' },
+  { route: '/terms/', file: 'public/terms/index.html' },
   { route: '/private-villas-boracay', file: 'public/private-villas-boracay/index.html' },
   { route: '/boracay-villa-with-private-pool', file: 'public/boracay-villa-with-private-pool/index.html' },
   { route: '/boracay-family-villa', file: 'public/boracay-family-villa/index.html' },
   { route: '/boracay-wellness-stay', file: 'public/boracay-wellness-stay/index.html' },
   { route: '/high-boracay-location', file: 'public/high-boracay-location/index.html' },
+  { route: '/photo-library', file: 'public/photo-library.html' },
 ];
 
 const viewportMetaPattern = /<meta\s+name=["']viewport["']\s+content=["']([^"']*)["']\s*\/?>/gi;
