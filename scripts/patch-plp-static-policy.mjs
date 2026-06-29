@@ -31,7 +31,7 @@ async function patchFile(fileName) {
     .replace(/href="\/terms"/g, 'href="/terms-of-service"')
     .replace(/href="\/terms\/"/g, 'href="/terms-of-service"')
     .replace(/The 30% deposit step is not configured yet\./g, 'The payment step is not configured yet.')
-    .replace(/but the 30% deposit step could not start:/g, 'but the payment step could not start:');
+    .replace(/but the 30% deposit step could not start:[^`']*/g, 'The online deposit step is temporarily unavailable. Our concierge will contact you to complete the deposit.');
 
   if (fileName === 'booking.html') {
     html = html.replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${bookingDescription}" />`);
