@@ -35,8 +35,10 @@
   --plp-dining-breakfast: url('/images/plp-private-breakfast-pool.webp');
 }
 
-/* Homepage hero: target the real React background layer, not only a pseudo element. */
-section.h-screen.bg-stone-900::before {
+/* Homepage hero: bound to semantic data hooks in the React markup, not to
+   utility classes that can change (the hero previously used .h-screen and the
+   binding broke when it became min-h-[100svh]). */
+[data-plp-hero]::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -46,17 +48,19 @@ section.h-screen.bg-stone-900::before {
     var(--plp-hero-sunset) center / cover no-repeat !important;
 }
 
-section.h-screen.bg-stone-900 > div.absolute.inset-0.bg-\[\#050505\] {
+[data-plp-hero-bg] {
   background:
     linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.74)),
     var(--plp-hero-sunset) center / cover no-repeat !important;
 }
 
-section.h-screen.bg-stone-900 > div.absolute.inset-0.flex.items-center {
+[data-plp-hero-placeholder] {
   display: none !important;
 }
 
-.bg-stone-200 {
+/* Shared ImageBlock placeholder fallback (semantic hook, not the raw
+   .bg-stone-200 utility). Only shows when no <img> is supplied. */
+[data-plp-image-fallback] {
   background:
     linear-gradient(180deg, rgba(5,5,5,.08), rgba(5,5,5,.38)),
     var(--plp-villa-primary) center / cover no-repeat !important;
