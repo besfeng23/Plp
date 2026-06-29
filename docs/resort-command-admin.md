@@ -77,9 +77,49 @@ Today Command is designed to be mobile-safe at narrow widths. KPI cards stack, T
 
 The Reservation 360 drawer uses a full-width mobile sheet, sticky header, large close action, horizontal tabs, wrapping long values, and a scrollable raw record block.
 
+## Admin Phase 1C confirmation workflow
+
+Admin Phase 1C adds a review-first workflow between payment review and final reservation confirmation. The served `/admin` shell loads `admin-confirmation-workflow.js` after the existing admin and Reservation 360 scripts. The workflow is derived from loaded operations rows only and does not alter server payment verification.
+
+### Workflow states
+
+The workflow displays these row groups:
+
+- **Awaiting payment**: no verified deposit yet and no reliable provider/capture state indicating completion.
+- **Payment processing**: a provider/session/capture identifier exists or payment/booking status indicates processing, but verification is not final.
+- **Payment verified / availability review**: payment verification is `VERIFIED`, but staff still needs to review availability, guest details, dates, requests, and operational readiness.
+- **Confirmation ready**: payment is verified and row status suggests readiness/reviewed state. Staff still performs final review.
+- **Confirmed reservations**: final/confirmed operational rows such as `CONFIRMED`, `FULLY_PAID`, `CHECKED_IN`, or `CHECKED_OUT`.
+- **Payment exceptions**: mismatch, unmatched, missing order/session, missing order id, database-unconfigured, failed, or other verification-error records.
+
+### What staff can trust
+
+Staff can trust `VERIFIED` only as a payment-verification signal from the server-side payment flow. It means the payment row and provider/capture details matched the expected reference, stored provider session, amount, and currency.
+
+Staff must not treat the PayPal return page, a provider redirect, a visible provider id, or a pending/processing row as final proof of payment.
+
+### What staff must manually review
+
+Even with `VERIFIED` payment, staff must still review:
+
+- Availability for the requested dates.
+- Guest identity/contact details.
+- Accommodation fit and guest count.
+- Special requests and transfer/arrival notes.
+- Remaining balance and payment terms.
+- Any operational constraints or manual exceptions.
+
+### What is not persisted
+
+The Phase 1C workflow is UI-only. It does not save confirmation state, internal notes, task assignments, concierge tasks, cancellation actions, or availability-reviewed flags. If a backend status endpoint is not available, the UI must not show fake “saved,” “confirmed,” or “assigned” actions.
+
+### Confirmation rule
+
+A booking cannot be treated as ready for final confirmation unless payment verification is `VERIFIED` and there are no payment exceptions. Even then, final confirmation is a staff decision after availability review.
+
 ## Remaining Admin Phase 1 backlog
 
-1. Payment Review clarity
+1. Persisted confirmation/status action endpoints
 2. Guest Profile summaries
 3. Concierge queue
 4. Availability board
