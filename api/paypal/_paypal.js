@@ -1,3 +1,34 @@
+export class SafePayPalError extends Error {
+  constructor(code, message, status = 500) {
+    super(message);
+    this.name = 'SafePayPalError';
+    this.code = code;
+    this.status = status;
+  }
+}
+
+export function getBaseUrlSource(req) {
+  if (process.env.NEXT_PUBLIC_BASE_URL) return 'NEXT_PUBLIC_BASE_URL';
+  if (process.env.SITE_URL) return 'SITE_URL';
+  if (process.env.PUBLIC_SITE_URL) return 'PUBLIC_SITE_URL';
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return 'VERCEL_PROJECT_PRODUCTION_URL';
+  if (process.env.VERCEL_URL) return 'VERCEL_URL';
+  if (req?.headers?.['x-forwarded-host'] || req?.headers?.host) return 'request_host';
+  return 'fallback';
+}
+
+export function getPayPalHealthConfig(req) {
+  return {
+    ok: Boolean(process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET && (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    mode: getPayPalMode(),
+    hasClientId: Boolean(process.env.PAYPAL_CLIENT_ID),
+    hasClientSecret: Boolean(process.env.PAYPAL_CLIENT_SECRET),
+    hasSupabaseUrl: Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL),
+    hasSupabaseServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    baseUrlSource: getBaseUrlSource(req),
+  };
+}
+
 const PAYPAL_API_BASE = {
   sandbox: 'https://api-m.sandbox.paypal.com',
   live: 'https://api-m.paypal.com',
@@ -28,7 +59,7 @@ function getPayPalCredentials() {
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error('PayPal is not configured. Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Vercel environment variables.');
+    throw new SafePayPalError('PAYPAL_NOT_CONFIGURED', 'PayPal checkout is not configured.', 503);
   }
 
   return { clientId, clientSecret };
@@ -49,7 +80,7 @@ export async function getPayPalAccessToken() {
 
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.access_token) {
-    throw new Error(data?.error_description || data?.error || `PayPal OAuth failed with status ${response.status}`);
+    throw new SafePayPalError('PAYPAL_NOT_CONFIGURED', `PayPal OAuth failed with status ${response.status}.`, 503);
   }
 
   return data.access_token;
@@ -67,7 +98,7 @@ export function getBookingReference(booking) {
 export function getDepositAmount(booking) {
   const amount = Number(booking?.deposit || booking?.paymentDue || booking?.deposit_amount_php || 0);
   if (!Number.isFinite(amount) || amount < 1) {
-    throw new Error('Missing or invalid PayPal deposit amount. Create the booking first so the 30% deposit is calculated server-side.');
+    throw new SafePayPalError('PAYPAL_ORDER_CREATE_FAILED', 'Missing or invalid PayPal deposit amount.', 400);
   }
 
   return amount.toFixed(2);
@@ -139,11 +170,11 @@ export async function createPayPalOrder({ booking, req }) {
 
   const data = await response.json().catch(() => null);
   if (!response.ok || !data?.id) {
-    throw new Error(data?.message || data?.details?.[0]?.description || `PayPal order creation failed with status ${response.status}`);
+    throw new SafePayPalError('PAYPAL_ORDER_CREATE_FAILED', `PayPal order creation failed with status ${response.status}.`, 502);
   }
 
   const approveUrl = data.links?.find((link) => link.rel === 'payer-action' || link.rel === 'approve')?.href;
-  if (!approveUrl) throw new Error('PayPal did not return an approval URL for this checkout order.');
+  if (!approveUrl) throw new SafePayPalError('PAYPAL_ORDER_CREATE_FAILED', 'PayPal did not return an approval URL for this checkout order.', 502);
 
   return {
     id: data.id,

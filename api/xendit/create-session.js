@@ -1,5 +1,5 @@
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
-import { createPayPalOrder } from '../paypal/_paypal.js';
+import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -27,30 +27,55 @@ export default async function handler(req, res) {
       currency: order.currency,
     };
 
-    const { databasePayment, databaseWarning } = await createPayPalPaymentRecord({
-      bookingReference: order.reference,
-      session,
-      amount: Number(order.amount),
-      checkoutUrl: order.approveUrl,
-      rawResponse: order.raw,
-    });
+    let databasePayment = null;
+    let databaseWarning = null;
+    try {
+      ({ databasePayment, databaseWarning } = await createPayPalPaymentRecord({
+        bookingReference: order.reference,
+        session,
+        amount: Number(order.amount),
+        checkoutUrl: order.approveUrl,
+        rawResponse: order.raw,
+      }));
+    } catch (storeError) {
+      return res.status(503).json({
+        ok: false,
+        error: 'Unable to store PayPal checkout session',
+        code: 'PAYPAL_SESSION_STORE_FAILED',
+        detail: 'PayPal order was created but could not be stored in the payment table.',
+      });
+    }
 
     if (databaseWarning || !databasePayment) {
       return res.status(503).json({
         ok: false,
         error: 'Unable to store PayPal checkout session',
-        detail: databaseWarning || 'No payment row was created for this PayPal order.',
+        code: databaseWarning ? 'SUPABASE_NOT_CONFIGURED' : 'PAYPAL_SESSION_STORE_FAILED',
+        detail: databaseWarning ? 'Payment database is not configured.' : 'No payment row was created for this PayPal order.',
       });
     }
 
     return res.status(201).json({
       ok: true,
       ...session,
-      databasePayment,
+      databasePayment: {
+        id: databasePayment.id,
+        provider: databasePayment.provider,
+        provider_session_id: databasePayment.provider_session_id,
+        status: databasePayment.status,
+        verification_status: databasePayment.verification_status,
+      },
       databaseWarning: null,
       note: 'PayPal checkout order created. Redirect the guest to checkoutUrl to approve the 30% deposit.',
     });
   } catch (error) {
-    return res.status(500).json({ ok: false, error: 'Unable to create PayPal checkout session', detail: error.message });
+    const code = error instanceof SafePayPalError ? error.code : 'PAYPAL_ORDER_CREATE_FAILED';
+    const status = error instanceof SafePayPalError ? error.status : 500;
+    return res.status(status).json({
+      ok: false,
+      error: 'Unable to create PayPal checkout session',
+      code,
+      detail: error instanceof SafePayPalError ? error.message : 'PayPal checkout could not be started safely.',
+    });
   }
 }
