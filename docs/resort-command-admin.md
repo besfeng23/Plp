@@ -10,38 +10,81 @@ The admin entry path is:
 
 Because of this, admin changes must cover both the static admin flow and the React admin app.
 
+## Today Command purpose
+
+Today Command is the daily operations dashboard for PLP staff. It answers the same first-shift questions from existing reservation/payment rows only:
+
+- Who is arriving today?
+- Who is currently in-house?
+- Who is departing today?
+- Which bookings need payment review?
+- Which records need staff review?
+- What should staff look at next today?
+
+The served `/admin` experience and the React Resort Command dashboard both surface Today Command before deeper reservation tables so staff can triage the day without losing access to raw reservation records.
+
+## Today Command classification rules
+
+Today Command derives its lists in the browser from already-loaded operations rows:
+
+- **Arrivals today**: `check_in`, `checkIn`, `arrival_date`, or `arrivalDate` matches today's date.
+- **Departures today**: `check_out`, `checkOut`, `departure_date`, or `departureDate` matches today's date.
+- **In-house**: today's date is on or after check-in and before check-out.
+- **Upcoming 7 Days**: check-in is today through the next seven days, sorted by check-in date.
+- **Payment review**: payment verification is missing or one of the review/exception statuses, verification note/error fields exist, or booking/payment status suggests pending payment, awaiting deposit, or payment processing.
+- **Records needing review**: the row needs payment review, has missing core guest/stay fields, or has a non-final booking status that still needs staff attention.
+
+Date parsing is intentionally defensive. Missing or malformed dates do not throw; those records fall into review-oriented areas instead of breaking the dashboard.
+
+## Derived fields
+
+Today Command uses safe client-side helpers for:
+
+- `dateOnly(value)`
+- `isToday(value)`
+- `getCheckIn(row)`
+- `getCheckOut(row)`
+- `isInHouse(row)`
+- `isUpcomingWithin(row, days)`
+
+These helpers read existing row fields only. They do not create new schema requirements and do not change booking, payment, webhook, or provider semantics.
+
 ## Reservation 360 purpose
 
 Reservation 360 is a staff detail drawer for one booking. It helps staff review the guest, stay, payment state, notes, next action, and raw row data without leaving Resort Command.
 
+## Relationship to Reservation 360
+
+Every Today Command section includes a **View 360** action. Filtered Today lists keep the original row object or original row index so the drawer opens the exact matching reservation, not a filtered-list position. Staff can use Today Command for triage and Reservation 360 for detailed review, payment context, notes, and raw record fallback.
+
 ## Real data
 
-The drawer reads the existing reservation row. It uses current row fields for guest name, email, phone, guest count, accommodation, check-in, check-out, booking status, payment status, verification status, provider IDs, notes, and guest requests.
-
-## Derived data
-
-The UI derives nights, stay bucket, and next action from existing row values. These are advisory only and do not save anything.
+The drawer and Today Command read the existing reservation row. They use current row fields for guest name, email, phone, guest count, accommodation, check-in, check-out, booking status, payment status, verification status, provider IDs, notes, and guest requests.
 
 ## Not persisted yet
+
+Today Command guidance is UI-only. The staff guidance strip does not save tasks, assignments, internal notes, concierge work, housekeeping state, conflict decisions, guest memory, or departure/balance checks.
 
 Internal notes, concierge tasks, housekeeping checklist state, conflict decisions, and OTA import decisions are not saved by this phase.
 
 ## Safety boundaries
 
-This phase does not change public booking behavior, booking creation, payment verification rules, webhook handling, privileged server-side database logic, OTA connections, or public luxury pages.
+This phase does not change public booking behavior, booking creation, payment verification rules, webhook handling, privileged server-side database logic, OTA connections, live OTA credentials, or public luxury pages.
 
 ## Mobile behavior
 
-The drawer uses a full-width mobile sheet, sticky header, large close action, horizontal tabs, wrapping long values, and a scrollable raw record block.
+Today Command is designed to be mobile-safe at narrow widths. KPI cards stack, Today lists render as cards, View 360 buttons remain finger-friendly, and long emails, provider IDs, notes, and verification text wrap rather than causing horizontal overflow. The legacy full reservations/payment tables can still scroll horizontally where tables are intentionally retained.
+
+The Reservation 360 drawer uses a full-width mobile sheet, sticky header, large close action, horizontal tabs, wrapping long values, and a scrollable raw record block.
 
 ## Remaining Admin Phase 1 backlog
 
-1. Today Command dashboard
-2. Payment Review clarity
-3. Guest Profile summaries
-4. Concierge queue
-5. Availability board
-6. Housekeeping readiness
+1. Payment Review clarity
+2. Guest Profile summaries
+3. Concierge queue
+4. Availability board
+5. Housekeeping readiness
+6. Persisted staff tasks and internal notes
 7. Admin QA and mobile polish
 
 ## PayPal checkout operations
