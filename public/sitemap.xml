@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://plp-boracay.vercel.app/</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
   <url><loc>https://plp-boracay.vercel.app/accommodation</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/accommodation/grand-ocean-villa</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/accommodation/sunset-suite</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.83</priority></url>
+  <url><loc>https://plp-boracay.vercel.app/accommodation/smart-room-premium</loc><lastmod>2026-06-29</lastmod><changefreq>monthly</changefreq><priority>0.81</priority></url>
   <url><loc>https://plp-boracay.vercel.app/booking</loc><lastmod>2026-06-26</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://plp-boracay.vercel.app/private-villas-boracay</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
   <url><loc>https://plp-boracay.vercel.app/boracay-villa-with-private-pool</loc><lastmod>2026-06-26</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
