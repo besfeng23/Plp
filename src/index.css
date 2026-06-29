@@ -67,6 +67,16 @@ button {
   cursor: pointer;
 }
 
+/* Editorial headings break more evenly; keeps the luxury rhythm calm on mobile. */
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+img {
+  display: block;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
