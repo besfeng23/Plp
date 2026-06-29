@@ -1,10 +1,10 @@
 # PayPal checkout operations
 
-PayPal checkout is used only to start the online reservation deposit step. A reservation request can be received without a PayPal checkout URL, but the booking must not be treated as paid or confirmed until PayPal capture verification succeeds.
+PayPal checkout is used for reservation deposit startup only. It must stay review-first: a guest return from PayPal is not final confirmation, and PLP should only treat an online deposit as successful after server-side capture and verification returns `VERIFIED`.
 
 ## Required Vercel environment variables
 
-Set these variables in Vercel for the deployment environment that should start PayPal checkout:
+Set these in Vercel for the environment being tested or deployed:
 
 ```env
 PAYPAL_CLIENT_ID=
@@ -15,17 +15,11 @@ SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Notes:
-
-- Use `PAYPAL_MODE=sandbox` for smoke testing before using live credentials.
-- `NEXT_PUBLIC_BASE_URL` should be the public site origin so PayPal return and cancel URLs point back to the deployment being tested.
-- `SUPABASE_SERVICE_ROLE_KEY` is required because checkout must store the PayPal order in `plp_payments` before returning a checkout URL.
-- Never paste, commit, or log real PayPal credentials, Supabase service-role keys, or access tokens.
-- Rotate any credential that was pasted in chat, a ticket, logs, or git history before continuing testing.
+`PAYPAL_MODE` should be `sandbox` until the sandbox flow is smoke-tested. Use `live` only after PayPal live credentials have been created and reviewed.
 
 ## Safe health check
 
-`GET /api/paypal/health` returns booleans and mode metadata only:
+Use `GET /api/paypal/health` to confirm configuration presence without exposing values. The endpoint returns only:
 
 - `ok`
 - `mode`
@@ -35,40 +29,39 @@ Notes:
 - `hasSupabaseServiceRole`
 - `baseUrlSource`
 
-It must never return actual client IDs, secrets, access tokens, service-role keys, or raw environment values.
+It must never return the PayPal client ID, client secret, access token, Supabase service-role key, or raw environment values.
 
-## Sandbox smoke test
+## Sandbox-first setup
 
-1. Configure Vercel preview or production with sandbox PayPal credentials and Supabase service-role credentials.
-2. Visit `/api/paypal/health` and confirm the booleans are `true`, `mode` is `sandbox`, and `baseUrlSource` is the expected deployment URL source.
-3. Open `/booking` and submit a reservation request using sandbox-safe guest details.
-4. Confirm the reservation request is created and the browser redirects to PayPal only after the API returns a checkout URL.
-5. Approve the order with a PayPal sandbox buyer account.
-6. Return through `/api/paypal/capture` and confirm the booking still says it is being verified, not automatically confirmed by the browser redirect alone.
-7. In admin Reservation 360, confirm the PayPal payment row has a stored `provider_session_id`, expected amount, currency `PHP`, and verification details.
+1. Create PayPal sandbox REST app credentials.
+2. Add the sandbox client ID and secret to the Vercel environment.
+3. Set `PAYPAL_MODE=sandbox`.
+4. Set `NEXT_PUBLIC_BASE_URL` to the deployed site origin that PayPal should return to.
+5. Confirm Supabase service-role variables are present for payment-row storage.
+6. Run the health endpoint and confirm all `has*` fields are `true` and `mode` is `sandbox`.
+7. Submit a test booking and complete PayPal sandbox approval.
+8. Confirm the payment row stores the PayPal order ID as `provider_session_id`.
+9. Confirm booking/payment state changes only after capture verification succeeds.
 
-## Expected fallback behavior
+## Rotate pasted or leaked credentials
 
-If PayPal checkout cannot start, the booking page should tell the guest:
+If a real PayPal client ID, client secret, access token, Supabase service-role key, or other production credential was pasted into chat, logs, docs, source code, screenshots, or support tickets, rotate it immediately in the provider dashboard and update Vercel with the new value. Do not try to “clean up” a leaked secret by deleting only the visible copy.
+
+## Smoke test steps
+
+1. Deploy the branch or preview environment with sandbox variables.
+2. Open `/api/paypal/health` and verify it reports configured booleans without exposing values.
+3. Open `/booking` and submit a reservation request with sandbox-safe guest details.
+4. Verify the reservation request is created.
+5. Verify checkout redirects only when PayPal creates an order and Supabase stores a payment row whose `provider_session_id` equals the PayPal order ID.
+6. Approve payment in PayPal sandbox.
+7. Verify the return page stays review-first and does not claim final confirmation by itself.
+8. Verify server-side capture/reconciliation records `VERIFIED` only when reference, stored provider session, amount, and currency match.
+
+## Expected fallback when PayPal cannot start
+
+If PayPal is not configured, PayPal order creation fails, Supabase is not configured, or the payment row cannot be safely stored, `/booking` should keep the created reservation request and show this guest-safe message:
 
 > Your reservation request was received. The online deposit step is temporarily unavailable. Our concierge will contact you to complete the deposit.
 
-This fallback means:
-
-- The reservation request was received for review.
-- The booking is not confirmed.
-- The booking is not marked paid.
-- No checkout URL is returned unless the PayPal order has been stored in `plp_payments` with `provider_session_id`.
-- Staff should complete deposit follow-up manually or retry checkout after configuration/table issues are fixed.
-
-## Safe API error codes
-
-Checkout startup failures may return safe machine-readable codes such as:
-
-- `PAYPAL_NOT_CONFIGURED`
-- `PAYPAL_ORDER_CREATE_FAILED`
-- `PAYPAL_SESSION_STORE_FAILED`
-- `SUPABASE_NOT_CONFIGURED`
-- `PAYMENT_TABLE_INSERT_FAILED`
-
-These codes are safe for client/admin display. Do not return raw provider responses or secret-bearing values to browsers.
+The page must also make clear that the reservation is not confirmed yet, concierge follow-up is needed, and no successful online deposit happened. The API response should include a safe machine-readable code such as `PAYPAL_NOT_CONFIGURED`, `PAYPAL_ORDER_CREATE_FAILED`, `SUPABASE_NOT_CONFIGURED`, `PAYMENT_TABLE_INSERT_FAILED`, or `PAYPAL_SESSION_STORE_FAILED` without exposing raw provider responses or secrets.
