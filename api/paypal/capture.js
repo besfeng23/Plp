@@ -11,13 +11,22 @@ function firstQueryValue(value) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function buildBookingQuery(bookingRef) {
+  return bookingRef ? `bookingId=${encodeURIComponent(bookingRef)}&` : '';
+}
+
 export default async function handler(req, res) {
   const baseUrl = getBaseUrl(req);
   const orderToken = firstQueryValue(req.query?.token);
   const bookingRef = firstQueryValue(req.query?.bookingRef);
+  const bookingQuery = buildBookingQuery(bookingRef);
 
   if (!orderToken) {
-    return redirect(res, `${baseUrl}/booking/cancel?provider=paypal&reason=missing-paypal-token`);
+    return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=missing-paypal-token`);
+  }
+
+  if (!bookingRef) {
+    return redirect(res, `${baseUrl}/booking/cancel?provider=paypal&reason=missing-booking-reference`);
   }
 
   try {
@@ -32,17 +41,16 @@ export default async function handler(req, res) {
       payload: capture.raw,
     });
 
-    const success = capture.status === 'COMPLETED' && databaseResult.verificationStatus !== 'AMOUNT_MISMATCH' && databaseResult.verificationStatus !== 'CURRENCY_MISMATCH';
     const captureId = capture.captureId || capture.orderId;
-    const bookingQuery = bookingRef ? `bookingId=${encodeURIComponent(bookingRef)}&` : '';
+    const verified = capture.status === 'COMPLETED' && databaseResult.verificationStatus === 'VERIFIED';
 
-    if (success) {
+    if (verified) {
       return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(capture.orderId)}&captureId=${encodeURIComponent(captureId)}`);
     }
 
-    return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=${encodeURIComponent(databaseResult.verificationStatus || capture.status || 'capture-not-completed')}`);
+    const reason = databaseResult.verificationStatus || capture.status || 'capture-not-verified';
+    return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=${encodeURIComponent(reason)}`);
   } catch (error) {
-    const bookingQuery = bookingRef ? `bookingId=${encodeURIComponent(bookingRef)}&` : '';
     return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=${encodeURIComponent(error.message || 'paypal-capture-failed')}`);
   }
 }
