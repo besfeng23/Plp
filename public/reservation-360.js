@@ -109,8 +109,8 @@
     return `<div class="r360-info"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
   }
 
-  function grid(items) {
-    return `<div class="r360-grid">${items.map(([label, value]) => info(label, value)).join('')}</div>`;
+  function grid(items, note = '') {
+    return `${note ? `<div class="r360-note">${escapeHtml(note)}</div>` : ''}<div class="r360-grid">${items.map(([label, value]) => info(label, value)).join('')}</div>`;
   }
 
   function setTab(tab, button) {
@@ -182,6 +182,11 @@
         ['Guest count', field(row, ['guest_count', 'guests', 'party_size'])],
       ],
       payment: [
+        ['Provider', field(row, ['provider'])],
+        ['Provider session ID', field(row, ['provider_session_id'])],
+        ['Provider payment ID', field(row, ['provider_payment_id'])],
+        ['Provider reference ID', field(row, ['provider_reference_id'])],
+        ['Last webhook/event ID', field(row, ['last_webhook_id', 'provider_event_id'])],
         ['Total amount', peso(field(row, ['total_amount_php']))],
         ['Deposit amount', peso(field(row, ['deposit_amount_php']))],
         ['Payment amount', peso(field(row, ['payment_amount_php']))],
@@ -190,10 +195,6 @@
         ['Booking payment status', field(row, ['booking_payment_status'])],
         ['Verification status', field(row, ['payment_verification_status'])],
         ['Verification note/error', field(row, ['verification_error', 'verification_note', 'verification_notes'])],
-        ['Provider', field(row, ['provider'])],
-        ['Provider payment ID', field(row, ['provider_payment_id'])],
-        ['Provider session ID', field(row, ['provider_session_id'])],
-        ['Provider event/reference', field(row, ['provider_event_id', 'provider_reference_id'])],
       ],
       stay: [
         ['Accommodation', field(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa'])],
@@ -204,7 +205,9 @@
         ['Arrival notes', field(row, ['arrival_notes', 'special_requests', 'guest_notes'])],
       ],
     };
-    body.innerHTML = grid(data[currentTab] || data.overview);
+    body.innerHTML = currentTab === 'payment'
+      ? grid(data.payment, 'For PayPal, success requires booking reference, stored PayPal order/session, amount, and currency to verify.')
+      : grid(data[currentTab] || data.overview);
   }
 
   function enhanceReservationHeader() {
