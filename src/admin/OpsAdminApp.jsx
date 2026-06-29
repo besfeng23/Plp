@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Link2, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users, X } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Link2, Lock, LogOut, RefreshCw, Search, Settings, Shield, Users, X } from 'lucide-react';
 import { OTA_ADMIN_SECTIONS, OTA_CHANNELS, OTA_CHANNEL_LABELS, OTA_FOUNDATION_NOTICE, OTA_SYNC_STATUSES, listSupportedOtaChannels } from '../../lib/ota/channels.js';
 
 const TABS = [
@@ -24,7 +24,6 @@ const SORT_OPTIONS = ['Newest booking first', 'Check-in soonest', 'Guest name A-
 const SECRET_FIELD_PATTERN = /(token|secret|key|password)/i;
 
 const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
-const isReviewBooking = (row) => !['CONFIRMED', 'FULLY_PAID', 'CANCELLED'].includes(String(row.booking_status || row.status || '').toUpperCase());
 const PAYMENT_STATUS_LABELS = {
   VERIFIED: 'Verified — matched booking, provider session, amount, and currency',
   PENDING: 'Pending — awaiting provider confirmation or staff review',
@@ -84,7 +83,7 @@ async function adminFetch(action, accessKey, options = {}) {
 export default function OpsAdminApp() {
   const [accessKey, setAccessKey] = useState('');
   const [isUnlocked, setUnlocked] = useState(false);
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [rows, setRows] = useState([]);
   const [exceptions, setExceptions] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -102,14 +101,15 @@ export default function OpsAdminApp() {
   const filteredRows = useMemo(() => filterReservations(rows, { search: reservationSearch, status: reservationStatus, stay: stayFilter, sort: reservationSort }), [rows, reservationSearch, reservationStatus, stayFilter, reservationSort]);
   const filteredExceptions = useMemo(() => filterRows(exceptions, query), [exceptions, query]);
   const filteredNotifications = useMemo(() => filterRows(notifications, query), [notifications, query]);
+  const todayCommand = useMemo(() => buildTodayCommand(rows, notifications), [rows, notifications]);
   const kpis = useMemo(() => ({
-    bookings: rows.length,
-    verified: rows.filter((row) => row.payment_verification_status === 'VERIFIED').length,
-    review: rows.filter(isReviewBooking).length,
-    exceptions: exceptions.length,
-    notifications: notifications.length,
-    verifiedDepositTotal: rows.filter((row) => row.payment_verification_status === 'VERIFIED').reduce((sum, row) => sum + Number(row.deposit_amount_php || row.payment_amount_php || 0), 0),
-  }), [rows, exceptions, notifications]);
+    arrivals: todayCommand.arrivals.length,
+    departures: todayCommand.departures.length,
+    inHouse: todayCommand.inHouse.length,
+    paymentReview: todayCommand.paymentReview.length,
+    review: todayCommand.recordReview.length,
+    activity: notifications.length + todayCommand.paymentReview.length,
+  }), [todayCommand, notifications]);
 
   async function loadData(nextKey = accessKey) {
     if (!nextKey) return setError('Enter the PLP staff access key to open live reservation records.');
@@ -121,7 +121,7 @@ export default function OpsAdminApp() {
       setRows(operations.rows || []);
       setExceptions(operations.exceptions || []);
       setLastSync(new Date());
-      setActiveTab('bookings');
+      setActiveTab('dashboard');
       setUnlocked(true);
       try {
         const notificationData = await adminFetch('notifications', nextKey);
@@ -196,7 +196,7 @@ export default function OpsAdminApp() {
           {message && <div className="mb-4 rounded-sm border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
           {error && <div className="mb-4 rounded-sm border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
           {activeTab === 'bookings' && <BookingsTable rows={filteredRows} totalRows={rows.length} controls={{ reservationSearch, setReservationSearch, reservationStatus, setReservationStatus, stayFilter, setStayFilter, reservationSort, setReservationSort }} updateBooking={updateBooking} onOpenReservation={setSelectedReservation} />}
-          {activeTab === 'dashboard' && <Dashboard kpis={kpis} />}
+          {activeTab === 'dashboard' && <Dashboard kpis={kpis} todayCommand={todayCommand} onOpenReservation={setSelectedReservation} />}
           {activeTab === 'exceptions' && <ExceptionsTable rows={filteredExceptions} />}
           {activeTab === 'notifications' && <NotificationsTable rows={filteredNotifications} />}
           {activeTab === 'channel-sync' && <ChannelSyncFoundation />}
@@ -227,8 +227,72 @@ function normalizeStatus(value) {
 
 function dateOnly(value) {
   if (!value) return null;
-  const date = new Date(`${String(value).slice(0, 10)}T00:00:00`);
+  const text = String(value).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const date = new Date(`${text}T00:00:00`);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function todayDate() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function isToday(value) {
+  const date = dateOnly(value);
+  return Boolean(date && date.getTime() === todayDate().getTime());
+}
+
+function getCheckIn(row) {
+  return rowValue(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']);
+}
+
+function getCheckOut(row) {
+  return rowValue(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']);
+}
+
+function isInHouse(row) {
+  const checkIn = dateOnly(getCheckIn(row));
+  const checkOut = dateOnly(getCheckOut(row));
+  const today = todayDate();
+  return Boolean(checkIn && checkOut && checkIn <= today && today < checkOut);
+}
+
+function isUpcomingWithin(row, days) {
+  const checkIn = dateOnly(getCheckIn(row));
+  if (!checkIn) return false;
+  const today = todayDate();
+  const end = new Date(today);
+  end.setDate(today.getDate() + Number(days || 0));
+  return checkIn >= today && checkIn <= end;
+}
+
+function needsPaymentReview(row) {
+  const verification = String(rowValue(row, ['payment_verification_status'])).trim().toUpperCase().replace(/[\s-]+/g, '_');
+  const statusText = `${rowValue(row, ['booking_status', 'status'])} ${rowValue(row, ['payment_status', 'booking_payment_status'])}`.toUpperCase();
+  const note = rowValue(row, ['verification_error', 'verification_note', 'verification_notes']);
+  const reviewStatuses = new Set(['PENDING', 'FAILED', 'UNMATCHED', 'MISMATCH', 'NEEDS_REVIEW', 'NEED_REVIEW', 'NOT_VERIFIED', 'UNMATCHED_REFERENCE', 'UNMATCHED_PAYMENT', 'AMOUNT_MISMATCH', 'CURRENCY_MISMATCH', 'ORDER_ID_MISMATCH', 'ORDER_SESSION_MISSING', 'ORDER_ID_MISSING', 'CAPTURE_NOT_COMPLETED', 'DATABASE_UNCONFIGURED']);
+  return !verification || reviewStatuses.has(verification) || /PENDING_PAYMENT|PAYMENT_PROCESSING|AWAITING_DEPOSIT|PENDING|PROCESSING/.test(statusText) || Boolean(note);
+}
+
+function needsRecordReview(row) {
+  const status = String(rowValue(row, ['booking_status', 'status'])).toUpperCase();
+  return needsPaymentReview(row) || !getCheckIn(row) || !getCheckOut(row) || !rowValue(row, ['guest_name', 'name', 'full_name', 'guestName']) || !rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']) || !['CONFIRMED', 'FULLY_PAID', 'CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'].includes(status);
+}
+
+function buildTodayCommand(rows, notifications = []) {
+  const indexed = (rows || []).map((row, originalIndex) => ({ row, originalIndex }));
+  const byCheckIn = (a, b) => (dateOnly(getCheckIn(a.row))?.getTime() || 0) - (dateOnly(getCheckIn(b.row))?.getTime() || 0);
+  return {
+    arrivals: indexed.filter(({ row }) => isToday(getCheckIn(row))),
+    departures: indexed.filter(({ row }) => isToday(getCheckOut(row))),
+    inHouse: indexed.filter(({ row }) => isInHouse(row)),
+    paymentReview: indexed.filter(({ row }) => needsPaymentReview(row)),
+    recordReview: indexed.filter(({ row }) => needsRecordReview(row)),
+    upcoming: indexed.filter(({ row }) => isUpcomingWithin(row, 7)).sort(byCheckIn),
+    activityCount: notifications.length,
+  };
 }
 
 function nights(row) {
@@ -271,7 +335,7 @@ function bookingTimestamp(row) {
 function filterReservations(rows, controls) {
   const needle = controls.search.trim().toLowerCase();
   return rows.filter((row) => !needle || reservationSearchText(row).includes(needle)).filter((row) => controls.status === 'All' || normalizeStatus(rowValue(row, ['booking_status', 'status'])) === controls.status).filter((row) => controls.stay === 'All' || stayBucket(row) === controls.stay).slice().sort((a, b) => {
-    if (controls.sort === 'Check-in soonest') return (dateOnly(rowValue(a, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER) - (dateOnly(rowValue(b, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER);
+    if (controls.sort === 'Check-in soonest') return (dateOnly(getCheckIn(a))?.getTime() || Number.MAX_SAFE_INTEGER) - (dateOnly(getCheckIn(b))?.getTime() || Number.MAX_SAFE_INTEGER);
     if (controls.sort === 'Guest name A-Z') return String(rowValue(a, ['guest_name', 'name', 'full_name', 'guestName'])).localeCompare(String(rowValue(b, ['guest_name', 'name', 'full_name', 'guestName'])));
     if (controls.sort === 'Status A-Z') return normalizeStatus(rowValue(a, ['booking_status', 'status'])).localeCompare(normalizeStatus(rowValue(b, ['booking_status', 'status'])));
     return bookingTimestamp(b) - bookingTimestamp(a);
@@ -316,8 +380,32 @@ function LoginScreen({ accessKey, setAccessKey, onSubmit, loading, error }) {
   return <div className="flex min-h-screen items-center justify-center bg-[#17130F] p-4"><form onSubmit={onSubmit} className="w-full max-w-md rounded-md border-t-4 border-[#B8977E] bg-[#FBFAF7] p-6 shadow-2xl md:p-8"><div className="mb-8 text-center"><p className="text-[10px] uppercase tracking-[0.32em] text-[#B8977E]">Pueblo La Perla</p><h1 className="text-4xl font-light tracking-[-0.05em] text-[#17130F]">Resort Command</h1><p className="mt-3 text-xs uppercase tracking-widest text-[#6A645B]">Reservation Reconciliation</p></div><label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-[#6A645B]">PLP Access Key</label><div className="relative"><Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input type="password" value={accessKey} onChange={(event) => setAccessKey(event.target.value)} required className="w-full rounded-sm border border-[#E5E0D8] bg-white py-3 pl-10 pr-4 text-sm text-[#17130F] focus:border-[#B8977E] focus:outline-none" placeholder="Enter access key" /></div>{error && <div className="mt-4 rounded-sm border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">{error}</div>}<button disabled={loading} className="mt-6 w-full rounded-sm bg-[#17130F] py-3 font-medium text-[#F4F0E8] disabled:opacity-60">{loading ? 'Loading database...' : 'Open Resort Command'}</button><p className="mt-6 text-center text-[10px] uppercase tracking-widest text-[#6A645B]">Authorized personnel only</p></form></div>;
 }
 
-function Dashboard({ kpis }) {
-  return <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"><Metric icon={Database} label="Reservation Rows" value={kpis.bookings} help="All rows from payment reconciliation" /><Metric icon={CheckCircle2} label="Verified Deposits" value={kpis.verified} help="payment_verification_status = VERIFIED" /><Metric icon={Clock} label="Need Review" value={kpis.review} help="Not confirmed, fully paid, or cancelled" /><Metric icon={AlertCircle} label="Payment Exceptions" value={kpis.exceptions} help="Payment mismatches / unmatched events" tone="danger" /><Metric icon={Bell} label="Notifications" value={kpis.notifications} help="Notification activity rows" /><Metric icon={TrendingUp} label="Verified Deposit Total" value={money(kpis.verifiedDepositTotal)} help="Sum of verified deposits" dark /></div>;
+function Dashboard({ kpis, todayCommand, onOpenReservation }) {
+  return <div className="space-y-5"><div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"><Metric icon={Calendar} label="Arrivals today" value={kpis.arrivals} help="Check-in date equals today" /><Metric icon={Clock} label="Departures today" value={kpis.departures} help="Check-out date equals today" /><Metric icon={Users} label="In-house stays" value={kpis.inHouse} help="Today falls inside stay window" /><Metric icon={AlertCircle} label="Payment review" value={kpis.paymentReview} help="Verification notes, missing/pending/failed states, or payment processing" tone="danger" /><Metric icon={Database} label="Records needing review" value={kpis.review} help="Missing core stay data or non-final statuses" /><Metric icon={Bell} label="Message/payment activity" value={kpis.activity} help="Notification rows plus payment-review rows" dark /></div><StaffGuidance /><div className="grid gap-4 xl:grid-cols-2"><TodaySection title="Arrivals Today" rows={todayCommand.arrivals} type="arrival" onOpenReservation={onOpenReservation} /><TodaySection title="In-House" rows={todayCommand.inHouse} type="inHouse" onOpenReservation={onOpenReservation} /><TodaySection title="Departures Today" rows={todayCommand.departures} type="departure" onOpenReservation={onOpenReservation} /><TodaySection title="Payment Review" rows={todayCommand.paymentReview} type="payment" onOpenReservation={onOpenReservation} /></div><TodaySection title="Upcoming 7 Days" rows={todayCommand.upcoming} type="upcoming" onOpenReservation={onOpenReservation} wide /></div>;
+}
+
+function StaffGuidance() {
+  const items = ['Review payment exceptions', 'Prepare arrivals', 'Confirm in-house service notes', 'Check departures and balances'];
+  return <section className="grid gap-3 rounded-md border border-[#D8CEC0] bg-[#FBFAF7] p-4 md:grid-cols-4">{items.map((item) => <div key={item} className="rounded-sm border border-[#E5E0D8] bg-white p-3 text-sm text-[#6A645B]"><p className="font-semibold text-[#17130F]">{item}</p><p className="mt-1 text-xs">UI-only staff guidance; no task state is saved here.</p></div>)}</section>;
+}
+
+function TodaySection({ title, rows, type, onOpenReservation, wide }) {
+  return <Panel title={title} count={rows.length}><div className={wide ? 'grid gap-3 md:grid-cols-2 xl:grid-cols-3' : 'grid gap-3'}>{rows.length === 0 ? <div className="rounded-md border border-dashed border-[#E5E0D8] bg-[#F7F2EA] p-5 text-sm text-[#6A645B]">No matching loaded records.</div> : rows.map(({ row, originalIndex }) => <TodayCard key={`${title}-${originalIndex}-${row.booking_reference || row.provider_payment_id || ''}`} row={row} type={type} onOpenReservation={() => onOpenReservation(row)} />)}</div></Panel>;
+}
+
+function TodayCard({ row, type, onOpenReservation }) {
+  const accommodation = rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']);
+  const guestCount = rowValue(row, ['guest_count', 'guests', 'party_size']);
+  const notes = rowValue(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']);
+  const verificationNote = rowValue(row, ['verification_error', 'verification_note', 'verification_notes']);
+  const meta = {
+    arrival: [['Accommodation', accommodation], ['Guests', guestCount || '—'], ['Provider', <ProviderBadge row={row} />], ['Verification', <Pill value={row.payment_verification_status} />]],
+    inHouse: [['Accommodation', accommodation], ['Check-out', getCheckOut(row)], ['Notes / requests', notes || 'No notes captured'], ['Provider', <ProviderBadge row={row} />]],
+    departure: [['Accommodation', accommodation], ['Balance', money(row.balance_amount_php)], ['Payment status', <Pill value={row.payment_status || row.booking_payment_status} />], ['Check-out', getCheckOut(row)]],
+    payment: [['Provider', <ProviderBadge row={row} />], ['Expected / deposit', money(row.deposit_amount_php || row.payment_amount_php || row.expected_amount_php)], ['Payment status', <Pill value={row.payment_status || row.booking_payment_status} />], ['Verification', <Pill value={row.payment_verification_status} />]],
+    upcoming: [['Date', getCheckIn(row)], ['Accommodation', accommodation], ['Provider', <ProviderBadge row={row} />], ['Booking / payment', <><Pill value={row.booking_status} /> <Pill value={row.payment_status || row.booking_payment_status} /></>]],
+  }[type] || [];
+  return <article className="min-w-0 rounded-md border border-[#E5E0D8] bg-white p-4 shadow-sm"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div className="min-w-0"><p className="break-words text-base font-bold text-[#17130F]">{row.booking_reference || rowValue(row, ['reference', 'booking_code', 'code']) || '—'}</p><p className="mt-1 break-words text-sm font-medium text-[#17130F]">{row.guest_name || rowValue(row, ['name', 'full_name', 'guestName']) || '—'}</p></div><Action onClick={onOpenReservation}>View 360</Action></div><div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">{meta.map(([label, value]) => <div key={label} className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-widest text-[#B8977E]">{label}</p><div className="mt-1 break-words text-[#6A645B]">{value || '—'}</div></div>)}</div>{type === 'payment' && <div className="mt-3 rounded-sm bg-[#F7F2EA] p-3 text-xs text-[#6A645B]">{verificationNote || 'No verification note captured'}</div>}</article>;
 }
 
 function Metric({ icon: Icon, label, value, help, tone, dark }) {
