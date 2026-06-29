@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/optimize-plp-images.mjs && node scripts/prepare-plp-static-pages.mjs && node scripts/check-viewport-fit.mjs && vite build",
+    "build": "node scripts/optimize-plp-images.mjs && node scripts/prepare-plp-static-pages.mjs && node scripts/patch-plp-static-policy.mjs && node scripts/check-viewport-fit.mjs && vite build",
     "preview": "vite preview",
     "check:routes": "node scripts/audit-plp-routes.mjs",
     "check:viewport": "node scripts/check-viewport-fit.mjs"
