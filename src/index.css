@@ -99,6 +99,17 @@ textarea:focus-visible {
   pointer-events: auto;
 }
 
+/*
+  Homepage restraint pass:
+  These details matter, but they were overpowering the homepage.
+  Keep the homepage editorial and let booking/legal paths carry the policy depth.
+*/
+#main-content > section[aria-labelledby="trust-proof-title"],
+#main-content > section[aria-labelledby="booking-policy-title"],
+#main-content > section[aria-labelledby="faq-title"] {
+  display: none;
+}
+
 @layer components {
   .inputish {
     @apply w-full bg-white border border-[#E5E0D8] text-[#17130F] rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-[#B8977E] focus:ring-1 focus:ring-[#B8977E] transition-colors placeholder:text-[#6A645B];

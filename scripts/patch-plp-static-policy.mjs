@@ -29,7 +29,9 @@ async function patchFile(fileName) {
     .replace(/href="\/privacy"/g, 'href="/privacy-policy"')
     .replace(/href="\/privacy\/"/g, 'href="/privacy-policy"')
     .replace(/href="\/terms"/g, 'href="/terms-of-service"')
-    .replace(/href="\/terms\/"/g, 'href="/terms-of-service"');
+    .replace(/href="\/terms\/"/g, 'href="/terms-of-service"')
+    .replace(/The 30% deposit step is not configured yet\./g, 'The payment step is not configured yet.')
+    .replace(/but the 30% deposit step could not start:/g, 'but the payment step could not start:');
 
   if (fileName === 'booking.html') {
     html = html.replace(/<meta name="description" content="[^"]*" \/>/, `<meta name="description" content="${bookingDescription}" />`);
@@ -53,6 +55,6 @@ async function patchFile(fileName) {
   }
 }
 
-for (const fileName of ['accommodation.html', 'booking.html', 'experiences.html', 'privacy.html', 'reservation-policy.html', 'terms.html']) {
+for (const fileName of ['accommodation.html', 'booking.html', 'experiences.html', 'privacy.html', 'reservation-policy.html', 'reservation-policy/index.html', 'terms.html']) {
   await patchFile(fileName);
 }
