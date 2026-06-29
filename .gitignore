@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Lockfile (project pins deps with "latest"; no lockfile is committed)
+package-lock.json
+
+# Build-generated images (regenerated from tracked PNG sources by
+# scripts/optimize-plp-images.mjs during `npm run build`)
+public/images/plp-hero-sunset.webp
+public/images/plp-hero-day.webp
+public/images/plp-hero-evening.webp
+public/images/plp-grand-villa-exterior.webp
+public/images/plp-villa-golden-exterior.webp
+public/images/plp-villa-exterior-alt.webp
+public/images/plp-pool-ocean-view.webp
+public/images/plp-master-bedroom-view.webp
+public/images/plp-sunset-balcony.webp
+public/images/plp-day-balcony-sea-view.webp
+public/images/plp-rooftop-evening-lounge.webp
+public/images/plp-smart-room-twin-view.webp
+public/images/plp-bedroom-balcony-outlook.webp
+public/images/plp-bath-tub-greenery.webp
+public/images/plp-bathroom-vanity-shower.webp
+public/images/plp-poolside-experience.webp
+public/images/plp-wellness-bath-ritual.webp
+public/images/plp-private-breakfast-pool.webp
