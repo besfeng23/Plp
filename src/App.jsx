@@ -58,11 +58,10 @@ const EXPERIENCE_GROUPS = [
 const GALLERY_GROUPS = [
   ['The Hillside & Villas', 'The property from the air and the villa exteriors set into the slope above the coast.', [
     ['/images/plp-hero-sunset.webp', 'Pueblo La Perla hillside villas above the Boracay coast at sunset'],
+    ['/images/plp-hero-day.webp', 'Daytime aerial of the Pueblo La Perla hillside above the coast'],
     ['/images/plp-grand-villa-exterior.webp', 'Grand Ocean Villa exterior on the Pueblo La Perla hillside'],
     ['/images/plp-villa-golden-exterior.webp', 'Pueblo La Perla villa exterior in golden afternoon light'],
-    ['/images/plp-property-overview-wide.webp', 'Wide overview of the Pueblo La Perla property and surrounding hillside'],
     ['/images/plp-villa-exterior-alt.webp', 'Alternate view of a Pueblo La Perla villa exterior and greenery'],
-    ['/images/plp-grand-ocean-villa-aerial.webp', 'Aerial view of the Grand Ocean Villa and its private pool'],
   ]],
   ['Pool, Deck & Sea Views', 'Pool, terrace, and balcony outlooks over the water.', [
     ['/images/plp-pool-ocean-view.webp', 'Pueblo La Perla pool looking out over the ocean'],
