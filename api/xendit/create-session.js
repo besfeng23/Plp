@@ -1,6 +1,15 @@
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
 import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
 
+function safeCheckoutStartupError(res, status, { code, detail }) {
+  return res.status(status).json({
+    ok: false,
+    error: 'Unable to create PayPal checkout session',
+    code,
+    detail,
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -38,20 +47,30 @@ export default async function handler(req, res) {
         rawResponse: order.raw,
       }));
     } catch (storeError) {
-      return res.status(503).json({
-        ok: false,
-        error: 'Unable to store PayPal checkout session',
-        code: 'PAYPAL_SESSION_STORE_FAILED',
-        detail: 'PayPal order was created but could not be stored in the payment table.',
+      return safeCheckoutStartupError(res, 503, {
+        code: 'PAYMENT_TABLE_INSERT_FAILED',
+        detail: 'PayPal order was created but the payment row could not be written safely.',
       });
     }
 
-    if (databaseWarning || !databasePayment) {
-      return res.status(503).json({
-        ok: false,
-        error: 'Unable to store PayPal checkout session',
-        code: databaseWarning ? 'SUPABASE_NOT_CONFIGURED' : 'PAYPAL_SESSION_STORE_FAILED',
-        detail: databaseWarning ? 'Payment database is not configured.' : 'No payment row was created for this PayPal order.',
+    if (databaseWarning) {
+      return safeCheckoutStartupError(res, 503, {
+        code: 'SUPABASE_NOT_CONFIGURED',
+        detail: 'Payment database is not configured.',
+      });
+    }
+
+    if (!databasePayment?.id) {
+      return safeCheckoutStartupError(res, 503, {
+        code: 'PAYMENT_TABLE_INSERT_FAILED',
+        detail: 'No payment row was created for this PayPal order.',
+      });
+    }
+
+    if (String(databasePayment.provider_session_id || '') !== String(order.id)) {
+      return safeCheckoutStartupError(res, 503, {
+        code: 'PAYPAL_SESSION_STORE_FAILED',
+        detail: 'The stored PayPal session did not match the created PayPal order.',
       });
     }
 
@@ -71,9 +90,7 @@ export default async function handler(req, res) {
   } catch (error) {
     const code = error instanceof SafePayPalError ? error.code : 'PAYPAL_ORDER_CREATE_FAILED';
     const status = error instanceof SafePayPalError ? error.status : 500;
-    return res.status(status).json({
-      ok: false,
-      error: 'Unable to create PayPal checkout session',
+    return safeCheckoutStartupError(res, status, {
       code,
       detail: error instanceof SafePayPalError ? error.message : 'PayPal checkout could not be started safely.',
     });
