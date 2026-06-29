@@ -35,11 +35,19 @@ export default async function handler(req, res) {
       rawResponse: order.raw,
     });
 
+    if (databaseWarning || !databasePayment) {
+      return res.status(503).json({
+        ok: false,
+        error: 'Unable to store PayPal checkout session',
+        detail: databaseWarning || 'No payment row was created for this PayPal order.',
+      });
+    }
+
     return res.status(201).json({
       ok: true,
       ...session,
       databasePayment,
-      databaseWarning,
+      databaseWarning: null,
       note: 'PayPal checkout order created. Redirect the guest to checkoutUrl to approve the 30% deposit.',
     });
   } catch (error) {
