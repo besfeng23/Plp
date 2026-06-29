@@ -12,6 +12,7 @@ No live OTA credentials, tokens, or API secrets should be stored in these tables
 - Channel IDs should use the shared constants documented in `lib/ota/channels.js`: `booking_com`, `agoda`, `airbnb`, `expedia`, `vrbo`, `direct`, and `manual`.
 - Status values should align with: `imported`, `mapped`, `unmapped`, `blocked`, `conflict`, `cancelled`, `modified`, `needs_review`, `synced`, and `failed`.
 - `raw_payload` JSONB columns are for provider payload snapshots, iCal event data, and diagnostic metadata. Do not place plaintext credentials in `raw_payload`.
+- `channel_key` is intentionally repeated on operational tables even when `channel_id` exists. This denormalized value is for audit stability, simpler support queries, and readable raw import review if an upstream channel row is later renamed or retired. Migrations should still keep it aligned with `ota_channels.channel_key` through server-side validation where practical.
 
 ## Proposed SQL
 
@@ -100,6 +101,8 @@ create table if not exists external_bookings (
   review_status text not null default 'needs_review',
   conflict_status text not null default 'needs_review',
   raw_payload jsonb not null default '{}'::jsonb,
+  constraint external_bookings_valid_stay check (check_in is null or check_out is null or check_out > check_in),
+  constraint external_bookings_positive_guests check (guest_count is null or guest_count > 0),
   unique (channel_key, external_booking_id)
 );
 
@@ -145,7 +148,8 @@ create table if not exists calendar_sync_runs (
   blocked_count integer not null default 0,
   conflict_count integer not null default 0,
   error_message text,
-  raw_payload jsonb not null default '{}'::jsonb
+  raw_payload jsonb not null default '{}'::jsonb,
+  constraint calendar_sync_runs_valid_duration check (started_at is null or finished_at is null or finished_at >= started_at)
 );
 
 create table if not exists availability_blocks (
@@ -161,7 +165,8 @@ create table if not exists availability_blocks (
   block_status text not null default 'blocked',
   block_reason text not null default 'external_booking_import',
   review_status text not null default 'needs_review',
-  raw_payload jsonb not null default '{}'::jsonb
+  raw_payload jsonb not null default '{}'::jsonb,
+  constraint availability_blocks_valid_range check (block_end > block_start)
 );
 
 create table if not exists availability_conflicts (
@@ -179,7 +184,8 @@ create table if not exists availability_conflicts (
   resolved_by text,
   resolution_notes text,
   review_status text not null default 'needs_review',
-  raw_payload jsonb not null default '{}'::jsonb
+  raw_payload jsonb not null default '{}'::jsonb,
+  constraint availability_conflicts_valid_resolution check (resolved_at is null or resolved_at >= detected_at)
 );
 ```
 
