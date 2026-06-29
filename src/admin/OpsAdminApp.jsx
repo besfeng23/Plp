@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Link2, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users } from 'lucide-react';
+import { OTA_ADMIN_SECTIONS, OTA_CHANNELS, OTA_CHANNEL_LABELS, OTA_FOUNDATION_NOTICE, OTA_SYNC_STATUSES, listSupportedOtaChannels } from '../../lib/ota/channels.js';
 
 const TABS = [
   { id: 'dashboard', label: 'Today', icon: LayoutDashboard },
@@ -13,6 +14,7 @@ const TABS = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'staff', label: 'Staff & Roles', icon: Shield },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'channel-sync', label: 'Channel Sync', icon: Link2 },
 ];
 
 const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
@@ -153,6 +155,7 @@ export default function OpsAdminApp() {
           {activeTab === 'dashboard' && <Dashboard kpis={kpis} />}
           {activeTab === 'exceptions' && <ExceptionsTable rows={filteredExceptions} />}
           {activeTab === 'notifications' && <NotificationsTable rows={filteredNotifications} />}
+          {activeTab === 'channel-sync' && <ChannelSyncFoundation />}
           {['availability', 'guests', 'housekeeping', 'concierge', 'content', 'staff', 'settings'].includes(activeTab) && <Placeholder tab={activeLabel} rows={rows} />}
         </main>
       </div>
@@ -286,6 +289,45 @@ function ExceptionsTable({ rows }) {
 
 function NotificationsTable({ rows }) {
   return <Panel title="Notification Activity" count={rows.length}><Table columns={['Reference', 'Recipient', 'Subject', 'Status', 'Sent', 'Error']}>{rows.length === 0 ? <Empty colSpan={6} text="No notification activity." /> : rows.map((row) => <tr key={row.id || `${row.booking_reference}-${row.notification_key}`} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.notification_key || ''}</span></td><td className="cell">{row.recipient_type || '—'}<br /><span className="muted">{row.recipient_email || 'No recipient'}</span></td><td className="cell">{row.subject || '—'}</td><td className="cell"><Pill value={row.status} /></td><td className="cell">{row.sent_at || row.created_at || '—'}</td><td className="cell">{row.error || '—'}</td></tr>)}</Table></Panel>;
+}
+
+
+function ChannelSyncFoundation() {
+  const channels = listSupportedOtaChannels();
+  const statusList = Object.values(OTA_SYNC_STATUSES);
+  return <Panel title="OTA Channel Sync Foundation" count={OTA_ADMIN_SECTIONS.length}>
+    <div className="space-y-5">
+      <div className="rounded-md border border-[#D8CEC0] bg-[#FBFAF7] p-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[#B8977E]">Phase 2A foundation only</p>
+        <h4 className="mt-1 font-serif text-2xl font-light text-[#17130F]">Future external booking and calendar sync command center</h4>
+        <p className="mt-3 text-sm font-semibold text-[#17130F]">{OTA_FOUNDATION_NOTICE}</p>
+        <p className="mt-2 max-w-4xl text-sm text-[#6A645B]">No live Booking.com, Agoda, Airbnb, Expedia, or Vrbo API calls are made from this screen. No OTA credentials are requested or stored client-side. Imported bookings, iCal feeds, room mapping, availability blocks, conflicts, and sync logs are staged as a records-first model for future reviewed backend work.</p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {OTA_ADMIN_SECTIONS.map((section) => <div key={section.id} className="rounded-md border border-[#E5E0D8] bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div><p className="text-[10px] font-semibold uppercase tracking-widest text-[#B8977E]">Placeholder</p><h5 className="mt-1 text-lg font-semibold text-[#17130F]">{section.label}</h5></div>
+            <Pill value={section.status} />
+          </div>
+          <p className="mt-3 text-sm text-[#6A645B]">{section.description}</p>
+        </div>)}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <div className="rounded-md border border-[#E5E0D8] bg-[#F7F2EA] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6A645B]">Supported future channels</p>
+          <div className="mt-3 flex flex-wrap gap-2">{channels.map((channel) => <span key={channel.id} className="rounded-full border border-[#D8CEC0] bg-white px-3 py-1 text-xs font-semibold text-[#17130F]">{channel.label}</span>)}</div>
+          <p className="mt-3 text-xs text-[#6A645B]">Internal keys: {Object.values(OTA_CHANNELS).join(', ')}</p>
+        </div>
+        <div className="rounded-md border border-[#E5E0D8] bg-[#F7F2EA] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[#6A645B]">Shared statuses</p>
+          <div className="mt-3 flex flex-wrap gap-2">{statusList.map((status) => <Pill key={status} value={status} />)}</div>
+          <p className="mt-3 text-xs text-[#6A645B]">Direct website remains {OTA_CHANNEL_LABELS.direct}; staff-created rows remain {OTA_CHANNEL_LABELS.manual}. Payment verification remains outside OTA sync.</p>
+        </div>
+      </div>
+    </div>
+  </Panel>;
 }
 
 function Placeholder({ tab, rows }) { return <Panel title={tab} count={rows.length}><div className="bg-[#F7F2EA] border border-dashed border-[#E5E0D8] rounded-xl p-8 text-center text-[#6A645B]"><p className="text-sm uppercase tracking-widest text-[#17130F]">{tab} module staged</p><p className="mt-2 text-sm">This section is now part of the Resort Command IA. It will be wired to dedicated tables/endpoints after Reservations, Payments, and Reservation 360 are stable.</p></div></Panel>; }
