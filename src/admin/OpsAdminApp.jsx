@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Link2, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CheckCircle2, Clock, Database, FileText, LayoutDashboard, Link2, Lock, LogOut, RefreshCw, Search, Settings, Shield, TrendingUp, Users, X } from 'lucide-react';
 import { OTA_ADMIN_SECTIONS, OTA_CHANNELS, OTA_CHANNEL_LABELS, OTA_FOUNDATION_NOTICE, OTA_SYNC_STATUSES, listSupportedOtaChannels } from '../../lib/ota/channels.js';
 
 const TABS = [
@@ -18,11 +18,12 @@ const TABS = [
 ];
 
 const SEARCHABLE_TABS = new Set(['exceptions', 'notifications']);
-const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
 const RESERVATION_STATUS_OPTIONS = ['All', 'Pending', 'Awaiting deposit', 'Payment processing', 'Deposit verified', 'Confirmed', 'Checked In', 'Checked Out', 'Cancelled', 'Review needed'];
 const STAY_FILTER_OPTIONS = ['All', 'Upcoming', 'In-house', 'Past'];
 const SORT_OPTIONS = ['Newest booking first', 'Check-in soonest', 'Guest name A-Z', 'Status A-Z'];
+const SECRET_FIELD_PATTERN = /(token|secret|key|password)/i;
 
+const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
 const isReviewBooking = (row) => !['CONFIRMED', 'FULLY_PAID', 'CANCELLED'].includes(String(row.booking_status || row.status || '').toUpperCase());
 
 function statusClass(value) {
@@ -59,6 +60,7 @@ export default function OpsAdminApp() {
   const [reservationStatus, setReservationStatus] = useState('All');
   const [stayFilter, setStayFilter] = useState('All');
   const [reservationSort, setReservationSort] = useState('Newest booking first');
+  const [selectedReservation, setSelectedReservation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -131,6 +133,7 @@ export default function OpsAdminApp() {
     setRows([]);
     setExceptions([]);
     setNotifications([]);
+    setSelectedReservation(null);
   }
 
   if (!isUnlocked) return <LoginScreen accessKey={accessKey} setAccessKey={setAccessKey} onSubmit={unlock} loading={loading} error={error} />;
@@ -146,34 +149,20 @@ export default function OpsAdminApp() {
       </div>
       <div className="grid min-h-[calc(100vh-30px)] lg:grid-cols-[260px_1fr]">
         <aside className="bg-[#17130F] p-4 text-white lg:p-6">
-          <div className="mb-4 lg:mb-8">
-            <p className="text-[10px] uppercase tracking-[0.32em] text-[#B8977E]">Pueblo La Perla</p>
-            <h1 className="text-2xl font-light tracking-[-0.05em] lg:text-3xl">Resort Command</h1>
-            <p className="mt-2 text-[10px] uppercase tracking-widest text-[#6A645B]">Reservations first · live database</p>
-          </div>
+          <div className="mb-4 lg:mb-8"><p className="text-[10px] uppercase tracking-[0.32em] text-[#B8977E]">Pueblo La Perla</p><h1 className="text-2xl font-light tracking-[-0.05em] lg:text-3xl">Resort Command</h1><p className="mt-2 text-[10px] uppercase tracking-widest text-[#6A645B]">Reservations first · live database</p></div>
           <nav className="grid max-h-[42vh] grid-cols-2 gap-2 overflow-y-auto pr-1 lg:max-h-none lg:grid-cols-1 lg:space-y-1 lg:pr-0">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex min-h-11 w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-xs transition lg:text-sm ${activeTab === tab.id ? 'bg-[#B8977E]/10 text-[#B8977E]' : 'text-[#8C8378] hover:bg-white/5 hover:text-[#F4F0E8]'}`}><Icon size={16} /> <span>{tab.label}</span></button>;
-            })}
+            {TABS.map((tab) => { const Icon = tab.icon; return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex min-h-11 w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-xs transition lg:text-sm ${activeTab === tab.id ? 'bg-[#B8977E]/10 text-[#B8977E]' : 'text-[#8C8378] hover:bg-white/5 hover:text-[#F4F0E8]'}`}><Icon size={16} /> <span>{tab.label}</span></button>; })}
           </nav>
           <button onClick={logout} className="mt-4 flex w-full items-center justify-between border-t border-[#B8977E]/10 pt-4 text-sm text-[#6A645B] hover:text-[#B8977E]">Secure Logout <LogOut size={16} /></button>
         </aside>
         <main className="min-w-0 overflow-auto p-4 md:p-8">
           <header className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-[#B8977E]">Pueblo La Perla Resort Operations</p>
-              <h2 className="text-3xl font-light tracking-[-0.05em] text-[#17130F] md:text-4xl">{activeLabel}</h2>
-              <p className="mt-2 max-w-3xl text-sm text-[#6A645B]">A quiet luxury command center for reservations, payments, villa readiness, guest memory, Boracay service delivery, and future OTA sync.</p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              {showGlobalSearch && <div className="relative w-full sm:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full rounded-sm border border-[#E5E0D8] bg-white py-2.5 pl-9 pr-4 text-sm focus:border-[#B8977E] focus:outline-none" /></div>}
-              <button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-[#17130F] px-4 py-2.5 text-sm font-medium text-[#F4F0E8] disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button>
-            </div>
+            <div><p className="text-[10px] uppercase tracking-widest text-[#B8977E]">Pueblo La Perla Resort Operations</p><h2 className="text-3xl font-light tracking-[-0.05em] text-[#17130F] md:text-4xl">{activeLabel}</h2><p className="mt-2 max-w-3xl text-sm text-[#6A645B]">A quiet luxury command center for reservations, payments, villa readiness, guest memory, Boracay service delivery, and future OTA sync.</p></div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">{showGlobalSearch && <div className="relative w-full sm:w-80"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6A645B]" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search ref, guest, payment, email..." className="w-full rounded-sm border border-[#E5E0D8] bg-white py-2.5 pl-9 pr-4 text-sm focus:border-[#B8977E] focus:outline-none" /></div>}<button onClick={() => loadData(accessKey)} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-[#17130F] px-4 py-2.5 text-sm font-medium text-[#F4F0E8] disabled:opacity-60"><RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh</button></div>
           </header>
           {message && <div className="mb-4 rounded-sm border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
           {error && <div className="mb-4 rounded-sm border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-          {activeTab === 'bookings' && <BookingsTable rows={filteredRows} totalRows={rows.length} controls={{ reservationSearch, setReservationSearch, reservationStatus, setReservationStatus, stayFilter, setStayFilter, reservationSort, setReservationSort }} updateBooking={updateBooking} />}
+          {activeTab === 'bookings' && <BookingsTable rows={filteredRows} totalRows={rows.length} controls={{ reservationSearch, setReservationSearch, reservationStatus, setReservationStatus, stayFilter, setStayFilter, reservationSort, setReservationSort }} updateBooking={updateBooking} onOpenReservation={setSelectedReservation} />}
           {activeTab === 'dashboard' && <Dashboard kpis={kpis} />}
           {activeTab === 'exceptions' && <ExceptionsTable rows={filteredExceptions} />}
           {activeTab === 'notifications' && <NotificationsTable rows={filteredNotifications} />}
@@ -181,12 +170,13 @@ export default function OpsAdminApp() {
           {['availability', 'guests', 'housekeeping', 'concierge', 'content', 'staff', 'settings'].includes(activeTab) && <Placeholder tab={activeLabel} rows={rows} />}
         </main>
       </div>
+      {selectedReservation && <Reservation360Drawer row={selectedReservation} onClose={() => setSelectedReservation(null)} />}
     </div>
   );
 }
 
 function rowValue(row, fields) {
-  return fields.map((field) => row[field]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
+  return fields.map((fieldName) => row?.[fieldName]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
 }
 
 function normalizeStatus(value) {
@@ -208,28 +198,35 @@ function dateOnly(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function nights(row) {
+  const checkIn = dateOnly(rowValue(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']));
+  const checkOut = dateOnly(rowValue(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']));
+  return checkIn && checkOut && checkOut > checkIn ? Math.round((checkOut - checkIn) / 86400000) : '—';
+}
+
 function stayBucket(row) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const checkIn = dateOnly(rowValue(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']));
   const checkOut = dateOnly(rowValue(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']));
   if (checkIn && checkIn > today) return 'Upcoming';
-  if (checkIn && checkOut && checkIn <= today && today <= checkOut) return 'In-house';
-  if (checkOut && checkOut < today) return 'Past';
-  return 'All';
+  if (checkIn && checkOut && checkIn <= today && today < checkOut) return 'In-house';
+  if (checkOut && checkOut <= today) return 'Past';
+  return 'Review booking record';
+}
+
+function nextAction(row) {
+  const status = `${rowValue(row, ['booking_status', 'status'])} ${rowValue(row, ['payment_status', 'booking_payment_status'])} ${rowValue(row, ['payment_verification_status'])}`.toUpperCase();
+  const issue = rowValue(row, ['verification_error', 'verification_note', 'verification_notes']);
+  if (status.includes('CANCEL')) return 'No active stay — cancelled';
+  if (issue || status.includes('FAILED') || status.includes('MISMATCH') || status.includes('UNMATCHED') || status.includes('REVIEW')) return 'Payment review needed';
+  if (status.includes('VERIFIED') || status.includes('CONFIRMED') || status.includes('FULLY_PAID') || status.includes('SUCCEEDED')) return 'Prepare arrival / confirm guest details';
+  if (status.includes('PENDING') || status.includes('AWAITING') || status.includes('PROCESSING')) return 'Await or review deposit';
+  return 'Review booking record';
 }
 
 function reservationSearchText(row) {
-  return [
-    rowValue(row, ['guest_name', 'name', 'full_name', 'guestName']),
-    rowValue(row, ['guest_email', 'email', 'guestEmail']),
-    rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']),
-    rowValue(row, ['booking_reference', 'reference', 'booking_code', 'code']),
-    rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']),
-    rowValue(row, ['notes', 'special_requests', 'message', 'guest_notes', 'arrival_notes']),
-    rowValue(row, ['guest_count', 'guests', 'party_size']),
-    rowValue(row, ['payment_status', 'booking_payment_status', 'payment_verification_status']),
-  ].join(' ').toLowerCase();
+  return [rowValue(row, ['guest_name', 'name', 'full_name', 'guestName']), rowValue(row, ['guest_email', 'email', 'guestEmail']), rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']), rowValue(row, ['booking_reference', 'reference', 'booking_code', 'code']), rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']), rowValue(row, ['notes', 'special_requests', 'message', 'guest_notes', 'arrival_notes']), rowValue(row, ['guest_count', 'guests', 'party_size']), rowValue(row, ['payment_status', 'booking_payment_status', 'payment_verification_status'])].join(' ').toLowerCase();
 }
 
 function bookingTimestamp(row) {
@@ -240,23 +237,46 @@ function bookingTimestamp(row) {
 
 function filterReservations(rows, controls) {
   const needle = controls.search.trim().toLowerCase();
-  return rows
-    .filter((row) => !needle || reservationSearchText(row).includes(needle))
-    .filter((row) => controls.status === 'All' || normalizeStatus(rowValue(row, ['booking_status', 'status'])) === controls.status)
-    .filter((row) => controls.stay === 'All' || stayBucket(row) === controls.stay)
-    .slice()
-    .sort((a, b) => {
-      if (controls.sort === 'Check-in soonest') return (dateOnly(rowValue(a, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER) - (dateOnly(rowValue(b, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER);
-      if (controls.sort === 'Guest name A-Z') return String(rowValue(a, ['guest_name', 'name', 'full_name', 'guestName'])).localeCompare(String(rowValue(b, ['guest_name', 'name', 'full_name', 'guestName'])));
-      if (controls.sort === 'Status A-Z') return normalizeStatus(rowValue(a, ['booking_status', 'status'])).localeCompare(normalizeStatus(rowValue(b, ['booking_status', 'status'])));
-      return bookingTimestamp(b) - bookingTimestamp(a);
-    });
+  return rows.filter((row) => !needle || reservationSearchText(row).includes(needle)).filter((row) => controls.status === 'All' || normalizeStatus(rowValue(row, ['booking_status', 'status'])) === controls.status).filter((row) => controls.stay === 'All' || stayBucket(row) === controls.stay).slice().sort((a, b) => {
+    if (controls.sort === 'Check-in soonest') return (dateOnly(rowValue(a, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER) - (dateOnly(rowValue(b, ['check_in', 'checkIn']))?.getTime() || Number.MAX_SAFE_INTEGER);
+    if (controls.sort === 'Guest name A-Z') return String(rowValue(a, ['guest_name', 'name', 'full_name', 'guestName'])).localeCompare(String(rowValue(b, ['guest_name', 'name', 'full_name', 'guestName'])));
+    if (controls.sort === 'Status A-Z') return normalizeStatus(rowValue(a, ['booking_status', 'status'])).localeCompare(normalizeStatus(rowValue(b, ['booking_status', 'status'])));
+    return bookingTimestamp(b) - bookingTimestamp(a);
+  });
 }
 
 function filterRows(rows, query) {
   const needle = query.trim().toLowerCase();
   if (!needle) return rows;
   return rows.filter((row) => JSON.stringify(row).toLowerCase().includes(needle));
+}
+
+function maskSecrets(value) {
+  if (Array.isArray(value)) return value.map(maskSecrets);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, SECRET_FIELD_PATTERN.test(key) ? '[masked]' : maskSecrets(child)]));
+  return value;
+}
+
+function DetailCard({ label, value }) {
+  return <div className="min-w-0 rounded-md border border-[#E5E0D8] bg-[#F7F2EA] p-4"><p className="text-[10px] font-bold uppercase tracking-widest text-[#6A645B]">{label}</p><p className="mt-2 break-words text-sm font-semibold text-[#17130F]">{value || '—'}</p></div>;
+}
+
+function Reservation360Drawer({ row, onClose }) {
+  const [tab, setTab] = useState('overview');
+  const guestName = rowValue(row, ['guest_name', 'name', 'full_name', 'guestName']);
+  const reference = rowValue(row, ['booking_reference', 'reference', 'booking_code', 'code']);
+  const accommodation = rowValue(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']);
+  const checkIn = rowValue(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']);
+  const checkOut = rowValue(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']);
+  const requests = rowValue(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']);
+  const tabs = ['overview', 'guest', 'payment', 'stay', 'raw'];
+  const data = {
+    overview: [['Reference', reference], ['Guest', guestName], ['Booking status', rowValue(row, ['booking_status', 'status'])], ['Payment verification', rowValue(row, ['payment_verification_status'])], ['Stay', `${checkIn || '—'} → ${checkOut || '—'}`], ['Nights', nights(row)], ['Stay bucket', stayBucket(row)], ['Next action', nextAction(row)], ['Requests / notes', requests || 'No request captured']],
+    guest: [['Name', guestName], ['Email', rowValue(row, ['guest_email', 'email', 'guestEmail'])], ['Phone', rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone'])], ['Guest count', rowValue(row, ['guest_count', 'guests', 'party_size'])]],
+    payment: [['Total amount', money(row.total_amount_php)], ['Deposit amount', money(row.deposit_amount_php)], ['Payment amount', money(row.payment_amount_php)], ['Balance amount', money(row.balance_amount_php)], ['Payment status', rowValue(row, ['payment_status'])], ['Booking payment status', rowValue(row, ['booking_payment_status'])], ['Verification status', rowValue(row, ['payment_verification_status'])], ['Verification note/error', rowValue(row, ['verification_error', 'verification_note', 'verification_notes'])], ['Provider', rowValue(row, ['provider'])], ['Provider payment ID', rowValue(row, ['provider_payment_id'])], ['Provider session ID', rowValue(row, ['provider_session_id'])], ['Provider event/reference', rowValue(row, ['provider_event_id', 'provider_reference_id'])]],
+    stay: [['Accommodation', accommodation], ['Check-in', checkIn], ['Check-out', checkOut], ['Nights', nights(row)], ['Stay bucket', stayBucket(row)], ['Arrival notes', rowValue(row, ['arrival_notes', 'special_requests', 'guest_notes'])]],
+  };
+  return <div className="fixed inset-0 z-50"><button className="absolute inset-0 h-full w-full bg-[#17130F]/45 backdrop-blur-sm" onClick={onClose} aria-label="Close Reservation 360" /><aside className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col overflow-hidden bg-[#FFFDF8] shadow-2xl sm:w-[min(760px,100vw)]"><header className="sticky top-0 z-10 bg-[#17130F] p-5 text-[#F7F2EA]"><div className="flex items-start justify-between gap-4"><div className="min-w-0"><p className="text-[10px] uppercase tracking-[0.28em] text-[#B8977E]">Reservation 360</p><h3 className="mt-1 break-words text-3xl font-light tracking-[-0.05em]">{reference || 'Reservation'}</h3><p className="mt-1 break-words text-sm text-[#A9A096]">{guestName || 'Guest'} · {accommodation || 'Accommodation'}</p></div><button onClick={onClose} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#B8977E]/40 bg-[#FFFDF8] px-4 py-2 text-sm font-bold text-[#17130F]"><X size={16} /> Close</button></div><div className="mt-4 flex flex-wrap gap-2"><Pill value={rowValue(row, ['booking_status', 'status'])} /><Pill value={rowValue(row, ['payment_verification_status'])} /></div></header><nav className="flex gap-2 overflow-x-auto border-b border-[#E5E0D8] bg-[#F7F2EA] p-3">{tabs.map((item) => <button key={item} onClick={() => setTab(item)} className={`whitespace-nowrap rounded-full border px-3 py-2 text-xs font-bold uppercase tracking-widest ${tab === item ? 'border-[#17130F] bg-[#17130F] text-[#F7F2EA]' : 'border-[#E5E0D8] bg-white text-[#17130F]'}`}>{item === 'raw' ? 'Raw Record' : item}</button>)}</nav><div className="min-h-0 flex-1 overflow-auto p-4 md:p-5">{tab === 'raw' ? <div className="space-y-3"><div className="rounded-md border border-dashed border-[#D8CEC0] bg-[#FBFAF7] p-4 text-sm text-[#6A645B]">Raw source record with obvious token/secret/key/password fields masked.</div><pre className="max-h-[58vh] overflow-auto whitespace-pre-wrap break-words rounded-md bg-[#17130F] p-4 text-xs leading-relaxed text-[#F7F2EA]">{JSON.stringify(maskSecrets(row), null, 2)}</pre></div> : <div className="grid gap-3 sm:grid-cols-2">{(data[tab] || data.overview).map(([label, value]) => <DetailCard key={label} label={label} value={value} />)}</div>}</div></aside></div>;
 }
 
 function LoginScreen({ accessKey, setAccessKey, onSubmit, loading, error }) {
@@ -271,16 +291,16 @@ function Metric({ icon: Icon, label, value, help, tone, dark }) {
   return <div className={`${dark ? 'bg-[#17130F] text-[#F4F0E8] border-[#2A241D]' : tone === 'danger' ? 'bg-white border-red-200' : 'bg-white border-[#E5E0D8]'} rounded-md border p-5 shadow-sm`}><div className="flex items-center justify-between"><p className={`text-xs font-semibold uppercase tracking-widest ${dark ? 'text-[#B8977E]' : tone === 'danger' ? 'text-red-800' : 'text-[#6A645B]'}`}>{label}</p><Icon size={17} className={tone === 'danger' ? 'text-red-500' : 'text-[#B8977E]'} /></div><p className="mt-4 text-3xl font-light">{value}</p><p className="mt-1 text-xs text-[#6A645B]">{help}</p></div>;
 }
 
-function BookingCard({ row, updateBooking }) {
+function BookingCard({ row, updateBooking, onOpenReservation }) {
   const guestPhone = rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']);
   const guestCount = rowValue(row, ['guest_count', 'guests', 'party_size']);
   const requests = rowValue(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']);
-  return <article className="space-y-3 rounded-md border border-[#E5E0D8] bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><div><p className="text-lg font-bold leading-tight text-[#17130F]">{row.booking_reference || '—'}</p><p className="text-xs uppercase tracking-widest text-[#6A645B]">{row.provider || 'XENDIT'}</p></div><Pill value={row.payment_verification_status || row.booking_status} /></div><div><p className="font-medium text-[#17130F]">{row.guest_name || '—'}</p><p className="break-all text-xs text-[#6A645B]">{row.guest_email || ''}</p><p className="text-xs text-[#6A645B]">{guestPhone || 'No phone captured'} · {guestCount || '—'} guests</p></div><div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2"><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Stay</p><p>{row.accommodation_name || '—'}</p><p className="text-[#6A645B]">{row.check_in || '—'} → {row.check_out || '—'}</p><p className="text-[#6A645B]">{guestCount || '—'} guests</p></div><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Amounts</p><p>Total: {money(row.total_amount_php)}</p><p>Deposit: {money(row.deposit_amount_php)}</p><p>Balance: {money(row.balance_amount_php)}</p></div></div>{requests && <div className="rounded-sm bg-[#F7F2EA] px-3 py-2 text-xs text-[#6A645B]"><span className="font-semibold uppercase tracking-widest text-[#17130F]">Requests</span><br />{requests}</div>}<div className="grid grid-cols-2 gap-2 text-xs"><div><span className="text-[#6A645B]">Booking</span><br /><Pill value={row.booking_status} /></div><div><span className="text-[#6A645B]">Payment</span><br /><Pill value={row.payment_status || row.booking_payment_status} /></div></div><div className="grid gap-2 pt-2 sm:flex sm:flex-wrap"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm after verified deposit</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Mark payment review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></article>;
+  return <article className="space-y-3 rounded-md border border-[#E5E0D8] bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-3"><div><p className="text-lg font-bold leading-tight text-[#17130F]">{row.booking_reference || '—'}</p><p className="text-xs uppercase tracking-widest text-[#6A645B]">{row.provider || 'XENDIT'}</p></div><Pill value={row.payment_verification_status || row.booking_status} /></div><div><p className="font-medium text-[#17130F]">{row.guest_name || '—'}</p><p className="break-all text-xs text-[#6A645B]">{row.guest_email || ''}</p><p className="text-xs text-[#6A645B]">{guestPhone || 'No phone captured'} · {guestCount || '—'} guests</p></div><div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2"><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Stay</p><p>{row.accommodation_name || '—'}</p><p className="text-[#6A645B]">{row.check_in || '—'} → {row.check_out || '—'}</p><p className="text-[#6A645B]">{guestCount || '—'} guests</p></div><div><p className="text-[10px] uppercase tracking-widest text-[#6A645B]">Amounts</p><p>Total: {money(row.total_amount_php)}</p><p>Deposit: {money(row.deposit_amount_php)}</p><p>Balance: {money(row.balance_amount_php)}</p></div></div>{requests && <div className="rounded-sm bg-[#F7F2EA] px-3 py-2 text-xs text-[#6A645B]"><span className="font-semibold uppercase tracking-widest text-[#17130F]">Requests</span><br />{requests}</div>}<div className="grid grid-cols-2 gap-2 text-xs"><div><span className="text-[#6A645B]">Booking</span><br /><Pill value={row.booking_status} /></div><div><span className="text-[#6A645B]">Payment</span><br /><Pill value={row.payment_status || row.booking_payment_status} /></div></div><div className="grid gap-2 pt-2 sm:flex sm:flex-wrap"><Action onClick={() => onOpenReservation(row)}>View 360</Action><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm after verified deposit</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Mark payment review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></article>;
 }
 
-function BookingsTable({ rows, totalRows, controls, updateBooking }) {
+function BookingsTable({ rows, totalRows, controls, updateBooking, onOpenReservation }) {
   const emptyMessage = totalRows === 0 ? 'No reservations loaded yet.' : 'No reservations match the current search or filters.';
-  return <Panel title="Reservations" count={rows.length}><ReservationControls rowsShown={rows.length} totalRows={totalRows} controls={controls} /><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="py-8 text-center text-[#6A645B]">{emptyMessage}</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Requests', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={9} text={emptyMessage} /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span><br /><span className="muted">{rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']) || 'No phone captured'}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span><br /><span className="muted">{rowValue(row, ['guest_count', 'guests', 'party_size']) || '—'} guests</span></td><td className="cell max-w-[240px]"><span className="muted">{rowValue(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']) || 'No requests noted'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || row.verification_note || 'Webhook verification is the payment source of truth'}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm after verified deposit</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Mark payment review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
+  return <Panel title="Reservations" count={rows.length}><ReservationControls rowsShown={rows.length} totalRows={totalRows} controls={controls} /><div className="grid gap-3 md:hidden">{rows.length === 0 ? <div className="py-8 text-center text-[#6A645B]">{emptyMessage}</div> : rows.map((row) => <BookingCard key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} row={row} updateBooking={updateBooking} onOpenReservation={onOpenReservation} />)}</div><div className="hidden md:block"><Table columns={['Ref', 'Guest', 'Stay', 'Requests', 'Amounts', 'Booking', 'Payment', 'Verification', 'Actions']}>{rows.length === 0 ? <Empty colSpan={9} text={emptyMessage} /> : rows.map((row) => <tr key={row.booking_reference || row.provider_payment_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || '—'}</strong><br /><span className="muted">{row.provider || 'XENDIT'}</span></td><td className="cell">{row.guest_name || '—'}<br /><span className="muted">{row.guest_email || ''}</span><br /><span className="muted">{rowValue(row, ['guest_phone', 'phone', 'phone_number', 'whatsapp', 'guestPhone']) || 'No phone captured'}</span></td><td className="cell">{row.accommodation_name || '—'}<br /><span className="muted">{row.check_in || '—'} → {row.check_out || '—'}</span><br /><span className="muted">{rowValue(row, ['guest_count', 'guests', 'party_size']) || '—'} guests</span></td><td className="cell max-w-[240px]"><span className="muted">{rowValue(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']) || 'No requests noted'}</span></td><td className="cell">Total: {money(row.total_amount_php)}<br />Deposit: {money(row.deposit_amount_php)}<br />Balance: {money(row.balance_amount_php)}</td><td className="cell"><Pill value={row.booking_status} /></td><td className="cell"><Pill value={row.payment_status || row.booking_payment_status} /><br /><span className="muted">{row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td className="cell"><Pill value={row.payment_verification_status} /><br /><span className="muted">{row.verification_error || row.verification_note || 'Webhook verification is the payment source of truth'}</span></td><td className="cell"><div className="flex flex-wrap gap-2"><Action onClick={() => onOpenReservation(row)}>View 360</Action><Action onClick={() => updateBooking(row.booking_reference, 'CONFIRMED')} tone="good">Confirm after verified deposit</Action><Action onClick={() => updateBooking(row.booking_reference, 'PAYMENT_PROCESSING')} tone="warn">Mark payment review</Action><Action onClick={() => updateBooking(row.booking_reference, 'CANCELLED')} tone="bad">Cancel</Action></div></td></tr>)}</Table></div></Panel>;
 }
 
 function ReservationControls({ rowsShown, totalRows, controls }) {
@@ -308,11 +328,7 @@ function ChannelSyncFoundation() {
 function Placeholder({ tab, rows }) {
   return <Panel title={tab} count={rows.length}><div className="rounded-xl border border-dashed border-[#E5E0D8] bg-[#F7F2EA] p-8 text-center text-[#6A645B]"><p className="text-sm uppercase tracking-widest text-[#17130F]">{tab} module staged</p><p className="mt-2 text-sm">This section is now part of the Resort Command IA. It will be wired to dedicated tables/endpoints after Reservations, Payments, and Reservation 360 are stable.</p></div></Panel>;
 }
-function Panel({ title, count, children }) {
-  return <section className="overflow-hidden rounded-md border border-[#E5E0D8] bg-white shadow-sm"><div className="flex flex-col gap-2 border-b border-[#E5E0D8] bg-[#FBFAF7] p-4 sm:flex-row sm:items-center sm:justify-between md:p-5"><h3 className="text-sm font-semibold uppercase tracking-widest text-[#17130F]">{title}</h3>{count !== undefined && <span className="text-xs text-[#6A645B]">{count} rows</span>}</div><div className="p-4 md:p-5">{children}</div></section>;
-}
-function Table({ columns, children }) {
-  return <div className="overflow-x-auto rounded-sm border border-[#E5E0D8]"><table className="w-full min-w-[1080px] border-collapse text-left"><thead><tr className="bg-[#F4F0E8]/60">{columns.map((column) => <th key={column} className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-[#6A645B]">{column}</th>)}</tr></thead><tbody className="divide-y divide-[#E5E0D8] text-sm">{children}</tbody></table></div>;
-}
+function Panel({ title, count, children }) { return <section className="overflow-hidden rounded-md border border-[#E5E0D8] bg-white shadow-sm"><div className="flex flex-col gap-2 border-b border-[#E5E0D8] bg-[#FBFAF7] p-4 sm:flex-row sm:items-center sm:justify-between md:p-5"><h3 className="text-sm font-semibold uppercase tracking-widest text-[#17130F]">{title}</h3>{count !== undefined && <span className="text-xs text-[#6A645B]">{count} rows</span>}</div><div className="p-4 md:p-5">{children}</div></section>; }
+function Table({ columns, children }) { return <div className="overflow-x-auto rounded-sm border border-[#E5E0D8]"><table className="w-full min-w-[1080px] border-collapse text-left"><thead><tr className="bg-[#F4F0E8]/60">{columns.map((column) => <th key={column} className="px-6 py-4 text-[10px] font-semibold uppercase tracking-widest text-[#6A645B]">{column}</th>)}</tr></thead><tbody className="divide-y divide-[#E5E0D8] text-sm">{children}</tbody></table></div>; }
 function Empty({ colSpan, text }) { return <tr><td colSpan={colSpan} className="px-6 py-10 text-center text-[#6A645B]">{text}</td></tr>; }
-function Action({ children, onClick, tone }) { const cls = tone === 'good' ? 'bg-green-50 text-green-700 border-green-100' : tone === 'bad' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-yellow-50 text-yellow-700 border-yellow-100'; return <button onClick={onClick} className={`rounded-sm border px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${cls}`}>{children}</button>; }
+function Action({ children, onClick, tone }) { const cls = tone === 'good' ? 'bg-green-50 text-green-700 border-green-100' : tone === 'bad' ? 'bg-red-50 text-red-700 border-red-100' : tone === 'warn' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 'bg-[#17130F] text-[#F7F2EA] border-[#17130F]'; return <button type="button" onClick={(event) => { event.stopPropagation(); onClick?.(); }} className={`rounded-sm border px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${cls}`}>{children}</button>; }
