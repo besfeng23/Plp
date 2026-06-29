@@ -14,9 +14,18 @@
     return window.location.pathname.replace(/\/$/, '') || '/';
   }
 
+  function isReactApp() {
+    // The React SPA shell (index.html) mounts into #root and renders its own
+    // navbar, footer, mobile action bar, and per-page trust/summary content.
+    // The static HTML route files do not have #root. The injected trust strip
+    // and mobile action bar are for those static pages only — inside the SPA
+    // they duplicate React's own UI and break against its fixed header / hero.
+    return !!document.getElementById('root');
+  }
+
   function skipUxLayer() {
     var path = getPath();
-    return path === '/' || path.indexOf('/api') === 0 || path.indexOf('/photo-library') === 0 || path.indexOf('/admin') === 0 || path.indexOf('/content-ops') === 0 || path.indexOf('/availability-ops') === 0;
+    return isReactApp() || path === '/' || path.indexOf('/api') === 0 || path.indexOf('/photo-library') === 0 || path.indexOf('/admin') === 0 || path.indexOf('/content-ops') === 0 || path.indexOf('/availability-ops') === 0;
   }
 
   function addTrustItem(parent, label, value) {
