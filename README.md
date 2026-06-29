@@ -11,6 +11,7 @@ Luxury editorial resort prototype for Pueblo La Perla Boracay.
 - Vercel serverless functions
 - Supabase Postgres for bookings/payments
 - Xendit Payment Sessions for reservation deposits
+- PayPal Checkout for reservation deposits
 
 ## Run locally
 
@@ -33,6 +34,9 @@ Set these in Vercel before accepting real payments:
 NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
 XENDIT_SECRET_KEY=
 XENDIT_WEBHOOK_TOKEN=
+PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+PAYPAL_MODE=sandbox
 SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 ```
@@ -46,6 +50,19 @@ BOOKINGS_TO_EMAIL=
 LEADS_FROM_EMAIL=
 LEADS_TO_EMAIL=
 ```
+
+## PayPal setup
+
+PayPal checkout must be configured with environment variable names only; never commit or paste real credential values.
+
+```env
+PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+PAYPAL_MODE=sandbox
+NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
+```
+
+Start with `PAYPAL_MODE=sandbox` and complete a sandbox smoke test before considering live payment use. If a real PayPal client id or secret was leaked, pasted, logged, or committed anywhere, rotate it in PayPal immediately and update the deployment environment.
 
 ## Booking/payment flow
 
