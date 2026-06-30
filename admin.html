@@ -87,6 +87,11 @@
                     const otaReadiness = doc.createElement('script');
                     otaReadiness.src = '/ota-channel-readiness.js';
                     doc.body.appendChild(otaReadiness);
+                    otaReadiness.addEventListener('load', () => {
+                      const otaDryRun = doc.createElement('script');
+                      otaDryRun.src = '/ota-sync-dry-run.js';
+                      doc.body.appendChild(otaDryRun);
+                    });
                   });
                 });
               });
