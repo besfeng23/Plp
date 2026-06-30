@@ -83,10 +83,20 @@
     line.innerHTML = events.length ? events.map((event) => `<article class="availability-event"><strong>${esc(event.type)}</strong><p>${esc(event.date)} · ${esc(guest(event.row))} · ${esc(room(event.row))}</p><button type="button" class="r360-view" onclick="window.openReservation360(${event.index})">View 360</button></article>`).join('') : '<div class="empty-state">No check-in/check-out timeline available.</div>';
   }
 
+  function loadHousekeeping() {
+    if (document.querySelector('script[data-housekeeping-readiness]')) return;
+    const script = document.createElement('script');
+    script.src = '/housekeeping-readiness.js';
+    script.defer = true;
+    script.setAttribute('data-housekeeping-readiness', 'true');
+    document.body.appendChild(script);
+  }
+
   const oldToday = window.renderTodayCommand;
   if (typeof oldToday === 'function') window.renderTodayCommand = function (rows, notifications) { const out = oldToday.apply(this, arguments); render(rows || []); return out; };
   const oldRows = window.renderRows;
   if (typeof oldRows === 'function') window.renderRows = function (rows) { const out = oldRows.apply(this, arguments); render(rows || []); return out; };
   ensureShell();
   render(rowsCache);
+  loadHousekeeping();
 })();
