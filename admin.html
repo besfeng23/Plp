@@ -10,8 +10,8 @@
     <style>
       :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #F7F2EA; color: #17130F; }
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; background: linear-gradient(135deg, #F7F2EA 0%, #EFE7DA 100%); color: #17130F; -webkit-font-smoothing: antialiased; }
-      .boot-shell { min-height: 100vh; display: grid; grid-template-columns: 260px minmax(0, 1fr); }
+      body { margin: 0; min-height: 100vh; overflow: hidden; background: linear-gradient(135deg, #F7F2EA 0%, #EFE7DA 100%); color: #17130F; -webkit-font-smoothing: antialiased; }
+      .boot-shell { position: fixed; inset: 0; display: grid; grid-template-columns: 260px minmax(0, 1fr); z-index: 2; background: linear-gradient(135deg, #F7F2EA 0%, #EFE7DA 100%); }
       .boot-sidebar { border-right: 1px solid rgba(184,151,126,.28); background: rgba(255,253,248,.62); padding: 28px 22px; }
       .boot-mark { margin-bottom: 42px; }
       .boot-eyebrow { color: #B8977E; font-size: 10px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
@@ -35,13 +35,15 @@
       .boot-panel .boot-line:nth-child(2) { width: 82%; height: 42px; border-radius: 16px; margin-bottom: 26px; }
       .boot-panel .boot-line:nth-child(n+3) { width: 100%; height: 46px; border-radius: 12px; }
       .boot-status { position: fixed; left: 32px; bottom: 24px; color: #6A645B; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+      #adminFrame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #F7F2EA; }
       @keyframes shimmer { 0% { background-position: 180% 0; } 100% { background-position: -40% 0; } }
       @media (max-width: 900px) { .boot-shell { grid-template-columns: 1fr; } .boot-sidebar { display: none; } .boot-main { padding: 22px 18px; } .boot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .boot-actions { display: none; } .boot-status { left: 18px; } }
       @media (max-width: 560px) { .boot-grid { grid-template-columns: 1fr; } .boot-card:nth-child(n+3) { display: none; } .boot-title { width: 100%; } }
     </style>
   </head>
   <body>
-    <div class="boot-shell" role="status" aria-live="polite" aria-label="Loading PLP Resort Command">
+    <iframe id="adminFrame" src="/admin-ops.html" title="PLP Resort Command"></iframe>
+    <div id="bootShell" class="boot-shell" role="status" aria-live="polite" aria-label="Loading PLP Resort Command">
       <aside class="boot-sidebar" aria-hidden="true">
         <div class="boot-mark"><div class="boot-eyebrow">Pueblo La Perla</div><div class="boot-logo">Resort Command</div></div>
         <div class="boot-nav"><div class="boot-line"></div><div class="boot-line"></div><div class="boot-line"></div><div class="boot-line"></div><div class="boot-line"></div></div>
@@ -54,20 +56,22 @@
       <div class="boot-status">Opening secure admin workspace</div>
     </div>
     <script>
-      fetch('/admin-ops.html', { cache: 'no-store' })
-        .then((response) => {
-          if (!response.ok) throw new Error('Admin workspace unavailable');
-          return response.text();
-        })
-        .then((html) => {
-          const enhanced = html.replace('</body>', '<script src="/reservation-360.js"><\/script></body>');
-          document.open();
-          document.write(enhanced);
-          document.close();
-        })
-        .catch(() => {
-          window.location.href = '/admin-ops.html';
-        });
+      const frame = document.getElementById('adminFrame');
+      const boot = document.getElementById('bootShell');
+      frame.addEventListener('load', () => {
+        try {
+          const doc = frame.contentDocument;
+          const r360 = doc.createElement('script');
+          r360.src = '/reservation-360.js';
+          doc.body.appendChild(r360);
+          r360.addEventListener('load', () => {
+            const workflow = doc.createElement('script');
+            workflow.src = '/admin-confirmation-workflow.js';
+            doc.body.appendChild(workflow);
+          });
+        } catch {}
+        boot.style.display = 'none';
+      });
     </script>
   </body>
 </html>
