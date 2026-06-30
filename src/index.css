@@ -18,6 +18,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Honor reduced-motion across the public site: no smooth scroll, minimal transitions. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 html[data-admin-experience="plp-resort-command-v3"] body {
   background: linear-gradient(135deg, #F7F2EA, #EFE7DA);
 }
@@ -107,6 +122,16 @@ textarea:focus-visible {
   transform: translateY(max(0.75rem, env(safe-area-inset-top, 0px)));
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Comfortable >=44px tap targets for footer links on touch devices; desktop density preserved. */
+@media (hover: none) and (pointer: coarse) {
+  footer a,
+  footer button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 /*
