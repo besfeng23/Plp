@@ -1,6 +1,7 @@
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
+import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './otaSyncPlanner.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 const STAFF_TASK_KINDS = new Set(['task', 'note']);
@@ -235,6 +236,44 @@ async function handleContent(req, res) {
   return json(res, 200, { ok: true, content: saved });
 }
 
+async function handleOtaReadiness(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const snapshot = await getOtaReadinessSnapshot();
+  return json(res, 200, snapshot);
+}
+
+async function handleOtaMappings(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const snapshot = await getOtaMappingSnapshot();
+  return json(res, 200, snapshot);
+}
+
+async function handleOtaSyncDryRun(req, res) {
+  if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const body = parseBody(req);
+  if (String(body.mode || 'dry_run') === 'live') return json(res, 400, { ok: false, error: 'Live OTA sync is intentionally disabled in Phase 2A.' });
+  if (!body.startDate || !body.endDate) return json(res, 400, { ok: false, error: 'Missing date range.' });
+  try {
+    const result = await buildOtaInventoryDryRun({
+      channelKey: cleanText(body.channelKey, 80) || undefined,
+      accommodationName: cleanText(body.accommodationName, 160) || undefined,
+      startDate: cleanText(body.startDate, 20),
+      endDate: cleanText(body.endDate, 20),
+      mode: body.mode || 'dry_run',
+      createdBy: cleanText(req.headers['x-plp-staff-name'] || body.createdBy || 'staff', 120),
+    });
+    return json(res, 200, result);
+  } catch (error) {
+    return json(res, 400, { ok: false, error: error.message, dryRunOnly: true });
+  }
+}
+
+async function handleOtaConflicts(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const rows = await selectRows('plp_ota_conflicts', 'status=eq.open&select=*&order=created_at.desc&limit=500');
+  return json(res, 200, { ok: true, conflicts: rows || [] });
+}
+
 export default async function handler(req, res) {
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
 
@@ -250,6 +289,10 @@ export default async function handler(req, res) {
     if (action === 'staff-tasks' || action === 'staff-task' || action === 'internal-notes') return await handleStaffTasks(req, res);
     if (action === 'date-blocks') return await handleDateBlocks(req, res);
     if (action === 'content') return await handleContent(req, res);
+    if (action === 'ota-readiness') return await handleOtaReadiness(req, res);
+    if (action === 'ota-mappings') return await handleOtaMappings(req, res);
+    if (action === 'ota-sync-dry-run') return await handleOtaSyncDryRun(req, res);
+    if (action === 'ota-conflicts') return await handleOtaConflicts(req, res);
     return json(res, 404, { ok: false, error: 'Unknown admin action' });
   } catch (error) {
     return json(res, 500, { ok: false, error: 'Admin action failed', detail: error.message });
