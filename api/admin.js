@@ -3,6 +3,7 @@ import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
 import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './otaSyncPlanner.js';
 import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './otaReservationImporter.js';
+import { getOtaConflictConsoleSummary, listOtaConflictConsole, updateOtaConflictResolution } from './otaConflictManager.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 const STAFF_TASK_KINDS = new Set(['task', 'note']);
@@ -10,6 +11,7 @@ const STAFF_TASK_CATEGORIES = new Set(['concierge', 'housekeeping', 'payment', '
 const STAFF_TASK_PRIORITIES = new Set(['high', 'medium', 'normal']);
 const STAFF_TASK_STATUSES = new Set(['open', 'in_progress', 'done', 'cancelled']);
 const PHASE_2B_BLOCK_MESSAGE = 'Phase 2B is review-first only. Automatic booking/payment/guest-message actions are disabled.';
+const PHASE_2C_BLOCK_MESSAGE = 'Phase 2C is operator-review only. Automatic booking/payment/guest-message/cancellation actions are disabled.';
 
 function json(res, status, payload) { res.statusCode = status; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(payload)); }
 function hasStaffAccess(req) { const expected = process.env.PLP_STAFF_CODE; const provided = req.headers['x-plp-staff-code']; return Boolean(expected && provided && String(provided) === String(expected)); }
@@ -21,6 +23,7 @@ function cleanText(value, max = 500) { return String(value || '').replace(/[\r\n
 function cleanEnum(value, allowed, fallback) { const normalized = String(value || fallback).trim().toLowerCase().replace(/[\s-]+/g, '_'); return allowed.has(normalized) ? normalized : fallback; }
 function encode(value) { return encodeURIComponent(String(value || '')); }
 function containsDisabledOtaAction(value) { if (!value || typeof value !== 'object') return false; if (value.createBooking === true || value.autoConfirm === true || value.mutatePayment === true || value.sendGuestMessage === true) return true; if (String(value.mode || '').trim().toLowerCase() === 'live') return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledOtaAction(item)); }
+function containsDisabledConflictAction(value) { if (!value || typeof value !== 'object') return false; if (containsDisabledOtaAction(value)) return true; if (value.cancelDirectBooking === true || value.cancelOtaBooking === true) return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledConflictAction(item)); }
 function staffName(req) { return cleanText(req.headers['x-plp-staff-name'] || 'staff', 120); }
 
 async function handleHealth(req, res) {
@@ -108,6 +111,10 @@ async function handleOtaReservationStage(req, res) { if (req.method !== 'POST') 
 async function handleOtaReservationReview(req, res) { if (req.method !== 'PATCH') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE }); const row = await updateOtaReservationReview({ ...body, reviewedBy: body.reviewedBy || staffName(req) }); return json(res, row ? 200 : 404, { ok: Boolean(row), row, reviewFirstOnly: true, message: 'Review status updated. No booking was created.' }); }
 async function handleOtaReservationSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const summary = await getOtaReservationReviewSummary(); return json(res, 200, { ok: true, summary, reviewFirstOnly: true }); }
 
+async function handleOtaConflictConsole(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await listOtaConflictConsole({ sourceTable: req.query?.sourceTable, channelKey: req.query?.channelKey, severity: req.query?.severity, resolutionStatus: req.query?.resolutionStatus, reviewStatus: req.query?.reviewStatus, conflictType: req.query?.conflictType, accommodationName: req.query?.accommodationName, limit: req.query?.limit }); return json(res, 200, result); }
+async function handleOtaConflictSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getOtaConflictConsoleSummary(); return json(res, 200, result); }
+async function handleOtaConflictResolution(req, res) { if (!['PATCH', 'POST'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledConflictAction(body)) return json(res, 400, { ok: false, error: PHASE_2C_BLOCK_MESSAGE }); const result = await updateOtaConflictResolution({ ...body, actor: body.actor || staffName(req) }); return json(res, 200, { ...result, message: 'Conflict resolution saved. No booking, payment, guest message, or OTA cancellation was performed.' }); }
+
 export default async function handler(req, res) {
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
   try {
@@ -128,6 +135,9 @@ export default async function handler(req, res) {
     if (action === 'ota-reservation-stage') return await handleOtaReservationStage(req, res);
     if (action === 'ota-reservation-review') return await handleOtaReservationReview(req, res);
     if (action === 'ota-reservation-summary') return await handleOtaReservationSummary(req, res);
+    if (action === 'ota-conflict-console') return await handleOtaConflictConsole(req, res);
+    if (action === 'ota-conflict-summary') return await handleOtaConflictSummary(req, res);
+    if (action === 'ota-conflict-resolution') return await handleOtaConflictResolution(req, res);
     return json(res, 404, { ok: false, error: 'Unknown admin action' });
   } catch (error) { return json(res, 500, { ok: false, error: 'Admin action failed', detail: error.message }); }
 }
