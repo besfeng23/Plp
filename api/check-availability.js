@@ -1,4 +1,4 @@
-import { getAvailabilityConflicts } from './availabilityHelper.js';
+import { getAvailabilityConflicts } from './_availabilityHelper.js';
 import { getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 
 export default async function handler(req, res) {

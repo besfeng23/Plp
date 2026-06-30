@@ -18,6 +18,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Honor reduced-motion across the public site: no smooth scroll, minimal transitions. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 html[data-admin-experience="plp-resort-command-v3"] body {
   background: linear-gradient(135deg, #F7F2EA, #EFE7DA);
 }
@@ -77,6 +92,45 @@ img {
   display: block;
 }
 
+/* Public responsive hardening: prevent oversized media, SVGs, or containers from creating horizontal drift. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root,
+#main-content {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body,
+  #root,
+  #main-content {
+    overflow-x: hidden;
+  }
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -107,6 +161,95 @@ textarea:focus-visible {
   transform: translateY(max(0.75rem, env(safe-area-inset-top, 0px)));
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Comfortable >=44px tap targets for footer links on touch devices; desktop density preserved. */
+@media (hover: none) and (pointer: coarse) {
+  footer a,
+  footer button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Public responsive guardrails for small phones. Keep the PLP editorial mood, but stop oversized type/letterspacing from crowding. */
+@media (max-width: 640px) {
+  header button[aria-label="Pueblo La Perla home"] {
+    max-width: calc(100vw - 5.75rem);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  header button[aria-label="Pueblo La Perla home"] span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #main-content > section,
+  #main-content > div {
+    max-width: 100vw;
+  }
+
+  #main-content p,
+  #main-content li,
+  #main-content figcaption {
+    overflow-wrap: anywhere;
+  }
+
+  #main-content h1 {
+    font-size: clamp(2.75rem, 14vw, 4.25rem);
+    line-height: 1;
+  }
+
+  #main-content h2 {
+    font-size: clamp(2.15rem, 10vw, 3.5rem);
+    line-height: 1.05;
+  }
+
+  #main-content h3 {
+    line-height: 1.15;
+  }
+
+  #main-content button,
+  #main-content a {
+    min-height: 44px;
+  }
+
+  [data-plp-hero="true"] {
+    min-height: 100svh;
+    padding-top: calc(7rem + var(--safe-top));
+    padding-bottom: calc(7.25rem + var(--safe-bottom));
+  }
+
+  [data-plp-hero="true"] h1 {
+    font-size: clamp(3rem, 16vw, 4.6rem);
+    line-height: 0.95;
+  }
+}
+
+@media (max-width: 390px) {
+  header [class*="tracking-[0.18em]"],
+  header [class*="tracking-[0.2em]"],
+  header [class*="tracking-[0.3em]"],
+  footer [class*="tracking-[0.18em]"],
+  footer [class*="tracking-[0.2em]"],
+  footer [class*="tracking-[0.3em]"],
+  #main-content [class*="tracking-[0.18em]"],
+  #main-content [class*="tracking-[0.2em]"],
+  #main-content [class*="tracking-[0.3em]"] {
+    letter-spacing: 0.12em !important;
+  }
+
+  #main-content h1 {
+    font-size: clamp(2.55rem, 13.5vw, 3.75rem);
+  }
+
+  #main-content h2 {
+    font-size: clamp(2rem, 9.5vw, 3rem);
+  }
 }
 
 /*

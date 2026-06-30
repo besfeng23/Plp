@@ -1,4 +1,4 @@
-import { requireAvailability } from './availabilityHelper.js';
+import { requireAvailability } from './_availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 

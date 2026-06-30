@@ -1,5 +1,5 @@
 import { insertRow, selectRows } from './_supabase.js';
-import { assertLiveSyncDisabled } from './otaAdapters.js';
+import { assertLiveSyncDisabled } from './_otaAdapters.js';
 
 const MAX_DAYS = 120;
 const CHANNEL_KEYS = ['agoda', 'airbnb', 'expedia', 'booking_com', 'direct_website', 'google_hotel_ads', 'trip_com'];
