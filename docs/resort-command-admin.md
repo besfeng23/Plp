@@ -192,3 +192,7 @@ These outcomes should send the guest to the cancel/review path, not success:
 ### PayPal configuration health
 
 A server-only health endpoint is available at `/api/paypal/health`. It returns configuration booleans, PayPal mode, and the configured-or-derived base URL. It must not return the PayPal client id, PayPal client secret, access tokens, raw environment variables, or any credential value.
+
+## Admin Phase 1N OTA channel readiness
+
+Admin Phase 1N adds a planning-only OTA Channel Readiness panel and schema foundation for future inventory sync. It is admin-only, non-functional for live OTA operations, does not connect to OTA APIs, and does not change booking creation, booking prices, PayPal, Xendit, webhook verification, or payment reconciliation logic. See `docs/admin-phase-1n-ota-channel-sync-planning.md`, `docs/ota-channel-matrix.md`, and `docs/ota-sync-runbook.md` for the readiness model and future Phase 2A handoff.
