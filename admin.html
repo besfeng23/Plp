@@ -76,6 +76,11 @@
                 const concierge = doc.createElement('script');
                 concierge.src = '/concierge-queue.js';
                 doc.body.appendChild(concierge);
+                concierge.addEventListener('load', () => {
+                  const availability = doc.createElement('script');
+                  availability.src = '/availability-board.js';
+                  doc.body.appendChild(availability);
+                });
               });
             });
           });
