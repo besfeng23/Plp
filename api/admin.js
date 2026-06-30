@@ -4,6 +4,7 @@ import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExc
 import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './otaSyncPlanner.js';
 import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './otaReservationImporter.js';
 import { getOtaConflictConsoleSummary, listOtaConflictConsole, updateOtaConflictResolution } from './otaConflictManager.js';
+import { archiveOtaRatePlanMapping, archiveOtaRoomMapping, createOtaRatePlanMapping, createOtaRoomMapping, getOtaMappingWorkspaceSummary, listOtaMappingWorkspace, updateOtaRatePlanMapping, updateOtaRoomMapping } from './otaMappingManager.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 const STAFF_TASK_KINDS = new Set(['task', 'note']);
@@ -12,6 +13,7 @@ const STAFF_TASK_PRIORITIES = new Set(['high', 'medium', 'normal']);
 const STAFF_TASK_STATUSES = new Set(['open', 'in_progress', 'done', 'cancelled']);
 const PHASE_2B_BLOCK_MESSAGE = 'Phase 2B is review-first only. Automatic booking/payment/guest-message actions are disabled.';
 const PHASE_2C_BLOCK_MESSAGE = 'Phase 2C is operator-review only. Automatic booking/payment/guest-message/cancellation actions are disabled.';
+const PHASE_2D_BLOCK_MESSAGE = 'Phase 2D is mapping-review only. Live OTA sync, credentials, booking, payment, and guest-message actions are disabled.';
 
 function json(res, status, payload) { res.statusCode = status; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(payload)); }
 function hasStaffAccess(req) { const expected = process.env.PLP_STAFF_CODE; const provided = req.headers['x-plp-staff-code']; return Boolean(expected && provided && String(provided) === String(expected)); }
@@ -24,6 +26,7 @@ function cleanEnum(value, allowed, fallback) { const normalized = String(value |
 function encode(value) { return encodeURIComponent(String(value || '')); }
 function containsDisabledOtaAction(value) { if (!value || typeof value !== 'object') return false; if (value.createBooking === true || value.autoConfirm === true || value.mutatePayment === true || value.sendGuestMessage === true) return true; if (String(value.mode || '').trim().toLowerCase() === 'live') return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledOtaAction(item)); }
 function containsDisabledConflictAction(value) { if (!value || typeof value !== 'object') return false; if (containsDisabledOtaAction(value)) return true; if (value.cancelDirectBooking === true || value.cancelOtaBooking === true) return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledConflictAction(item)); }
+function containsDisabledMappingAction(value) { if (!value || typeof value !== 'object') return false; if (containsDisabledConflictAction(value)) return true; if (value.syncLive === true || value.pushToOta === true || value.publishToOta === true) return true; if (Object.prototype.hasOwnProperty.call(value, 'credentials') || Object.prototype.hasOwnProperty.call(value, 'clientSecret') || Object.prototype.hasOwnProperty.call(value, 'accessToken') || Object.prototype.hasOwnProperty.call(value, 'refreshToken') || Object.prototype.hasOwnProperty.call(value, 'apiKey') || Object.prototype.hasOwnProperty.call(value, 'password')) return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledMappingAction(item)); }
 function staffName(req) { return cleanText(req.headers['x-plp-staff-name'] || 'staff', 120); }
 
 async function handleHealth(req, res) {
@@ -115,6 +118,12 @@ async function handleOtaConflictConsole(req, res) { if (req.method !== 'GET') re
 async function handleOtaConflictSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getOtaConflictConsoleSummary(); return json(res, 200, result); }
 async function handleOtaConflictResolution(req, res) { if (!['PATCH', 'POST'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledConflictAction(body)) return json(res, 400, { ok: false, error: PHASE_2C_BLOCK_MESSAGE }); const result = await updateOtaConflictResolution({ ...body, actor: body.actor || staffName(req) }); return json(res, 200, { ...result, message: 'Conflict resolution saved. No booking, payment, guest message, or OTA cancellation was performed.' }); }
 
+async function handleOtaMappingWorkspace(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await listOtaMappingWorkspace({ channelKey: req.query?.channelKey, accommodationName: req.query?.accommodationName, mappingStatus: req.query?.mappingStatus, reviewStatus: req.query?.reviewStatus, limit: req.query?.limit }); return json(res, 200, result); }
+async function handleOtaMappingSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getOtaMappingWorkspaceSummary(); return json(res, 200, result); }
+async function handleOtaRoomMapping(req, res) { if (!['POST', 'PATCH'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledMappingAction(body)) return json(res, 400, { ok: false, error: PHASE_2D_BLOCK_MESSAGE }); const actor = staffName(req); const result = req.method === 'POST' ? await createOtaRoomMapping({ ...body, actor, createdBy: body.createdBy || actor, updatedBy: body.updatedBy || actor }) : String(body.actionType || '').toLowerCase() === 'archive' ? await archiveOtaRoomMapping({ ...body, actor, archivedBy: body.archivedBy || actor, updatedBy: body.updatedBy || actor }) : await updateOtaRoomMapping({ ...body, actor, updatedBy: body.updatedBy || actor }); return json(res, result.ok ? 200 : 400, { ...result, message: result.message || 'Mapping saved for review. No OTA sync was performed.' }); }
+async function handleOtaRateMapping(req, res) { if (!['POST', 'PATCH'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledMappingAction(body)) return json(res, 400, { ok: false, error: PHASE_2D_BLOCK_MESSAGE }); const actor = staffName(req); const result = req.method === 'POST' ? await createOtaRatePlanMapping({ ...body, actor, createdBy: body.createdBy || actor, updatedBy: body.updatedBy || actor }) : String(body.actionType || '').toLowerCase() === 'archive' ? await archiveOtaRatePlanMapping({ ...body, actor, archivedBy: body.archivedBy || actor, updatedBy: body.updatedBy || actor }) : await updateOtaRatePlanMapping({ ...body, actor, updatedBy: body.updatedBy || actor }); return json(res, result.ok ? 200 : 400, { ...result, message: result.message || 'Mapping saved for review. No OTA sync was performed.' }); }
+
+
 export default async function handler(req, res) {
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
   try {
@@ -138,6 +147,10 @@ export default async function handler(req, res) {
     if (action === 'ota-conflict-console') return await handleOtaConflictConsole(req, res);
     if (action === 'ota-conflict-summary') return await handleOtaConflictSummary(req, res);
     if (action === 'ota-conflict-resolution') return await handleOtaConflictResolution(req, res);
+    if (action === 'ota-mapping-workspace') return await handleOtaMappingWorkspace(req, res);
+    if (action === 'ota-mapping-summary') return await handleOtaMappingSummary(req, res);
+    if (action === 'ota-room-mapping') return await handleOtaRoomMapping(req, res);
+    if (action === 'ota-rate-mapping') return await handleOtaRateMapping(req, res);
     return json(res, 404, { ok: false, error: 'Unknown admin action' });
   } catch (error) { return json(res, 500, { ok: false, error: 'Admin action failed', detail: error.message }); }
 }
