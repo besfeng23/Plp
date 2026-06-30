@@ -92,7 +92,7 @@ img {
   display: block;
 }
 
-/* Public site responsive hardening: prevent single oversized media, SVGs, or containers from creating horizontal drift. */
+/* Public responsive hardening: prevent oversized media, SVGs, or containers from creating horizontal drift. */
 *,
 *::before,
 *::after {
