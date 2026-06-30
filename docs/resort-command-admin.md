@@ -61,15 +61,15 @@ Every Today Command section includes a **View 360** action. Filtered Today lists
 
 The drawer and Today Command read the existing reservation row. They use current row fields for guest name, email, phone, guest count, accommodation, check-in, check-out, booking status, payment status, verification status, provider IDs, notes, and guest requests.
 
-## Not persisted yet
+## Persisted vs UI-only admin behavior
 
-Today Command guidance is UI-only. The staff guidance strip does not save tasks, assignments, internal notes, concierge work, housekeeping state, conflict decisions, guest memory, or departure/balance checks.
+Today Command remains mostly review guidance. The staff guidance strip does not save assignments, internal notes, concierge work, housekeeping state, conflict decisions, guest memory, or departure/balance checks.
 
-Internal notes, concierge tasks, housekeeping checklist state, conflict decisions, and OTA import decisions are not saved by this phase.
+The confirmation workflow now has real saved status actions for reviewed staff decisions. The save buttons call the reviewed admin booking-status endpoint and persist status changes to the booking row. These buttons are not fake UI states.
 
 ## Safety boundaries
 
-This phase does not change public booking behavior, booking creation, payment verification rules, webhook handling, privileged server-side database logic, OTA connections, live OTA credentials, or public luxury pages.
+This phase does not change public booking behavior, booking creation, booking prices, payment verification rules, webhook handling, PayPal/Xendit provider logic, OTA connections, live OTA credentials, or public luxury pages.
 
 ## Mobile behavior
 
@@ -79,7 +79,7 @@ The Reservation 360 drawer uses a full-width mobile sheet, sticky header, large 
 
 ## Admin Phase 1C confirmation workflow
 
-Admin Phase 1C adds a review-first workflow between payment review and final reservation confirmation. The served `/admin` shell loads `admin-confirmation-workflow.js` after the existing admin and Reservation 360 scripts. The workflow is derived from loaded operations rows only and does not alter server payment verification.
+Admin Phase 1C added a review-first workflow between payment review and final reservation confirmation. The served `/admin` shell loads `admin-confirmation-workflow.js` after the existing admin and Reservation 360 scripts. The workflow is derived from loaded operations rows only and does not alter server payment verification.
 
 ### Workflow states
 
@@ -109,23 +109,37 @@ Even with `VERIFIED` payment, staff must still review:
 - Remaining balance and payment terms.
 - Any operational constraints or manual exceptions.
 
-### What is not persisted
-
-The Phase 1C workflow is UI-only. It does not save confirmation state, internal notes, task assignments, concierge tasks, cancellation actions, or availability-reviewed flags. If a backend status endpoint is not available, the UI must not show fake “saved,” “confirmed,” or “assigned” actions.
-
 ### Confirmation rule
 
 A booking cannot be treated as ready for final confirmation unless payment verification is `VERIFIED` and there are no payment exceptions. Even then, final confirmation is a staff decision after availability review.
 
+## Admin Phase 1D persisted confirmation actions
+
+Admin Phase 1D wires the confirmation workflow to a real admin save path instead of UI-only status labels.
+
+### Saved actions
+
+The confirmation workflow can now call `/api/admin?action=booking-status` from served `/admin`:
+
+- **Save processing** persists `PAYMENT_PROCESSING` for records that should remain in payment review.
+- **Save final confirmation** persists `CONFIRMED` after staff confirms the booking is safe to finalize.
+
+### Guardrails
+
+The UI disables final confirmation when payment is not `VERIFIED`, when a payment exception exists, or when the row is already final. The backend also rejects final confirmation unless the deposit payment is verified and successful.
+
+### What is still not saved
+
+Phase 1D still does not persist internal notes, task assignments, concierge work, housekeeping readiness, arrival coordination, or availability review checklists. Those belong in later admin phases with dedicated schema and audit trails.
+
 ## Remaining Admin Phase 1 backlog
 
-1. Persisted confirmation/status action endpoints
-2. Guest Profile summaries
-3. Concierge queue
-4. Availability board
-5. Housekeeping readiness
-6. Persisted staff tasks and internal notes
-7. Admin QA and mobile polish
+1. Guest Profile summaries
+2. Concierge queue
+3. Availability board
+4. Housekeeping readiness
+5. Persisted staff tasks and internal notes
+6. Admin QA and mobile polish
 
 ## PayPal checkout operations
 
