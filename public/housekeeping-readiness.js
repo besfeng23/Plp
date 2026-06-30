@@ -68,10 +68,20 @@
     window.plpHousekeepingReadiness = items;
   }
 
+  function loadStaffTasks() {
+    if (document.querySelector('script[data-staff-tasks]')) return;
+    const script = document.createElement('script');
+    script.src = '/staff-tasks.js';
+    script.defer = true;
+    script.setAttribute('data-staff-tasks', 'true');
+    document.body.appendChild(script);
+  }
+
   const oldToday = window.renderTodayCommand;
   if (typeof oldToday === 'function') window.renderTodayCommand = function (rows, notifications) { const out = oldToday.apply(this, arguments); render(rows || []); return out; };
   const oldRows = window.renderRows;
   if (typeof oldRows === 'function') window.renderRows = function (rows) { const out = oldRows.apply(this, arguments); render(rows || []); return out; };
   ensureShell();
   render(rowsCache);
+  loadStaffTasks();
 })();
