@@ -69,6 +69,15 @@
     if (typeof window.refreshStaffTasks === 'function') await window.refreshStaffTasks();
   }
 
+  function loadAvailabilityBlocks() {
+    if (document.querySelector('script[data-availability-block-actions]')) return;
+    const script = document.createElement('script');
+    script.src = '/availability-block-actions.js';
+    script.defer = true;
+    script.setAttribute('data-availability-block-actions', 'true');
+    document.body.appendChild(script);
+  }
+
   document.addEventListener('change', (event) => {
     if (event.target?.id === 'housekeepingStatusChoice') renderChoices();
   });
@@ -81,4 +90,5 @@
   window.refreshHousekeepingStatusActions = renderChoices;
   ensureShell();
   renderChoices();
+  loadAvailabilityBlocks();
 })();
