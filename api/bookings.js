@@ -5,9 +5,9 @@ import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } fro
 const DEPOSIT_RATE = 0.3;
 
 const accommodations = {
-  'Grand Ocean Villa': { rate: 40000, capacity: 8 },
-  'Sunset Suite': { rate: 18000, capacity: 4 },
-  'Smart Room Premium': { rate: 8000, capacity: 2 },
+  'Grand Ocean Villa': { rate: 30, capacity: 8 },
+  'Sunset Suite': { rate: 20, capacity: 4 },
+  'Smart Room Premium': { rate: 10, capacity: 2 },
 };
 
 const required = ['name', 'email', 'phone', 'accommodation', 'checkIn', 'checkOut', 'guests'];
