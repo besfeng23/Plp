@@ -69,6 +69,15 @@
     if (typeof window.refreshStaffTasks === 'function') await window.refreshStaffTasks();
   }
 
+  function loadHousekeepingStatusActions() {
+    if (document.querySelector('script[data-housekeeping-status-actions]')) return;
+    const script = document.createElement('script');
+    script.src = '/housekeeping-status-actions.js';
+    script.defer = true;
+    script.setAttribute('data-housekeeping-status-actions', 'true');
+    document.body.appendChild(script);
+  }
+
   document.addEventListener('change', (event) => {
     if (event.target?.id === 'conciergeTaskChoice') renderChoices();
   });
@@ -80,4 +89,5 @@
   window.refreshConciergeTaskActions = renderChoices;
   ensureShell();
   renderChoices();
+  loadHousekeepingStatusActions();
 })();
