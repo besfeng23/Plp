@@ -72,6 +72,11 @@
               const profiles = doc.createElement('script');
               profiles.src = '/guest-profile-360.js';
               doc.body.appendChild(profiles);
+              profiles.addEventListener('load', () => {
+                const concierge = doc.createElement('script');
+                concierge.src = '/concierge-queue.js';
+                doc.body.appendChild(concierge);
+              });
             });
           });
         } catch {}
