@@ -49,7 +49,7 @@
   function ensureShell() {
     if (document.getElementById('staff-tasks-panel')) return;
     const style = document.createElement('style');
-    style.textContent = '.staff-task-form,.staff-task-card{border:1px solid rgba(229,224,216,.88);border-radius:20px;background:rgba(255,253,248,.82);box-shadow:var(--shadow);padding:16px}.staff-task-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}.staff-task-form label{display:grid;gap:6px;color:var(--brass);font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.staff-task-form input,.staff-task-form select,.staff-task-form textarea{width:100%;border:1px solid var(--linen);border-radius:12px;background:#FFFDF8;color:var(--teak);padding:10px}.staff-task-form textarea{min-height:42px}.staff-task-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.staff-task-card p,.staff-task-note{border-radius:12px;background:var(--sand);padding:10px;color:var(--muted);font-size:12px;line-height:1.45}.staff-task-note{margin-bottom:14px;border:1px dashed rgba(184,151,126,.42)}.staff-task-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:900px){.staff-task-form,.staff-task-list{grid-template-columns:1fr}}';
+    style.textContent = '.staff-task-form,.staff-task-card{border:1px solid rgba(229,224,216,.88);border-radius:20px;background:rgba(255,253,248,.82);box-shadow:var(--shadow);padding:16px}.staff-task-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}.staff-task-form label{display:grid;gap:6px;color:var(--brass);font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.staff-task-form input,.staff-task-form select,.staff-task-form textarea{width:100%;border:1px solid var(--linen);border-radius:12px;background:#FFFDF8;color:var(--teak);padding:10px}.staff-task-form textarea{min-height:42px}.staff-task-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.staff-task-card p,.staff-task-note,.r360-staff-worklog{border-radius:12px;background:var(--sand);padding:10px;color:var(--muted);font-size:12px;line-height:1.45}.staff-task-note{margin-bottom:14px;border:1px dashed rgba(184,151,126,.42)}.r360-staff-worklog{margin-bottom:12px;border:1px solid rgba(184,151,126,.35)}.staff-task-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}@media(max-width:900px){.staff-task-form,.staff-task-list{grid-template-columns:1fr}}';
     document.head.appendChild(style);
     const anchor = document.getElementById('housekeeping-readiness') || document.getElementById('availability-board') || document.getElementById('summary');
     if (!anchor) return;
@@ -73,6 +73,17 @@
     list.innerHTML = saved.length ? saved.map((task) => `<article class="staff-task-card"><strong>${esc(task.title)}</strong><p>${esc(task.booking_reference)} · ${esc(task.kind)} · ${esc(task.category)} · ${esc(task.priority)} · ${esc(task.status)}${task.note ? `<br>${esc(task.note)}` : ''}</p>${task.status === 'open' || task.status === 'in_progress' ? `<div class="staff-task-actions"><button data-staff-id="${esc(task.id)}" data-staff-status="in_progress">In progress</button><button data-staff-id="${esc(task.id)}" data-staff-status="done">Done</button><button data-staff-id="${esc(task.id)}" data-staff-status="cancelled">Cancel</button></div>` : ''}</article>`).join('') : '<div class="empty-state">No saved internal notes or staff tasks yet.</div>';
   }
 
+  function decorateDrawer(row) {
+    const body = document.getElementById('r360Body');
+    const reference = ref(row);
+    if (!body || !reference || body.querySelector('.r360-staff-worklog')) return;
+    const related = saved.filter((task) => task.booking_reference === reference).slice(0, 6);
+    const box = document.createElement('div');
+    box.className = 'r360-staff-worklog';
+    box.innerHTML = `<strong>Internal notes + staff tasks</strong>${related.length ? related.map((task) => `<p>${esc(task.title)} · ${esc(task.status)}${task.note ? `<br>${esc(task.note)}` : ''}</p>`).join('') : '<p>No saved internal notes or staff tasks for this booking yet.</p>'}`;
+    body.prepend(box);
+  }
+
   document.addEventListener('click', async (event) => {
     const saveButton = event.target?.closest?.('[data-save-staff]');
     const statusButton = event.target?.closest?.('[data-staff-status]');
@@ -89,6 +100,8 @@
   if (typeof oldRows === 'function') window.renderRows = function (rows) { const out = oldRows.apply(this, arguments); rowsCache = rows || []; renderSaved(); return out; };
   const oldToday = window.renderTodayCommand;
   if (typeof oldToday === 'function') window.renderTodayCommand = function (rows, notifications) { const out = oldToday.apply(this, arguments); rowsCache = rows || []; renderSaved(); return out; };
+  const oldOpen = window.openReservation360;
+  if (typeof oldOpen === 'function') window.openReservation360 = function (index) { const row = rowsCache[index]; const out = oldOpen.apply(this, arguments); setTimeout(() => decorateDrawer(row), 0); return out; };
   ensureShell();
   renderSaved();
   loadSaved().catch((error) => setMsg(error.message, 'error'));
