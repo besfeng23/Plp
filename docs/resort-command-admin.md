@@ -200,3 +200,6 @@ Admin Phase 1N adds a planning-only OTA Channel Readiness panel and schema found
 ## Admin Phase 2D OTA Room & Rate Mapping Workspace
 
 Phase 2D adds a staff-only OTA Room & Rate Mapping Workspace after the conflict console. It lets operators create, review, approve for future use, and archive OTA room/rate mappings while preserving a strict review-only boundary: no live OTA sync, no credentials, no booking creation/cancellation, no payment mutation, and no guest messaging.
+
+## Phase 2E — OTA Preflight & Operator Readiness
+Phase 2E adds an admin-only readiness dashboard for future OTA planning. It runs read-only checks across mapping, reservation review, conflict, manual block, staff task, security, and deployment readiness signals. It does not enable live OTA sync, credentials, booking creation, payment mutation, cancellation, or guest messaging.
