@@ -83,6 +83,11 @@
                   const qa = doc.createElement('script');
                   qa.src = '/admin-qa-polish.js';
                   doc.body.appendChild(qa);
+                  qa.addEventListener('load', () => {
+                    const otaReadiness = doc.createElement('script');
+                    otaReadiness.src = '/ota-channel-readiness.js';
+                    doc.body.appendChild(otaReadiness);
+                  });
                 });
               });
             });
