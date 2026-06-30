@@ -1,11 +1,11 @@
-import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './availabilityHelper.js';
+import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
-import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './otaSyncPlanner.js';
-import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './otaReservationImporter.js';
-import { getOtaConflictConsoleSummary, listOtaConflictConsole, updateOtaConflictResolution } from './otaConflictManager.js';
-import { archiveOtaRatePlanMapping, archiveOtaRoomMapping, createOtaRatePlanMapping, createOtaRoomMapping, getOtaMappingWorkspaceSummary, listOtaMappingWorkspace, updateOtaRatePlanMapping, updateOtaRoomMapping } from './otaMappingManager.js';
-import { getLatestOtaPreflightRun, listOtaPreflightRunItems, listOtaPreflightRuns, runOtaPreflightChecks } from './otaPreflightManager.js';
+import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './_otaSyncPlanner.js';
+import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './_otaReservationImporter.js';
+import { getOtaConflictConsoleSummary, listOtaConflictConsole, updateOtaConflictResolution } from './_otaConflictManager.js';
+import { archiveOtaRatePlanMapping, archiveOtaRoomMapping, createOtaRatePlanMapping, createOtaRoomMapping, getOtaMappingWorkspaceSummary, listOtaMappingWorkspace, updateOtaRatePlanMapping, updateOtaRoomMapping } from './_otaMappingManager.js';
+import { getLatestOtaPreflightRun, listOtaPreflightRunItems, listOtaPreflightRuns, runOtaPreflightChecks } from './_otaPreflightManager.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 const STAFF_TASK_KINDS = new Set(['task', 'note']);

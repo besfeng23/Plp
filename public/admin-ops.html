@@ -180,15 +180,44 @@
     @media (min-width: 1181px) {
       .mobile-topbar, .scrim, .mobile-drawer { display: none !important; }
     }
+
+    /* Calm attention accent for problem KPIs (muted clay, palette-true — not loud) */
+    .metric-card--attention { border-color: rgba(166,111,92,.45); box-shadow: inset 3px 0 0 rgba(166,111,92,.55), var(--shadow); }
+
+    /* Keep the closed mobile drawer out of the tab order and a11y tree */
+    .mobile-drawer { visibility: hidden; }
+    .mobile-drawer.open { visibility: visible; }
+
+    /* Honor reduced-motion for drawer and in-page scrolling */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .mobile-drawer, .scrim, .nav-link__dot { transition: none; }
+    }
+
+    /* Core admin tables become readable stacked cards on small screens (no page overflow).
+       Block layout (label above value) is resilient to multi-child cells and action buttons. */
+    @media (max-width: 820px) {
+      .table-wrap[data-cards] { overflow: visible; border: 0; background: transparent; box-shadow: none; border-radius: 0; }
+      .table-wrap[data-cards]::after { display: none !important; }
+      table.responsive { min-width: 0; display: block; }
+      table.responsive thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+      table.responsive tbody { display: block; }
+      table.responsive tr { display: block; border: 1px solid var(--linen); border-radius: 16px; background: rgba(255,253,248,.82); box-shadow: 0 10px 24px rgba(23,19,15,.035); margin-bottom: 12px; padding: 4px 2px; }
+      table.responsive td { display: block; padding: 9px 16px; border-bottom: 1px solid var(--soft-line); text-align: left; white-space: normal; }
+      table.responsive tr td:last-child { border-bottom: 0; }
+      table.responsive td.money-cell, table.responsive td.number { text-align: left; }
+      table.responsive td::before { content: attr(data-label); display: block; margin-bottom: 3px; color: var(--brass); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      table.responsive td:not([data-label])::before, table.responsive td[data-label=""]::before, table.responsive td[colspan]::before { content: none; }
+      table.responsive td[colspan] { text-align: center; padding: 16px; color: var(--muted); }
+    }
   </style>
 </head>
 <body>
   <div class="command-shell">
     <aside class="sidebar" aria-label="Resort Command navigation">
       <div class="brand"><div class="brand__eyebrow">Pueblo La Perla</div><div class="brand__title">Resort Command</div><p class="brand__note">Quiet luxury operating cockpit for reservations, payments, guest communication, and channel readiness.</p></div>
-      <nav class="command-nav" id="commandNav" aria-label="Resort Command sections">
-        <div class="nav-section"><p class="nav-section__label">Operations</p><a class="nav-link" href="#summary">Today Command</a><a class="nav-link" href="#reservations">Reservations</a><a class="nav-link" href="#exceptions">Exceptions</a><a class="nav-link" href="#messages">Messages</a></div>
-      </nav>
+      <nav class="command-nav" id="commandNav" aria-label="Resort Command sections"></nav>
+      <noscript><p class="nav-section__label" style="margin-top:10px">Sections require JavaScript</p></noscript>
       <a class="nav-link nav-link--shell" href="/admin">Secure Shell <small>Admin</small></a>
       <div class="side-status"><span>Connection honesty</span><strong>Records first. No fake OTA status.</strong><p>External channel cards are visible for planning, but live API credentials are not handled client-side.</p></div>
     </aside>
@@ -205,14 +234,14 @@
         <div class="auth-card"><label for="staffCode">Staff access</label><div class="auth-row"><input id="staffCode" type="password" placeholder="Enter PLP staff code" autocomplete="current-password" /><button class="primary" onclick="saveCode()">Save</button></div><div class="auth-actions"><button onclick="loadData()">Refresh records</button><button class="ghost" onclick="clearCode()">Clear code</button></div></div>
       </header>
       <div id="message"></div>
-      <section id="summary" aria-labelledby="summary-title"><div class="section-head"><div><h2 id="summary-title">Today Command</h2><p>Daily arrivals, in-house stays, departures, payment review, and staff review cues derived from loaded reservation/payment rows only.</p></div><div class="section-actions"><button type="button" onclick="loadData()">Refresh</button><button type="button" class="ghost" onclick="setMessage('Export stays hidden until a reviewed backend export endpoint exists. No fake admin actions.')">More</button></div></div><div class="metric-grid"><div class="card metric-card"><span>Arrivals today</span><strong id="kpiArrivals">—</strong><small>Check-ins dated today</small></div><div class="card metric-card"><span>Departures today</span><strong id="kpiDepartures">—</strong><small>Check-outs dated today</small></div><div class="card metric-card"><span>In-house stays</span><strong id="kpiInHouse">—</strong><small>Active stay window</small></div><div class="card metric-card"><span>Payment review</span><strong id="kpiPaymentReview">—</strong><small>Verification/payment flags</small></div><div class="card metric-card"><span>Records needing review</span><strong id="kpiReview">—</strong><small>Staff attention</small></div><div class="card metric-card"><span>Message/payment activity</span><strong id="kpiNotifications">—</strong><small>Notifications plus exceptions</small></div></div><div class="guidance-strip" aria-label="UI-only staff guidance"><div class="guidance-item"><strong>Review payment exceptions</strong>Check verification notes, unmatched rows, and pending processing before confirming anything.</div><div class="guidance-item"><strong>Prepare arrivals</strong>Use Reservation 360 to confirm guest details, requests, and payment state.</div><div class="guidance-item"><strong>Confirm in-house service notes</strong>Read loaded notes/requests. This guidance strip does not save task state.</div><div class="guidance-item"><strong>Check departures and balances</strong>Review balance fields where present before guest departure.</div></div></section><section id="today-lists" aria-labelledby="today-lists-title"><div class="section-head"><div><h2 id="today-lists-title">Daily operations lists</h2><p>Each View 360 action opens the matching original reservation row, not a filtered-list index.</p></div></div><div class="today-grid"><div class="today-grid today-grid--two"><div><h2>Arrivals Today</h2><div id="arrivalsToday" class="ops-list"></div></div><div><h2>In-House</h2><div id="inHouseToday" class="ops-list"></div></div><div><h2>Departures Today</h2><div id="departuresToday" class="ops-list"></div></div><div><h2>Payment Review</h2><div id="paymentReviewToday" class="ops-list"></div></div></div><div><h2>Upcoming 7 Days</h2><div id="upcomingWeek" class="ops-list"></div></div></div></section>
-      <section id="channel-sync" aria-labelledby="integrations-title"><div class="section-head"><div><h2 id="integrations-title">Integrations</h2><p>Booking channel visibility without dishonest live status.</p></div><div class="section-actions"><button type="button" class="ghost" onclick="setMessage('OTA setup still needs backend credential vaulting, import queues, mapping tables, conflict review, and audit logs before production connection.')">Setup notes</button></div></div><div class="foundation"><span>Channel command foundation</span><h3>Airbnb, Agoda, and Expedia visibility without pretending they are live</h3><p><strong>Visible channel cards are allowed. Fake connection status is not.</strong></p><p>This screen prepares PLP Resort Command for external booking channels, imported reservations, calendar sync, property mapping, conflict review, and sync logs. No live OTA API credentials are requested or stored client-side from this screen.</p></div><div class="channel-grid" id="channelCards"></div></section>
-      <section id="reservations" aria-labelledby="reservations-title"><div class="section-head"><div><h2 id="reservations-title">Reservations & Payments</h2><p>Operational booking records, deposit state, provider IDs, and verification status.</p></div><div class="section-actions"><button type="button" class="ghost" onclick="setMessage('Advanced reservation actions belong behind reviewed backend permissions, not loose client-side buttons.')">Actions</button></div></div><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Guest</th><th>Stay</th><th class="number">Amounts</th><th>Booking</th><th>Payment</th><th>Verification</th></tr></thead><tbody id="rowsBody"></tbody></table></div></section>
-      <section id="exceptions" aria-labelledby="exceptions-title"><div class="section-head"><div><h2 id="exceptions-title">Payment Exceptions</h2><p>Mismatch, failure, and verification problems that must not get buried.</p></div></div><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Issue</th><th class="number">Expected</th><th class="number">Received</th><th>Event</th><th>Notes</th></tr></thead><tbody id="exceptionsBody"></tbody></table></div></section>
-      <section id="messages" aria-labelledby="messages-title"><div class="section-head"><div><h2 id="messages-title">Message Activity</h2><p>Guest-facing and internal notification trail for booking communication.</p></div></div><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Type</th><th>Subject</th><th>Status</th><th>Sent</th><th>Note</th></tr></thead><tbody id="notificationsBody"></tbody></table></div></section>
+      <section id="summary" aria-labelledby="summary-title"><div class="section-head"><div><h2 id="summary-title">Today Command</h2><p>Daily arrivals, in-house stays, departures, payment review, and staff review cues derived from loaded reservation/payment rows only.</p></div><div class="section-actions"><button type="button" onclick="loadData()">Refresh</button><button type="button" class="ghost" onclick="setMessage('Export stays hidden until a reviewed backend export endpoint exists. No fake admin actions.')">More</button></div></div><div class="metric-grid"><div class="card metric-card"><span>Arrivals today</span><strong id="kpiArrivals">—</strong><small>Check-ins dated today</small></div><div class="card metric-card"><span>Departures today</span><strong id="kpiDepartures">—</strong><small>Check-outs dated today</small></div><div class="card metric-card"><span>In-house stays</span><strong id="kpiInHouse">—</strong><small>Active stay window</small></div><div class="card metric-card metric-card--attention"><span>Payment review</span><strong id="kpiPaymentReview">—</strong><small>Verification/payment flags</small></div><div class="card metric-card metric-card--attention"><span>Records needing review</span><strong id="kpiReview">—</strong><small>Staff attention</small></div><div class="card metric-card"><span>Message/payment activity</span><strong id="kpiNotifications">—</strong><small>Notifications plus exceptions</small></div></div><div class="guidance-strip" aria-label="UI-only staff guidance"><div class="guidance-item"><strong>Review payment exceptions</strong>Check verification notes, unmatched rows, and pending processing before confirming anything.</div><div class="guidance-item"><strong>Prepare arrivals</strong>Use Reservation 360 to confirm guest details, requests, and payment state.</div><div class="guidance-item"><strong>Confirm in-house service notes</strong>Read loaded notes/requests. This guidance strip does not save task state.</div><div class="guidance-item"><strong>Check departures and balances</strong>Review balance fields where present before guest departure.</div></div></section><section id="today-lists" aria-labelledby="today-lists-title"><div class="section-head"><div><h2 id="today-lists-title">Daily operations lists</h2><p>Each View 360 action opens the matching original reservation row, not a filtered-list index.</p></div></div><div class="today-grid"><div class="today-grid today-grid--two"><div><h2>Arrivals Today</h2><div id="arrivalsToday" class="ops-list"></div></div><div><h2>In-House</h2><div id="inHouseToday" class="ops-list"></div></div><div><h2>Departures Today</h2><div id="departuresToday" class="ops-list"></div></div><div><h2>Payment Review</h2><div id="paymentReviewToday" class="ops-list"></div></div></div><div><h2>Upcoming 7 Days</h2><div id="upcomingWeek" class="ops-list"></div></div></div></section>
+      <section id="reservations" aria-labelledby="reservations-title"><div class="section-head"><div><h2 id="reservations-title">Reservations &amp; Payments</h2><p>Operational booking records, deposit state, provider IDs, and verification status.</p></div><div class="section-actions"><button type="button" class="ghost" onclick="setMessage('Advanced reservation actions belong behind reviewed backend permissions, not loose client-side buttons.')">Actions</button></div></div><div class="table-wrap" data-cards><table class="responsive"><thead><tr><th>Ref</th><th>Guest</th><th>Stay</th><th class="number">Amounts</th><th>Booking</th><th>Payment</th><th>Verification</th></tr></thead><tbody id="rowsBody"></tbody></table></div></section>
+      <section id="exceptions" aria-labelledby="exceptions-title"><div class="section-head"><div><h2 id="exceptions-title">Payment Exceptions</h2><p>Mismatch, failure, and verification problems that must not get buried.</p></div></div><div class="table-wrap" data-cards><table class="responsive"><thead><tr><th>Reference</th><th>Issue</th><th class="number">Expected</th><th class="number">Received</th><th>Event</th><th>Notes</th></tr></thead><tbody id="exceptionsBody"></tbody></table></div></section>
+      <section id="messages" aria-labelledby="messages-title"><div class="section-head"><div><h2 id="messages-title">Message Activity</h2><p>Guest-facing and internal notification trail for booking communication.</p></div></div><div class="table-wrap" data-cards><table class="responsive"><thead><tr><th>Reference</th><th>Type</th><th>Subject</th><th>Status</th><th>Sent</th><th>Note</th></tr></thead><tbody id="notificationsBody"></tbody></table></div></section>
+      <section id="channel-sync" aria-labelledby="integrations-title"><div class="section-head"><div><h2 id="integrations-title">Integrations</h2><p>Booking channel visibility without dishonest live status — kept below live records.</p></div><div class="section-actions"><button type="button" class="ghost" onclick="setMessage('OTA setup still needs backend credential vaulting, import queues, mapping tables, conflict review, and audit logs before production connection.')">Setup notes</button></div></div><div class="foundation"><span>Channel command foundation</span><h3>Airbnb, Agoda, and Expedia visibility without pretending they are live</h3><p><strong>Visible channel cards are allowed. Fake connection status is not.</strong></p><p>This screen prepares PLP Resort Command for external booking channels, imported reservations, calendar sync, property mapping, conflict review, and sync logs. No live OTA API credentials are requested or stored client-side from this screen.</p></div><div class="channel-grid" id="channelCards"></div></section>
     </main>
     <div class="scrim" id="navScrim" hidden></div>
-    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Resort Command sections" aria-hidden="true">
+    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Resort Command sections" aria-hidden="true" tabindex="-1" inert>
       <div class="mobile-drawer__head">
         <div class="mobile-topbar__brand"><span>Pueblo La Perla</span><strong>Resort Command</strong></div>
         <button type="button" class="ghost" id="mobileNavClose" aria-label="Close sections menu">Close</button>
@@ -262,8 +291,8 @@
     function showChannelNote(channelId, action) { const channel = CHANNEL_INTEGRATIONS.find((item) => item.id === channelId); if (!channel) return; const note = action === 'primary' ? `${channel.name} mapping preparation is visible only. Backend credential storage, imported reservation queues, and sync logs still need reviewed implementation before this can be marked connected.` : `${channel.name} foundation: listing/property mapping, reservation review, conflict handling, payment exception review, and sync logs are prepared as admin concepts without live OTA calls.`; setMessage(note); }
     function renderChannelCards() { document.getElementById('channelCards').innerHTML = CHANNEL_INTEGRATIONS.map((channel) => { const disabled = channel.status === 'coming_soon' ? 'disabled' : ''; return `<article class="channel-card integration-card integration-card--${channel.status}"><div class="channel-logo-bay">${renderChannelLogo(channel)}</div><div class="integration-card__head"><div><span class="integration-kicker">Booking Channel</span><h3>${channel.name}</h3></div>${integrationStatusPill(channel.status, channel.statusLabel)}</div><p>${channel.description}</p><dl class="integration-meta"><div><dt>Last sync</dt><dd>${channel.lastSync}</dd></div><div><dt>Mapping</dt><dd>${channel.mapping}</dd></div><div><dt>Health</dt><dd>${channel.health}</dd></div></dl><div class="integration-actions"><button type="button" class="primary" onclick="showChannelNote('${channel.id}', 'primary')" ${disabled}>${channel.primaryAction}</button><button type="button" class="ghost" onclick="showChannelNote('${channel.id}', 'secondary')">${channel.secondaryAction}</button></div></article>`; }).join(''); }
     function renderSkeletonRows(targetId, colspan, count = 4) { document.getElementById(targetId).innerHTML = Array.from({ length: count }).map(() => `<tr class="skeleton-row">${Array.from({ length: colspan }).map(() => '<td><span></span></td>').join('')}</tr>`).join(''); }
-    function renderRows(rows) { const body = document.getElementById('rowsBody'); if (!rows.length) { body.innerHTML = '<tr><td colspan="7" class="muted">No reservations yet.</td></tr>'; return; } body.innerHTML = rows.map((row) => `<tr${providerRowClass(row)}><td><strong>${row.booking_reference || '—'}</strong><br>${providerBadge(row)}</td><td>${row.guest_name || '—'}<br><span class="muted">${row.guest_email || ''}</span></td><td>${row.accommodation_name || '—'}<br><span class="muted">${row.check_in || '—'} → ${row.check_out || '—'}</span></td><td class="money-cell">Total: ${money(row.total_amount_php)}<br>Deposit: ${money(row.deposit_amount_php || row.payment_amount_php)}<br>Balance: ${money(row.balance_amount_php)}</td><td>${pill(row.booking_status)}</td><td>${providerBadge(row)}<br>${pill(row.payment_status || row.booking_payment_status)}<br><span class="muted">${row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td>${verificationBlock(row.payment_verification_status, row.verification_error || '')}</td></tr>`).join(''); }
-    function renderExceptions(exceptions) { const body = document.getElementById('exceptionsBody'); if (!exceptions.length) { body.innerHTML = '<tr><td colspan="6" class="muted">No payment exceptions.</td></tr>'; return; } body.innerHTML = exceptions.map((row) => `<tr${providerRowClass(row)}><td><strong>${row.booking_reference || row.provider_reference_id || '—'}</strong><br>${providerBadge(row)}</td><td>${verificationBlock(row.verification_status)}</td><td class="money-cell">${money(row.expected_amount_php)} ${row.expected_currency || 'PHP'}</td><td class="money-cell">${money(row.amount_php)} ${row.currency || ''}</td><td>${row.event_type || '—'}<br><span class="muted">${row.provider_event_id || ''}</span></td><td>${row.verification_notes || '—'}</td></tr>`).join(''); }
+    function renderRows(rows) { const body = document.getElementById('rowsBody'); if (!rows.length) { body.innerHTML = '<tr><td colspan="7" class="muted">No reservations yet.</td></tr>'; return; } body.innerHTML = rows.map((row) => `<tr${providerRowClass(row)}><td data-label="Ref"><strong>${row.booking_reference || '—'}</strong><br>${providerBadge(row)}</td><td data-label="Guest">${row.guest_name || '—'}<br><span class="muted">${row.guest_email || ''}</span></td><td data-label="Stay">${row.accommodation_name || '—'}<br><span class="muted">${row.check_in || '—'} → ${row.check_out || '—'}</span></td><td class="money-cell" data-label="Amounts">Total: ${money(row.total_amount_php)}<br>Deposit: ${money(row.deposit_amount_php || row.payment_amount_php)}<br>Balance: ${money(row.balance_amount_php)}</td><td data-label="Booking">${pill(row.booking_status)}</td><td data-label="Payment">${providerBadge(row)}<br>${pill(row.payment_status || row.booking_payment_status)}<br><span class="muted">${row.provider_payment_id || row.provider_session_id || 'No provider ID yet'}</span></td><td data-label="Verification">${verificationBlock(row.payment_verification_status, row.verification_error || '')}</td></tr>`).join(''); }
+    function renderExceptions(exceptions) { const body = document.getElementById('exceptionsBody'); if (!exceptions.length) { body.innerHTML = '<tr><td colspan="6" class="muted">No payment exceptions.</td></tr>'; return; } body.innerHTML = exceptions.map((row) => `<tr${providerRowClass(row)}><td data-label="Reference"><strong>${row.booking_reference || row.provider_reference_id || '—'}</strong><br>${providerBadge(row)}</td><td data-label="Issue">${verificationBlock(row.verification_status)}</td><td class="money-cell" data-label="Expected">${money(row.expected_amount_php)} ${row.expected_currency || 'PHP'}</td><td class="money-cell" data-label="Received">${money(row.amount_php)} ${row.currency || ''}</td><td data-label="Event">${row.event_type || '—'}<br><span class="muted">${row.provider_event_id || ''}</span></td><td data-label="Notes">${row.verification_notes || '—'}</td></tr>`).join(''); }
     function escapeHtml(value) { return String(value ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
     function field(row, names) { return names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || ''; }
     function dateOnly(value) { if (!value) return null; const text = String(value).slice(0, 10); if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null; const date = new Date(`${text}T00:00:00`); return Number.isNaN(date.getTime()) ? null : date; }
@@ -279,7 +308,7 @@
     function view360Button(originalIndex) { return `<button class="r360-view" type="button" onclick="window.openReservation360(${originalIndex})">View 360</button>`; }
     function renderOpsCards(targetId, items, type) { const target = document.getElementById(targetId); if (!target) return; if (!items.length) { target.innerHTML = '<div class="empty-state">No matching loaded records.</div>'; return; } target.innerHTML = items.map(({ row, originalIndex }) => { const ref = escapeHtml(field(row, ['booking_reference', 'reference', 'booking_code', 'code'])); const guest = escapeHtml(field(row, ['guest_name', 'name', 'full_name', 'guestName'])); const accommodation = escapeHtml(field(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa'])); const guestCount = escapeHtml(field(row, ['guest_count', 'guests', 'party_size']) || '—'); const provider = providerBadge(row); const payment = pill(field(row, ['payment_status', 'booking_payment_status'])); const verification = pill(field(row, ['payment_verification_status'])); const notes = escapeHtml(field(row, ['special_requests', 'notes', 'message', 'guest_notes', 'arrival_notes']) || 'No notes captured'); const balance = money(field(row, ['balance_amount_php'])); const deposit = money(field(row, ['deposit_amount_php', 'payment_amount_php', 'expected_amount_php'])); const verificationNote = escapeHtml(field(row, ['verification_error', 'verification_note', 'verification_notes']) || 'No verification note captured'); const checkOut = escapeHtml(getCheckOut(row) || '—'); const checkIn = escapeHtml(getCheckIn(row) || '—'); let meta = ''; if (type === 'arrival') meta = `<div><span>Accommodation</span>${accommodation}</div><div><span>Guests</span>${guestCount}</div><div><span>Provider</span>${provider}</div><div><span>Verification</span>${verification}</div>`; if (type === 'inhouse') meta = `<div><span>Accommodation</span>${accommodation}</div><div><span>Check-out</span>${checkOut}</div><div><span>Notes / requests</span>${notes}</div><div><span>Provider</span>${provider}</div>`; if (type === 'departure') meta = `<div><span>Accommodation</span>${accommodation}</div><div><span>Balance</span>${balance}</div><div><span>Payment status</span>${payment}</div><div><span>Check-out</span>${checkOut}</div>`; if (type === 'payment') meta = `<div><span>Provider</span>${provider}</div><div><span>Expected / deposit</span>${deposit}</div><div><span>Payment status</span>${payment}</div><div><span>Verification</span>${verification}</div>`; if (type === 'upcoming') meta = `<div><span>Date</span>${checkIn}</div><div><span>Accommodation</span>${accommodation}</div><div><span>Provider</span>${provider}</div><div><span>Booking / payment</span>${pill(field(row, ['booking_status', 'status']))} ${payment}</div>`; return `<article class="ops-card"><div class="ops-card__top"><div><div class="ops-card__ref">${ref}</div><div class="ops-card__guest">${guest}</div></div>${view360Button(originalIndex)}</div><div class="ops-card__meta">${meta}</div>${type === 'payment' ? `<div class="ops-card__note">${verificationNote}</div>` : ''}</article>`; }).join(''); }
     function renderTodayCommand(rows, notifications = []) { const indexed = indexedRows(rows); const arrivals = indexed.filter(({ row }) => isToday(getCheckIn(row))); const departures = indexed.filter(({ row }) => isToday(getCheckOut(row))); const inHouse = indexed.filter(({ row }) => isInHouse(row)); const paymentReview = indexed.filter(({ row }) => needsPaymentReview(row)); const recordReview = indexed.filter(({ row }) => needsRecordReview(row)); const upcoming = indexed.filter(({ row }) => isUpcomingWithin(row, 7)).sort((a,b) => (dateOnly(getCheckIn(a.row))?.getTime() || 0) - (dateOnly(getCheckIn(b.row))?.getTime() || 0)); document.getElementById('kpiArrivals').textContent = arrivals.length; document.getElementById('kpiDepartures').textContent = departures.length; document.getElementById('kpiInHouse').textContent = inHouse.length; document.getElementById('kpiPaymentReview').textContent = paymentReview.length; document.getElementById('kpiReview').textContent = recordReview.length; document.getElementById('kpiNotifications').textContent = notifications.length + paymentReview.length; renderOpsCards('arrivalsToday', arrivals, 'arrival'); renderOpsCards('inHouseToday', inHouse, 'inhouse'); renderOpsCards('departuresToday', departures, 'departure'); renderOpsCards('paymentReviewToday', paymentReview, 'payment'); renderOpsCards('upcomingWeek', upcoming, 'upcoming'); }
-    function renderNotifications(rows) { const body = document.getElementById('notificationsBody'); if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="muted">No message activity.</td></tr>'; return; } body.innerHTML = rows.map((row) => `<tr><td><strong>${row.booking_reference || '—'}</strong><br><span class="muted">${row.notification_key || ''}</span></td><td>${row.recipient_type || '—'}</td><td>${row.subject || '—'}</td><td>${pill(row.status)}</td><td>${row.sent_at || row.created_at || '—'}</td><td>${row.error || '—'}</td></tr>`).join(''); }
+    function renderNotifications(rows) { const body = document.getElementById('notificationsBody'); if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="muted">No message activity.</td></tr>'; return; } body.innerHTML = rows.map((row) => `<tr><td data-label="Reference"><strong>${row.booking_reference || '—'}</strong><br><span class="muted">${row.notification_key || ''}</span></td><td data-label="Type">${row.recipient_type || '—'}</td><td data-label="Subject">${row.subject || '—'}</td><td data-label="Status">${pill(row.status)}</td><td data-label="Sent">${row.sent_at || row.created_at || '—'}</td><td data-label="Note">${row.error || '—'}</td></tr>`).join(''); }
     async function loadData() { setMessage('Loading Resort Command data...'); renderSkeletonRows('rowsBody', 7); renderSkeletonRows('exceptionsBody', 6, 3); renderSkeletonRows('notificationsBody', 6, 3); try { const operationsResponse = await fetch('/api/admin?action=operations', { headers: headers() }); const data = await operationsResponse.json(); if (!operationsResponse.ok || !data.ok) throw new Error(data.error || 'Unable to load operations data'); let notifications = []; try { const notificationResponse = await fetch('/api/admin?action=notifications', { headers: headers() }); const notificationData = await notificationResponse.json(); notifications = notificationData.rows || []; } catch {} const rows = data.rows || []; const exceptions = data.exceptions || []; renderTodayCommand(rows, notifications); renderRows(rows); renderExceptions(exceptions); renderNotifications(notifications); setMessage('Resort Command records loaded. Integrations are visible as read-only OTA foundation cards.'); } catch (error) { ['kpiArrivals','kpiDepartures','kpiInHouse','kpiPaymentReview','kpiReview','kpiNotifications'].forEach((id) => { document.getElementById(id).textContent = '—'; }); renderTodayCommand([], []); renderRows([]); renderExceptions([]); renderNotifications([]); setMessage(error.message, 'error'); } }
     renderChannelCards();
     renderSkeletonRows('rowsBody', 7);
@@ -346,7 +375,7 @@
           if (isMobile) closeDrawer();
           setActive(id);
           const target = document.getElementById(id);
-          if (target) requestAnimationFrame(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+          if (target) requestAnimationFrame(() => target.scrollIntoView({ behavior: motionQuery.matches ? 'auto' : 'smooth', block: 'start' }));
           if (history.replaceState) history.replaceState(null, '', '#' + id);
         });
         return link;
@@ -407,17 +436,29 @@
       const closeBtn = document.getElementById('mobileNavClose');
       const scrim = document.getElementById('navScrim');
       const drawer = document.getElementById('mobileDrawer');
+      const motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
       let lastFocus = null;
+      if (drawer) drawer.inert = true;
+      function isDrawerOpen() { return !!(drawer && drawer.classList.contains('open')); }
+      function drawerFocusables() {
+        if (!drawer) return [];
+        return Array.from(drawer.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+          .filter((node) => node.offsetWidth > 0 || node.offsetHeight > 0 || node === document.activeElement);
+      }
       function openDrawer() {
-        if (!drawer || !scrim) return;
+        if (!drawer || !scrim || isDrawerOpen()) return;
         lastFocus = document.activeElement;
         scrim.hidden = false;
-        requestAnimationFrame(() => { scrim.classList.add('open'); drawer.classList.add('open'); });
+        drawer.inert = false;
         drawer.setAttribute('aria-hidden', 'false');
         if (toggle) toggle.setAttribute('aria-expanded', 'true');
         document.body.style.overflow = 'hidden';
-        const first = drawer.querySelector('.nav-link');
-        if (first) first.focus();
+        requestAnimationFrame(() => {
+          scrim.classList.add('open');
+          drawer.classList.add('open');
+          const focusables = drawerFocusables();
+          (focusables[0] || drawer).focus();
+        });
       }
       function closeDrawer() {
         if (!drawer || !scrim) return;
@@ -426,15 +467,38 @@
         drawer.setAttribute('aria-hidden', 'true');
         if (toggle) toggle.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
-        window.setTimeout(() => { scrim.hidden = true; }, 280);
+        const finish = () => { scrim.hidden = true; drawer.inert = true; };
+        if (motionQuery.matches) finish(); else window.setTimeout(finish, 280);
         if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
       }
       if (toggle) toggle.addEventListener('click', openDrawer);
       if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
       if (scrim) scrim.addEventListener('click', closeDrawer);
-      document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && drawer && drawer.classList.contains('open')) closeDrawer(); });
+      document.addEventListener('keydown', (event) => {
+        if (!isDrawerOpen()) return;
+        if (event.key === 'Escape') { event.preventDefault(); closeDrawer(); return; }
+        if (event.key === 'Tab') {
+          const focusables = drawerFocusables();
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+      });
+
+      function activateInitialHash() {
+        const id = (location.hash || '').replace(/^#/, '');
+        if (!id) return false;
+        const target = document.getElementById(id);
+        if (!target) return false;
+        setActive(id);
+        requestAnimationFrame(() => target.scrollIntoView({ behavior: 'auto', block: 'start' }));
+        return true;
+      }
 
       rebuild();
+      activateInitialHash();
       let scheduled = 0;
       if (window.MutationObserver) {
         const mutationObserver = new MutationObserver(() => {
@@ -443,7 +507,10 @@
         });
         mutationObserver.observe(main, { childList: true });
       }
-      window.addEventListener('load', () => window.setTimeout(rebuild, 600));
+      window.addEventListener('load', () => window.setTimeout(() => {
+        rebuild();
+        if (location.hash && window.scrollY < 4) activateInitialHash();
+      }, 600));
     })();
   </script>
   <script src="/reservation-360.js"></script>
