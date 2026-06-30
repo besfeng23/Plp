@@ -68,6 +68,11 @@
             const workflow = doc.createElement('script');
             workflow.src = '/admin-confirmation-workflow.js';
             doc.body.appendChild(workflow);
+            workflow.addEventListener('load', () => {
+              const profiles = doc.createElement('script');
+              profiles.src = '/guest-profile-360.js';
+              doc.body.appendChild(profiles);
+            });
           });
         } catch {}
         boot.style.display = 'none';
