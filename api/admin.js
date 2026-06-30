@@ -3,6 +3,10 @@ import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
+const STAFF_TASK_KINDS = new Set(['task', 'note']);
+const STAFF_TASK_CATEGORIES = new Set(['concierge', 'housekeeping', 'payment', 'arrival', 'availability', 'admin']);
+const STAFF_TASK_PRIORITIES = new Set(['high', 'medium', 'normal']);
+const STAFF_TASK_STATUSES = new Set(['open', 'in_progress', 'done', 'cancelled']);
 
 function json(res, status, payload) {
   res.statusCode = status;
@@ -37,6 +41,19 @@ function cleanStatus(value) {
   return ALLOWED_CONTENT_STATUSES.has(status) ? status : 'DRAFT';
 }
 
+function cleanText(value, max = 500) {
+  return String(value || '').replace(/[\r\n\t]+/g, ' ').trim().slice(0, max);
+}
+
+function cleanEnum(value, allowed, fallback) {
+  const normalized = String(value || fallback).trim().toLowerCase().replace(/[\s-]+/g, '_');
+  return allowed.has(normalized) ? normalized : fallback;
+}
+
+function encode(value) {
+  return encodeURIComponent(String(value || ''));
+}
+
 async function handleHealth(req, res) {
   if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
   return json(res, 200, {
@@ -47,6 +64,7 @@ async function handleHealth(req, res) {
     resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
     webhookToken: process.env.XENDIT_WEBHOOK_TOKEN ? 'configured' : 'missing',
     adminAccess: process.env.PLP_STAFF_CODE ? 'configured' : 'missing',
+    staffTasks: 'configured',
     checkedAt: new Date().toISOString(),
   });
 }
@@ -81,7 +99,7 @@ async function handleBookingStatus(req, res) {
   const nextStatus = String(body.nextStatus || '').trim();
   if (!reference || !nextStatus) return json(res, 400, { ok: false, error: 'Missing reference or next status' });
 
-  const rows = await selectRows('plp_payment_reconciliation', `booking_reference=eq.${encodeURIComponent(reference)}&select=*&limit=1`);
+  const rows = await selectRows('plp_payment_reconciliation', `booking_reference=eq.${encode(reference)}&select=*&limit=1`);
   const current = rows?.[0] || null;
   if (!current) return json(res, 404, { ok: false, error: 'Booking not found' });
 
@@ -101,7 +119,7 @@ async function handleBookingStatus(req, res) {
     return json(res, 400, { ok: false, error: 'Unsupported status' });
   }
 
-  const updated = await updateRows('plp_bookings', `booking_reference=eq.${encodeURIComponent(reference)}`, payload);
+  const updated = await updateRows('plp_bookings', `booking_reference=eq.${encode(reference)}`, payload);
   let notifications = null;
   try {
     notifications = await notifyBookingStatus(reference, nextStatus);
@@ -109,6 +127,57 @@ async function handleBookingStatus(req, res) {
     notifications = { ok: false, error: error.message };
   }
   return json(res, 200, { ok: true, row: updated?.[0] || null, notifications });
+}
+
+async function handleStaffTasks(req, res) {
+  if (req.method === 'GET') {
+    const reference = cleanText(req.query?.reference, 80);
+    const query = reference
+      ? `booking_reference=eq.${encode(reference)}&select=*&order=created_at.desc&limit=1000`
+      : 'select=*&order=created_at.desc&limit=1000';
+    const rows = await selectRows('plp_staff_tasks', query);
+    return json(res, 200, { ok: true, rows: rows || [] });
+  }
+
+  const body = parseBody(req);
+
+  if (req.method === 'POST') {
+    const reference = cleanText(body.reference || body.bookingReference, 80);
+    const kind = cleanEnum(body.kind, STAFF_TASK_KINDS, 'task');
+    const category = cleanEnum(body.category, STAFF_TASK_CATEGORIES, 'admin');
+    const priority = cleanEnum(body.priority, STAFF_TASK_PRIORITIES, 'normal');
+    const title = cleanText(body.title || (kind === 'note' ? 'Internal note' : ''), 160);
+    const note = cleanText(body.note || body.body, 1200);
+    if (!reference) return json(res, 400, { ok: false, error: 'Booking reference is required.' });
+    if (!title && !note) return json(res, 400, { ok: false, error: 'Task title or note is required.' });
+    const saved = await insertRow('plp_staff_tasks', {
+      booking_reference: reference,
+      kind,
+      category,
+      priority,
+      status: kind === 'note' ? 'done' : 'open',
+      title: title || 'Internal note',
+      note: note || null,
+      actor: cleanText(req.headers['x-plp-staff-name'] || 'staff', 120),
+      source: 'resort-command-admin',
+      completed_at: kind === 'note' ? new Date().toISOString() : null,
+    });
+    return json(res, 200, { ok: true, row: saved });
+  }
+
+  if (req.method === 'PATCH') {
+    const id = cleanText(body.id, 80);
+    const status = cleanEnum(body.status, STAFF_TASK_STATUSES, 'open');
+    if (!id) return json(res, 400, { ok: false, error: 'Task id is required.' });
+    const updated = await updateRows('plp_staff_tasks', `id=eq.${encode(id)}`, {
+      status,
+      completed_at: status === 'done' ? new Date().toISOString() : null,
+      actor: cleanText(req.headers['x-plp-staff-name'] || 'staff', 120),
+    });
+    return json(res, 200, { ok: true, row: updated?.[0] || null });
+  }
+
+  return json(res, 405, { ok: false, error: 'Method not allowed' });
 }
 
 async function handleDateBlocks(req, res) {
@@ -159,7 +228,7 @@ async function handleContent(req, res) {
     updated_by: String(body.updatedBy || 'staff').trim().slice(0, 120),
     updated_at: new Date().toISOString(),
   };
-  const existing = await selectRows('plp_site_content', `section=eq.${encodeURIComponent(section)}&select=id&limit=1`);
+  const existing = await selectRows('plp_site_content', `section=eq.${encode(section)}&select=id&limit=1`);
   const saved = existing?.[0]
     ? (await updateRows('plp_site_content', `id=eq.${existing[0].id}`, payload))?.[0]
     : await insertRow('plp_site_content', payload);
@@ -178,6 +247,7 @@ export default async function handler(req, res) {
     if (action === 'operations') return await handleOperations(req, res);
     if (action === 'notifications') return await handleNotifications(req, res);
     if (action === 'booking-status') return await handleBookingStatus(req, res);
+    if (action === 'staff-tasks' || action === 'staff-task' || action === 'internal-notes') return await handleStaffTasks(req, res);
     if (action === 'date-blocks') return await handleDateBlocks(req, res);
     if (action === 'content') return await handleContent(req, res);
     return json(res, 404, { ok: false, error: 'Unknown admin action' });
