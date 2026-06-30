@@ -17,6 +17,10 @@ function eachDate(startDate, endDate) {
   return days;
 }
 
+function nextDate(date) {
+  return new Date(Date.parse(`${date}T00:00:00Z`) + dayMs).toISOString().slice(0, 10);
+}
+
 function validateRange(startDate, endDate) {
   if (!ymd(startDate) || !ymd(endDate)) return { ok: false, error: 'startDate and endDate must be YYYY-MM-DD.' };
   const start = Date.parse(`${startDate}T00:00:00Z`);
@@ -108,6 +112,45 @@ export async function createOtaConflict(payload) {
   return insertRow('plp_ota_conflicts', { status: 'open', ...payload });
 }
 
+function normalizeConflict(candidate, options = {}) {
+  return {
+    channel_key: candidate.channelKey || candidate.channel_key || options.channelKey || 'all',
+    conflict_type: candidate.conflictType || candidate.type || 'ota_dry_run_conflict',
+    internal_booking_reference: candidate.internalBookingReference || null,
+    ota_reservation_reference: candidate.otaReservationReference || null,
+    accommodation_name: candidate.accommodationName || null,
+    start_date: candidate.startDate || options.startDate || null,
+    end_date: candidate.endDate || options.endDate || null,
+    severity: candidate.severity || 'medium',
+    status: 'open',
+    details: {
+      phase: '2A',
+      mode: 'dry_run',
+      generatedAt: new Date().toISOString(),
+      ...candidate,
+    },
+  };
+}
+
+async function persistConflictCandidates(candidates, warnings, options) {
+  let logged = 0;
+  const seen = new Set();
+  for (const candidate of candidates.slice(0, 250)) {
+    const row = normalizeConflict(candidate, options);
+    const key = [row.channel_key, row.conflict_type, row.accommodation_name, row.start_date, row.end_date].join('|');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    try {
+      await createOtaConflict(row);
+      logged += 1;
+    } catch (error) {
+      warnings.push(`Dry-run calculated but conflict logging failed: ${error.message}`);
+      break;
+    }
+  }
+  return logged;
+}
+
 export async function buildOtaInventoryDryRun(options = {}) {
   assertLiveSyncDisabled();
   const mode = options.mode || 'dry_run';
@@ -141,7 +184,24 @@ export async function buildOtaInventoryDryRun(options = {}) {
         let available = true, reason = 'open', proposedAction = 'would_open_inventory', conflicts = [];
         if (!channel.inventory_sync_enabled) { proposedAction = 'skip_channel_disabled'; summary.skippedDays += 1; }
         else if (!ready) { proposedAction = 'skip_mapping_not_ready'; summary.skippedDays += 1; }
-        else if (manualBlockCount && directBookingHoldCount) { available = false; reason = 'conflict_manual_block_and_booking'; proposedAction = 'needs_review'; conflicts = ['manual_block_overlaps_booking']; summary.conflictDays += 1; }
+        else if (manualBlockCount && directBookingHoldCount) {
+          available = false;
+          reason = 'conflict_manual_block_and_booking';
+          proposedAction = 'needs_review';
+          conflicts = ['manual_block_overlaps_booking'];
+          summary.conflictDays += 1;
+          conflictCandidates.push({
+            type: 'manual_block_overlaps_booking',
+            conflictType: 'manual_block_overlaps_booking',
+            severity: 'critical',
+            channelKey: channel.channel_key,
+            accommodationName: m.internal_accommodation_name,
+            startDate: date,
+            endDate: nextDate(date),
+            manualBlockCount,
+            directBookingHoldCount,
+          });
+        }
         else if (manualBlockCount) { available = false; reason = 'manual_block'; proposedAction = 'would_close_inventory'; summary.blockedDays += 1; }
         else if (directBookingHoldCount) { available = false; reason = 'direct_booking_hold'; proposedAction = 'would_close_inventory'; summary.directHoldDays += 1; }
         else { summary.availableDays += 1; }
@@ -152,7 +212,8 @@ export async function buildOtaInventoryDryRun(options = {}) {
     })};
   });
   const output = { ok: true, mode: 'dry_run', generatedAt: new Date().toISOString(), range: { startDate: options.startDate, endDate: options.endDate }, channels: resultChannels, summary, warnings };
-  try { await createOtaSyncEvent({ channel_key: options.channelKey || 'all', event_type: 'inventory_dry_run', mode: 'dry_run', status: 'succeeded', payload: options, result: { summary, conflictCandidateCount: conflictCandidates.length }, created_by: options.createdBy || 'staff' }); }
+  const conflictLoggedCount = await persistConflictCandidates(conflictCandidates, output.warnings, options);
+  try { await createOtaSyncEvent({ channel_key: options.channelKey || 'all', event_type: 'inventory_dry_run', mode: 'dry_run', status: 'succeeded', payload: options, result: { summary, conflictCandidateCount: conflictCandidates.length, conflictLoggedCount }, created_by: options.createdBy || 'staff' }); }
   catch (error) { output.warnings.push('Dry-run calculated but event logging failed.'); output.warnings.push(error.message); }
   return output;
 }
