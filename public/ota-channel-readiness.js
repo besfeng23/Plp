@@ -38,12 +38,16 @@
     document.head.appendChild(style);
   }
 
-  function channelCard(channel) {
-    return `<article class="ota-channel-card"><h3>${esc(channel.name)}</h3><div class="ota-meta"><span><strong>Current status:</strong> Planning only</span><span><strong>Connection state:</strong> Not connected</span><span><strong>Credential state:</strong> Missing / not configured</span><span><strong>Inventory sync state:</strong> Disabled</span><span><strong>Reservation import state:</strong> Disabled</span><span><strong>Rate sync state:</strong> Disabled</span><span><strong>Risk level:</strong> <em class="ota-risk">${esc(channel.risk)}</em></span><span><strong>Next required step:</strong> ${esc(channel.next)}</span></div></article>`;
-  }
+  function channelCard(channel) { return `<article class="ota-channel-card"><h3>${esc(channel.name)}</h3><div class="ota-meta"><span><strong>Current status:</strong> Planning only</span><span><strong>Connection state:</strong> Not connected</span><span><strong>Credential state:</strong> Missing / not configured</span><span><strong>Inventory sync state:</strong> Disabled</span><span><strong>Reservation import state:</strong> Disabled</span><span><strong>Rate sync state:</strong> Disabled</span><span><strong>Risk level:</strong> <em class="ota-risk">${esc(channel.risk)}</em></span><span><strong>Next required step:</strong> ${esc(channel.next)}</span></div></article>`; }
+  function mappingRow(room) { return `<tr><td><strong>${esc(room)}</strong></td><td>Placeholder — OTA room name not mapped</td><td>Placeholder — max guests not confirmed</td><td>Placeholder — rate plan not mapped</td><td>Not eligible until reviewed and enabled</td><td>Manual admin blocks override OTA availability</td><td>Queue for staff review; never auto-cancel a direct booking</td></tr>`; }
 
-  function mappingRow(room) {
-    return `<tr><td><strong>${esc(room)}</strong></td><td>Placeholder — OTA room name not mapped</td><td>Placeholder — max guests not confirmed</td><td>Placeholder — rate plan not mapped</td><td>Not eligible until reviewed and enabled</td><td>Manual admin blocks override OTA availability</td><td>Queue for staff review; never auto-cancel a direct booking</td></tr>`;
+  function loadReservationReview() {
+    if (document.querySelector('script[data-ota-reservation-review]')) return;
+    const script = document.createElement('script');
+    script.src = '/ota-reservation-review.js';
+    script.defer = true;
+    script.setAttribute('data-ota-reservation-review', 'true');
+    document.body.appendChild(script);
   }
 
   function render() {
@@ -57,6 +61,7 @@
       anchor.insertAdjacentElement('afterend', section);
     }
     section.innerHTML = `<div class="section-head"><div><h2>OTA Channel Readiness</h2><p>Planning matrix for future OTA inventory sync. No live OTA connection is active.</p></div><div class="section-actions"><button type="button" class="ghost" onclick="window.refreshOtaChannelReadiness()">Refresh planning view</button></div></div><div class="ota-readiness-alert">Planning only. No live OTA API sync is enabled.</div><div class="ota-channel-grid">${CHANNELS.map(channelCard).join('')}</div><div class="ota-table-wrap"><table class="ota-table"><thead><tr><th>Internal accommodation name</th><th>OTA room name placeholder</th><th>Max guests placeholder</th><th>Rate plan placeholder</th><th>Inventory sync eligibility</th><th>Manual block behavior</th><th>Conflict behavior</th></tr></thead><tbody>${ROOMS.map(mappingRow).join('')}</tbody></table></div><ul class="ota-rule-list"><li>Confirmed direct bookings must override OTA availability.</li><li>Payment-pending direct bookings must not be pushed as confirmed OTA holds.</li><li>OTA sync must never modify PayPal/Xendit/payment status.</li><li>OTA reservation imports must enter a review queue first.</li><li>OTA conflicts must never auto-cancel a direct booking.</li></ul><div class="ota-checklist">${CHECKS.map((item) => `<div class="ota-check"><span aria-hidden="true">□</span>${esc(item)}</div>`).join('')}</div><div class="ota-preview"><h3>Phase 2A: OTA Inventory Sync Foundation</h3><p><strong>Planned only. Not live in Phase 1N.</strong></p>${ENDPOINTS.map((endpoint) => `<code>${esc(endpoint)}</code>`).join('')}</div>`;
+    loadReservationReview();
   }
 
   window.refreshOtaChannelReadiness = render;
