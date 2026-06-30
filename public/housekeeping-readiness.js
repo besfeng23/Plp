@@ -68,13 +68,20 @@
     window.plpHousekeepingReadiness = items;
   }
 
-  function loadStaffTasks() {
-    if (document.querySelector('script[data-staff-tasks]')) return;
+  function loadScriptOnce(src, marker) {
+    if (document.querySelector(`script[${marker}]`)) return null;
     const script = document.createElement('script');
-    script.src = '/staff-tasks.js';
+    script.src = src;
     script.defer = true;
-    script.setAttribute('data-staff-tasks', 'true');
+    script.setAttribute(marker, 'true');
     document.body.appendChild(script);
+    return script;
+  }
+
+  function loadStaffTasks() {
+    const script = loadScriptOnce('/staff-tasks.js', 'data-staff-tasks');
+    if (script) script.addEventListener('load', () => loadScriptOnce('/concierge-task-actions.js', 'data-concierge-task-actions'));
+    else loadScriptOnce('/concierge-task-actions.js', 'data-concierge-task-actions');
   }
 
   const oldToday = window.renderTodayCommand;
