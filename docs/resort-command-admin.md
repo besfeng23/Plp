@@ -196,3 +196,7 @@ A server-only health endpoint is available at `/api/paypal/health`. It returns c
 ## Admin Phase 1N OTA channel readiness
 
 Admin Phase 1N adds a planning-only OTA Channel Readiness panel and schema foundation for future inventory sync. It is admin-only, non-functional for live OTA operations, does not connect to OTA APIs, and does not change booking creation, booking prices, PayPal, Xendit, webhook verification, or payment reconciliation logic. See `docs/admin-phase-1n-ota-channel-sync-planning.md`, `docs/ota-channel-matrix.md`, and `docs/ota-sync-runbook.md` for the readiness model and future Phase 2A handoff.
+
+## Admin Phase 2B OTA reservation review note
+
+Phase 2B adds an admin-only OTA Reservation Review Queue. It stages and reviews OTA payloads without creating bookings, mutating payment status, sending guest messages, connecting to live OTA APIs, or adding OTA credentials. Operator approval means approved for future manual entry only.

@@ -1,6 +1,7 @@
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
+import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './otaReservationImporter.js';
 
 const ALLOWED_CONTENT_STATUSES = new Set(['DRAFT', 'PUBLISHED', 'ARCHIVED']);
 const STAFF_TASK_KINDS = new Set(['task', 'note']);
@@ -235,6 +236,53 @@ async function handleContent(req, res) {
   return json(res, 200, { ok: true, content: saved });
 }
 
+const PHASE_2B_BLOCK_MESSAGE = 'Phase 2B is review-first only. Automatic booking/payment/guest-message actions are disabled.';
+
+function containsDisabledOtaAction(value) {
+  if (!value || typeof value !== 'object') return false;
+  if (value.createBooking === true || value.autoConfirm === true || value.mutatePayment === true || value.sendGuestMessage === true) return true;
+  if (String(value.mode || '').trim().toLowerCase() === 'live') return true;
+  return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledOtaAction(item));
+}
+
+function staffName(req) {
+  return cleanText(req.headers['x-plp-staff-name'] || 'staff', 120);
+}
+
+async function handleOtaReservationImports(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const rows = await listOtaReservationImports({
+    reviewStatus: req.query?.reviewStatus,
+    channelKey: req.query?.channelKey,
+    severity: req.query?.severity,
+    accommodationName: req.query?.accommodationName,
+    limit: req.query?.limit,
+  });
+  return json(res, 200, { ok: true, rows: rows || [], reviewFirstOnly: true });
+}
+
+async function handleOtaReservationStage(req, res) {
+  if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const body = parseBody(req);
+  if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE });
+  const result = await stageOtaReservationImport({ ...body, createdBy: staffName(req) });
+  return json(res, result.ok ? 200 : 409, result);
+}
+
+async function handleOtaReservationReview(req, res) {
+  if (req.method !== 'PATCH') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const body = parseBody(req);
+  if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE });
+  const row = await updateOtaReservationReview({ ...body, reviewedBy: body.reviewedBy || staffName(req) });
+  return json(res, row ? 200 : 404, { ok: Boolean(row), row, reviewFirstOnly: true, message: 'Review status updated. No booking was created.' });
+}
+
+async function handleOtaReservationSummary(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+  const summary = await getOtaReservationReviewSummary();
+  return json(res, 200, { ok: true, summary, reviewFirstOnly: true });
+}
+
 export default async function handler(req, res) {
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
 
@@ -250,6 +298,10 @@ export default async function handler(req, res) {
     if (action === 'staff-tasks' || action === 'staff-task' || action === 'internal-notes') return await handleStaffTasks(req, res);
     if (action === 'date-blocks') return await handleDateBlocks(req, res);
     if (action === 'content') return await handleContent(req, res);
+    if (action === 'ota-reservation-imports') return await handleOtaReservationImports(req, res);
+    if (action === 'ota-reservation-stage') return await handleOtaReservationStage(req, res);
+    if (action === 'ota-reservation-review') return await handleOtaReservationReview(req, res);
+    if (action === 'ota-reservation-summary') return await handleOtaReservationSummary(req, res);
     return json(res, 404, { ok: false, error: 'Unknown admin action' });
   } catch (error) {
     return json(res, 500, { ok: false, error: 'Admin action failed', detail: error.message });

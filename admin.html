@@ -87,6 +87,16 @@
                     const otaReadiness = doc.createElement('script');
                     otaReadiness.src = '/ota-channel-readiness.js';
                     doc.body.appendChild(otaReadiness);
+                    otaReadiness.addEventListener('load', () => {
+                      const otaSyncDryRun = doc.createElement('script');
+                      otaSyncDryRun.src = '/ota-sync-dry-run.js';
+                      doc.body.appendChild(otaSyncDryRun);
+                      otaSyncDryRun.addEventListener('load', () => {
+                        const otaReservationReview = doc.createElement('script');
+                        otaReservationReview.src = '/ota-reservation-review.js';
+                        doc.body.appendChild(otaReservationReview);
+                      });
+                    });
                   });
                 });
               });
