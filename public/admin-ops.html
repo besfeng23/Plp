@@ -144,18 +144,62 @@
     @keyframes shimmer { 0% { background-position: 180% 0; } 100% { background-position: -40% 0; } }
     @media (max-width: 1180px) { .guidance-strip, .today-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); } .command-shell { grid-template-columns: 1fr; } .sidebar { position: relative; height: auto; display: grid; grid-template-columns: 1fr; padding: 20px 18px; border-right: 0; border-bottom: 1px solid rgba(184,151,126,.28); } .brand { margin-bottom: 16px; } .side-status { display: none; } .nav-group { margin-top: 14px; } .nav-group nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; } .nav-link { flex: 0 0 auto; min-height: 38px; border-color: var(--linen); background: rgba(255,253,248,.66); } .nav-link small, .brand__note { display: none; } .main { padding: 22px 18px 54px; } .metric-grid, .channel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar { flex-direction: column; } .auth-card { width: 100%; flex-basis: auto; } }
     @media (max-width: 760px) { .metric-grid, .channel-grid, .guidance-strip, .today-grid--two, .ops-card__meta { grid-template-columns: 1fr; gap: 12px; } .metric-card, .foundation, .integration-card, .table-wrap { border-radius: 18px; } .auth-row { grid-template-columns: 1fr; } .auth-actions { display: grid; grid-template-columns: 1fr 1fr; } .auth-actions button { width: 100%; } .section-head { align-items: flex-start; flex-direction: column; } .section-actions { width: 100%; display: grid; grid-template-columns: 1fr; } .integration-actions { grid-template-columns: 1fr; } .channel-logo-bay { min-height: 82px; } .table-wrap::after { display: block; } table { min-width: 820px; font-size: 12px; } th, td { padding: 12px 14px; } }
+    /* Resort Command — grouped navigation, scrollspy active states & mobile drawer */
+    .command-nav { display: grid; gap: 16px; }
+    .nav-section { display: grid; gap: 5px; }
+    .nav-section__label { margin: 0 0 1px; color: var(--brass); font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .nav-link__inner { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+    .nav-link__dot { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 999px; background: var(--brass); opacity: 0; transition: opacity .2s ease; }
+    .nav-link.is-active { background: rgba(184,151,126,.16); border-color: rgba(184,151,126,.46); color: var(--teak); box-shadow: inset 3px 0 0 var(--brass); }
+    .nav-link.is-active .nav-link__dot { opacity: 1; }
+    .nav-link.is-active small { color: var(--brass); }
+    .nav-link--shell { justify-content: flex-start; gap: 8px; color: var(--muted); }
+    .main section[id] { scroll-margin-top: 88px; }
+
+    .mobile-topbar { display: none; }
+    .mobile-topbar__right { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .mobile-topbar__brand { display: grid; gap: 2px; min-width: 0; }
+    .mobile-topbar__brand span { color: var(--brass); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    .mobile-topbar__brand strong { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .mobile-topbar__current { max-width: 40vw; color: var(--muted); font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mobile-topbar__menu { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; border-radius: 999px; white-space: nowrap; }
+
+    .scrim { position: fixed; inset: 0; background: rgba(23,19,15,.46); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; z-index: 60; }
+    .scrim.open { opacity: 1; visibility: visible; }
+    .mobile-drawer { position: fixed; top: 0; bottom: 0; left: 0; width: min(86vw, 344px); display: flex; flex-direction: column; gap: 18px; padding: calc(18px + env(safe-area-inset-top,0px)) 18px calc(20px + var(--safe-bottom)); background: var(--card); border-right: 1px solid rgba(184,151,126,.3); box-shadow: 0 24px 60px rgba(23,19,15,.22); transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); z-index: 61; overflow-y: auto; }
+    .mobile-drawer.open { transform: translateX(0); }
+    .mobile-drawer__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .mobile-drawer__head button { min-height: 44px; padding: 8px 14px; }
+    .mobile-drawer__foot { margin-top: auto; display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--soft-line); }
+    .mobile-drawer__foot button, .mobile-drawer__foot .nav-link { min-height: 44px; }
+
+    @media (max-width: 1180px) {
+      .sidebar { display: none !important; }
+      .mobile-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 50; margin: 0 0 8px; padding: calc(10px + env(safe-area-inset-top,0px)) 4px 10px; background: linear-gradient(180deg, rgba(247,242,234,.97), rgba(247,242,234,.82)); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(184,151,126,.24); }
+    }
+    @media (min-width: 1181px) {
+      .mobile-topbar, .scrim, .mobile-drawer { display: none !important; }
+    }
   </style>
 </head>
 <body>
   <div class="command-shell">
     <aside class="sidebar" aria-label="Resort Command navigation">
       <div class="brand"><div class="brand__eyebrow">Pueblo La Perla</div><div class="brand__title">Resort Command</div><p class="brand__note">Quiet luxury operating cockpit for reservations, payments, guest communication, and channel readiness.</p></div>
-      <div class="nav-group"><p class="nav-group__label">Operations</p><nav><a class="nav-link" href="#summary">Today Command <small>Live</small></a><a class="nav-link" href="#reservations">Reservations <small>Core</small></a><a class="nav-link" href="#exceptions">Exceptions <small>Risk</small></a><a class="nav-link" href="#messages">Messages <small>Comms</small></a></nav></div>
-      <div class="nav-group"><p class="nav-group__label">Channels</p><nav><a class="nav-link" href="#channel-sync">Integrations <small>OTA</small></a></nav></div>
-      <div class="nav-group"><p class="nav-group__label">System</p><nav><a class="nav-link" href="/admin">Secure Shell <small>Admin</small></a></nav></div>
+      <nav class="command-nav" id="commandNav" aria-label="Resort Command sections">
+        <div class="nav-section"><p class="nav-section__label">Operations</p><a class="nav-link" href="#summary">Today Command</a><a class="nav-link" href="#reservations">Reservations</a><a class="nav-link" href="#exceptions">Exceptions</a><a class="nav-link" href="#messages">Messages</a></div>
+      </nav>
+      <a class="nav-link nav-link--shell" href="/admin">Secure Shell <small>Admin</small></a>
       <div class="side-status"><span>Connection honesty</span><strong>Records first. No fake OTA status.</strong><p>External channel cards are visible for planning, but live API credentials are not handled client-side.</p></div>
     </aside>
     <main class="main">
+      <div class="mobile-topbar">
+        <div class="mobile-topbar__brand"><span>Pueblo La Perla</span><strong>Resort Command</strong></div>
+        <div class="mobile-topbar__right">
+          <span class="mobile-topbar__current" id="mobileCurrentSection" aria-live="polite">Today Command</span>
+          <button type="button" class="mobile-topbar__menu primary" id="mobileNavToggle" aria-haspopup="true" aria-expanded="false" aria-controls="mobileDrawer">Sections</button>
+        </div>
+      </div>
       <header class="topbar">
         <div class="topbar__text"><div class="eyebrow">Admin Ops</div><h1>Resort Command</h1><p>Live reservations and payment reconciliation stay at the top. Channel integrations are shown as a prepared foundation, not a pretend connection.</p></div>
         <div class="auth-card"><label for="staffCode">Staff access</label><div class="auth-row"><input id="staffCode" type="password" placeholder="Enter PLP staff code" autocomplete="current-password" /><button class="primary" onclick="saveCode()">Save</button></div><div class="auth-actions"><button onclick="loadData()">Refresh records</button><button class="ghost" onclick="clearCode()">Clear code</button></div></div>
@@ -167,6 +211,18 @@
       <section id="exceptions" aria-labelledby="exceptions-title"><div class="section-head"><div><h2 id="exceptions-title">Payment Exceptions</h2><p>Mismatch, failure, and verification problems that must not get buried.</p></div></div><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Issue</th><th class="number">Expected</th><th class="number">Received</th><th>Event</th><th>Notes</th></tr></thead><tbody id="exceptionsBody"></tbody></table></div></section>
       <section id="messages" aria-labelledby="messages-title"><div class="section-head"><div><h2 id="messages-title">Message Activity</h2><p>Guest-facing and internal notification trail for booking communication.</p></div></div><div class="table-wrap"><table><thead><tr><th>Reference</th><th>Type</th><th>Subject</th><th>Status</th><th>Sent</th><th>Note</th></tr></thead><tbody id="notificationsBody"></tbody></table></div></section>
     </main>
+    <div class="scrim" id="navScrim" hidden></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Resort Command sections" aria-hidden="true">
+      <div class="mobile-drawer__head">
+        <div class="mobile-topbar__brand"><span>Pueblo La Perla</span><strong>Resort Command</strong></div>
+        <button type="button" class="ghost" id="mobileNavClose" aria-label="Close sections menu">Close</button>
+      </div>
+      <nav class="command-nav" id="commandNavMobile" aria-label="Resort Command sections"></nav>
+      <div class="mobile-drawer__foot">
+        <button type="button" class="primary" onclick="loadData()">Refresh records</button>
+        <a class="nav-link nav-link--shell" href="/admin">Secure Shell <small>Admin</small></a>
+      </div>
+    </aside>
   </div>
   <script>
     const CHANNEL_INTEGRATIONS = [
@@ -230,6 +286,165 @@
     renderSkeletonRows('exceptionsBody', 6, 3);
     renderSkeletonRows('notificationsBody', 6, 3);
     loadData();
+  </script>
+  <script>
+    /* Resort Command navigation controller — discovers static + injected sections,
+       builds a grouped sidebar / mobile drawer, tracks the active section (scrollspy),
+       and rebuilds automatically as admin modules inject their panels. */
+    (function () {
+      const NAV_GROUPS = [
+        { label: 'Today', items: [['summary', 'Today Command'], ['today-lists', 'Daily Lists']] },
+        { label: 'Reservations', items: [['confirmation-workflow', 'Confirmation'], ['reservations', 'Reservations'], ['exceptions', 'Exceptions'], ['messages', 'Messages']] },
+        { label: 'Guests & Concierge', items: [['guest-profile-360', 'Guests'], ['concierge-queue', 'Concierge'], ['concierge-task-actions', 'Concierge Tasks']] },
+        { label: 'Availability', items: [['availability-board', 'Availability'], ['availability-block-actions', 'Date Blocks'], ['housekeeping-readiness', 'Housekeeping'], ['housekeeping-status-actions', 'Housekeeping Actions'], ['staff-tasks-panel', 'Staff Tasks']] },
+        { label: 'Channels & OTA', items: [['channel-sync', 'Integrations'], ['ota-channel-readiness', 'Channel Readiness'], ['ota-reservation-review', 'OTA Reservations'], ['ota-mapping-workspace', 'Room Mapping'], ['ota-conflict-console', 'Conflicts'], ['ota-preflight-readiness', 'Preflight'], ['ota-sync-dry-run', 'Sync Dry Run']] },
+        { label: 'System', items: [['admin-qa-polish', 'QA & Status']] }
+      ];
+      const KNOWN = new Set();
+      NAV_GROUPS.forEach((group) => group.items.forEach((item) => KNOWN.add(item[0])));
+      const main = document.querySelector('.main');
+      const desktopNav = document.getElementById('commandNav');
+      const mobileNav = document.getElementById('commandNavMobile');
+      const currentEl = document.getElementById('mobileCurrentSection');
+      if (!main) return;
+      const labelById = new Map();
+
+      function sectionList() { return Array.from(main.querySelectorAll(':scope > section[id]')); }
+      function headingLabel(el) { const heading = el.querySelector('h2'); return heading ? heading.textContent.trim() : el.id; }
+
+      function buildGroups() {
+        const present = sectionList();
+        const ids = new Set(present.map((node) => node.id));
+        labelById.clear();
+        const groups = [];
+        NAV_GROUPS.forEach((group) => {
+          const items = group.items.filter((entry) => ids.has(entry[0]));
+          items.forEach((entry) => labelById.set(entry[0], entry[1]));
+          if (items.length) groups.push({ label: group.label, items });
+        });
+        const leftover = present.filter((node) => !KNOWN.has(node.id)).map((node) => { const label = headingLabel(node); labelById.set(node.id, label); return [node.id, label]; });
+        if (leftover.length) groups.push({ label: 'More', items: leftover });
+        return groups;
+      }
+
+      function makeLink(id, label, isMobile) {
+        const link = document.createElement('a');
+        link.className = 'nav-link';
+        link.href = '#' + id;
+        link.dataset.navId = id;
+        const inner = document.createElement('span');
+        inner.className = 'nav-link__inner';
+        const dot = document.createElement('span');
+        dot.className = 'nav-link__dot';
+        const text = document.createElement('span');
+        text.textContent = label;
+        inner.appendChild(dot);
+        inner.appendChild(text);
+        link.appendChild(inner);
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          if (isMobile) closeDrawer();
+          setActive(id);
+          const target = document.getElementById(id);
+          if (target) requestAnimationFrame(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+          if (history.replaceState) history.replaceState(null, '', '#' + id);
+        });
+        return link;
+      }
+
+      function renderInto(container, groups, isMobile) {
+        if (!container) return;
+        container.textContent = '';
+        groups.forEach((group) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'nav-section';
+          const label = document.createElement('p');
+          label.className = 'nav-section__label';
+          label.textContent = group.label;
+          wrap.appendChild(label);
+          group.items.forEach((entry) => wrap.appendChild(makeLink(entry[0], entry[1], isMobile)));
+          container.appendChild(wrap);
+        });
+      }
+
+      let activeId = null;
+      function setActive(id) { if (!id) return; activeId = id; highlight(id); }
+      function highlight(id) {
+        const selectorId = (window.CSS && CSS.escape) ? CSS.escape(id) : id;
+        document.querySelectorAll('.nav-link.is-active').forEach((node) => node.classList.remove('is-active'));
+        document.querySelectorAll('.nav-link[data-nav-id="' + selectorId + '"]').forEach((node) => node.classList.add('is-active'));
+        const label = labelById.get(id);
+        if (currentEl && label) currentEl.textContent = label;
+      }
+
+      let observer = null;
+      const visible = new Map();
+      function observe(list) {
+        if (observer) observer.disconnect();
+        visible.clear();
+        observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) visible.set(entry.target.id, entry.boundingClientRect.top);
+            else visible.delete(entry.target.id);
+          });
+          let pick = null;
+          let best = Infinity;
+          visible.forEach((top, id) => { if (top < best) { best = top; pick = id; } });
+          if (pick) setActive(pick);
+        }, { rootMargin: '-96px 0px -68% 0px', threshold: 0 });
+        list.forEach((node) => observer.observe(node));
+      }
+
+      function rebuild() {
+        const groups = buildGroups();
+        renderInto(desktopNav, groups, false);
+        renderInto(mobileNav, groups, true);
+        observe(sectionList());
+        if (activeId) highlight(activeId);
+      }
+
+      const toggle = document.getElementById('mobileNavToggle');
+      const closeBtn = document.getElementById('mobileNavClose');
+      const scrim = document.getElementById('navScrim');
+      const drawer = document.getElementById('mobileDrawer');
+      let lastFocus = null;
+      function openDrawer() {
+        if (!drawer || !scrim) return;
+        lastFocus = document.activeElement;
+        scrim.hidden = false;
+        requestAnimationFrame(() => { scrim.classList.add('open'); drawer.classList.add('open'); });
+        drawer.setAttribute('aria-hidden', 'false');
+        if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        const first = drawer.querySelector('.nav-link');
+        if (first) first.focus();
+      }
+      function closeDrawer() {
+        if (!drawer || !scrim) return;
+        scrim.classList.remove('open');
+        drawer.classList.remove('open');
+        drawer.setAttribute('aria-hidden', 'true');
+        if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        window.setTimeout(() => { scrim.hidden = true; }, 280);
+        if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      }
+      if (toggle) toggle.addEventListener('click', openDrawer);
+      if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+      if (scrim) scrim.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && drawer && drawer.classList.contains('open')) closeDrawer(); });
+
+      rebuild();
+      let scheduled = 0;
+      if (window.MutationObserver) {
+        const mutationObserver = new MutationObserver(() => {
+          if (scheduled) return;
+          scheduled = requestAnimationFrame(() => { scheduled = 0; rebuild(); });
+        });
+        mutationObserver.observe(main, { childList: true });
+      }
+      window.addEventListener('load', () => window.setTimeout(rebuild, 600));
+    })();
   </script>
   <script src="/reservation-360.js"></script>
 </body>
