@@ -231,9 +231,15 @@ textarea:focus-visible {
 }
 
 @media (max-width: 390px) {
-  [class*="tracking-[0.18em]"],
-  [class*="tracking-[0.2em]"],
-  [class*="tracking-[0.3em]"] {
+  header [class*="tracking-[0.18em]"],
+  header [class*="tracking-[0.2em]"],
+  header [class*="tracking-[0.3em]"],
+  footer [class*="tracking-[0.18em]"],
+  footer [class*="tracking-[0.2em]"],
+  footer [class*="tracking-[0.3em]"],
+  #main-content [class*="tracking-[0.18em]"],
+  #main-content [class*="tracking-[0.2em]"],
+  #main-content [class*="tracking-[0.3em]"] {
     letter-spacing: 0.12em !important;
   }
 
