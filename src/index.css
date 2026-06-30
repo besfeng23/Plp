@@ -92,7 +92,7 @@ img {
   display: block;
 }
 
-/* Public site responsive hardening: prevent single oversized media, SVGs, or long copy from creating horizontal drift. */
+/* Public site responsive hardening: prevent single oversized media, SVGs, or containers from creating horizontal drift. */
 *,
 *::before,
 *::after {
@@ -121,12 +121,6 @@ svg,
 video,
 canvas {
   max-width: 100%;
-}
-
-#main-content p,
-#main-content li,
-#main-content figcaption {
-  overflow-wrap: anywhere;
 }
 
 button,
@@ -197,6 +191,12 @@ textarea:focus-visible {
   #main-content > section,
   #main-content > div {
     max-width: 100vw;
+  }
+
+  #main-content p,
+  #main-content li,
+  #main-content figcaption {
+    overflow-wrap: anywhere;
   }
 
   #main-content h1 {
