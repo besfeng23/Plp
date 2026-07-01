@@ -22,9 +22,9 @@ function mapPayPalStatus(status) {
 }
 
 function mapBookingStatus(paymentStatus) {
-  if (paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED') return 'PAID_DEPOSIT';
-  if (paymentStatus === 'FAILED') return 'FAILED';
-  if (paymentStatus === 'VOIDED') return 'CANCELLED';
+  if (paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED') return 'DEPOSIT_VERIFIED_AWAITING_CONFIRMATION';
+  if (paymentStatus === 'FAILED') return 'PAYMENT_FAILED';
+  if (paymentStatus === 'VOIDED') return 'PAYMENT_CANCELLED';
   return 'PAYMENT_PROCESSING';
 }
 
@@ -68,7 +68,7 @@ function getVerificationResult({ booking, payment, orderId, amount, currency, pa
     return { status: 'AMOUNT_MISMATCH', note: `Expected ${expectedAmount} but received ${receivedAmount || 'missing amount'}.`, expectedAmount };
   }
 
-  return { status: 'VERIFIED', note: 'PayPal capture matched booking reference, stored order id, payment record, amount, and currency.', expectedAmount };
+  return { status: 'VERIFIED', note: 'PayPal deposit matched booking reference, stored order id, payment record, amount, and currency. Staff confirmation is still required.', expectedAmount };
 }
 
 export async function createPayPalPaymentRecord({ bookingReference, session, amount, checkoutUrl, rawResponse }) {
@@ -106,8 +106,8 @@ export async function createPayPalPaymentRecord({ bookingReference, session, amo
   });
 
   await updateRows('plp_bookings', `id=eq.${booking.id}`, {
-    status: 'PAYMENT_PROCESSING',
-    payment_status: 'PROCESSING',
+    status: 'DEPOSIT_CHECKOUT_CREATED',
+    payment_status: 'AWAITING_DEPOSIT',
   });
 
   return { databaseWarning: null, databasePayment: payment };
