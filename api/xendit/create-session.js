@@ -1,6 +1,6 @@
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
 import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
-import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured } from '../_supabase.js';
+import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured, selectRows } from '../_supabase.js';
 
 function safeCheckoutStartupError(res, status, { code, detail }) {
   return res.status(status).json({
@@ -9,6 +9,25 @@ function safeCheckoutStartupError(res, status, { code, detail }) {
     code,
     detail,
   });
+}
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function encodeFilterValue(value) {
+  return encodeURIComponent(String(value));
+}
+
+async function requestMatchesPersistedGuest({ booking, persistedBooking }) {
+  const submittedEmail = normalizeEmail(booking?.email);
+  const guestId = persistedBooking?.guest_id;
+  if (!submittedEmail || !guestId) return false;
+
+  const guests = await selectRows('plp_guests', `id=eq.${encodeFilterValue(guestId)}&select=email,normalized_email&limit=1`);
+  const guest = guests?.[0];
+  const persistedEmail = normalizeEmail(guest?.normalized_email || guest?.email);
+  return Boolean(persistedEmail && submittedEmail === persistedEmail);
 }
 
 function isCheckoutAllowed(booking) {
@@ -61,6 +80,14 @@ export default async function handler(req, res) {
 
     const persistedBooking = await findBookingByReference(booking.reference);
     if (!persistedBooking) {
+      return safeCheckoutStartupError(res, 404, {
+        code: 'BOOKING_NOT_FOUND',
+        detail: 'No matching reservation request was found for this reference.',
+      });
+    }
+
+    const ownsBooking = await requestMatchesPersistedGuest({ booking, persistedBooking });
+    if (!ownsBooking) {
       return safeCheckoutStartupError(res, 404, {
         code: 'BOOKING_NOT_FOUND',
         detail: 'No matching reservation request was found for this reference.',
