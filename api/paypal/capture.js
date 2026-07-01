@@ -16,6 +16,25 @@ function buildBookingQuery(bookingRef) {
   return bookingRef ? `bookingId=${encodeURIComponent(bookingRef)}&` : '';
 }
 
+function runNotificationTask(task) {
+  const promise = Promise.resolve().then(task).catch(() => {
+    // Notifications are non-critical; never fail the guest redirect on a notify error.
+  });
+
+  if (typeof globalThis.waitUntil === 'function') {
+    globalThis.waitUntil(promise);
+  }
+}
+
+function notifyAfterResponse(res, task) {
+  if (typeof res.once === 'function') {
+    res.once('finish', () => runNotificationTask(task));
+    return;
+  }
+
+  setTimeout(() => runNotificationTask(task), 0);
+}
+
 export default async function handler(req, res) {
   const baseUrl = getBaseUrl(req);
   const orderToken = firstQueryValue(req.query?.token);
@@ -47,31 +66,27 @@ export default async function handler(req, res) {
 
     // A verified PayPal deposit capture triggers the same guest/staff
     // "deposit verified" notification as the Xendit webhook path. This is
-    // best-effort and must never block the guest redirect. Duplicate emails
-    // (e.g. a replayed return URL) are prevented by the unique notification_key
-    // inside notifyPaymentVerified, so the deposit-verified copy is idempotent.
+    // registered after the HTTP response finishes so email, Supabase writes,
+    // or provider latency never block the guest redirect after capture succeeds.
+    // Duplicate emails are prevented by the unique notification_key inside
+    // notifyPaymentVerified, so the deposit-verified copy is idempotent.
     // Verifying the deposit does NOT confirm the stay: the booking stays in
     // PAID_DEPOSIT and only staff confirmation in Admin Operations finalizes it.
-    try {
-      if (verified) {
-        await notifyPaymentVerified(bookingRef);
-      } else if (
-        databaseResult.verificationStatus &&
-        !['VERIFIED', 'DUPLICATE', 'DATABASE_UNCONFIGURED'].includes(databaseResult.verificationStatus)
-      ) {
-        await notifyPaymentException({
-          reference: bookingRef,
-          verificationStatus: databaseResult.verificationStatus,
-          verificationNote: databaseResult.verificationNote,
-          eventType: 'PAYPAL.ORDER.CAPTURE',
-        });
-      }
-    } catch (notifyError) {
-      // Notifications are non-critical; never fail the guest redirect on a notify error.
+    if (verified) {
+      notifyAfterResponse(res, () => notifyPaymentVerified(bookingRef));
+      return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(capture.orderId)}&captureId=${encodeURIComponent(captureId)}`);
     }
 
-    if (verified) {
-      return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(capture.orderId)}&captureId=${encodeURIComponent(captureId)}`);
+    if (
+      databaseResult.verificationStatus &&
+      !['VERIFIED', 'DUPLICATE', 'DATABASE_UNCONFIGURED'].includes(databaseResult.verificationStatus)
+    ) {
+      notifyAfterResponse(res, () => notifyPaymentException({
+        reference: bookingRef,
+        verificationStatus: databaseResult.verificationStatus,
+        verificationNote: databaseResult.verificationNote,
+        eventType: 'PAYPAL.ORDER.CAPTURE',
+      }));
     }
 
     const reason = databaseResult.verificationStatus || capture.status || 'capture-not-verified';
