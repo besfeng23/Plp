@@ -94,6 +94,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
+  let bookingReference = null;
   try {
     let body;
     try {
@@ -106,6 +107,7 @@ export default async function handler(req, res) {
     if (!booking?.reference || !booking?.name || !booking?.email) {
       return res.status(400).json({ ok: false, error: 'Missing booking reference or guest details' });
     }
+    bookingReference = booking.reference;
 
     if (!isSupabaseConfigured()) {
       return safeCheckoutStartupError(res, 503, {
@@ -210,6 +212,6 @@ export default async function handler(req, res) {
     return safeCheckoutStartupError(res, status, {
       code,
       detail: error instanceof SafePayPalError ? error.message : 'PayPal checkout could not be started safely.',
-    }, req);
+    }, req, bookingReference);
   }
 }
