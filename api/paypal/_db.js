@@ -22,7 +22,7 @@ function mapPayPalStatus(status) {
 }
 
 function mapBookingStatus(paymentStatus) {
-  if (paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED') return 'DEPOSIT_VERIFIED_AWAITING_CONFIRMATION';
+  if (paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED') return 'DEPOSIT_VERIFIED';
   if (paymentStatus === 'FAILED') return 'PAYMENT_FAILED';
   if (paymentStatus === 'VOIDED') return 'PAYMENT_CANCELLED';
   return 'PAYMENT_PROCESSING';
