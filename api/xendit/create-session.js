@@ -1,5 +1,6 @@
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
 import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
+import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured, selectRows } from '../_supabase.js';
 
 function safeCheckoutStartupError(res, status, { code, detail }) {
   return res.status(status).json({
@@ -8,6 +9,52 @@ function safeCheckoutStartupError(res, status, { code, detail }) {
     code,
     detail,
   });
+}
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function encodeFilterValue(value) {
+  return encodeURIComponent(String(value));
+}
+
+async function requestMatchesPersistedGuest({ booking, persistedBooking }) {
+  const submittedEmail = normalizeEmail(booking?.email);
+  const guestId = persistedBooking?.guest_id;
+  if (!submittedEmail || !guestId) return false;
+
+  const guests = await selectRows('plp_guests', `id=eq.${encodeFilterValue(guestId)}&select=email,normalized_email&limit=1`);
+  const guest = guests?.[0];
+  const persistedEmail = normalizeEmail(guest?.normalized_email || guest?.email);
+  return Boolean(persistedEmail && submittedEmail === persistedEmail);
+}
+
+function isCheckoutAllowed(booking) {
+  const bookingStatus = String(booking?.status || '').trim().toUpperCase();
+  const paymentStatus = String(booking?.payment_status || '').trim().toUpperCase();
+  const terminalBookingStatuses = new Set([
+    'PAID_DEPOSIT',
+    'DEPOSIT_VERIFIED',
+    'CONFIRMED',
+    'CANCELLED',
+    'VOIDED',
+    'FAILED',
+    'EXPIRED',
+    'REFUNDED',
+  ]);
+  const terminalPaymentStatuses = new Set([
+    'SUCCEEDED',
+    'CAPTURED',
+    'VERIFIED',
+    'FAILED',
+    'CANCELLED',
+    'VOIDED',
+    'EXPIRED',
+    'REFUNDED',
+  ]);
+
+  return !terminalBookingStatuses.has(bookingStatus) && !terminalPaymentStatuses.has(paymentStatus);
 }
 
 export default async function handler(req, res) {
@@ -24,7 +71,41 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Missing booking reference or guest details' });
     }
 
-    const order = await createPayPalOrder({ booking, req });
+    if (!isSupabaseConfigured()) {
+      return safeCheckoutStartupError(res, 503, {
+        code: 'SUPABASE_NOT_CONFIGURED',
+        detail: getSupabaseConfigError() || 'Payment database is not configured.',
+      });
+    }
+
+    const persistedBooking = await findBookingByReference(booking.reference);
+    if (!persistedBooking) {
+      return safeCheckoutStartupError(res, 404, {
+        code: 'BOOKING_NOT_FOUND',
+        detail: 'No matching reservation request was found for this reference.',
+      });
+    }
+
+    const ownsBooking = await requestMatchesPersistedGuest({ booking, persistedBooking });
+    if (!ownsBooking) {
+      return safeCheckoutStartupError(res, 404, {
+        code: 'BOOKING_NOT_FOUND',
+        detail: 'No matching reservation request was found for this reference.',
+      });
+    }
+
+    if (!isCheckoutAllowed(persistedBooking)) {
+      return safeCheckoutStartupError(res, 409, {
+        code: 'CHECKOUT_NOT_AVAILABLE_FOR_STATUS',
+        detail: 'Checkout is not available for this booking in its current payment state.',
+      });
+    }
+
+    // Never trust a client-supplied deposit amount: the checkout order is always created
+    // for the deposit already computed and persisted server-side by /api/bookings.
+    const authoritativeBooking = { ...booking, deposit: persistedBooking.deposit_amount_php, paymentDue: persistedBooking.deposit_amount_php };
+
+    const order = await createPayPalOrder({ booking: authoritativeBooking, req });
     const session = {
       provider: 'PAYPAL',
       checkoutUrl: order.approveUrl,
