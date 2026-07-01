@@ -1,3 +1,4 @@
+import { findBookingByReference } from '../_supabase.js';
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
 import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
 
@@ -10,6 +11,10 @@ function safeCheckoutStartupError(res, status, { code, detail }) {
   });
 }
 
+function bookingReferenceFrom(input) {
+  return String(input?.reference || input?.booking_reference || input?.id || '').trim();
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -18,20 +23,26 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
-    const booking = body.booking || body;
+    const submittedBooking = body.booking || body;
+    const bookingReference = bookingReferenceFrom(submittedBooking);
 
-    if (!booking?.reference || !booking?.name || !booking?.email) {
-      return res.status(400).json({ ok: false, error: 'Missing booking reference or guest details' });
+    if (!bookingReference) {
+      return res.status(400).json({ ok: false, error: 'Missing booking reference' });
     }
 
-    const order = await createPayPalOrder({ booking, req });
+    const storedBooking = await findBookingByReference(bookingReference);
+    if (!storedBooking) {
+      return res.status(404).json({ ok: false, error: 'Booking request was not found for checkout' });
+    }
+
+    const order = await createPayPalOrder({ booking: storedBooking, req });
     const session = {
       provider: 'PAYPAL',
       checkoutUrl: order.approveUrl,
       paypalOrderId: order.id,
       paymentSessionId: order.id,
       referenceId: order.reference,
-      status: 'CREATED',
+      status: 'DEPOSIT_CHECKOUT_CREATED',
       amount: Number(order.amount),
       currency: order.currency,
     };
@@ -85,7 +96,7 @@ export default async function handler(req, res) {
         verification_status: databasePayment.verification_status,
       },
       databaseWarning: null,
-      note: 'PayPal checkout order created. Redirect the guest to checkoutUrl to approve the 30% deposit.',
+      note: 'Secure deposit checkout created from the stored booking amount. Final booking confirmation still requires resort review after payment verification.',
     });
   } catch (error) {
     const code = error instanceof SafePayPalError ? error.code : 'PAYPAL_ORDER_CREATE_FAILED';
