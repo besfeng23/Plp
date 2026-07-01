@@ -114,10 +114,24 @@
     if (typeof MutationObserver !== 'undefined' && document.body) new MutationObserver(function () { setTimeout(sync, 0); }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
+  function syncBookingExpectationCopy() {
+    if (window.location.pathname !== '/booking') return;
+    var estimateNote = document.querySelector('.estimate-note');
+    if (estimateNote) estimateNote.textContent = 'Estimates for planning only. If online deposit checkout is available, you may be redirected after submitting your request. Final rate, availability, and booking confirmation still require resort review.';
+    var items = document.querySelectorAll('.reassure li');
+    if (items && items.length >= 4) {
+      items[2].textContent = 'Secure deposit step may open after submission';
+      items[3].textContent = 'Final confirmation follows team review';
+    }
+    var fine = document.querySelector('.fine');
+    if (fine) fine.textContent = 'Submitting opens a reservation request and may direct you to a secure deposit step when online checkout is available. Final confirmation follows resort availability review and team confirmation.';
+  }
+
   function trackView() {
     track('view_page', { title: document.title });
     if (window.location.pathname === '/booking') track('view_booking', { title: document.title });
     syncBookingNightlyPrices();
+    syncBookingExpectationCopy();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', trackView);
