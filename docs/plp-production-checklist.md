@@ -1,6 +1,6 @@
 # PLP production checklist
 
-Use this checklist after a deployment or before promoting a release. Do not paste real staff access keys, Xendit secrets, webhook tokens, or Supabase service-role keys into this file.
+Use this checklist after a deployment or before promoting a release. Do not paste real staff access keys, PayPal credentials, Xendit secrets, webhook tokens, or Supabase service-role keys into this file.
 
 ## Public site route checks
 
@@ -29,24 +29,25 @@ Use this checklist after a deployment or before promoting a release. Do not past
 
 - Confirm `/api/bookings` creates a booking reference with total, deposit, and balance amounts.
 - Confirm `/api/paypal/create-session` creates the PayPal checkout order for the 30% deposit.
-- Confirm the legacy `/api/xendit/create-session` alias still delegates to the PayPal route (the booking form POSTs to it).
-- Confirm a verified `/api/paypal/capture` sends the deposit-verified notification and leaves the booking in paid-deposit state (not confirmed).
+- Confirm the legacy `/api/xendit/create-session` alias only delegates to the PayPal route because the booking form still POSTs to it.
+- Confirm `/api/paypal/capture` captures the approved PayPal order and verifies the stored booking reference, amount, and currency.
+- Confirm a verified `/api/paypal/capture` sends the deposit-verified notification and leaves the booking in paid-deposit state, not confirmed.
 - Confirm the success redirect only tells guests the reservation is being verified.
 - Do not treat the success redirect as proof of payment.
 
-## Webhook verification checklist
+## Legacy Xendit webhook verification checklist
 
-- Confirm Xendit sends the expected callback token.
+- Confirm Xendit sends the expected callback token before accepting any Xendit-originated event.
 - Confirm webhook events are recorded with booking reference, provider payment ID, amount, currency, and verification status.
 - Confirm mismatched amount, mismatched currency, unmatched reference, and duplicate events are visible for operations review.
-- Treat the webhook verification result as the payment source of truth.
+- Treat `/api/xendit/webhook` as the source of truth only for legacy Xendit callback events, not for PayPal captures.
 
 ## Admin reservation handoff checklist
 
 - Confirm Reservations loads only after the staff access key is provided.
 - Confirm search covers guest name, email, phone/WhatsApp, accommodation, booking reference, notes, guest count, and payment/deposit status.
 - Confirm each reservation shows check-in, check-out, guest count, notes/special requests, total, deposit, balance, booking status, payment status, and payment verification status.
-- Confirm action labels do not imply payment is verified before webhook reconciliation.
+- Confirm action labels do not imply payment is verified before server-side payment reconciliation.
 
 ## Post-deployment verification checklist
 
