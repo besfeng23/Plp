@@ -163,7 +163,8 @@ export async function notifyPaymentVerified(reference) {
     `Dear ${row.guest_name || 'Guest'},`,
     '',
     'Your Pueblo La Perla reservation deposit has been verified.',
-    'The booking is now awaiting final concierge availability confirmation.',
+    'This confirms the deposit only. Your stay is not finally confirmed yet.',
+    'Our concierge team will review availability and send a separate final confirmation before your booking is complete.',
     '',
     ...baseBookingLines(row),
     '',
@@ -191,7 +192,7 @@ export async function notifyPaymentException({ reference, verificationStatus, ve
   const row = reference ? await getBookingContext(reference) : null;
   const subject = `PLP payment exception: ${verificationStatus || 'Review required'}`;
   const text = [
-    'A Xendit webhook was received but did not pass clean verification.',
+    'A payment event was received but did not pass clean verification.',
     '',
     `Reference: ${reference || '-'}`,
     `Verification status: ${verificationStatus || '-'}`,
