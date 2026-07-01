@@ -70,7 +70,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+    let body;
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+    } catch {
+      return res.status(400).json({ ok: false, error: 'Invalid JSON body' });
+    }
     const booking = body.booking || body;
 
     if (!booking?.reference || !booking?.name || !booking?.email) {
