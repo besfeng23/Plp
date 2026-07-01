@@ -10,8 +10,8 @@ Luxury editorial resort prototype for Pueblo La Perla Boracay.
 - lucide-react
 - Vercel serverless functions
 - Supabase Postgres for bookings/payments
-- Xendit Payment Sessions for reservation deposits
 - PayPal Checkout for reservation deposits
+- Legacy Xendit webhook compatibility for payment reconciliation callbacks
 
 ## Run locally
 
@@ -68,24 +68,25 @@ Start with `PAYPAL_MODE=sandbox` and complete a sandbox smoke test before consid
 
 1. Guest submits reservation details.
 2. `/api/bookings` validates the request, calculates a 30% deposit, creates or updates the guest in Supabase, and creates a booking record.
-3. `/api/paypal/create-session` creates the PayPal deposit checkout order for the 30% deposit and records the payment session in Supabase. The legacy `/api/xendit/create-session` path is kept as a backward-compatible alias that delegates to this canonical route (the public booking form still POSTs to it).
+3. `/api/paypal/create-session` creates the PayPal deposit checkout order for the 30% deposit and records the payment session in Supabase. The legacy `/api/xendit/create-session` path is kept only as a backward-compatible alias that delegates to this canonical PayPal route because the public booking form still POSTs to it.
 4. Guest is redirected to PayPal to approve the deposit.
-5. `/api/paypal/capture` captures the approved order, verifies the reference/amount/currency against the stored payment session, updates the payment record, moves the booking to paid-deposit state only when verification passes, and triggers the deposit-verified notification to the guest and staff. `/api/xendit/webhook` applies the same token-verified reconciliation rules for the Xendit callback channel.
-6. A verified deposit does not confirm the stay. The booking stays in paid-deposit state; only staff confirmation in Admin Operations finalizes it.
-7. Admin can read booking/payment reconciliation and payment exceptions through `/api/admin/bookings`.
+5. `/api/paypal/capture` captures the approved order, verifies the reference/amount/currency against the stored payment session, updates the payment record, moves the booking to paid-deposit state only when verification passes, and triggers the deposit-verified notification to the guest and staff.
+6. `/api/xendit/webhook` remains the legacy Xendit callback path and applies the same token-verified reconciliation rules only for Xendit-originated events.
+7. A verified deposit does not confirm the stay. The booking stays in paid-deposit state; only staff confirmation in Admin Operations finalizes it.
+8. Admin can read booking/payment reconciliation and payment exceptions through `/api/admin/bookings`.
 
 ## Payment verification rules
 
-The success redirect page is not treated as proof of payment. Real status changes come from server-side verification (the PayPal capture and the Xendit webhook), never from the redirect.
+The success redirect page is not treated as proof of payment. Real status changes come only from server-side verification: `/api/paypal/capture` for PayPal orders and `/api/xendit/webhook` only for legacy Xendit callback events.
 
-Webhook events are classified as:
+Server-side payment events are classified as:
 
 - `VERIFIED` — booking reference exists, payment session exists, amount matches, currency is PHP.
-- `DUPLICATE` — webhook/event ID was already processed.
-- `UNMATCHED_REFERENCE` — no booking exists for the callback reference.
+- `DUPLICATE` — event ID or return/capture processing was already handled.
+- `UNMATCHED_REFERENCE` — no booking exists for the payment reference.
 - `UNMATCHED_PAYMENT` — booking exists but no matching payment session exists.
-- `AMOUNT_MISMATCH` — callback amount does not match the expected deposit.
-- `CURRENCY_MISMATCH` — callback currency is not PHP.
+- `AMOUNT_MISMATCH` — payment amount does not match the expected deposit.
+- `CURRENCY_MISMATCH` — payment currency is not PHP.
 
 Only `VERIFIED` positive payment events can move a booking into `PAID_DEPOSIT`.
 
@@ -99,9 +100,9 @@ The app includes:
 - Getting Here page
 - VIP Wellness Package page
 - Contact/reservation inquiry form
-- Xendit-ready reservation deposit checkout
+- PayPal-backed reservation deposit checkout
 - Supabase-backed booking/payment tables
-- Hardened webhook verification and payment exception tracking
+- Hardened PayPal capture, legacy webhook verification, and payment exception tracking
 - Hidden guest portal mock
 - Hidden admin Resort OS mock
 
@@ -141,7 +142,7 @@ Manual `/admin` checklist:
 
 Payment verification reminders:
 
-- Xendit success redirects are not proof of payment.
-- The Xendit webhook verification result is the payment source of truth.
+- PayPal success redirects are not proof of payment.
+- `/api/paypal/capture` is the canonical PayPal deposit verification path.
+- `/api/xendit/webhook` is only the legacy Xendit callback verification path.
 - Staff should only issue final confirmation after PLP availability review and verified payment reconciliation.
-
