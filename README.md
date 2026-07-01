@@ -80,6 +80,11 @@ XENDIT_SECRET_KEY=
 XENDIT_WEBHOOK_TOKEN=
 ```
 
+
+## PLP Telegram Command Bot
+
+A read-only Telegram operations bot can be deployed through the Vercel API route at `/api/telegram/webhook`. It answers production, PR, PayPal health, latest booking, and payment exception questions from approved Telegram user IDs only. See `docs/plp-telegram-command-bot.md` for setup, security rules, required environment variables, and webhook configuration.
+
 ## PayPal setup
 
 PayPal checkout must be configured with environment variable names only; never
