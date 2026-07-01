@@ -34,9 +34,9 @@ values
     "primaryCta": "Reserve your stay"
   }'::jsonb, 'migration'),
   ('accommodation', 'PUBLISHED', '{
-    "grandOceanVilla": { "name": "Grand Ocean Villa", "rate": 40000, "capacity": 8, "bedrooms": 4 },
-    "sunsetSuite": { "name": "Sunset Suite", "rate": 18000, "capacity": 4, "bedrooms": 2 },
-    "smartRoomPremium": { "name": "Smart Room Premium", "rate": 8000, "capacity": 2, "bedrooms": 1 }
+    "grandOceanVilla": { "name": "Grand Ocean Villa", "rate": 300, "capacity": 8, "bedrooms": 4 },
+    "sunsetSuite": { "name": "Sunset Suite", "rate": 200, "capacity": 4, "bedrooms": 2 },
+    "smartRoomPremium": { "name": "Smart Room Premium", "rate": 100, "capacity": 2, "bedrooms": 1 }
   }'::jsonb, 'migration'),
   ('experiences', 'PUBLISHED', '{
     "water": "Paraw sailing, island hopping, snorkeling, and curated water activities.",

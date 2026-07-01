@@ -12,7 +12,7 @@ values
   ('accommodation', 'PUBLISHED', '{
     "grandOceanVilla": {
       "name": "Grand Ocean Villa",
-      "rate": 40000,
+      "rate": 300,
       "capacity": 8,
       "bedrooms": 4,
       "type": "Signature Villa",
@@ -23,7 +23,7 @@ values
     },
     "sunsetSuite": {
       "name": "Sunset Suite",
-      "rate": 18000,
+      "rate": 200,
       "capacity": 4,
       "bedrooms": 2,
       "type": "Elevated Suite",
@@ -34,7 +34,7 @@ values
     },
     "smartRoomPremium": {
       "name": "Smart Room Premium",
-      "rate": 8000,
+      "rate": 100,
       "capacity": 2,
       "bedrooms": 1,
       "type": "Premium Room",

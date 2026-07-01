@@ -50,7 +50,7 @@
 
   function syncBookingNightlyPrices() {
     if (window.location.pathname !== '/booking') return;
-    var rates = { grandOceanVilla: 40000, sunsetSuite: 18000, smartRoomPremium: 8000 };
+    var rates = { grandOceanVilla: 300, sunsetSuite: 200, smartRoomPremium: 100 };
     var names = { grandOceanVilla: 'Grand Ocean Villa', sunsetSuite: 'Sunset Suite', smartRoomPremium: 'Smart Room Premium' };
     var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var syncing = false;
