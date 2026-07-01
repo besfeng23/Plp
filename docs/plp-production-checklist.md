@@ -2,6 +2,35 @@
 
 Use this checklist after a deployment or before promoting a release. Do not paste real staff access keys, PayPal credentials, Xendit secrets, webhook tokens, or Supabase service-role keys into this file.
 
+## Temporary live test pricing
+
+For live PayPal go-live verification the nightly rates are intentionally low so a real guest can complete a real PayPal deposit without a large charge:
+
+| Accommodation | Nightly rate | 30% deposit (1 night) |
+| --- | --- | --- |
+| Grand Ocean Villa | 300 | 90 |
+| Sunset Suite | 200 | 60 |
+| Smart Room Premium | 100 | 30 |
+
+- Confirm `/booking` shows `300 / 200 / 100` per night and `90 / 60 / 30` as the 30% deposit.
+- The server-side deposit stored by `/api/bookings` is the source of truth; a browser-supplied amount must never override it.
+
+## Live PayPal env var checklist (Vercel Production)
+
+> Real PayPal payments require **live** PayPal credentials. Sandbox credentials will **not** work for real guest payment testing. Enter secrets only in Vercel Production env vars — never in code, docs, logs, or screenshots.
+
+Confirm these are set in **Vercel → Settings → Environment Variables → Production** before real payment testing:
+
+- `PAYPAL_MODE=live`
+- `PAYPAL_CLIENT_ID` = live PayPal REST app client id
+- `PAYPAL_CLIENT_SECRET` = live PayPal REST app secret
+- `NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app`
+- `SUPABASE_URL` = production Supabase URL
+- `SUPABASE_SERVICE_ROLE_KEY` = production Supabase service role key
+- `RESEND_API_KEY`, `BOOKINGS_FROM_EMAIL`, `BOOKINGS_TO_EMAIL` if email notifications are expected
+
+Keep live and sandbox credentials separate: live mode needs live credentials and sandbox mode needs sandbox credentials. Never mix them in one environment.
+
 ## Public site route checks
 
 - Run `npm run check:routes` against `https://plp-boracay.vercel.app`.
@@ -52,7 +81,19 @@ Use this checklist after a deployment or before promoting a release. Do not past
 ## Post-deployment verification checklist
 
 - Run `npm run build`.
+- Run `npm run check:viewport`.
 - Run `npm run check:routes`.
 - Manually open `/booking` and submit only safe test data.
 - Manually open `/admin` and confirm no reservation data is visible without the staff access key.
 - Confirm no real secrets are present in committed docs or code.
+
+## Live PayPal go-live smoke test (post-deploy)
+
+- Open `GET /api/paypal/health`; confirm `mode` is `live` and every `has*` field is `true` (values never exposed).
+- Open `/booking`, select a room, and confirm the temporary test pricing (`300 / 200 / 100`, deposits `90 / 60 / 30`).
+- Submit reservation details and continue to PayPal live checkout.
+- Pay the deposit through a real PayPal account and return to `/booking/success`.
+- Confirm the booking becomes deposit-paid **only** after server-side capture verification (`VERIFIED`).
+- Confirm the booking stays in paid-deposit state and is not auto-confirmed; only staff final confirmation finalizes the stay.
+- Confirm the guest/staff deposit-verified notification runs via the non-blocking `waitUntil` path.
+- Do not merge or promote unless the Vercel preview passes.

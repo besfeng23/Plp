@@ -4,10 +4,15 @@ import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } fro
 
 const DEPOSIT_RATE = 0.3;
 
+// Temporary live PayPal test pricing (2026 go-live verification).
+// Nightly rates are intentionally low so a real guest can complete a live
+// PayPal deposit without a large charge. 30% deposits are 90 / 60 / 30.
+// The server-side computed deposit below remains the single source of truth;
+// no browser-supplied amount can override it.
 const accommodations = {
-  'Grand Ocean Villa': { rate: 40000, capacity: 8 },
-  'Sunset Suite': { rate: 18000, capacity: 4 },
-  'Smart Room Premium': { rate: 8000, capacity: 2 },
+  'Grand Ocean Villa': { rate: 300, capacity: 8 },
+  'Sunset Suite': { rate: 200, capacity: 4 },
+  'Smart Room Premium': { rate: 100, capacity: 2 },
 };
 
 const required = ['name', 'email', 'phone', 'accommodation', 'checkIn', 'checkOut', 'guests'];

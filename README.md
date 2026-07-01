@@ -26,43 +26,94 @@ npm run dev
 npm run build
 ```
 
-## Production environment variables
+## Temporary live test pricing
 
-Set these in Vercel before accepting real payments:
+For live PayPal go-live verification the nightly rates are intentionally low so a
+real guest can complete a real PayPal deposit without a large charge. These are
+temporary test prices, not the final published rates.
+
+| Accommodation | Nightly rate | 30% deposit (1 night) |
+| --- | --- | --- |
+| Grand Ocean Villa | 300 | 90 |
+| Sunset Suite | 200 | 60 |
+| Smart Room Premium | 100 | 30 |
+
+The 30% deposit rule is unchanged. The server-side deposit computed and stored
+by `/api/bookings` is the single source of truth; a browser-supplied amount can
+never override the server-computed deposit sent to PayPal.
+
+## Production environment variables (Vercel Production)
+
+> **Real PayPal payments require live PayPal credentials.** Sandbox credentials
+> will not work for real guest payment testing. Never commit or paste real
+> credential values into code, docs, logs, screenshots, or comments — enter them
+> only in the Vercel Production environment.
+
+Configure these in **Vercel → Project → Settings → Environment Variables →
+Production** before real payment testing:
 
 ```env
+PAYPAL_MODE=live
+PAYPAL_CLIENT_ID=<live PayPal REST app client id>
+PAYPAL_CLIENT_SECRET=<live PayPal REST app secret>
 NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
-XENDIT_SECRET_KEY=
-XENDIT_WEBHOOK_TOKEN=
-PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
-PAYPAL_MODE=sandbox
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_URL=<production Supabase URL>
+SUPABASE_SERVICE_ROLE_KEY=<production Supabase service role key>
 ```
 
-Optional email variables:
+Optional email variables (needed if guest/staff email notifications are expected):
 
 ```env
-RESEND_API_KEY=
-BOOKINGS_FROM_EMAIL=
-BOOKINGS_TO_EMAIL=
+RESEND_API_KEY=<production Resend key>
+BOOKINGS_FROM_EMAIL=<verified sender>
+BOOKINGS_TO_EMAIL=<staff inbox>
 LEADS_FROM_EMAIL=
 LEADS_TO_EMAIL=
 ```
 
-## PayPal setup
-
-PayPal checkout must be configured with environment variable names only; never commit or paste real credential values.
+Legacy Xendit reconciliation variables remain optional and only affect the
+legacy `/api/xendit/webhook` callback path; they are not required for PayPal
+deposit checkout:
 
 ```env
-PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
-PAYPAL_MODE=sandbox
+XENDIT_SECRET_KEY=
+XENDIT_WEBHOOK_TOKEN=
+```
+
+## PayPal setup
+
+PayPal checkout must be configured with environment variable names only; never
+commit or paste real credential values.
+
+### Live (real guest payments)
+
+```env
+PAYPAL_MODE=live
+PAYPAL_CLIENT_ID=<live PayPal REST app client id>
+PAYPAL_CLIENT_SECRET=<live PayPal REST app secret>
 NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
 ```
 
-Start with `PAYPAL_MODE=sandbox` and complete a sandbox smoke test before considering live payment use. If a real PayPal client id or secret was leaked, pasted, logged, or committed anywhere, rotate it in PayPal immediately and update the deployment environment.
+`PAYPAL_MODE=live` selects the live PayPal REST API base
+(`https://api-m.paypal.com`); any other value falls back to the sandbox base
+(`https://api-m.sandbox.paypal.com`). Live mode requires **live** PayPal REST
+app credentials created in the PayPal live dashboard. Sandbox credentials will
+be rejected by the live API.
+
+### Sandbox (rehearsal only — keep separate from live)
+
+```env
+PAYPAL_MODE=sandbox
+PAYPAL_CLIENT_ID=<sandbox PayPal REST app client id>
+PAYPAL_CLIENT_SECRET=<sandbox PayPal REST app secret>
+NEXT_PUBLIC_BASE_URL=https://plp-boracay.vercel.app
+```
+
+Do not mix sandbox and live credentials in the same environment: live mode needs
+live credentials and sandbox mode needs sandbox credentials. Complete a sandbox
+smoke test before switching an environment to live. If a real PayPal client id
+or secret was leaked, pasted, logged, or committed anywhere, rotate it in PayPal
+immediately and update the deployment environment.
 
 ## Booking/payment flow
 
@@ -146,3 +197,24 @@ Payment verification reminders:
 - `/api/paypal/capture` is the canonical PayPal deposit verification path.
 - `/api/xendit/webhook` is only the legacy Xendit callback verification path.
 - Staff should only issue final confirmation after PLP availability review and verified payment reconciliation.
+
+## Live PayPal go-live smoke test
+
+Run after deploying with `PAYPAL_MODE=live` and live PayPal credentials set in
+Vercel Production:
+
+1. Open `GET /api/paypal/health` and confirm `mode` is `live` and every `has*`
+   field is `true`. It must never expose secret values.
+2. Open `/booking`, select a room, and confirm the temporary test pricing shows
+   `300 / 200 / 100` per night with `90 / 60 / 30` as the 30% deposit.
+3. Submit reservation details and continue to PayPal live checkout.
+4. Pay the deposit through a real PayPal account.
+5. Confirm you return to `/booking/success` and that the booking is marked
+   deposit-paid **only** after server-side capture verification (`VERIFIED`).
+6. Confirm the booking stays in paid-deposit state and is **not** auto-confirmed;
+   only staff final confirmation in Admin Operations finalizes the stay.
+7. Confirm the guest/staff deposit-verified notification runs via the existing
+   non-blocking `waitUntil` path.
+
+> Do not promote to production or merge unless the Vercel preview passes and live
+> PayPal credentials have been entered only in Vercel Production env vars.
