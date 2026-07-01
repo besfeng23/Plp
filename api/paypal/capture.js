@@ -16,7 +16,7 @@ function buildBookingQuery(bookingRef) {
   return bookingRef ? `bookingId=${encodeURIComponent(bookingRef)}&` : '';
 }
 
-function runNotificationTask(task) {
+function scheduleNotification(task) {
   const promise = Promise.resolve().then(task).catch(() => {
     // Notifications are non-critical; never fail the guest redirect on a notify error.
   });
@@ -24,15 +24,6 @@ function runNotificationTask(task) {
   if (typeof globalThis.waitUntil === 'function') {
     globalThis.waitUntil(promise);
   }
-}
-
-function notifyAfterResponse(res, task) {
-  if (typeof res.once === 'function') {
-    res.once('finish', () => runNotificationTask(task));
-    return;
-  }
-
-  setTimeout(() => runNotificationTask(task), 0);
 }
 
 export default async function handler(req, res) {
@@ -65,15 +56,16 @@ export default async function handler(req, res) {
     const verified = capture.status === 'COMPLETED' && databaseResult.verificationStatus === 'VERIFIED';
 
     // A verified PayPal deposit capture triggers the same guest/staff
-    // "deposit verified" notification as the Xendit webhook path. This is
-    // registered after the HTTP response finishes so email, Supabase writes,
-    // or provider latency never block the guest redirect after capture succeeds.
-    // Duplicate emails are prevented by the unique notification_key inside
+    // "deposit verified" notification as the Xendit webhook path. The Promise is
+    // created and passed to waitUntil before the 302 response is ended, so email,
+    // Supabase writes, or provider latency never block the guest redirect while
+    // Vercel still has an explicit background task to keep alive. Duplicate
+    // emails are prevented by the unique notification_key inside
     // notifyPaymentVerified, so the deposit-verified copy is idempotent.
     // Verifying the deposit does NOT confirm the stay: the booking stays in
     // PAID_DEPOSIT and only staff confirmation in Admin Operations finalizes it.
     if (verified) {
-      notifyAfterResponse(res, () => notifyPaymentVerified(bookingRef));
+      scheduleNotification(() => notifyPaymentVerified(bookingRef));
       return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(capture.orderId)}&captureId=${encodeURIComponent(captureId)}`);
     }
 
@@ -81,7 +73,7 @@ export default async function handler(req, res) {
       databaseResult.verificationStatus &&
       !['VERIFIED', 'DUPLICATE', 'DATABASE_UNCONFIGURED'].includes(databaseResult.verificationStatus)
     ) {
-      notifyAfterResponse(res, () => notifyPaymentException({
+      scheduleNotification(() => notifyPaymentException({
         reference: bookingRef,
         verificationStatus: databaseResult.verificationStatus,
         verificationNote: databaseResult.verificationNote,
