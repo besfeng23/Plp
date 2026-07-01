@@ -1,6 +1,3 @@
-const API_BASE = 'https://api.vercel.com';
-function vercelHeaders() { const token = process.env.VERCEL_TOKEN; if (!token) throw new Error('Vercel token is not configured.'); return { Authorization: `Bearer ${token}`, 'User-Agent': 'plp-telegram-command-bot' }; }
-function teamQuery() { return process.env.VERCEL_TEAM_ID ? `&teamId=${encodeURIComponent(process.env.VERCEL_TEAM_ID)}` : ''; }
-async function vercelFetch(path) { const response = await fetch(`${API_BASE}${path}`, { headers: vercelHeaders() }); const data = await response.json().catch(() => null); if (!response.ok) throw new Error(data?.error?.message || `Vercel request failed with status ${response.status}`); return data; }
-export async function getLatestProductionDeployment() { const projectId = process.env.VERCEL_PROJECT_ID; if (!projectId) throw new Error('Vercel project id is not configured.'); const data = await vercelFetch(`/v6/deployments?projectId=${encodeURIComponent(projectId)}&target=production&limit=5${teamQuery()}`); const latest = data.deployments?.[0] || null; if (!latest) return null; return { state: latest.state, url: latest.url, createdAt: latest.createdAt ? new Date(latest.createdAt).toISOString() : null, commitSha: latest.meta?.githubCommitSha || latest.meta?.githubCommitRef || null, commitMessage: latest.meta?.githubCommitMessage || null, id: latest.uid }; }
-export async function getRecentVercelErrors() { const latest = await getLatestProductionDeployment(); return { latest, note: 'Runtime log access depends on the Vercel plan/API permissions; latest production deployment is reported as a safe read-only fallback.' }; }
+export default function handler(req, res) {
+  res.status(404).json({ ok: false, error: 'Not found' });
+}
