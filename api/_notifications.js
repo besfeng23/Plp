@@ -113,7 +113,7 @@ export async function notifyBookingCreated({ booking, databaseRecord }) {
     `Dear ${booking.name},`,
     '',
     'Thank you for your Pueblo La Perla Boracay reservation request.',
-    'Your booking reference has been created. Please complete the secure Xendit reservation deposit checkout to continue.',
+    'Your booking reference has been created. Please complete the secure reservation deposit checkout to continue.',
     '',
     `Booking reference: ${booking.reference}`,
     `Accommodation: ${booking.accommodation}`,

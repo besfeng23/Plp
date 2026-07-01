@@ -1,5 +1,6 @@
 import { createPayPalPaymentRecord } from '../paypal/_db.js';
 import { SafePayPalError, createPayPalOrder } from '../paypal/_paypal.js';
+import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured } from '../_supabase.js';
 
 function safeCheckoutStartupError(res, status, { code, detail }) {
   return res.status(status).json({
@@ -24,7 +25,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Missing booking reference or guest details' });
     }
 
-    const order = await createPayPalOrder({ booking, req });
+    if (!isSupabaseConfigured()) {
+      return safeCheckoutStartupError(res, 503, {
+        code: 'SUPABASE_NOT_CONFIGURED',
+        detail: getSupabaseConfigError() || 'Payment database is not configured.',
+      });
+    }
+
+    const persistedBooking = await findBookingByReference(booking.reference);
+    if (!persistedBooking) {
+      return safeCheckoutStartupError(res, 404, {
+        code: 'BOOKING_NOT_FOUND',
+        detail: 'No matching reservation request was found for this reference.',
+      });
+    }
+
+    // Never trust a client-supplied deposit amount: the checkout order is always created
+    // for the deposit already computed and persisted server-side by /api/bookings.
+    const authoritativeBooking = { ...booking, deposit: persistedBooking.deposit_amount_php, paymentDue: persistedBooking.deposit_amount_php };
+
+    const order = await createPayPalOrder({ booking: authoritativeBooking, req });
     const session = {
       provider: 'PAYPAL',
       checkoutUrl: order.approveUrl,
