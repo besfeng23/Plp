@@ -68,14 +68,15 @@ Start with `PAYPAL_MODE=sandbox` and complete a sandbox smoke test before consid
 
 1. Guest submits reservation details.
 2. `/api/bookings` validates the request, calculates a 30% deposit, creates or updates the guest in Supabase, and creates a booking record.
-3. `/api/xendit/create-session` creates the Xendit hosted checkout and records the payment session in Supabase.
-4. Guest is redirected to Xendit.
-5. `/api/xendit/webhook` verifies the Xendit callback token, stores the payment event, validates the reference/amount/currency, updates the payment record, and only moves the booking to paid state when verification passes.
-6. Admin can read booking/payment reconciliation and payment exceptions through `/api/admin/bookings`.
+3. `/api/paypal/create-session` creates the PayPal deposit checkout order for the 30% deposit and records the payment session in Supabase. The legacy `/api/xendit/create-session` path is kept as a backward-compatible alias that delegates to this canonical route (the public booking form still POSTs to it).
+4. Guest is redirected to PayPal to approve the deposit.
+5. `/api/paypal/capture` captures the approved order, verifies the reference/amount/currency against the stored payment session, updates the payment record, moves the booking to paid-deposit state only when verification passes, and triggers the deposit-verified notification to the guest and staff. `/api/xendit/webhook` applies the same token-verified reconciliation rules for the Xendit callback channel.
+6. A verified deposit does not confirm the stay. The booking stays in paid-deposit state; only staff confirmation in Admin Operations finalizes it.
+7. Admin can read booking/payment reconciliation and payment exceptions through `/api/admin/bookings`.
 
 ## Payment verification rules
 
-The success redirect page is not treated as proof of payment. Real status changes come from the Xendit webhook.
+The success redirect page is not treated as proof of payment. Real status changes come from server-side verification (the PayPal capture and the Xendit webhook), never from the redirect.
 
 Webhook events are classified as:
 

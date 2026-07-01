@@ -25,10 +25,12 @@ Use this checklist after a deployment or before promoting a release. Do not past
 - Confirm the 30% deposit is the next payment step.
 - Confirm submission alone does not promise final confirmation.
 
-## Xendit test payment flow checklist
+## PayPal deposit checkout flow checklist
 
 - Confirm `/api/bookings` creates a booking reference with total, deposit, and balance amounts.
-- Confirm `/api/xendit/create-session` creates the hosted checkout session for the 30% deposit.
+- Confirm `/api/paypal/create-session` creates the PayPal checkout order for the 30% deposit.
+- Confirm the legacy `/api/xendit/create-session` alias still delegates to the PayPal route (the booking form POSTs to it).
+- Confirm a verified `/api/paypal/capture` sends the deposit-verified notification and leaves the booking in paid-deposit state (not confirmed).
 - Confirm the success redirect only tells guests the reservation is being verified.
 - Do not treat the success redirect as proof of payment.
 
