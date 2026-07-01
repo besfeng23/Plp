@@ -105,6 +105,14 @@
     return `<span class="pill ${cls}">${label}</span>`;
   }
 
+  // Booking status gets calm, operator-friendly wording (e.g. "Deposit verified · Awaiting
+  // confirmation" instead of a raw PAID_DEPOSIT/DEPOSIT_VERIFIED enum) via the shared helper
+  // admin-ops.html exposes. Falls back to the generic pill if that helper is unavailable.
+  function bookingStatusPill(value) {
+    if (typeof window.plpBookingStatusPill === 'function') return window.plpBookingStatusPill(value);
+    return pill(value);
+  }
+
   function info(label, value) {
     return `<div class="r360-info"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
   }
@@ -167,7 +175,7 @@
       overview: [
         ['Reference', field(row, ['booking_reference', 'reference', 'booking_code', 'code'])],
         ['Guest', field(row, ['guest_name', 'name', 'full_name', 'guestName'])],
-        ['Booking status', field(row, ['booking_status', 'status'])],
+        ['Booking status', typeof window.plpBookingStatusLabel === 'function' ? window.plpBookingStatusLabel(field(row, ['booking_status', 'status'])) : field(row, ['booking_status', 'status'])],
         ['Payment verification', field(row, ['payment_verification_status'])],
         ['Stay', `${text(checkIn)} → ${text(checkOut)}`],
         ['Nights', nights(row)],
@@ -238,7 +246,7 @@
       const accommodation = field(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']);
       const checkIn = field(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']);
       const checkOut = field(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']);
-      return `<tr><td data-label="Ref"><strong>${escapeHtml(ref)}</strong><br><span class="muted">${escapeHtml(row.provider || 'XENDIT')}</span></td><td data-label="Guest">${escapeHtml(guest)}<br><span class="muted">${escapeHtml(email)}</span></td><td data-label="Stay">${escapeHtml(accommodation)}<br><span class="muted">${escapeHtml(checkIn)} → ${escapeHtml(checkOut)}</span></td><td data-label="Amounts">Total: ${escapeHtml(peso(row.total_amount_php))}<br>Deposit: ${escapeHtml(peso(row.deposit_amount_php || row.payment_amount_php))}<br>Balance: ${escapeHtml(peso(row.balance_amount_php))}</td><td data-label="Booking">${pill(field(row, ['booking_status', 'status']))}</td><td data-label="Payment">${pill(field(row, ['payment_status', 'booking_payment_status']))}<br><span class="muted">${escapeHtml(row.provider_payment_id || row.provider_session_id || 'No provider ID yet')}</span></td><td data-label="Verification">${pill(field(row, ['payment_verification_status']))}<br><span class="muted">${escapeHtml(field(row, ['verification_error', 'verification_note', 'verification_notes']))}</span></td><td data-label=""><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></td></tr>`;
+      return `<tr><td data-label="Ref"><strong>${escapeHtml(ref)}</strong><br><span class="muted">${escapeHtml(row.provider || 'XENDIT')}</span></td><td data-label="Guest">${escapeHtml(guest)}<br><span class="muted">${escapeHtml(email)}</span></td><td data-label="Stay">${escapeHtml(accommodation)}<br><span class="muted">${escapeHtml(checkIn)} → ${escapeHtml(checkOut)}</span></td><td data-label="Amounts">Total: ${escapeHtml(peso(row.total_amount_php))}<br>Deposit: ${escapeHtml(peso(row.deposit_amount_php || row.payment_amount_php))}<br>Balance: ${escapeHtml(peso(row.balance_amount_php))}</td><td data-label="Booking">${bookingStatusPill(field(row, ['booking_status', 'status']))}</td><td data-label="Payment">${pill(field(row, ['payment_status', 'booking_payment_status']))}<br><span class="muted">${escapeHtml(row.provider_payment_id || row.provider_session_id || 'No provider ID yet')}</span></td><td data-label="Verification">${pill(field(row, ['payment_verification_status']))}<br><span class="muted">${escapeHtml(field(row, ['verification_error', 'verification_note', 'verification_notes']))}</span></td><td data-label=""><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></td></tr>`;
     }).join('');
   };
 
