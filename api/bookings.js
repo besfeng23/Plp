@@ -69,8 +69,8 @@ export default async function handler(req, res) {
       deposit,
       balance,
       paymentDue: deposit,
-      paymentStatus: 'Awaiting Xendit Checkout',
-      status: 'Pending Deposit',
+      paymentStatus: 'PENDING_DEPOSIT',
+      status: 'REQUEST_RECEIVED',
       message: String(body.message || '').slice(0, 1200),
       receivedAt: new Date().toISOString(),
       persisted: false,
@@ -108,8 +108,8 @@ export default async function handler(req, res) {
       databaseWarning,
       notifications,
       note: booking.persisted
-        ? 'Booking request accepted, availability-held, and persisted. Continue to Xendit deposit checkout.'
-        : 'Booking request accepted but not persisted. Add Supabase environment variables in Vercel.',
+        ? 'Reservation request accepted and stored. Continue to secure deposit checkout when available; final confirmation still requires resort review.'
+        : 'Reservation request accepted but not persisted. Add Supabase environment variables in Vercel before payment checkout can be trusted.',
     });
   } catch (error) {
     return res.status(500).json({ ok: false, error: 'Booking request failed', detail: error.message });
