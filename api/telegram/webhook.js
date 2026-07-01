@@ -1,4 +1,4 @@
-import { routePlpAgent } from './plpAgent.js';
+import { routePlpAgent } from '../../server/plpTelegram/plpAgent.js';
 import { sendTelegramMessage } from '../../server/plpTelegram/sendMessage.js';
 
 function allowedIds() { return new Set(String(process.env.TELEGRAM_ALLOWED_USER_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)); }
