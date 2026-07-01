@@ -11,6 +11,33 @@ function safeCheckoutStartupError(res, status, { code, detail }) {
   });
 }
 
+function isCheckoutAllowed(booking) {
+  const bookingStatus = String(booking?.status || '').trim().toUpperCase();
+  const paymentStatus = String(booking?.payment_status || '').trim().toUpperCase();
+  const terminalBookingStatuses = new Set([
+    'PAID_DEPOSIT',
+    'DEPOSIT_VERIFIED',
+    'CONFIRMED',
+    'CANCELLED',
+    'VOIDED',
+    'FAILED',
+    'EXPIRED',
+    'REFUNDED',
+  ]);
+  const terminalPaymentStatuses = new Set([
+    'SUCCEEDED',
+    'CAPTURED',
+    'VERIFIED',
+    'FAILED',
+    'CANCELLED',
+    'VOIDED',
+    'EXPIRED',
+    'REFUNDED',
+  ]);
+
+  return !terminalBookingStatuses.has(bookingStatus) && !terminalPaymentStatuses.has(paymentStatus);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -37,6 +64,13 @@ export default async function handler(req, res) {
       return safeCheckoutStartupError(res, 404, {
         code: 'BOOKING_NOT_FOUND',
         detail: 'No matching reservation request was found for this reference.',
+      });
+    }
+
+    if (!isCheckoutAllowed(persistedBooking)) {
+      return safeCheckoutStartupError(res, 409, {
+        code: 'CHECKOUT_NOT_AVAILABLE_FOR_STATUS',
+        detail: 'Checkout is not available for this booking in its current payment state.',
       });
     }
 
