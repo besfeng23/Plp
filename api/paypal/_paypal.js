@@ -109,8 +109,10 @@ export async function createPayPalOrder({ booking, req }) {
   const baseUrl = getBaseUrl(req);
   const reference = getBookingReference(booking);
   const amount = getDepositAmount(booking);
-  const accommodation = safeText(booking?.accommodation, 'Pueblo La Perla stay', 80);
-  const dateRange = safeText(`${booking?.checkIn || ''} to ${booking?.checkOut || ''}`, 'Reservation deposit', 100);
+  const accommodation = safeText(booking?.accommodation || booking?.accommodation_name, 'Pueblo La Perla stay', 80);
+  const checkIn = booking?.checkIn || booking?.check_in || '';
+  const checkOut = booking?.checkOut || booking?.check_out || '';
+  const dateRange = safeText(`${checkIn} to ${checkOut}`, 'Reservation deposit', 100);
 
   const payload = {
     intent: 'CAPTURE',
