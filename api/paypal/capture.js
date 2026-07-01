@@ -1,3 +1,4 @@
+import { waitUntil } from '@vercel/functions';
 import { notifyPaymentException, notifyPaymentVerified } from '../_notifications.js';
 import { recordPayPalCapture } from './_db.js';
 import { capturePayPalOrder, getBaseUrl } from './_paypal.js';
@@ -21,9 +22,7 @@ function scheduleNotification(task) {
     // Notifications are non-critical; never fail the guest redirect on a notify error.
   });
 
-  if (typeof globalThis.waitUntil === 'function') {
-    globalThis.waitUntil(promise);
-  }
+  waitUntil(promise);
 }
 
 export default async function handler(req, res) {
@@ -57,13 +56,14 @@ export default async function handler(req, res) {
 
     // A verified PayPal deposit capture triggers the same guest/staff
     // "deposit verified" notification as the Xendit webhook path. The Promise is
-    // created and passed to waitUntil before the 302 response is ended, so email,
-    // Supabase writes, or provider latency never block the guest redirect while
-    // Vercel still has an explicit background task to keep alive. Duplicate
-    // emails are prevented by the unique notification_key inside
-    // notifyPaymentVerified, so the deposit-verified copy is idempotent.
-    // Verifying the deposit does NOT confirm the stay: the booking stays in
-    // PAID_DEPOSIT and only staff confirmation in Admin Operations finalizes it.
+    // created and passed to Vercel's supported waitUntil helper before the 302
+    // response is ended, so email, Supabase writes, or provider latency never
+    // block the guest redirect while Vercel still has an explicit background task
+    // to keep alive. Duplicate emails are prevented by the unique
+    // notification_key inside notifyPaymentVerified, so the deposit-verified copy
+    // is idempotent. Verifying the deposit does NOT confirm the stay: the booking
+    // stays in PAID_DEPOSIT and only staff confirmation in Admin Operations
+    // finalizes it.
     if (verified) {
       scheduleNotification(() => notifyPaymentVerified(bookingRef));
       return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(capture.orderId)}&captureId=${encodeURIComponent(captureId)}`);

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@vercel/analytics": "latest",
+    "@vercel/functions": "latest",
     "@vitejs/plugin-react": "latest",
     "vite": "latest",
     "react": "latest",
