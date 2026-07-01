@@ -1,7 +1,7 @@
-import { getOpenPullRequests, getPullRequest } from '../_tools/githubStatus.js';
-import { getLatestProductionDeployment, getRecentVercelErrors } from '../_tools/vercelStatus.js';
-import { getPayPalHealth } from '../_tools/paypalHealth.js';
-import { getLatestBookings, getPaymentExceptions } from '../_tools/supabaseBookings.js';
+import { getOpenPullRequests, getPullRequest } from '../../server/plpTelegram/tools/githubStatus.js';
+import { getLatestProductionDeployment, getRecentVercelErrors } from '../../server/plpTelegram/tools/vercelStatus.js';
+import { getPayPalHealth } from '../../server/plpTelegram/tools/paypalHealth.js';
+import { getLatestBookings, getPaymentExceptions } from '../../server/plpTelegram/tools/supabaseBookings.js';
 
 const HELP = `PLP Command Bot\nAsk me:\n• check production\n• check paypal\n• check checkout errors\n• check all PRs\n• what PR is merge-ready\n• show latest bookings\n• any payment exceptions\n• give me morning update\n\nRead-only mode: I will not merge, deploy, close, delete, or change bookings.`;
 
