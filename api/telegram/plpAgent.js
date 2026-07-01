@@ -46,3 +46,7 @@ export async function routePlpAgent(text, { req } = {}) {
     return `I could not complete that read-only check safely. ${line(error.message, 'Please verify the required environment variables.')}`;
   }
 }
+
+export default function handler(req, res) {
+  res.status(404).json({ ok: false, error: 'Not found' });
+}
