@@ -54,24 +54,57 @@ export function intentFor(text) {
   // Payment problems worded as "issues" must not be swallowed by maintenance.
   if (has(t, 'maintenance', 'broken', 'repair', 'water', 'pool', 'leak', 'electric', 'ac problem', 'issue', 'issues') && !has(t, 'payment')) return { name: 'ops/maintenance' };
   if (has(t, 'housekeeping', 'clean', 'cleaning', 'rooms to clean', 'dirty', 'room ready', 'turnover')) return { name: 'ops/housekeeping' };
-  if (has(t, 'concierge', 'guest request', 'transfer', 'chef', 'breakfast', 'drinks', 'laundry')) return { name: 'ops/concierge' };
+  if (has(t, 'concierge', 'concierge today', 'guest request', 'guest requests', 'requests', 'transfer', 'chef', 'breakfast', 'drinks', 'laundry')) return { name: 'ops/concierge' };
   if (has(t, 'expense', 'expenses', 'spend', 'spent', 'profit', 'p l', 'cost')) return { name: 'finance/expenses' };
   if (has(t, 'reviews', 'review', 'rating', 'reputation', 'complaint', 'feedback')) return { name: 'reputation/reviews' };
   if (has(t, 'ota', 'airbnb', 'agoda', 'expedia', 'booking com', 'channel')) return { name: 'channels/status' };
-  if (has(t, 'website funnel', 'funnel', 'conversion', 'booking page', 'reserve click', 'analytics')) return { name: 'website/funnel' };
+  if (has(t, 'website funnel', 'funnel', 'website leads', 'inquiries', 'conversion', 'booking page', 'reserve click', 'analytics')) return { name: 'website/funnel' };
 
   if (prNum && mentionsPr) return { name: 'github/pr', number: prNum[1] || prNum[2] };
   if (mentionsPr || has(t, 'merge ready')) return { name: 'github/prs', mergeReady: has(t, 'merge ready') };
 
   if (has(t, 'paypal')) return { name: 'paypal/health' };
   if (has(t, 'checkout error', 'checkout errors', 'vercel error', 'vercel errors', 'logs')) return { name: 'vercel/errors' };
-  if (has(t, 'production', 'deploy', 'deployment', 'vercel')) return { name: 'vercel/status' };
+  if (has(t, 'production', 'deploy', 'deployment', 'vercel', 'health check', 'system status')) return { name: 'vercel/status' };
 
   // Before generic bookings so "unpaid bookings" / "failed payments" land here.
   if (has(t, 'payment exception', 'payment exceptions', 'payment problem', 'payments problem', 'payment issue', 'payment issues', 'unpaid', 'failed payment', 'failed payments', 'reconciliation', 'deposit review', 'exceptions')) return { name: 'payments/exceptions' };
   if (has(t, 'latest bookings', 'recent bookings', 'show latest bookings', 'bookings', 'booking', 'reservation', 'latest')) return { name: 'bookings/latest' };
 
   return { name: 'help', fallback: true };
+}
+
+// Canonical snake_case intent id for each internal router name. Used by
+// normalizeCommand() (and its tests) to expose a stable, report-oriented key.
+const INTENT_KEYS = {
+  'owner/attention': 'what_needs_attention',
+  'owner/brief': 'owner_update',
+  'owner/donor': 'donor_update',
+  'ops/arrivals': 'arrivals_today',
+  'ops/checkouts': 'checkouts_today',
+  'ops/maintenance': 'maintenance',
+  'ops/housekeeping': 'housekeeping',
+  'ops/concierge': 'concierge',
+  'finance/expenses': 'expenses',
+  'reputation/reviews': 'reviews',
+  'channels/status': 'ota_status',
+  'website/funnel': 'website_funnel',
+  'github/prs': 'check_all_prs',
+  'github/pr': 'check_all_prs',
+  'paypal/health': 'check_paypal',
+  'vercel/errors': 'check_production',
+  'vercel/status': 'check_production',
+  'payments/exceptions': 'payment_exceptions',
+  'bookings/latest': 'latest_bookings',
+};
+
+// Normalizes free Telegram text to a canonical command id, or null when the
+// message is unknown / a bare help/start request (which should show the menu).
+// normalizeCommand('Arrivals today') === 'arrivals_today'; normalizeCommand('hello') === null.
+export function normalizeCommand(text) {
+  const intent = intentFor(text);
+  if (intent.name === 'help') return null;
+  return INTENT_KEYS[intent.name] || null;
 }
 
 function formatPr(pr) {

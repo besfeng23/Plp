@@ -11,7 +11,8 @@ delete process.env.SUPABASE_URL;
 delete process.env.VITE_SUPABASE_URL;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const { intentFor, normalize, routePlpAgent } = await import('../server/plpTelegram/plpAgent.js');
+const { intentFor, normalize, normalizeCommand, routePlpAgent } = await import('../server/plpTelegram/plpAgent.js');
+const { PLP_PRICES, PLP_TIER_BY_ACCOMMODATION, formatPeso } = await import('../lib/pricing.js');
 
 test('normalize collapses case, slashes, underscores and hyphens', () => {
   assert.equal(normalize('/Arrivals_Today'), 'arrivals today');
@@ -152,4 +153,56 @@ test('routePlpAgent: "what needs attention" returns an attention report', async 
 test('routePlpAgent: "hello" returns the help menu', async () => {
   const out = await routePlpAgent('hello');
   assert.ok(out.includes(HELP_MARK));
+});
+
+// --- normalizeCommand: canonical snake_case ids (per spec) ---
+const commandCases = [
+  ['Arrivals today', 'arrivals_today'],
+  ['arrivals today', 'arrivals_today'],
+  ['/arrivals', 'arrivals_today'],
+  ['/arrivals_today', 'arrivals_today'],
+  ['checkouts today', 'checkouts_today'],
+  ['/checkouts', 'checkouts_today'],
+  ['latest bookings', 'latest_bookings'],
+  ['/bookings', 'latest_bookings'],
+  ['payment exceptions', 'payment_exceptions'],
+  ['unpaid bookings', 'payment_exceptions'],
+  ['maintenance', 'maintenance'],
+  ['housekeeping', 'housekeeping'],
+  ['concierge', 'concierge'],
+  ['owner update', 'owner_update'],
+  ['donor update', 'donor_update'],
+  ['what needs attention', 'what_needs_attention'],
+  ['reviews', 'reviews'],
+  ['ota status', 'ota_status'],
+  ['website funnel', 'website_funnel'],
+  ['check production', 'check_production'],
+  ['check paypal', 'check_paypal'],
+  ['check all prs', 'check_all_prs'],
+  ['hello', null],
+  ['/start', null],
+  ['help', null],
+];
+for (const [input, expected] of commandCases) {
+  test(`normalizeCommand(${JSON.stringify(input)}) -> ${expected}`, () => {
+    assert.equal(normalizeCommand(input), expected);
+  });
+}
+
+// --- pricing single source of truth ---
+test('PLP prices are the premium tiers 80000 / 60000 / 40000', () => {
+  assert.equal(PLP_PRICES.premium, 80000);
+  assert.equal(PLP_PRICES.mid, 60000);
+  assert.equal(PLP_PRICES.entry, 40000);
+});
+
+test('accommodation names map to the correct tier price', () => {
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Grand Ocean Villa'], 80000);
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Sunset Suite'], 60000);
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Smart Room Premium'], 40000);
+});
+
+test('formatPeso renders grouped pesos', () => {
+  assert.equal(formatPeso(80000), '₱80,000');
+  assert.equal(formatPeso(40000), '₱40,000');
 });

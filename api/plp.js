@@ -1,4 +1,5 @@
 import { insertRow, isSupabaseConfigured, selectRows } from './_supabase.js';
+import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 
 const DEFAULT_CONTENT = {
   homepage: {
@@ -9,7 +10,7 @@ const DEFAULT_CONTENT = {
   accommodation: {
     grandOceanVilla: {
       name: 'Grand Ocean Villa',
-      rate: 300,
+      rate: PLP_TIER_BY_ACCOMMODATION['Grand Ocean Villa'],
       capacity: 8,
       bedrooms: 4,
       type: 'Signature Villa',
@@ -20,7 +21,7 @@ const DEFAULT_CONTENT = {
     },
     sunsetSuite: {
       name: 'Sunset Suite',
-      rate: 200,
+      rate: PLP_TIER_BY_ACCOMMODATION['Sunset Suite'],
       capacity: 4,
       bedrooms: 2,
       type: 'Elevated Suite',
@@ -31,7 +32,7 @@ const DEFAULT_CONTENT = {
     },
     smartRoomPremium: {
       name: 'Smart Room Premium',
-      rate: 100,
+      rate: PLP_TIER_BY_ACCOMMODATION['Smart Room Premium'],
       capacity: 2,
       bedrooms: 1,
       type: 'Premium Room',

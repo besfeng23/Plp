@@ -278,11 +278,12 @@
     if (path !== '/accommodation' && path !== '/accommodations') return;
     var acc = content.accommodation || {};
     var villa = acc.grandOceanVilla || {};
-    var suite = acc.sunsetSuite || {};
-    var room = acc.smartRoomPremium || {};
-    updateFirstMatch('strong', '₱40,000', money(villa.rate));
-    updateFirstMatch('strong', '₱18,000', money(suite.rate));
-    updateFirstMatch('strong', '₱8,000', money(room.rate));
+    // Nightly rates on /accommodation are hydrated by the generic
+    // [data-content-money] handler above (grandOceanVilla.rate, sunsetSuite.rate,
+    // smartRoomPremium.rate), so they always reflect lib/pricing.js. The old
+    // literal-price updateFirstMatch() calls were removed: with premium pricing
+    // the Smart Room legitimately shows ₱40,000, and a literal '₱40,000' match
+    // would have overwritten it with the villa rate.
     updateFirstMatch('p', 'up to 8 guests', 'The Grand Ocean Villa is positioned for up to ' + (villa.capacity || 8) + ' guests, with ' + (villa.bedrooms || 4) + ' bedrooms, private pool atmosphere, living space, kitchen comfort, and hillside views.');
   }
 
