@@ -1,18 +1,19 @@
 import { requireAvailability } from './_availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
+import { PLP_DEPOSIT_RATE, PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 
-const DEPOSIT_RATE = 0.3;
+const DEPOSIT_RATE = PLP_DEPOSIT_RATE;
 
-// Temporary live PayPal test pricing (2026 go-live verification).
-// Nightly rates are intentionally low so a real guest can complete a live
-// PayPal deposit without a large charge. 30% deposits are 90 / 60 / 30.
-// The server-side computed deposit below remains the single source of truth;
-// no browser-supplied amount can override it.
+// Premium nightly rates come from the single pricing source of truth
+// (lib/pricing.js). The server-side computed deposit below remains the single
+// source of truth for the charged amount; no browser-supplied amount can
+// override it. At these rates a 30% deposit on one night is 24,000 / 18,000 /
+// 12,000 PHP.
 const accommodations = {
-  'Grand Ocean Villa': { rate: 300, capacity: 8 },
-  'Sunset Suite': { rate: 200, capacity: 4 },
-  'Smart Room Premium': { rate: 100, capacity: 2 },
+  'Grand Ocean Villa': { rate: PLP_TIER_BY_ACCOMMODATION['Grand Ocean Villa'], capacity: 8 },
+  'Sunset Suite': { rate: PLP_TIER_BY_ACCOMMODATION['Sunset Suite'], capacity: 4 },
+  'Smart Room Premium': { rate: PLP_TIER_BY_ACCOMMODATION['Smart Room Premium'], capacity: 2 },
 };
 
 const required = ['name', 'email', 'phone', 'accommodation', 'checkIn', 'checkOut', 'guests'];
