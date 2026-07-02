@@ -1,2 +1,2 @@
 retry direct telegram dispatcher deploy
-retry: 5
+retry: 6
