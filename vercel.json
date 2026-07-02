@@ -85,6 +85,14 @@
       "destination": "/tg/index.html"
     },
     {
+      "source": "/telegram",
+      "destination": "/tg/index.html"
+    },
+    {
+      "source": "/telegram/",
+      "destination": "/tg/index.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin.html"
     },
@@ -189,7 +197,7 @@
       "destination": "/index.html"
     },
     {
-      "source": "/((?!api/|tg/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
+      "source": "/((?!api/|tg/|telegram/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
       "destination": "/index.html"
     }
   ]
