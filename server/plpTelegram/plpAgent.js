@@ -22,30 +22,56 @@ const clean = (v, f = '—') => String(v || f).replace(/[\r\n]+/g, ' ').slice(0,
 const pesos = (v) => Number(v || 0) ? `PHP ${Number(v || 0).toLocaleString('en-US')}` : '—';
 const has = (t, ...phrases) => phrases.some((p) => t.includes(p));
 
-function intentFor(text) {
-  const t = String(text || '').toLowerCase().replace(/[^a-z0-9#]+/g, ' ').replace(/\s+/g, ' ').trim();
-  const pr = t.match(/pr #?\s*(\d+)|#(\d+)/);
-  if (t === 'help' || t === '/help' || t === 'start' || t === '/start') return { name: 'help' };
-  if (has(t, 'what needs attention', 'needs attention', 'attention', 'owner alert', 'urgent', 'problem today', 'issues today')) return { name: 'owner/attention' };
-  if (has(t, 'owner update', 'owner brief', 'morning update', 'evening update', 'daily update', 'how is plp', 'status update', 'update on plp')) return { name: 'owner/brief' };
+// Collapse any incoming Telegram text to a single comparable form so natural
+// language, slash commands, and snake_case/kebab-case all match the same intent.
+// Examples: "/Arrivals_Today" -> "arrivals today", "Check-ins  today" -> "check ins today".
+export function normalize(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9#]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function intentFor(text) {
+  const t = normalize(text);
+  // Whole-word PR detection. Using includes('pr') here is unsafe because words
+  // like "production"/"approve" contain "pr" and would hijack real queries.
+  const prNum = t.match(/\bpr\s*#?\s*(\d+)\b|#(\d+)\b/);
+  const mentionsPr = /\bprs?\b|\bpull requests?\b/.test(t) || /#\d+/.test(t);
+
+  if (t === 'help' || t === 'start' || t === 'menu' || t === 'commands') return { name: 'help' };
+
+  // Owner alerts / urgent — before maintenance so "issues today" is an alert,
+  // while a bare "issues"/"repairs" stays a maintenance query.
+  if (has(t, 'what needs attention', 'needs attention', 'attention', 'owner alert', 'urgent', 'problem today', 'problems today', 'issues today', 'issue today', 'problems')) return { name: 'owner/attention' };
+  if (has(t, 'owner update', 'owner brief', 'owner report', 'owner summary', 'morning update', 'morning brief', 'morning briefing', 'evening update', 'daily update', 'daily brief', 'daily briefing', 'status update', 'update on plp', 'how is plp')) return { name: 'owner/brief' };
   if (has(t, 'donor', 'investor', 'impact report', 'funds')) return { name: 'owner/donor' };
-  if (has(t, 'arrivals today', 'arrival today', 'arrivals')) return { name: 'ops/arrivals' };
-  if (has(t, 'checkouts today', 'checkout today', 'checkouts') && !has(t, 'checkout error')) return { name: 'ops/checkouts' };
-  if (has(t, 'maintenance', 'broken', 'repair', 'water', 'pool', 'leak', 'electric', 'ac problem')) return { name: 'ops/maintenance' };
-  if (has(t, 'housekeeping', 'clean', 'dirty', 'room ready', 'turnover')) return { name: 'ops/housekeeping' };
+
+  if (has(t, 'arrivals today', 'arrival today', 'today arrivals', 'arrivals', 'arrival', 'arriving today', 'guests arriving today', 'guests arriving', 'checkins today', 'check ins today', 'check in today', 'guest check ins', 'guest checkins')) return { name: 'ops/arrivals' };
+  if (has(t, 'checkouts today', 'checkout today', 'today checkouts', 'checkouts', 'departures today', 'departure today', 'departures', 'leaving today', 'guests leaving today', 'guests leaving') && !has(t, 'checkout error')) return { name: 'ops/checkouts' };
+
+  // Payment problems worded as "issues" must not be swallowed by maintenance.
+  if (has(t, 'maintenance', 'broken', 'repair', 'water', 'pool', 'leak', 'electric', 'ac problem', 'issue', 'issues') && !has(t, 'payment')) return { name: 'ops/maintenance' };
+  if (has(t, 'housekeeping', 'clean', 'cleaning', 'rooms to clean', 'dirty', 'room ready', 'turnover')) return { name: 'ops/housekeeping' };
   if (has(t, 'concierge', 'guest request', 'transfer', 'chef', 'breakfast', 'drinks', 'laundry')) return { name: 'ops/concierge' };
   if (has(t, 'expense', 'expenses', 'spend', 'spent', 'profit', 'p l', 'cost')) return { name: 'finance/expenses' };
   if (has(t, 'reviews', 'review', 'rating', 'reputation', 'complaint', 'feedback')) return { name: 'reputation/reviews' };
   if (has(t, 'ota', 'airbnb', 'agoda', 'expedia', 'booking com', 'channel')) return { name: 'channels/status' };
   if (has(t, 'website funnel', 'funnel', 'conversion', 'booking page', 'reserve click', 'analytics')) return { name: 'website/funnel' };
-  if (pr && has(t, 'pr', 'pull request', '#')) return { name: 'github/pr', number: pr[1] || pr[2] };
-  if (has(t, 'pr', 'pull request', 'merge ready', 'merge-ready')) return { name: 'github/prs', mergeReady: has(t, 'merge ready', 'merge-ready') };
+
+  if (prNum && mentionsPr) return { name: 'github/pr', number: prNum[1] || prNum[2] };
+  if (mentionsPr || has(t, 'merge ready')) return { name: 'github/prs', mergeReady: has(t, 'merge ready') };
+
   if (has(t, 'paypal')) return { name: 'paypal/health' };
   if (has(t, 'checkout error', 'checkout errors', 'vercel error', 'vercel errors', 'logs')) return { name: 'vercel/errors' };
   if (has(t, 'production', 'deploy', 'deployment', 'vercel')) return { name: 'vercel/status' };
-  if (has(t, 'payment exception', 'payment exceptions', 'exceptions', 'reconciliation', 'deposit review')) return { name: 'payments/exceptions' };
-  if (has(t, 'booking', 'bookings', 'reservation', 'latest')) return { name: 'bookings/latest' };
-  return { name: 'help' };
+
+  // Before generic bookings so "unpaid bookings" / "failed payments" land here.
+  if (has(t, 'payment exception', 'payment exceptions', 'payment problem', 'payments problem', 'payment issue', 'payment issues', 'unpaid', 'failed payment', 'failed payments', 'reconciliation', 'deposit review', 'exceptions')) return { name: 'payments/exceptions' };
+  if (has(t, 'latest bookings', 'recent bookings', 'show latest bookings', 'bookings', 'booking', 'reservation', 'latest')) return { name: 'bookings/latest' };
+
+  return { name: 'help', fallback: true };
 }
 
 function formatPr(pr) {
@@ -81,6 +107,13 @@ async function answerExceptions() {
 }
 export async function routePlpAgent(text, { req } = {}) {
   const intent = intentFor(text);
+  // Debug only. Never log tokens, secrets, or env values.
+  console.log('[telegram]', {
+    rawText: String(text || '').slice(0, 200),
+    normalizedText: normalize(text),
+    intent: intent.name,
+    fallback: Boolean(intent.fallback),
+  });
   try {
     if (intent.name === 'help') return HELP;
     if (intent.name === 'owner/brief') return `${await ownerBrief()}\n\n${await answerPaypal(req)}\n\n${await answerVercel()}\n\n${await attentionSummary()}`;
