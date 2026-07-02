@@ -1,2 +1,2 @@
-retry telegram bookings fallback deploy
-retry: 4
+retry direct telegram dispatcher deploy
+retry: 5
