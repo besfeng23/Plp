@@ -1,3 +1,361 @@
 <!doctype html>
-<title>PLP Telegram Mini App Preview</title>
-<p>Preview temporarily paused pending review fixes.</p>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>PLP Boracay Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      :root {
+        --plp-pearl: #f8f1e7;
+        --plp-ivory: #fffbf3;
+        --plp-sand: #ede0cf;
+        --plp-shell: #f3e8d8;
+        --plp-teak: #1a120c;
+        --plp-espresso: #2a1e15;
+        --plp-brass: #c6a46a;
+        --plp-bronze: #8e6f51;
+        --plp-clay: #a86d58;
+        --plp-sea: #6f9f91;
+        --plp-muted: #786b5b;
+        --plp-line: rgba(142, 111, 81, 0.2);
+        color-scheme: light;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { margin: 0; min-height: 100%; }
+
+      body {
+        color: var(--plp-teak);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 12% -4%, rgba(198, 164, 106, 0.34), transparent 31%),
+          radial-gradient(circle at 92% 6%, rgba(111, 159, 145, 0.20), transparent 28%),
+          linear-gradient(180deg, #fff7ea 0%, var(--plp-pearl) 42%, var(--plp-sand) 100%);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button, input, select, textarea { font: inherit; }
+      button { border: 0; cursor: pointer; }
+
+      .app { min-height: 100vh; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+      .shell { width: min(100%, 520px); min-height: 100vh; margin: 0 auto; padding: 28px 20px; }
+      .card {
+        background: linear-gradient(180deg, rgba(255, 251, 243, 0.96), rgba(255, 251, 243, 0.82));
+        border: 1px solid var(--plp-line);
+        box-shadow: 0 18px 42px rgba(42, 30, 21, 0.075), inset 0 1px 0 rgba(255, 255, 255, 0.66);
+        backdrop-filter: blur(18px);
+      }
+      .soft { background: linear-gradient(180deg, rgba(243, 232, 216, 0.92), rgba(237, 224, 207, 0.72)); border: 1px solid rgba(142, 111, 81, 0.16); }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        color: #fff7ea;
+        background: radial-gradient(circle at top left, rgba(198, 164, 106, 0.42), transparent 38%), radial-gradient(circle at bottom right, rgba(111, 159, 145, 0.22), transparent 35%), linear-gradient(135deg, #2a1e15 0%, #1a120c 58%, #3a2b1d 100%);
+        box-shadow: 0 26px 60px rgba(42, 30, 21, 0.24), inset 0 1px 0 rgba(255,255,255,.12);
+      }
+      .hero::before { content: ""; position: absolute; right: -44px; top: -44px; width: 144px; height: 144px; border-radius: 999px; background: rgba(255,255,255,.1); filter: blur(22px); }
+      .hero::after { content: ""; position: absolute; left: -44px; bottom: -44px; width: 160px; height: 160px; border-radius: 999px; background: rgba(111,159,145,.2); filter: blur(22px); }
+      .hero > * { position: relative; z-index: 1; }
+      .brass { color: var(--plp-brass); }
+      .hint { color: var(--plp-muted); }
+      .eyebrow { color: var(--plp-brass); font-size: 11px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; }
+      .title { margin: 8px 0 0; font-size: 34px; font-weight: 300; line-height: .98; letter-spacing: -.05em; }
+      .body { margin: 12px 0 0; color: var(--plp-muted); font-size: 14px; line-height: 1.65; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+      .brand-small { margin: 0; color: var(--plp-brass); font-size: 10px; font-weight: 800; letter-spacing: .34em; text-transform: uppercase; }
+      .brand-title { margin: 4px 0 0; font-size: 36px; font-weight: 300; line-height: 1; letter-spacing: -.055em; }
+      .round-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 999px; }
+      .hero-card { border-radius: 32px; padding: 20px; margin-bottom: 20px; }
+      .hero-kicker { color: #d8bd82; font-size: 11px; font-weight: 800; letter-spacing: .26em; text-transform: uppercase; }
+      .hero-title { max-width: 300px; margin: 12px 0 22px; font-size: 25px; font-weight: 300; line-height: 1.06; letter-spacing: -.04em; }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat { min-height: 76px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.1); border-radius: 18px; padding: 12px; backdrop-filter: blur(10px); }
+      .stat b { display: block; margin-top: 8px; color: rgba(255,255,255,.86); font-size: 11px; line-height: 1.15; }
+      .grid { display: grid; gap: 12px; }
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .action { min-height: 156px; border-radius: 30px; padding: 20px; text-align: left; transition: transform .12s ease; color: inherit; }
+      .action:active, .menu:active, .primary:active, .secondary:active, .chip:active { transform: scale(.98); }
+      .action.featured { color: var(--plp-ivory); background: linear-gradient(135deg, var(--plp-teak), #2a1e15); box-shadow: 0 18px 36px rgba(26, 18, 12, .28), inset 0 0 0 1px rgba(198, 164, 106, .18); }
+      .iconbox { width: 49px; height: 49px; display: grid; place-items: center; border-radius: 18px; margin-bottom: 28px; }
+      .action h3 { margin: 0; font-size: 18px; }
+      .action p { margin: 4px 0 0; font-size: 12px; color: var(--plp-muted); }
+      .action.featured p { color: rgba(255,255,255,.7); }
+      .menu { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; border-radius: 24px; padding: 16px; text-align: left; color: inherit; transition: transform .12s ease; }
+      .menu-left { display: flex; align-items: center; gap: 14px; }
+      .menu h3 { margin: 0; font-size: 16px; }
+      .menu p { margin: 3px 0 0; color: var(--plp-muted); font-size: 12px; }
+      .footer { margin-top: 36px; text-align: center; color: var(--plp-muted); font-size: 12px; line-height: 1.55; }
+      .page-intro { margin-bottom: 24px; }
+      .field { display: block; margin-bottom: 16px; }
+      .label { display: block; margin-bottom: 8px; color: var(--plp-muted); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+      .input { width: 100%; min-height: 54px; border: 1px solid rgba(142,111,81,.28); border-radius: 20px; padding: 14px 16px; outline: none; color: var(--plp-teak); background: rgba(255,251,243,.94); box-shadow: inset 0 1px 0 rgba(255,255,255,.7); font-size: 16px; }
+      .input:focus { border-color: var(--plp-brass); box-shadow: 0 0 0 4px rgba(198,164,106,.16), inset 0 1px 0 rgba(255,255,255,.76); }
+      textarea.input { min-height: 120px; resize: vertical; }
+      .primary { width: 100%; border-radius: 20px; padding: 16px; color: var(--plp-ivory); background: linear-gradient(135deg, var(--plp-teak), #2a1e15); box-shadow: 0 18px 36px rgba(26,18,12,.25); font-weight: 800; transition: transform .12s ease, opacity .12s ease; }
+      .primary:disabled { opacity: .42; cursor: not-allowed; }
+      .secondary { width: 100%; margin-top: 12px; border-radius: 20px; padding: 15px; color: var(--plp-teak); background: linear-gradient(135deg, rgba(198,164,106,.18), rgba(255,251,243,.7)); border: 1px solid rgba(198,164,106,.32); font-weight: 800; }
+      .info { display: flex; gap: 12px; border-radius: 22px; padding: 16px; margin: 16px 0; }
+      .info h4 { margin: 0; font-size: 14px; }
+      .info p { margin: 4px 0 0; color: var(--plp-muted); font-size: 12px; line-height: 1.55; }
+      .chips { display: flex; gap: 8px; overflow: auto; margin: 0 -20px 18px; padding: 0 20px 8px; scrollbar-width: none; }
+      .chips::-webkit-scrollbar { display: none; }
+      .chip { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; border-radius: 999px; padding: 11px 15px; color: var(--plp-teak); font-size: 14px; font-weight: 800; transition: transform .12s ease; }
+      .chip.active { color: var(--plp-ivory); background: linear-gradient(135deg, var(--plp-teak), #2a1e15); }
+      .tile { border-radius: 22px; padding: 16px; min-height: 120px; }
+      .tile p { margin: 12px 0 4px; color: var(--plp-muted); font-size: 12px; }
+      .tile h3 { margin: 0; font-size: 15px; }
+      .hero-plain { height: 310px; margin: -28px -20px 24px; padding: 0 20px 28px; display: flex; align-items: flex-end; border-radius: 0 0 36px 36px; background: radial-gradient(circle at top, rgba(184,151,126,.45), transparent 38%), linear-gradient(135deg, #2a241e, #15100b); color: white; }
+      .hero-plain h2 { max-width: 330px; margin: 10px 0 0; font-size: 40px; line-height: .96; font-weight: 300; letter-spacing: -.05em; }
+      .pill { display: inline-flex; border-radius: 999px; background: rgba(255,255,255,.12); padding: 6px 12px; font-size: 12px; font-weight: 700; backdrop-filter: blur(10px); }
+      .list { padding: 0; margin: 18px 0 28px; list-style: none; }
+      .list li { display: flex; gap: 10px; margin-bottom: 12px; font-size: 14px; line-height: 1.55; }
+      .gallery { display: flex; gap: 12px; overflow: auto; margin: 0 -20px; padding: 0 20px 16px; scrollbar-width: none; }
+      .gallery::-webkit-scrollbar { display: none; }
+      .gallery-card { min-width: 230px; overflow: hidden; border-radius: 24px; }
+      .gallery-img { height: 138px; display: grid; place-items: center; background: rgba(0,0,0,.08); font-size: 34px; }
+      .gallery-card div:last-child { padding: 16px; }
+      .gallery-card h4 { margin: 0; }
+      .gallery-card p { margin: 4px 0 0; color: var(--plp-muted); font-size: 12px; }
+      .mapbox { height: 208px; width: 100%; display: grid; place-items: center; border-radius: 24px; background: rgba(0,0,0,.08); color: inherit; }
+      .step { border-radius: 24px; padding: 16px; margin-bottom: 12px; }
+      .step h3 { margin: 12px 0 0; }
+      .step p { margin: 8px 0 0; color: var(--plp-muted); font-size: 14px; line-height: 1.6; }
+      .contact-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; font-size: 14px; }
+      .back { position: sticky; top: 0; z-index: 5; width: min(100%, 520px); margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 20px 8px; backdrop-filter: blur(18px); display: none; }
+      .back button { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 10px 14px; background: rgba(255,255,255,.55); color: inherit; font-weight: 800; }
+      .modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.42); backdrop-filter: blur(8px); }
+      .modal.open { display: flex; }
+      .modal-card { width: min(100%, 390px); border-radius: 28px; padding: 24px; text-align: center; }
+      .modal-card h3 { margin: 14px 0 8px; font-size: 22px; }
+      .modal-card p { color: var(--plp-muted); line-height: 1.55; font-size: 14px; }
+      .modal-icon { width: 58px; height: 58px; margin: 0 auto; display: grid; place-items: center; border-radius: 999px; font-size: 28px; }
+      .hidden { display: none !important; }
+      @media (prefers-color-scheme: dark) {
+        :root { --plp-pearl: #15100b; --plp-ivory: #211811; --plp-sand: #261b13; --plp-shell: #2a1e15; --plp-teak: #fff7ea; --plp-muted: #c8b79f; --plp-line: rgba(198,164,106,.18); color-scheme: dark; }
+        body { background: radial-gradient(circle at 12% -4%, rgba(198,164,106,.22), transparent 32%), radial-gradient(circle at 92% 6%, rgba(111,159,145,.12), transparent 28%), linear-gradient(180deg, #15100b 0%, #1d150f 48%, #261b13 100%); }
+        .card { background: linear-gradient(180deg, rgba(38,28,20,.94), rgba(31,23,16,.82)); box-shadow: 0 18px 48px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06); }
+        .soft { background: linear-gradient(180deg, rgba(54,40,29,.88), rgba(43,31,22,.76)); }
+        .input { color: #fff7ea; background: rgba(33,24,17,.94); border-color: rgba(198,164,106,.22); }
+        .secondary, .back button { color: #fff7ea; background: rgba(198,164,106,.12); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <div id="fallbackBack" class="back"><button type="button" id="fallbackBackButton">‹ Back</button></div>
+      <section id="root" class="shell"></section>
+    </main>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true">
+      <div class="modal-card card">
+        <div class="modal-icon soft">✓</div>
+        <h3 id="modalTitle">Request received</h3>
+        <p id="modalBody">The PLP team will review it shortly.</p>
+        <button id="modalClose" class="primary" type="button">Continue</button>
+      </div>
+    </div>
+
+    <script>
+      const tg = window.Telegram?.WebApp || null;
+      const PLP = { pearl: '#F8F1E7', ivory: '#FFFBF3', teak: '#1A120C' };
+      const state = { stack: ['home'], booking: { arrival: '', departure: '', guests: '2', notes: '' }, concierge: { category: 'Transport', message: '' } };
+      const root = document.getElementById('root');
+      const back = document.getElementById('fallbackBack');
+      const backButton = document.getElementById('fallbackBackButton');
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      const modalClose = document.getElementById('modalClose');
+      let mainHandler = null;
+
+      tg?.ready?.();
+      tg?.expand?.();
+      tg?.setHeaderColor?.(PLP.pearl);
+      tg?.setBackgroundColor?.(PLP.pearl);
+      tg?.setBottomBarColor?.(PLP.ivory);
+
+      const screens = {
+        home: 'PLP', book: 'Book Villa', villa: 'The Villa', concierge: 'Concierge', status: 'My Booking', directions: 'Directions'
+      };
+
+      const quickMessages = {
+        Transport: 'Please help arrange airport or island transfer.',
+        Breakfast: 'Please help arrange breakfast for our stay.',
+        Drinks: 'Please prepare drinks or bar service.',
+        Housekeeping: 'Please arrange housekeeping support.',
+        Chef: 'Please help arrange private chef service.',
+        Luggage: 'Please assist with luggage or arrival handling.'
+      };
+
+      function current() { return state.stack[state.stack.length - 1]; }
+      function esc(value) { return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch])); }
+      function haptic(type = 'tap') {
+        if (type === 'tap') tg?.HapticFeedback?.impactOccurred?.('light');
+        else tg?.HapticFeedback?.notificationOccurred?.(type);
+      }
+      function go(screen) { haptic(); state.stack.push(screen); render(); }
+      function goBack() { haptic(); if (state.stack.length > 1) state.stack.pop(); render(); }
+      function showModal(title, body) { modalTitle.textContent = title; modalBody.textContent = body; modal.classList.add('open'); }
+      function setMainButton(config) {
+        const button = tg?.MainButton;
+        if (!button) return;
+        if (mainHandler) button.offClick?.(mainHandler);
+        mainHandler = config?.onClick || null;
+        if (!config) { button.hide?.(); return; }
+        button.setParams?.({ text: config.text, color: '#1A120C', text_color: '#FFFDF8', is_active: !!config.active, is_visible: true, has_shine_effect: !!config.active });
+        if (!button.setParams) {
+          button.setText?.(config.text);
+          button.show?.();
+          config.active ? button.enable?.() : button.disable?.();
+        }
+        if (mainHandler) button.onClick?.(mainHandler);
+      }
+      function syncBack() {
+        if (current() !== 'home') {
+          if (tg?.BackButton) { tg.BackButton.show(); tg.BackButton.offClick?.(goBack); tg.BackButton.onClick?.(goBack); back.style.display = 'none'; }
+          else back.style.display = 'block';
+        } else {
+          tg?.BackButton?.hide?.();
+          back.style.display = 'none';
+        }
+      }
+      function pageIntro(eyebrow, title, body) { return `<header class="page-intro"><p class="eyebrow">${eyebrow}</p><h2 class="title">${title}</h2><p class="body">${body}</p></header>`; }
+      function menu(icon, title, subtitle, screen) { return `<button class="menu card" type="button" data-go="${screen}"><span class="menu-left"><span class="round-icon soft brass">${icon}</span><span><h3>${title}</h3><p>${subtitle}</p></span></span><span class="hint">›</span></button>`; }
+      function info(icon, title, body) { return `<div class="info soft"><div class="brass">${icon}</div><div><h4>${title}</h4><p>${body}</p></div></div>`; }
+
+      async function submitPayload(payload, successTitle, successBody) {
+        haptic('tap');
+        if (tg?.MainButton) tg.MainButton.showProgress?.();
+        try {
+          if (tg?.initData) {
+            const response = await fetch('/api/telegram/mini-app-event', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ initData: tg.initData, payload })
+            });
+            if (!response.ok) throw new Error('Mini App API failed');
+          } else if (tg?.sendData) {
+            tg.sendData(JSON.stringify(payload));
+          } else {
+            showModal('Browser preview only', 'Open this page inside Telegram to send real PLP requests. The UI is working, but no Telegram user is attached in normal browser mode.');
+            return;
+          }
+          haptic('success');
+          showModal(successTitle, successBody);
+        } catch (error) {
+          try { tg?.sendData?.(JSON.stringify(payload)); haptic('success'); showModal(successTitle, successBody); }
+          catch { haptic('error'); showModal('Could not send', 'The Mini App opened, but the backend did not accept the request yet. Check Vercel environment variables and webhook setup.'); }
+        } finally {
+          tg?.MainButton?.hideProgress?.();
+        }
+      }
+
+      function renderHome() {
+        const user = tg?.initDataUnsafe?.user;
+        const firstName = user?.first_name || 'Guest';
+        setMainButton(null);
+        root.innerHTML = `
+          <div class="topbar"><div><p class="brand-small">Pueblo La Perla</p><h1 class="brand-title">PLP Boracay</h1></div><div class="round-icon card brass">✦</div></div>
+          <section class="hero hero-card"><p class="hero-kicker">Private Villa Concierge</p><h2 class="hero-title">Welcome, ${esc(firstName)}. Your Boracay stay starts here.</h2><div class="stats"><div class="stat"><span>🛏</span><b>Private Villa</b></div><div class="stat"><span>🍽</span><b>Chef Ready</b></div><div class="stat"><span>🛡</span><b>Discreet Stay</b></div></div></section>
+          <section class="grid grid-2" style="margin-bottom:12px"><button class="action featured" type="button" data-go="book"><div class="iconbox" style="background:rgba(255,255,255,.12)">📅</div><h3>Book Villa</h3><p>Dates & guests</p></button><button class="action card" type="button" data-go="concierge"><div class="iconbox soft brass">💬</div><h3>Concierge</h3><p>Requests & help</p></button></section>
+          <section class="grid">${menu('🖼','View Rooms & Villa','Suites, pool, estate details','villa')}${menu('🔑','My Booking Status','Reservation and arrival updates','status')}${menu('🗺','Directions & Access','Airport, transfers, contact','directions')}</section>
+          <p class="footer">Quiet-luxury private villa service for Boracay arrivals, stays, and concierge requests.</p>`;
+      }
+
+      function renderBook() {
+        const b = state.booking;
+        const canSubmit = b.arrival && b.departure && Number(b.guests) > 0;
+        const submit = () => {
+          const fresh = state.booking;
+          if (!(fresh.arrival && fresh.departure && Number(fresh.guests) > 0)) { haptic('warning'); return; }
+          submitPayload({ type: 'booking_request', arrival: fresh.arrival, departure: fresh.departure, guests: Number(fresh.guests), notes: fresh.notes, source: 'telegram_mini_app' }, 'Request Sent', 'Your booking request has been sent to PLP for availability review.');
+          state.booking = { arrival: '', departure: '', guests: '2', notes: '' };
+        };
+        setMainButton({ text: 'Request Booking', active: canSubmit, onClick: submit });
+        root.innerHTML = `${pageIntro('Availability','Request your stay','Send dates, guest count, and preferences. The PLP team confirms availability before any payment step.')}
+          <label class="field"><span class="label">Arrival Date</span><input id="arrival" class="input" type="date" value="${esc(b.arrival)}"></label>
+          <label class="field"><span class="label">Departure Date</span><input id="departure" class="input" type="date" value="${esc(b.departure)}"></label>
+          <label class="field"><span class="label">Number of Guests</span><select id="guests" class="input">${Array.from({length:12},(_,i)=>i+1).map(n=>`<option value="${n}" ${String(n)===String(b.guests)?'selected':''}>${n} ${n===1?'Guest':'Guests'}</option>`).join('')}</select></label>
+          <label class="field"><span class="label">Special Requests</span><textarea id="notes" class="input" placeholder="Airport transfer, chef request, celebration setup, privacy needs...">${esc(b.notes)}</textarea></label>
+          <button id="submitBooking" class="primary ${tg ? 'hidden' : ''}" ${canSubmit ? '' : 'disabled'} type="button">Request Booking</button>
+          ${info('⏱','No instant charge','This sends a request only. Confirmation, deposit, and final terms should happen after staff review.')}
+          <button class="secondary" type="button" data-go="concierge">Ask concierge before booking</button>`;
+        document.getElementById('arrival').addEventListener('input', e => { state.booking.arrival = e.target.value; render(); });
+        document.getElementById('departure').addEventListener('input', e => { state.booking.departure = e.target.value; render(); });
+        document.getElementById('guests').addEventListener('change', e => { state.booking.guests = e.target.value; render(); });
+        document.getElementById('notes').addEventListener('input', e => { state.booking.notes = e.target.value; });
+        document.getElementById('submitBooking')?.addEventListener('click', submit);
+      }
+
+      function renderConcierge() {
+        const c = state.concierge;
+        const canSubmit = c.message.trim().length >= 3;
+        const submit = () => {
+          const fresh = state.concierge;
+          if (fresh.message.trim().length < 3) { haptic('warning'); return; }
+          submitPayload({ type: 'concierge_request', category: fresh.category, message: fresh.message, source: 'telegram_mini_app' }, 'Request Received', 'Your concierge request has been sent to the villa team.');
+          state.concierge.message = '';
+        };
+        setMainButton({ text: 'Send Request', active: canSubmit, onClick: submit });
+        const chips = ['Transport','Breakfast','Drinks','Housekeeping','Chef','Luggage'].map(label => `<button class="chip ${label===c.category?'active':'card'}" type="button" data-chip="${label}">${label}</button>`).join('');
+        root.innerHTML = `${pageIntro('Concierge','Send a villa request','Use this for transport, food, drinks, housekeeping, arrival help, or anything staff should prepare.')}
+          <div class="chips">${chips}</div>
+          <label class="field"><span class="label">Request Details</span><textarea id="conciergeMessage" class="input" style="min-height:220px" placeholder="Example: Please arrange a van from Caticlan Airport for 4 guests at 2:30 PM.">${esc(c.message)}</textarea></label>
+          <div class="grid grid-2"><div class="tile card"><div class="brass">⏱</div><p>Response</p><h3>Staff review</h3></div><div class="tile card"><div class="brass">🛡</div><p>Privacy</p><h3>Handled discreetly</h3></div></div>
+          <button id="submitConcierge" class="primary ${tg ? 'hidden' : ''}" style="margin-top:18px" ${canSubmit ? '' : 'disabled'} type="button">Send Request</button>`;
+        document.querySelectorAll('[data-chip]').forEach(btn => btn.addEventListener('click', () => { haptic(); state.concierge.category = btn.dataset.chip; state.concierge.message = quickMessages[btn.dataset.chip] || ''; render(); }));
+        document.getElementById('conciergeMessage').addEventListener('input', e => { state.concierge.message = e.target.value; });
+        document.getElementById('submitConcierge')?.addEventListener('click', submit);
+      }
+
+      function renderVilla() {
+        setMainButton(null);
+        root.innerHTML = `<section class="hero-plain"><div><span class="pill">Private Villa Estate</span><h2>Designed for privacy, arrival, and quiet service.</h2></div></section>
+          <p class="body">A Telegram-first guest view for PLP: fast villa overview, arrival coordination, concierge requests, and booking intent without forcing guests through the full public website.</p>
+          <div class="grid grid-2" style="margin:24px 0"><div class="tile card"><div class="brass">🛏</div><p>Villa Stay</p><h3>Private</h3></div><div class="tile card"><div class="brass">👤</div><p>Guest Flow</p><h3>Concierge-led</h3></div><div class="tile card"><div class="brass">🚗</div><p>Arrival</p><h3>Coordinated</h3></div><div class="tile card"><div class="brass">🛡</div><p>Privacy</p><h3>Priority</h3></div></div>
+          <h3>Highlights</h3><ul class="list"><li><span class="brass">✓</span>Private estate-style villa experience</li><li><span class="brass">✓</span>Ocean-facing rooms and quiet-luxury layout</li><li><span class="brass">✓</span>Concierge coordination before arrival</li><li><span class="brass">✓</span>Chef, transport, and housekeeping requests</li></ul>
+          <h3>Gallery Preview</h3><div class="gallery">${['Pool Deck','Master Suite','Dining','Arrival'].map(x=>`<div class="gallery-card card"><div class="gallery-img">🖼</div><div><h4>${x}</h4><p>Preview</p></div></div>`).join('')}</div>
+          <button class="primary" type="button" data-go="book">Request Stay</button>`;
+      }
+
+      function renderStatus() {
+        setMainButton(null);
+        root.innerHTML = `${pageIntro('Reservation','My Booking','Once backend booking lookup is connected, this screen will show the guest’s active reservation.')}
+          <section class="card" style="border-radius:28px;padding:28px;text-align:center"><div class="round-icon soft brass" style="width:64px;height:64px;margin:0 auto 16px">🔑</div><h3>No active booking found</h3><p class="body">You do not have a confirmed stay linked to this Telegram account yet.</p><button class="primary" type="button" data-go="book" style="margin-top:20px">Check Availability</button></section>
+          ${info('🛡','Backend required','Confirmed bookings can appear here after staff review and reservation sync.')}`;
+      }
+
+      function renderDirections() {
+        setMainButton(null);
+        root.innerHTML = `${pageIntro('Arrival','Directions & Access','Keep this practical: arrival instructions, staff contact, and transfer coordination.')}
+          <div class="card" style="border-radius:28px;padding:8px;margin-bottom:20px"><button id="mapButton" class="mapbox" type="button"><span><span style="font-size:38px">🗺</span><br><b>Open Map</b><br><small class="hint">Replace with exact PLP pin</small></span></button></div>
+          <div class="step card"><span class="pill soft brass">01</span><h3>Before Arrival</h3><p>Guest sends flight, ferry, and arrival details. Staff confirms the correct pickup plan.</p></div>
+          <div class="step card"><span class="pill soft brass">02</span><h3>Transfer Coordination</h3><p>Concierge coordinates airport, port, or island transfer depending on the guest’s route.</p></div>
+          <div class="step card"><span class="pill soft brass">03</span><h3>Villa Access</h3><p>Access instructions should only be shown to confirmed guests.</p></div>
+          <div class="card" style="border-radius:24px;padding:0 16px;margin-top:18px"><div class="contact-row"><span class="hint">Villa Manager</span><b>+63 917 123 4567</b></div><div style="height:1px;background:var(--plp-line)"></div><div class="contact-row"><span class="hint">Email</span><b>concierge@plp.com</b></div></div>`;
+        document.getElementById('mapButton').addEventListener('click', () => { const url = 'https://maps.google.com/?q=Boracay'; tg?.openLink ? tg.openLink(url) : window.open(url, '_blank', 'noopener,noreferrer'); });
+      }
+
+      function render() {
+        syncBack();
+        root.style.opacity = '0';
+        window.setTimeout(() => {
+          if (current() === 'home') renderHome();
+          if (current() === 'book') renderBook();
+          if (current() === 'villa') renderVilla();
+          if (current() === 'concierge') renderConcierge();
+          if (current() === 'status') renderStatus();
+          if (current() === 'directions') renderDirections();
+          document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => go(button.dataset.go)));
+          root.style.opacity = '1';
+        }, 80);
+      }
+
+      backButton.addEventListener('click', goBack);
+      modalClose.addEventListener('click', () => modal.classList.remove('open'));
+      render();
+    </script>
+  </body>
+</html>
