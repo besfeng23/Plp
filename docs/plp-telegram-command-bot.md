@@ -4,15 +4,36 @@ The PLP Telegram Command Bot is a read-only operations bridge for Pueblo La Perl
 
 ## What it can answer
 
-- `help`
+Commands are matched by a normalizing intent parser, so casing, punctuation,
+slash commands, and common phrasings all resolve to the same report. For
+example, `Arrivals today`, `arrivals today`, `/arrivals`, `check-ins today`, and
+`guests arriving today` all return the arrivals report.
+
+Operational reports:
+
+- `owner update` (also `owner report`, `morning update`, `daily briefing`)
+- `what needs attention` (also `urgent`, `problems`, `issues today`)
+- `arrivals today` (also `check-ins today`, `guests arriving today`, `/arrivals`)
+- `checkouts today` (also `departures today`, `guests leaving today`, `/checkouts`)
+- `maintenance` (also `repairs`)
+- `housekeeping` (also `rooms to clean`)
+- `concierge`
+- `expenses`
+- `reviews`
+- `OTA status`
+- `website funnel`
+
+System / integration checks:
+
 - `check production`
 - `check paypal`
 - `check checkout errors`
 - `check all PRs`
 - `what PR is merge-ready`
 - `show latest bookings`
-- `any payment exceptions`
-- `give me morning update`
+- `payment exceptions` (also `unpaid bookings`, `failed payments`)
+
+Anything unrecognised, plus `help` / `/start`, returns the read-only help menu.
 
 The first version is intentionally deterministic and read-only. It does not use expensive AI routing, and it does not merge PRs, deploy, close issues, delete records, change bookings, or alter payment state.
 
@@ -97,10 +118,14 @@ Telegram → Vercel API route → PLP Agent Router → server-side tool modules 
 
 Files:
 
-- `api/telegram/webhook.js` accepts Telegram webhook updates.
-- `api/telegram/plpAgent.js` routes natural-language text to deterministic intents.
-- `api/telegram/sendMessage.js` sends safe Telegram replies.
-- `api/_tools/githubStatus.js` reads open PR status.
-- `api/_tools/vercelStatus.js` reads latest production deployment status.
-- `api/_tools/paypalHealth.js` reuses existing PayPal health configuration checks.
-- `api/_tools/supabaseBookings.js` reads masked booking and payment exception summaries.
+- `api/telegram/webhook.js` accepts Telegram webhook updates (the only route Vercel exposes).
+- `server/plpTelegram/plpAgent.js` normalizes text and routes it to deterministic intents.
+- `server/plpTelegram/sendMessage.js` sends safe Telegram replies.
+- `server/plpTelegram/tools/ownerCommandCenter.js` reads owner/ops/finance/reputation summaries from Supabase.
+- `server/plpTelegram/tools/githubStatus.js` reads open PR status.
+- `server/plpTelegram/tools/vercelStatus.js` reads latest production deployment status.
+- `server/plpTelegram/tools/paypalHealth.js` reuses existing PayPal health configuration checks.
+- `server/plpTelegram/tools/supabaseBookings.js` reads masked booking and payment exception summaries.
+
+Tests: `npm test` runs `test/telegramRouter.test.js` (Node's built-in runner) to
+verify intent routing and that known commands never fall back to the help menu.
