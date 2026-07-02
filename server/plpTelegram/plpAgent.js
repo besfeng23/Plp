@@ -20,30 +20,31 @@ import {
 const HELP = 'PLP Command Bot\nAsk: owner update, donor update, what needs attention, arrivals today, checkouts today, maintenance, housekeeping, concierge, expenses, reviews, OTA status, website funnel, check production, check paypal, check all PRs, show latest bookings, payment exceptions, or morning update.\nRead-only mode is active.';
 const clean = (v, f = '—') => String(v || f).replace(/[\r\n]+/g, ' ').slice(0, 180);
 const pesos = (v) => Number(v || 0) ? `PHP ${Number(v || 0).toLocaleString('en-US')}` : '—';
+const has = (t, ...phrases) => phrases.some((p) => t.includes(p));
 
 function intentFor(text) {
-  const t = String(text || '').toLowerCase();
-  const pr = t.match(/\bpr\s*#?\s*(\d+)\b|#(\d+)\b/);
-  if (/\bhelp\b|start/.test(t)) return { name: 'help' };
-  if (/donor|investor|impact report|funds/.test(t)) return { name: 'owner/donor' };
-  if (/what needs attention|attention|owner alert|urgent|problem|issue today/.test(t)) return { name: 'owner/attention' };
-  if (/owner update|owner brief|morning update|evening update|daily update|how is plp|status|update on plp/.test(t)) return { name: 'owner/brief' };
-  if (/arrival/.test(t)) return { name: 'ops/arrivals' };
-  if (/checkout/.test(t) && !/error/.test(t)) return { name: 'ops/checkouts' };
-  if (/maintenance|broken|repair|ac\b|water|pool|leak|electric/.test(t)) return { name: 'ops/maintenance' };
-  if (/housekeeping|clean|dirty|room ready|turnover/.test(t)) return { name: 'ops/housekeeping' };
-  if (/concierge|guest request|transfer|chef|breakfast|drinks|laundry/.test(t)) return { name: 'ops/concierge' };
-  if (/expense|spend|spent|profit|p&l|cost/.test(t)) return { name: 'finance/expenses' };
-  if (/review|rating|reputation|complaint|feedback/.test(t)) return { name: 'reputation/reviews' };
-  if (/ota|airbnb|agoda|expedia|booking\.com|channel/.test(t)) return { name: 'channels/status' };
-  if (/website funnel|funnel|conversion|booking page|reserve click|analytics/.test(t)) return { name: 'website/funnel' };
-  if (pr && /pr|pull request|#/.test(t)) return { name: 'github/pr', number: pr[1] || pr[2] };
-  if (/pr|pull request|merge-ready|merge ready/.test(t)) return { name: 'github/prs', mergeReady: /merge-ready|merge ready/.test(t) };
-  if (/paypal/.test(t)) return { name: 'paypal/health' };
-  if (/checkout.*error|error.*checkout|vercel.*error|logs?/.test(t)) return { name: 'vercel/errors' };
-  if (/production|deploy|vercel/.test(t)) return { name: 'vercel/status' };
-  if (/payment exception|exceptions?|reconciliation|deposit review/.test(t)) return { name: 'payments/exceptions' };
-  if (/booking|reservation|latest/.test(t)) return { name: 'bookings/latest' };
+  const t = String(text || '').toLowerCase().replace(/[^a-z0-9#]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const pr = t.match(/pr #?\s*(\d+)|#(\d+)/);
+  if (t === 'help' || t === '/help' || t === 'start' || t === '/start') return { name: 'help' };
+  if (has(t, 'what needs attention', 'needs attention', 'attention', 'owner alert', 'urgent', 'problem today', 'issues today')) return { name: 'owner/attention' };
+  if (has(t, 'owner update', 'owner brief', 'morning update', 'evening update', 'daily update', 'how is plp', 'status update', 'update on plp')) return { name: 'owner/brief' };
+  if (has(t, 'donor', 'investor', 'impact report', 'funds')) return { name: 'owner/donor' };
+  if (has(t, 'arrivals today', 'arrival today', 'arrivals')) return { name: 'ops/arrivals' };
+  if (has(t, 'checkouts today', 'checkout today', 'checkouts') && !has(t, 'checkout error')) return { name: 'ops/checkouts' };
+  if (has(t, 'maintenance', 'broken', 'repair', 'water', 'pool', 'leak', 'electric', 'ac problem')) return { name: 'ops/maintenance' };
+  if (has(t, 'housekeeping', 'clean', 'dirty', 'room ready', 'turnover')) return { name: 'ops/housekeeping' };
+  if (has(t, 'concierge', 'guest request', 'transfer', 'chef', 'breakfast', 'drinks', 'laundry')) return { name: 'ops/concierge' };
+  if (has(t, 'expense', 'expenses', 'spend', 'spent', 'profit', 'p l', 'cost')) return { name: 'finance/expenses' };
+  if (has(t, 'reviews', 'review', 'rating', 'reputation', 'complaint', 'feedback')) return { name: 'reputation/reviews' };
+  if (has(t, 'ota', 'airbnb', 'agoda', 'expedia', 'booking com', 'channel')) return { name: 'channels/status' };
+  if (has(t, 'website funnel', 'funnel', 'conversion', 'booking page', 'reserve click', 'analytics')) return { name: 'website/funnel' };
+  if (pr && has(t, 'pr', 'pull request', '#')) return { name: 'github/pr', number: pr[1] || pr[2] };
+  if (has(t, 'pr', 'pull request', 'merge ready', 'merge-ready')) return { name: 'github/prs', mergeReady: has(t, 'merge ready', 'merge-ready') };
+  if (has(t, 'paypal')) return { name: 'paypal/health' };
+  if (has(t, 'checkout error', 'checkout errors', 'vercel error', 'vercel errors', 'logs')) return { name: 'vercel/errors' };
+  if (has(t, 'production', 'deploy', 'deployment', 'vercel')) return { name: 'vercel/status' };
+  if (has(t, 'payment exception', 'payment exceptions', 'exceptions', 'reconciliation', 'deposit review')) return { name: 'payments/exceptions' };
+  if (has(t, 'booking', 'bookings', 'reservation', 'latest')) return { name: 'bookings/latest' };
   return { name: 'help' };
 }
 
