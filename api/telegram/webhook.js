@@ -1,5 +1,6 @@
 import { routePlpAgent } from '../../server/plpTelegram/plpAgent.js';
 import { sendTelegramMessage } from '../../server/plpTelegram/sendMessage.js';
+import { directDispatch } from '../../server/plpTelegram/directDispatch.js';
 
 function allowedIds() { return new Set(String(process.env.TELEGRAM_ALLOWED_USER_IDS || '').split(',').map((id) => id.trim()).filter(Boolean)); }
 function isAuthorized(id) { const allowed = allowedIds(); return allowed.size === 0 || allowed.has(String(id)); }
@@ -52,7 +53,8 @@ export default async function handler(req, res) {
   if (!isAuthorized(userId)) return res.status(200).json({ ok: true });
 
   try {
-    const answer = await routePlpAgent(text, { req });
+    const direct = await directDispatch(text, req);
+    const answer = direct || await routePlpAgent(text, { req });
     await sendTelegramMessage(chatId, answer);
     return res.status(200).json({ ok: true });
   } catch (error) {
