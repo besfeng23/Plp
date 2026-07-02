@@ -1,4 +1,4 @@
-redeploy after supabase security acl cleanup
-retry: 7
-triggered_at: 2026-07-02T15:00:00+08:00
-reason: refresh Vercel production after Supabase RLS/ACL fixes
+redeploy
+retry: 8
+triggered_at: 2026-07-02T15:17:00+08:00
+reason: requested refresh
