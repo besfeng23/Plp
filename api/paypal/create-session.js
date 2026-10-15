@@ -85,7 +85,9 @@ function isCheckoutAllowed(booking) {
     'REFUNDED',
   ]);
 
-  return !terminalBookingStatuses.has(bookingStatus) && !terminalPaymentStatuses.has(paymentStatus);
+  const expiresAt = booking?.expires_at ? Date.parse(booking.expires_at) : null;
+  const hasExpiredHold = expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt <= Date.now());
+  return !hasExpiredHold && !terminalBookingStatuses.has(bookingStatus) && !terminalPaymentStatuses.has(paymentStatus);
 }
 
 export default async function handler(req, res) {
@@ -137,6 +139,55 @@ export default async function handler(req, res) {
         code: 'CHECKOUT_NOT_AVAILABLE_FOR_STATUS',
         detail: 'Checkout is not available for this booking in its current payment state.',
       }, req, booking.reference);
+    }
+
+    // Reuse a recent pending PayPal order on retries instead of creating a new
+    // order each time the guest taps the checkout button. The database row and
+    // persisted booking expiry, not client state, control whether it can be reused.
+    const existingPaymentRows = await selectRows(
+      'plp_payments',
+      `provider=eq.PAYPAL&provider_reference_id=eq.${encodeFilterValue(booking.reference)}&select=id,provider_session_id,checkout_url,amount_php,currency,status,verification_status,created_at&limit=1`
+    );
+    const existingPayment = existingPaymentRows?.[0] || null;
+    const existingCreatedAt = Date.parse(existingPayment?.created_at || '');
+    const existingAgeMs = Date.now() - existingCreatedAt;
+    const bookingExpiry = persistedBooking.expires_at ? Date.parse(persistedBooking.expires_at) : null;
+    const enoughHoldTimeRemains = bookingExpiry === null || (Number.isFinite(bookingExpiry) && bookingExpiry - Date.now() > 120000);
+    const reusableCheckout = existingPayment
+      && existingPayment.provider_session_id
+      && existingPayment.checkout_url
+      && existingPayment.status === 'PENDING'
+      && existingPayment.verification_status === 'PENDING'
+      && Number.isFinite(existingCreatedAt)
+      && existingAgeMs >= 0
+      && existingAgeMs <= 30 * 60 * 1000
+      && enoughHoldTimeRemains;
+
+    if (reusableCheckout) {
+      const reusedSession = {
+        provider: 'PAYPAL',
+        checkoutUrl: existingPayment.checkout_url,
+        paypalOrderId: existingPayment.provider_session_id,
+        paymentSessionId: existingPayment.provider_session_id,
+        referenceId: booking.reference,
+        status: 'CREATED',
+        amount: Number(existingPayment.amount_php),
+        currency: existingPayment.currency || 'PHP',
+      };
+      return res.status(200).json({
+        ok: true,
+        ...reusedSession,
+        databasePayment: {
+          id: existingPayment.id,
+          provider: 'PAYPAL',
+          provider_session_id: existingPayment.provider_session_id,
+          status: existingPayment.status,
+          verification_status: existingPayment.verification_status,
+        },
+        databaseWarning: null,
+        reused: true,
+        note: 'Existing pending PayPal checkout session reused.',
+      });
     }
 
     // Never trust a client-supplied deposit amount: the checkout order is always created
