@@ -146,10 +146,10 @@ export default async function handler(req, res) {
     // persisted booking expiry, not client state, control whether it can be reused.
     const existingPaymentRows = await selectRows(
       'plp_payments',
-      `provider=eq.PAYPAL&provider_reference_id=eq.${encodeFilterValue(booking.reference)}&select=id,provider_session_id,checkout_url,amount_php,currency,status,verification_status,created_at&limit=1`
+      `provider=eq.PAYPAL&provider_reference_id=eq.${encodeFilterValue(booking.reference)}&select=id,provider_session_id,checkout_url,amount_php,currency,status,verification_status,updated_at,created_at&limit=1`
     );
     const existingPayment = existingPaymentRows?.[0] || null;
-    const existingCreatedAt = Date.parse(existingPayment?.created_at || '');
+    const existingCreatedAt = Date.parse(existingPayment?.updated_at || existingPayment?.created_at || '');
     const existingAgeMs = Date.now() - existingCreatedAt;
     const bookingExpiry = persistedBooking.expires_at ? Date.parse(persistedBooking.expires_at) : null;
     const enoughHoldTimeRemains = bookingExpiry === null || (Number.isFinite(bookingExpiry) && bookingExpiry - Date.now() > 120000);
