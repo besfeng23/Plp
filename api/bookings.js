@@ -1,4 +1,3 @@
-import { requireAvailability } from './_availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 import { PLP_DEPOSIT_RATE, PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
@@ -58,7 +57,7 @@ export default async function handler(req, res) {
     const amount = nights * selected.rate;
     const deposit = Math.round(amount * DEPOSIT_RATE);
     const balance = Math.max(amount - deposit, 0);
-    const reference = `PLP-${Date.now().toString().slice(-8)}`;
+    const reference = `PLP-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
     const booking = {
       reference,
@@ -86,11 +85,21 @@ export default async function handler(req, res) {
     let databaseWarning = null;
     let availability = null;
     if (isSupabaseConfigured()) {
-      availability = await requireAvailability({ accommodationName: booking.accommodation, checkIn: booking.checkIn, checkOut: booking.checkOut });
-      if (!availability.available) {
-        return res.status(409).json({ ok: false, error: availability.error, conflictCount: availability.conflictCount });
+      // The database transaction is the source of truth for availability.
+      // It validates the current accommodation rate/capacity and rejects overlapping
+      // stays under the exclusion constraint, closing the check-then-insert race.
+      try {
+        databaseRecord = await createBookingRecord(booking);
+        availability = { available: true, atomic: true };
+      } catch (error) {
+        if (error?.code === '23P01' || /not available for those dates|overlap/i.test(String(error?.message || ''))) {
+          return res.status(409).json({ ok: false, error: 'Selected accommodation is not available for those dates.', conflictCount: 1 });
+        }
+        if (error?.code === '22023' || /not active|capacity|rate does not match|price or deposit is invalid|invalid booking dates/i.test(String(error?.message || ''))) {
+          return res.status(400).json({ ok: false, error: String(error.message || 'Booking details are invalid.') });
+        }
+        throw error;
       }
-      databaseRecord = await createBookingRecord(booking);
       booking.databaseId = databaseRecord.id;
       booking.persisted = true;
     } else {
