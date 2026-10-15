@@ -93,8 +93,10 @@ export default async function handler(req, res) {
 
     if (booking.expires_at) {
       const expiresAt = Date.parse(booking.expires_at);
-      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
-        return cancel('booking-hold-expired');
+      // Leave a small safety margin for PayPal's network round trip and the
+      // database commit that marks the deposit verified.
+      if (!Number.isFinite(expiresAt) || expiresAt <= Date.now() + 120000) {
+        return cancel('booking-hold-expired-or-expiring');
       }
     }
 
