@@ -1,16 +1,4 @@
-import {
-  findBookingByReference,
-  getSupabaseConfigError,
-  insertRow,
-  isSupabaseConfigured,
-  selectRows,
-  updateRows,
-  rpc,
-} from '../_supabase.js';
-
-function encodeFilterValue(value) {
-  return encodeURIComponent(String(value));
-}
+import { getSupabaseConfigError, isSupabaseConfigured, rpc } from '../_supabase.js';
 
 function mapPayPalStatus(status) {
   const normalized = String(status || '').toUpperCase();
@@ -22,96 +10,24 @@ function mapPayPalStatus(status) {
   return normalized || 'PENDING';
 }
 
-function mapBookingStatus(paymentStatus) {
-  if (paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED') return 'PAID_DEPOSIT';
-  if (paymentStatus === 'FAILED') return 'FAILED';
-  if (paymentStatus === 'VOIDED') return 'CANCELLED';
-  return 'PAYMENT_PROCESSING';
-}
-
-function isFinalPositiveStatus(paymentStatus) {
-  return paymentStatus === 'SUCCEEDED' || paymentStatus === 'CAPTURED';
-}
-
-function getVerificationResult({ booking, payment, orderId, amount, currency, paymentStatus }) {
-  if (!booking) {
-    return { status: 'UNMATCHED_REFERENCE', note: 'No booking was found for this PayPal reference.' };
-  }
-
-  if (!payment) {
-    return { status: 'UNMATCHED_PAYMENT', note: 'No payment session was found for this PayPal reference.' };
-  }
-
-  const expectedOrderId = String(payment.provider_session_id || '').trim();
-  const receivedOrderId = String(orderId || '').trim();
-  if (!expectedOrderId) {
-    return { status: 'ORDER_SESSION_MISSING', note: 'Stored PayPal payment row is missing the PayPal order/session id.' };
-  }
-  if (!receivedOrderId) {
-    return { status: 'ORDER_ID_MISSING', note: 'PayPal capture response did not include an order id.' };
-  }
-  if (expectedOrderId !== receivedOrderId) {
-    return { status: 'ORDER_ID_MISMATCH', note: 'PayPal order id does not match the stored payment session.' };
-  }
-
-  if (!isFinalPositiveStatus(paymentStatus)) {
-    return { status: 'CAPTURE_NOT_COMPLETED', note: `PayPal capture is not completed. Received status ${paymentStatus || 'unknown'}.` };
-  }
-
-  const expectedAmount = Number(payment.amount_php || booking.deposit_amount_php || 0);
-  const receivedAmount = Number(amount || 0);
-  const receivedCurrency = String(currency || '').toUpperCase();
-
-  if (receivedCurrency !== 'PHP') {
-    return { status: 'CURRENCY_MISMATCH', note: `Expected PHP but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
-  }
-  if (!receivedAmount || receivedAmount !== expectedAmount) {
-    return { status: 'AMOUNT_MISMATCH', note: `Expected ${expectedAmount} but received ${receivedAmount || 'missing amount'}.`, expectedAmount };
-  }
-
-  return { status: 'VERIFIED', note: 'PayPal capture matched booking reference, stored order id, payment record, amount, and currency.', expectedAmount };
-}
-
 export async function createPayPalPaymentRecord({ bookingReference, session, amount, checkoutUrl, rawResponse }) {
-  if (!isSupabaseConfigured()) return { databaseWarning: getSupabaseConfigError(), databasePayment: null };
-
-  const booking = await findBookingByReference(bookingReference);
-  if (!booking) throw new Error(`Booking ${bookingReference} was not found`);
+  if (!isSupabaseConfigured()) {
+    return { databaseWarning: getSupabaseConfigError(), databasePayment: null };
+  }
 
   const providerSessionId = session?.paypalOrderId || rawResponse?.id || null;
-  const providerReferenceId = bookingReference;
-  const existing = await selectRows('plp_payments', `provider=eq.PAYPAL&provider_reference_id=eq.${encodeFilterValue(providerReferenceId)}&select=id&limit=1`);
-
-  const payload = {
-    provider_session_id: providerSessionId,
-    checkout_url: checkoutUrl || session?.checkoutUrl || null,
-    amount_php: Number(amount || booking.deposit_amount_php || 0),
-    currency: 'PHP',
-    status: 'PENDING',
-    verification_status: 'PENDING',
-    verification_error: null,
-    raw_response: rawResponse || session || {},
-    expires_at: null,
-  };
-
-  if (existing?.[0]) {
-    const updated = await updateRows('plp_payments', `id=eq.${existing[0].id}`, payload);
-    return { databaseWarning: null, databasePayment: updated?.[0] || null };
-  }
-
-  const payment = await insertRow('plp_payments', {
-    booking_id: booking.id,
-    provider: 'PAYPAL',
-    provider_reference_id: providerReferenceId,
-    ...payload,
+  const stored = await rpc('create_paypal_payment_atomic', {
+    p_payment: {
+      bookingReference,
+      providerSessionId,
+      checkoutUrl: checkoutUrl || session?.checkoutUrl || null,
+      amount: Number(amount || 0),
+      currency: String(session?.currency || 'PHP').toUpperCase(),
+      rawResponse: rawResponse || session || {},
+    },
   });
-
-  await updateRows('plp_bookings', `id=eq.${booking.id}`, {
-    status: 'PAYMENT_PROCESSING',
-    payment_status: 'PROCESSING',
-  });
-
-  return { databaseWarning: null, databasePayment: payment };
+  const databasePayment = Array.isArray(stored) ? stored[0] : stored;
+  return { databaseWarning: null, databasePayment: databasePayment || null };
 }
 
 export async function recordPayPalCapture({ bookingReference, orderId, captureId, amount, currency, status, payload }) {
