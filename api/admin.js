@@ -73,7 +73,11 @@ async function handleBookingStatus(req, res) {
   }
   let notifications = null;
   try { notifications = await notifyBookingStatus(reference, nextStatus); } catch (error) { notifications = { ok: false, error: error.message }; }
-  return json(res, 200, { ok: true, reference, status: nextStatus, notifications });
+  const refreshedRows = await selectRows(
+    'plp_payment_reconciliation',
+    `booking_reference=eq.${encode(reference)}&select=*&limit=1`
+  );
+  return json(res, 200, { ok: true, row: refreshedRows?.[0] || null, notifications });
 }
 
 async function handleStaffTasks(req, res) {
