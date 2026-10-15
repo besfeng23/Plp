@@ -5,6 +5,7 @@ import {
   isSupabaseConfigured,
   selectRows,
   updateRows,
+  rpc,
 } from '../_supabase.js';
 
 function encodeFilterValue(value) {
@@ -124,70 +125,23 @@ export async function recordPayPalCapture({ bookingReference, orderId, captureId
     };
   }
 
-  const booking = bookingReference ? await findBookingByReference(bookingReference) : null;
-  const paymentRows = bookingReference
-    ? await selectRows('plp_payments', `provider=eq.PAYPAL&provider_reference_id=eq.${encodeFilterValue(bookingReference)}&select=id,booking_id,provider_session_id,amount_php,currency,status,verification_status&limit=1`)
-    : [];
-  const payment = paymentRows?.[0] || null;
-  const paymentStatus = mapPayPalStatus(status);
-  const verification = getVerificationResult({ booking, payment, orderId, amount, currency, paymentStatus });
-  const expectedAmount = verification.expectedAmount || Number(payment?.amount_php || booking?.deposit_amount_php || 0) || null;
-
-  const event = await insertRow('plp_payment_events', {
-    payment_id: payment?.id || null,
-    booking_id: booking?.id || payment?.booking_id || null,
-    provider: 'PAYPAL',
-    provider_event_id: captureId || orderId || null,
-    event_type: 'PAYPAL.ORDER.CAPTURE',
-    provider_reference_id: bookingReference || null,
-    provider_payment_id: captureId || orderId || null,
-    amount_php: amount ? Number(amount) : null,
-    currency: currency || null,
-    status: status || null,
-    expected_amount_php: expectedAmount,
-    expected_currency: 'PHP',
-    verification_status: verification.status,
-    verification_notes: verification.note,
-    payload: payload || {},
-    processed_at: new Date().toISOString(),
+  const result = await rpc('record_paypal_capture_atomic', {
+    p_event: {
+      bookingReference,
+      orderId,
+      captureId,
+      amount: amount == null ? null : String(amount),
+      currency,
+      status,
+      payload: payload || {},
+    },
   });
-
-  if (payment?.id) {
-    if (verification.status === 'VERIFIED') {
-      await updateRows('plp_payments', `id=eq.${payment.id}`, {
-        provider_payment_id: captureId || orderId || null,
-        amount_php: amount ? Number(amount) : payment.amount_php,
-        currency: currency || 'PHP',
-        status: paymentStatus,
-        verification_status: 'VERIFIED',
-        verification_error: null,
-        last_webhook_id: captureId || orderId || null,
-        paid_at: isFinalPositiveStatus(paymentStatus) ? new Date().toISOString() : null,
-        raw_response: payload || {},
-      });
-    } else {
-      await updateRows('plp_payments', `id=eq.${payment.id}`, {
-        provider_payment_id: captureId || orderId || null,
-        verification_status: verification.status,
-        verification_error: verification.note,
-        last_webhook_id: captureId || orderId || null,
-        raw_response: payload || {},
-      });
-    }
-  }
-
-  if (booking?.id && verification.status === 'VERIFIED') {
-    await updateRows('plp_bookings', `id=eq.${booking.id}`, {
-      status: mapBookingStatus(paymentStatus),
-      payment_status: paymentStatus,
-    });
-  }
-
+  const row = Array.isArray(result) ? result[0] : result;
   return {
     databaseWarning: null,
-    databaseEvent: event,
-    paymentStatus,
-    verificationStatus: verification.status,
-    verificationNote: verification.note,
+    databaseEvent: null,
+    paymentStatus: mapPayPalStatus(status),
+    verificationStatus: row?.verificationStatus || 'CAPTURE_NOT_VERIFIED',
+    verificationNote: row?.verificationNote || 'Database did not return a verification result.',
   };
 }
