@@ -1,5 +1,6 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const PLP_SCHEMA = 'plp_runtime';
 
 export function isSupabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -29,6 +30,8 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
+      'Accept-Profile': PLP_SCHEMA,
+      'Content-Profile': PLP_SCHEMA,
       Prefer: prefer,
     },
     body: body === undefined ? undefined : JSON.stringify(stripUndefined(body)),
@@ -45,6 +48,17 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
 
 function encodeFilterValue(value) {
   return encodeURIComponent(String(value));
+}
+
+export async function rpc(functionName, payload) {
+  if (!/^[a-z][a-z0-9_]*$/.test(String(functionName || ''))) {
+    throw new Error('Invalid database function name');
+  }
+  return supabaseRequest(`rpc/${functionName}`, {
+    method: 'POST',
+    body: payload,
+    prefer: 'return=representation',
+  });
 }
 
 export async function selectRows(tableOrView, query = '') {
@@ -86,28 +100,8 @@ export async function upsertGuest({ name, email, phone }) {
 }
 
 export async function createBookingRecord(booking) {
-  const accommodation = await findAccommodationByName(booking.accommodation);
-  const guest = await upsertGuest({ name: booking.name, email: booking.email, phone: booking.phone });
-
-  return insertRow('plp_bookings', {
-    booking_reference: booking.reference,
-    guest_id: guest.id,
-    accommodation_id: accommodation?.id || null,
-    accommodation_name: booking.accommodation,
-    check_in: booking.checkIn,
-    check_out: booking.checkOut,
-    guest_count: Number(booking.guests),
-    nights: Number(booking.nights),
-    rate_per_night_php: Number(booking.rate || accommodation?.nightly_rate_php || 0),
-    total_amount_php: Number(booking.amount || 0),
-    deposit_amount_php: Number(booking.deposit || booking.paymentDue || 0),
-    balance_amount_php: Number(booking.balance || 0),
-    status: 'PENDING_PAYMENT',
-    payment_status: 'PENDING',
-    special_requests: String(booking.message || '').slice(0, 1200),
-    source: 'website',
-    expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-  });
+  if (!isSupabaseConfigured()) throw new Error(getSupabaseConfigError() || 'Booking database is not configured.');
+  return rpc('create_booking_atomic', { p_booking: booking });
 }
 
 export async function findBookingByReference(reference) {
