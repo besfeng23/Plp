@@ -1,6 +1,6 @@
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
-import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
+import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows, rpc } from './_supabase.js';
 import { buildOtaInventoryDryRun, getOtaMappingSnapshot, getOtaReadinessSnapshot } from './_otaSyncPlanner.js';
 import { getOtaReservationReviewSummary, listOtaReservationImports, stageOtaReservationImport, updateOtaReservationReview } from './_otaReservationImporter.js';
 import { getOtaConflictConsoleSummary, listOtaConflictConsole, updateOtaConflictResolution } from './_otaConflictManager.js';
@@ -58,19 +58,22 @@ async function handleBookingStatus(req, res) {
   const rows = await selectRows('plp_payment_reconciliation', `booking_reference=eq.${encode(reference)}&select=*&limit=1`);
   const current = rows?.[0] || null;
   if (!current) return json(res, 404, { ok: false, error: 'Booking not found' });
-  const payload = {};
   if (nextStatus === 'CONFIRMED') {
-    const verifiedPayment = current.payment_verification_status === 'VERIFIED';
-    const successfulPayment = ['SUCCEEDED', 'CAPTURED'].includes(current.payment_status) || ['SUCCEEDED', 'CAPTURED'].includes(current.booking_payment_status);
-    if (!verifiedPayment || !successfulPayment) return json(res, 409, { ok: false, error: 'Deposit payment must be verified first.' });
-    payload.status = 'CONFIRMED'; payload.confirmed_at = new Date().toISOString();
-  } else if (nextStatus === 'CANCELLED') { payload.status = 'CANCELLED'; payload.cancelled_at = new Date().toISOString(); }
-  else if (nextStatus === 'PAYMENT_PROCESSING') { payload.status = 'PAYMENT_PROCESSING'; }
-  else { return json(res, 400, { ok: false, error: 'Unsupported status' }); }
-  const updated = await updateRows('plp_bookings', `booking_reference=eq.${encode(reference)}`, payload);
+    const result = await rpc('confirm_booking_atomic', { p_reference: reference });
+    const confirmation = Array.isArray(result) ? result[0] : result;
+    if (!confirmation?.ok) return json(res, 409, { ok: false, error: confirmation?.error || 'Booking could not be confirmed.' });
+  } else if (nextStatus === 'CANCELLED') {
+    const updated = await updateRows('plp_bookings', `booking_reference=eq.${encode(reference)}`, { status: 'CANCELLED', cancelled_at: new Date().toISOString() });
+    if (!updated?.[0]) return json(res, 404, { ok: false, error: 'Booking not found' });
+  } else if (nextStatus === 'PAYMENT_PROCESSING') {
+    const updated = await updateRows('plp_bookings', `booking_reference=eq.${encode(reference)}`, { status: 'PAYMENT_PROCESSING' });
+    if (!updated?.[0]) return json(res, 404, { ok: false, error: 'Booking not found' });
+  } else {
+    return json(res, 400, { ok: false, error: 'Unsupported status' });
+  }
   let notifications = null;
   try { notifications = await notifyBookingStatus(reference, nextStatus); } catch (error) { notifications = { ok: false, error: error.message }; }
-  return json(res, 200, { ok: true, row: updated?.[0] || null, notifications });
+  return json(res, 200, { ok: true, reference, status: nextStatus, notifications });
 }
 
 async function handleStaffTasks(req, res) {
