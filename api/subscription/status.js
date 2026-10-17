@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const filter = `provider_subscription_id=eq.${encodeFilterValue(session.subscriptionId)}&select=provider_subscription_id,email,full_name,plan_id,status,next_billing_time&limit=1`;
     const [row, expectedPlanId] = await Promise.all([
       selectRows('plp_site_subscriptions', filter).then((rows) => rows?.[0] || null),
-      getMonthlyPlanId(),
+      getValidatedMonthlyPlanId(),
     ]);
     if (!row || !expectedPlanId || row.plan_id !== expectedPlanId) {
       setCookies(res, [clearAccessCookie()]);
