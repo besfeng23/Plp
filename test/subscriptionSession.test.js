@@ -51,7 +51,7 @@ test('signed access cookie is parsed into a valid session', () => {
 test('subscription state tokens are random and state cookies are short-lived', () => {
   assert.notEqual(newSubscriptionState(), newSubscriptionState());
   assert.match(stateCookie(newSubscriptionState()), /HttpOnly/);
-  assert.match(stateCookie(newSubscriptionState()), /Max-Age=600/);
+  assert.match(stateCookie(newSubscriptionState()), /Max-Age=1800/);
 });
 
 test('return URLs remain same-site paths and subscription/API routes cannot be targeted', () => {
