@@ -104,6 +104,14 @@
   ],
   "rewrites": [
     {
+      "source": "/subscribe/",
+      "destination": "/subscribe/index.html"
+    },
+    {
+      "source": "/subscribe",
+      "destination": "/subscribe/index.html"
+    },
+    {
       "source": "/tg",
       "destination": "/tg/index.html"
     },
