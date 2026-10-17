@@ -2,12 +2,12 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 const ACCESS_COOKIE = 'plp_site_access';
 const STATE_COOKIE = 'plp_subscription_state';
-const ACCESS_TTL_SECONDS = 365 * 24 * 60 * 60;
+// Short signed sessions limit stale access after cancellation. Successful
+// server-side PayPal checks refresh this cookie on each page load.
+const ACCESS_TTL_SECONDS = 30 * 60;
 const STATE_TTL_SECONDS = 10 * 60;
 
 function sessionSecret() {
-  // Prefer a dedicated secret; keep existing deployments functional without
-  // requiring a new secret if the server-only Supabase key is already set.
   return process.env.PLP_SUBSCRIPTION_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 }
 
@@ -76,9 +76,10 @@ export function verifyAccessToken(token, now = Date.now()) {
 
 export function accessCookie(subscriptionId) {
   const expiresAt = Date.now() + ACCESS_TTL_SECONDS * 1000;
+  const token = createAccessToken(subscriptionId, expiresAt);
   return {
-    value: createAccessToken(subscriptionId, expiresAt),
-    cookie: cookie(ACCESS_COOKIE, createAccessToken(subscriptionId, expiresAt), ACCESS_TTL_SECONDS),
+    value: token,
+    cookie: cookie(ACCESS_COOKIE, token, ACCESS_TTL_SECONDS),
   };
 }
 
@@ -87,8 +88,7 @@ export function clearAccessCookie() {
 }
 
 export function getAccessSession(req) {
-  const token = readCookie(req, ACCESS_COOKIE);
-  return verifyAccessToken(token);
+  return verifyAccessToken(readCookie(req, ACCESS_COOKIE));
 }
 
 export function safeReturnPath(value) {
