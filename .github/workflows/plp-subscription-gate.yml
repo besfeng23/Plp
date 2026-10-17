@@ -1,0 +1,30 @@
+name: PLP subscription gate verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/plp-monthly-subscription-gate]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Test
+        run: npm test
+      - name: Audit routes
+        run: npm run check:routes
+      - name: Build
+        run: npm run build
