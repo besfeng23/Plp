@@ -5,7 +5,7 @@ const STATE_COOKIE = 'plp_subscription_state';
 // Short signed sessions limit stale access after cancellation. Successful
 // server-side PayPal checks refresh this cookie on each page load.
 const ACCESS_TTL_SECONDS = 30 * 60;
-const STATE_TTL_SECONDS = 10 * 60;
+const STATE_TTL_SECONDS = 30 * 60;
 
 function sessionSecret() {
   return process.env.PLP_SUBSCRIPTION_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
