@@ -24,7 +24,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Test
         run: npm test
-      - name: Audit routes
-        run: npm run check:routes
+      - name: Check viewport fit
+        run: npm run check:viewport
       - name: Build
         run: npm run build
