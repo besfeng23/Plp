@@ -55,7 +55,7 @@ export default async function handler(req, res) {
 
     const [details, expectedPlanId] = await Promise.all([
       getPayPalSubscription(subscriptionId),
-      getMonthlyPlanId(),
+      getValidatedMonthlyPlanId(),
     ]);
     const status = String(details.status || '').toUpperCase();
     const verified = details.id === subscriptionId &&
