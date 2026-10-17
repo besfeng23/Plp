@@ -26,13 +26,14 @@
     window.location.replace(target.toString());
   };
 
-  fetch('/api/subscription/status', {
-    method: 'GET',
-    credentials: 'same-origin',
-    cache: 'no-store',
-    headers: { Accept: 'application/json' },
-  })
-    .then(async (response) => {
+  const checkStatus = async (initial = false) => {
+    try {
+      const response = await fetch('/api/subscription/status', {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      });
       const data = await response.json().catch(() => ({}));
       if (response.ok && data.active === true) {
         doc.classList.remove('plp-subscription-checking');
@@ -40,6 +41,18 @@
         return;
       }
       goToSubscribe(response.status === 503 ? 'verification_unavailable' : '');
-    })
-    .catch(() => goToSubscribe('verification_unavailable'));
+    } catch {
+      goToSubscribe('verification_unavailable');
+    }
+  };
+
+  checkStatus(true);
+  // Keep an open SPA from remaining unlocked indefinitely if a subscription
+  // is cancelled or PayPal suspends it. Page reloads check status as well.
+  window.setInterval(() => {
+    if (document.visibilityState === 'visible') checkStatus(false);
+  }, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkStatus(false);
+  });
 })();
