@@ -1,5 +1,5 @@
 import { selectRows, updateRows } from '../_supabase.js';
-import { getMonthlyPlanId, getPayPalSubscription, SubscriptionPayPalError } from './_paypal.js';
+import { getValidatedMonthlyPlanId, getPayPalSubscription, SubscriptionPayPalError } from './_paypal.js';
 import { accessCookie, clearAccessCookie, getAccessSession, setCookies } from './_session.js';
 
 function encodeFilterValue(value) {
