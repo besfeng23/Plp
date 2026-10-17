@@ -68,9 +68,37 @@ export async function getMonthlyPlanId() {
   return rows?.[0]?.setting_value || null;
 }
 
+export async function validateMonthlyPlanId(planId) {
+  if (!planId) {
+    throw new SubscriptionPayPalError('PAYPAL_PLAN_NOT_CONFIGURED', 'The monthly PayPal subscription plan is not configured.', 503);
+  }
+  const plan = await paypalRequest(`/v1/billing/plans/${encodeURIComponent(planId)}`);
+  const cycle = (plan.billing_cycles || []).find((item) => String(item.tenure_type || '').toUpperCase() === 'REGULAR');
+  const frequency = cycle?.frequency || {};
+  const price = cycle?.pricing_scheme?.fixed_price || {};
+  const valid = plan.id === planId &&
+    String(plan.status || '').toUpperCase() === 'ACTIVE' &&
+    String(frequency.interval_unit || '').toUpperCase() === 'MONTH' &&
+    Number(frequency.interval_count) === 1 &&
+    Number(price.value) === 10000 &&
+    String(price.currency_code || '').toUpperCase() === 'PHP';
+  if (!valid) {
+    throw new SubscriptionPayPalError(
+      'PAYPAL_PLAN_MISMATCH',
+      'The configured PayPal plan does not match the required active ₱10,000 PHP monthly subscription.',
+      503,
+    );
+  }
+  return planId;
+}
+
+export async function getValidatedMonthlyPlanId() {
+  return validateMonthlyPlanId(await getMonthlyPlanId());
+}
+
 export async function ensureMonthlyPlanId() {
   const configured = await getMonthlyPlanId();
-  if (configured) return configured;
+  if (configured) return validateMonthlyPlanId(configured);
 
   const product = await paypalRequest('/v1/catalogs/products', {
     method: 'POST',
@@ -120,6 +148,9 @@ export async function ensureMonthlyPlanId() {
     });
   }
 
+  // Verify the provider's stored plan, not just the requested amount.
+  await validateMonthlyPlanId(plan.id);
+
   try {
     await insertRow('plp_site_subscription_config', {
       setting_key: PLAN_CONFIG_KEY,
@@ -131,7 +162,7 @@ export async function ensureMonthlyPlanId() {
     // Concurrent first-time checkouts may provision two candidate plans. Use
     // the persisted winner and never depend on an unpersisted plan ID.
     const winner = await getMonthlyPlanId().catch(() => null);
-    if (winner) return winner;
+    if (winner) return validateMonthlyPlanId(winner);
     throw error;
   }
 }
