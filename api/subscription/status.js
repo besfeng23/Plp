@@ -1,6 +1,6 @@
 import { selectRows, updateRows } from '../_supabase.js';
 import { getMonthlyPlanId, getPayPalSubscription, SubscriptionPayPalError } from './_paypal.js';
-import { clearAccessCookie, getAccessSession, setCookies } from './_session.js';
+import { accessCookie, clearAccessCookie, getAccessSession, setCookies } from './_session.js';
 
 function encodeFilterValue(value) {
   return encodeURIComponent(String(value));
@@ -50,6 +50,10 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, active: false, status: details.status || 'INACTIVE' });
     }
 
+    // Refresh a short-lived access session only after PayPal confirms it is
+    // still ACTIVE and its plan matches the server-configured monthly plan.
+    const refreshed = accessCookie(session.subscriptionId);
+    setCookies(res, [refreshed.cookie]);
     return res.status(200).json({
       ok: true,
       active: true,
