@@ -1,13 +1,12 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import OpsAdminApp from './OpsAdminApp.jsx';
-import '../index.css';
+import PlpEnterpriseAdminApp from './PlpEnterpriseAdminApp.jsx';
 
-document.documentElement.dataset.adminExperience = 'plp-resort-command-v3';
-document.title = 'PLP Resort Command';
+document.documentElement.dataset.adminExperience = 'plp-enterprise-admin';
+document.title = 'PLP Enterprise Administration';
 
 createRoot(document.getElementById('admin-root')).render(
   <React.StrictMode>
-    <OpsAdminApp />
+    <PlpEnterpriseAdminApp />
   </React.StrictMode>
 );

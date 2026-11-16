@@ -178,9 +178,11 @@ The app includes:
 - Supabase-backed booking/payment tables
 - Hardened PayPal capture, legacy webhook verification, and payment exception tracking
 - Hidden guest portal mock
-- Hidden admin Resort OS mock
+- Staff-gated PLP Enterprise Administration at `/admin`
 
-The dev-only Admin OS shortcut appears only when running on localhost or 127.0.0.1.
+The admin home offers **Manage Client** (the existing Resort Command and its reservation/payment/OTA review tools) and **Enter Client Workspace** (a PLP Enterprise-style view of real operational records). The public site does not link to the admin route. The staff access code is validated by `/api/admin` and kept in tab memory, not browser storage; protected records cannot load without valid staff access.
+
+The client workspace reuses the current PLP API and does not copy Pandora's Flutter runtime or its AI integrations. Vision is explicitly not connected; individual staff roles require a separate reviewed authorization implementation. See `docs/plp-enterprise-admin.md` for boundaries and verification.
 ## Production verification
 
 Before deploying or promoting a PLP release:
