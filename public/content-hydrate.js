@@ -238,22 +238,14 @@
     updateFirstMatch('p', 'up to 8 guests', 'The Grand Ocean Villa is positioned for up to ' + (villa.capacity || 8) + ' guests, with ' + (villa.bedrooms || 4) + ' bedrooms, private pool atmosphere, living space, kitchen comfort, and hillside views.');
   }
 
-  function applyExperiences(content) {
-    var path = getPath();
-    if (path !== '/experiences') return;
-    var exp = content.experiences || {};
-    updateFirstMatch('li', 'paraw sailing', exp.water);
-    updateFirstMatch('li', 'quiet recovery', exp.wellness);
-    updateFirstMatch('li', 'sunset dinner', exp.privateDining);
-  }
-
   function applyContent(content) {
     if (!content) return;
     ensureProductionLayer();
     hydrateBoundElements(content);
     applyHome(content);
     applyAccommodation(content);
-    applyExperiences(content);
+    // Experience paragraphs and lists have explicit data-content bindings;
+    // replacing the first list item with its paragraph repeated that copy.
     applyBooking(content);
     applyImageCaptions();
     ensureRoomBookingLinks();
