@@ -155,14 +155,15 @@ The success redirect page is not treated as proof of payment. Real status change
 
 Server-side payment events are classified as:
 
-- `VERIFIED` — booking reference exists, payment session exists, amount matches, currency is PHP.
+- `VERIFIED` — booking reference exists, payment session exists, amount matches, and received currency matches the stored expected currency (USD for the current PayPal rate catalog).
 - `DUPLICATE` — event ID or return/capture processing was already handled.
 - `UNMATCHED_REFERENCE` — no booking exists for the payment reference.
 - `UNMATCHED_PAYMENT` — booking exists but no matching payment session exists.
 - `AMOUNT_MISMATCH` — payment amount does not match the expected deposit.
-- `CURRENCY_MISMATCH` — payment currency is not PHP.
+- `CURRENCY_MISMATCH` — payment currency is missing or differs from the stored expected currency.
 
 Only `VERIFIED` positive payment events can move a booking into `PAID_DEPOSIT`.
+Legacy database amount fields retain `_php` suffixes; interpret amounts using their accompanying currency fields, not the suffix.
 
 ## Notes
 
