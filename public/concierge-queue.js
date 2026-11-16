@@ -3,7 +3,7 @@
   const esc = (value) => String(value ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const status = (value) => String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-  const money = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
+  const money = (value, row) => window.PLP_RECORDS.recordMoney(value, row);
 
   function dateOnly(value) {
     if (!value) return null;
@@ -57,7 +57,7 @@
       if (arriveIn !== null && arriveIn >= 0 && arriveIn <= 7) tasks.push({ row, index, category: 'Arriving Soon', title: `Prepare arrival for ${guest(row)} in ${arriveIn === 0 ? 'today' : `${arriveIn} day${arriveIn === 1 ? '' : 's'}`}.`, source: 'Arrival date', priority: arriveIn <= 2 ? 'High' : 'Medium' });
       if (paymentReview(row)) tasks.push({ row, index, category: 'Follow-up', title: 'Review deposit/payment state before confirming guest arrangements.', source: 'Payment status', priority: 'High' });
       const balance = Number(field(row, ['balance_amount_php']) || 0);
-      if (balance > 0) tasks.push({ row, index, category: 'Follow-up', title: `Balance due remains ${money(balance)}.`, source: 'Balance amount', priority: 'Medium' });
+      if (balance > 0) tasks.push({ row, index, category: 'Follow-up', title: `Balance due remains ${money(balance, row)}.`, source: 'Balance amount', priority: 'Medium' });
     });
     return tasks.sort((a, b) => ({ High: 3, Medium: 2, Normal: 1 }[b.priority] || 0) - ({ High: 3, Medium: 2, Normal: 1 }[a.priority] || 0));
   }

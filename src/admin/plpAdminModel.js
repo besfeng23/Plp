@@ -1,3 +1,5 @@
+import { isTestRecord, totalsByCurrency } from '../../lib/admin-records.js';
+
 const STATUS_NAMES = {
   REQUEST_RECEIVED: 'Request received',
   PENDING: 'Request received',
@@ -79,7 +81,7 @@ export function needsStaffReview(row) {
 }
 
 export function summarizeRecords(rows = [], exceptions = [], notifications = [], tasks = [], today = manilaToday()) {
-  const validRows = Array.isArray(rows) ? rows : [];
+  const validRows = Array.isArray(rows) ? rows.filter(row => !isTestRecord(row)) : [];
   const active = validRows.filter((row) => !['CANCELLED', 'CANCELED', 'VOIDED', 'REFUNDED'].includes(statusKey(rowField(row, ['booking_status', 'status']))));
   // A paid deposit or an unconfirmed request is not evidence a guest has checked in.
   const inHouse = active.filter((row) => ['CONFIRMED', 'CHECKED_IN'].includes(statusKey(rowField(row, ['booking_status', 'status']))) && checkIn(row) && checkOut(row) && checkIn(row) <= today && checkOut(row) > today);
@@ -93,9 +95,11 @@ export function summarizeRecords(rows = [], exceptions = [], notifications = [],
     inHouse,
     review,
     upcoming: active.filter((row) => checkIn(row) >= today).sort((a, b) => checkIn(a).localeCompare(checkIn(b))).slice(0, 12),
-    exceptionCount: Array.isArray(exceptions) ? exceptions.length : 0,
-    notificationCount: Array.isArray(notifications) ? notifications.length : 0,
-    openTasks: Array.isArray(tasks) ? tasks.filter((task) => !['done', 'cancelled'].includes(String(task.status || '').toLowerCase())) : [],
+    exceptionCount: Array.isArray(exceptions) ? exceptions.filter(row => !isTestRecord(row)).length : 0,
+    notificationCount: Array.isArray(notifications) ? notifications.filter(row => !isTestRecord(row)).length : 0,
+    openTasks: Array.isArray(tasks) ? tasks.filter((task) => !isTestRecord(task) && !['done', 'cancelled'].includes(String(task.status || '').toLowerCase())) : [],
+    confirmedTotals: totalsByCurrency(validRows.filter(row => statusKey(row.booking_status) === 'CONFIRMED' && statusKey(row.payment_status) !== 'REFUNDED'), row => row.total_amount_php),
+    depositTotals: totalsByCurrency(verified, row => row.deposit_amount_php ?? row.payment_amount_php),
     confirmedValue: validRows.filter((row) => statusKey(row.booking_status) === 'CONFIRMED' && statusKey(row.payment_status) !== 'REFUNDED').reduce((total, row) => total + (Number(row.total_amount_php) || 0), 0),
     verifiedDeposits: verified.reduce((total, row) => total + (Number(row.deposit_amount_php ?? row.payment_amount_php) || 0), 0),
   };

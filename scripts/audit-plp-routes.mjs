@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from 'node:fs/promises';
 const BASE_URL = process.env.PLP_PRODUCTION_URL || 'https://plp-boracay.vercel.app';
 const routes = [
   '/',
@@ -7,6 +8,15 @@ const routes = [
   '/accommodation',
   '/accommodations',
   '/experiences',
+  '/gallery',
+  '/getting-here',
+  '/contact',
+  '/exclusive-offer',
+  '/accommodation/grand-ocean-villa',
+  '/accommodation/sunset-suite',
+  '/accommodation/smart-room-premium',
+  '/privacy-policy',
+  '/terms-of-service',
   '/reservation-policy',
   '/privacy',
   '/terms',
@@ -19,7 +29,8 @@ const routes = [
   '/sitemap.xml',
 ];
 
-const expectedRedirects = new Map();
+const deploymentConfig = JSON.parse(await fs.readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+const expectedRedirects = new Map((deploymentConfig.redirects || []).filter(rule => rule.source.startsWith('/') && rule.destination.startsWith('/') && !rule.source.includes(':')).map(rule => [rule.source, new URL(rule.destination, BASE_URL).toString()]));
 const publicRoutes = new Set(routes.filter((route) => route !== '/admin'));
 
 function routeUrl(route) {
@@ -31,6 +42,7 @@ async function checkRoute(route) {
   try {
     const response = await fetch(startUrl, {
       method: 'GET',
+      signal: AbortSignal.timeout(25000),
       redirect: 'follow',
       headers: {
         'User-Agent': 'PLP route audit (no staff key)',

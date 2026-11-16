@@ -4,7 +4,7 @@
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const norm = (value) => String(value || '').trim().toLowerCase();
   const status = (value) => String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-  const money = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
+  const money = (rows, valueOf) => window.PLP_RECORDS.totalsByCurrency(rows, valueOf).map(total => esc(window.PLP_RECORDS.recordMoney(total.amount, total))).join(' / ') || '—';
 
   function guestName(row) { return field(row, ['guest_name', 'name', 'full_name', 'guestName']) || 'Unnamed guest'; }
   function guestEmail(row) { return field(row, ['guest_email', 'email', 'guestEmail', 'normalized_email']); }
@@ -78,7 +78,7 @@
   function profileCard(profile) {
     const flags = Array.from(profile.flags);
     const firstNote = profile.notes[0] || 'No saved request text in loaded rows.';
-    return `<article class="guest-profile-card"><div class="guest-profile-card__top"><div><strong>${esc(profile.name)}</strong><span>${esc(profile.email || profile.phone || 'No contact captured')}</span></div><button type="button" class="r360-view" onclick="window.openReservation360(${latestIndex(profile)})">Open latest 360</button></div><div class="guest-profile-grid"><div><span>Bookings</span>${profile.rows.length}</div><div><span>Preferred stay</span>${esc(preferredRoom(profile))}</div><div><span>Total value</span>${money(profile.total)}</div><div><span>Balance</span>${money(profile.balance)}</div><div><span>Deposit basis</span>${money(profile.deposits)}</div><div><span>Contact</span>${esc(profile.email || '—')}<br>${esc(profile.phone || '—')}</div></div><div class="guest-flags">${flags.length ? flags.map(pill).join('') : pill('No attention flag')}</div><p>${esc(firstNote)}</p></article>`;
+    return `<article class="guest-profile-card"><div class="guest-profile-card__top"><div><strong>${esc(profile.name)}</strong><span>${esc(profile.email || profile.phone || 'No contact captured')}</span></div><button type="button" class="r360-view" onclick="window.openReservation360(${latestIndex(profile)})">Open latest 360</button></div><div class="guest-profile-grid"><div><span>Bookings</span>${profile.rows.length}</div><div><span>Preferred stay</span>${esc(preferredRoom(profile))}</div><div><span>Total value</span>${money(profile.rows, row => row.total_amount_php)}</div><div><span>Balance</span>${money(profile.rows, row => row.balance_amount_php)}</div><div><span>Deposit basis</span>${money(profile.rows, row => row.deposit_amount_php ?? row.payment_amount_php)}</div><div><span>Contact</span>${esc(profile.email || '—')}<br>${esc(profile.phone || '—')}</div></div><div class="guest-flags">${flags.length ? flags.map(pill).join('') : pill('No attention flag')}</div><p>${esc(firstNote)}</p></article>`;
   }
 
   function ensureShell() {

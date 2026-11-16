@@ -44,7 +44,7 @@
       section.id = 'admin-qa-polish';
       anchor.insertAdjacentElement('afterend', section);
     }
-    section.innerHTML = `<div class="section-head"><div><h2>Admin QA + Mobile Polish</h2><p>Load-chain, readiness, and mobile-safe admin checks.</p></div><div class="section-actions"><button type="button" onclick="window.refreshAdminQaPolish()">Refresh QA</button></div></div><div class="admin-qa-note"><strong>Deploy note:</strong> If saved tasks fail, apply the Phase 1I Supabase migration. If this is not live yet, clear Vercel build-rate-limit and redeploy latest main.</div><div class="admin-qa-grid">${MODULES.map(statusCard).join('')}</div>`;
+    section.innerHTML = `<div class="section-head"><div><h2>System status</h2><p>Operational module availability.</p></div><div class="section-actions"><button type="button" onclick="window.refreshAdminQaPolish()">Refresh QA</button></div></div><div class="admin-qa-note"><strong>Deploy note:</strong> If a module is unavailable, refresh once and contact your system administrator.</div><div class="admin-qa-grid">${MODULES.map(statusCard).join('')}</div>`;
   }
 
   window.addEventListener('error', (event) => {

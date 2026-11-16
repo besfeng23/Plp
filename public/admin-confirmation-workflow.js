@@ -4,7 +4,7 @@
   const esc = (value) => String(value ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const norm = (value) => String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-  const peso = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
+  const peso = (value, row) => window.PLP_RECORDS.recordMoney(value, row);
   const provider = (row) => norm(field(row, ['provider', 'payment_provider'])) || 'UNKNOWN';
   const booking = (row) => norm(field(row, ['booking_status', 'status'])) || 'MISSING';
   const pay = (row) => norm(field(row, ['payment_status', 'booking_payment_status'])) || 'MISSING';
@@ -64,7 +64,7 @@
     const ref = field(row, ['booking_reference', 'reference', 'booking_code', 'code']);
     const guest = field(row, ['guest_name', 'name', 'full_name', 'guestName']);
     const stay = `${field(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']) || '—'} → ${field(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']) || '—'}`;
-    return `<article class="confirmation-card"><div class="confirmation-card__top"><div><strong>${esc(ref)}</strong><span>${esc(guest)}</span></div><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></div><div class="confirmation-card__grid"><div><span>Stay</span>${esc(stay)}</div><div><span>Provider</span>${esc(provider(row))}</div><div><span>Payment</span>${pill(pay(row))}</div><div><span>Verification</span>${pill(verify(row))}</div><div><span>Balance</span>${peso(field(row, ['balance_amount_php']))}</div><div><span>Status</span>${pill(booking(row))}</div></div><p>${esc(nextAction(row))}</p>${actionButtons(row)}</article>`;
+    return `<article class="confirmation-card"><div class="confirmation-card__top"><div><strong>${esc(ref)}</strong><span>${esc(guest)}</span></div><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></div><div class="confirmation-card__grid"><div><span>Stay</span>${esc(stay)}</div><div><span>Provider</span>${esc(provider(row))}</div><div><span>Payment</span>${pill(pay(row))}</div><div><span>Verification</span>${pill(verify(row))}</div><div><span>Balance</span>${peso(row.balance_amount_php, row)}</div><div><span>Status</span>${pill(booking(row))}</div></div><p>${esc(nextAction(row))}</p>${actionButtons(row)}</article>`;
   }
 
   async function saveStatus(reference, nextStatus) {

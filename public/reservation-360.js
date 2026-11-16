@@ -1,6 +1,6 @@
 (() => {
   const SECRET_FIELD_PATTERN = /(token|secret|key|password)/i;
-  const peso = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
+  const peso = (value, row) => window.PLP_RECORDS.recordMoney(value, row);
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const text = (value) => value === undefined || value === null || value === '' ? '—' : String(value);
   const escapeHtml = (value) => text(value)
@@ -195,10 +195,10 @@
         ['Provider payment ID', field(row, ['provider_payment_id'])],
         ['Provider reference ID', field(row, ['provider_reference_id'])],
         ['Last webhook/event ID', field(row, ['last_webhook_id', 'provider_event_id'])],
-        ['Total amount', peso(field(row, ['total_amount_php']))],
-        ['Deposit amount', peso(field(row, ['deposit_amount_php']))],
-        ['Payment amount', peso(field(row, ['payment_amount_php']))],
-        ['Balance amount', peso(field(row, ['balance_amount_php']))],
+        ['Total amount', peso(row.total_amount_php, row)],
+        ['Deposit amount', peso(row.deposit_amount_php, row)],
+        ['Payment amount', peso(row.payment_amount_php, row)],
+        ['Balance amount', peso(row.balance_amount_php, row)],
         ['Payment status', field(row, ['payment_status'])],
         ['Booking payment status', field(row, ['booking_payment_status'])],
         ['Verification status', field(row, ['payment_verification_status'])],
@@ -246,7 +246,7 @@
       const accommodation = field(row, ['accommodation_name', 'accommodation', 'room_name', 'villa_name', 'room', 'villa']);
       const checkIn = field(row, ['check_in', 'checkIn', 'arrival_date', 'arrivalDate']);
       const checkOut = field(row, ['check_out', 'checkOut', 'departure_date', 'departureDate']);
-      return `<tr><td data-label="Ref"><strong>${escapeHtml(ref)}</strong><br><span class="muted">${escapeHtml(row.provider || 'XENDIT')}</span></td><td data-label="Guest">${escapeHtml(guest)}<br><span class="muted">${escapeHtml(email)}</span></td><td data-label="Stay">${escapeHtml(accommodation)}<br><span class="muted">${escapeHtml(checkIn)} → ${escapeHtml(checkOut)}</span></td><td data-label="Amounts">Total: ${escapeHtml(peso(row.total_amount_php))}<br>Deposit: ${escapeHtml(peso(row.deposit_amount_php || row.payment_amount_php))}<br>Balance: ${escapeHtml(peso(row.balance_amount_php))}</td><td data-label="Booking">${bookingStatusPill(field(row, ['booking_status', 'status']))}</td><td data-label="Payment">${pill(field(row, ['payment_status', 'booking_payment_status']))}<br><span class="muted">${escapeHtml(row.provider_payment_id || row.provider_session_id || 'No provider ID yet')}</span></td><td data-label="Verification">${pill(field(row, ['payment_verification_status']))}<br><span class="muted">${escapeHtml(field(row, ['verification_error', 'verification_note', 'verification_notes']))}</span></td><td data-label=""><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></td></tr>`;
+      return `<tr><td data-label="Ref"><strong>${escapeHtml(ref)}</strong><br><span class="muted">${escapeHtml(row.provider || 'XENDIT')}</span></td><td data-label="Guest">${escapeHtml(guest)}<br><span class="muted">${escapeHtml(email)}</span></td><td data-label="Stay">${escapeHtml(accommodation)}<br><span class="muted">${escapeHtml(checkIn)} → ${escapeHtml(checkOut)}</span></td><td data-label="Amounts">Total: ${escapeHtml(peso(row.total_amount_php, row))}<br>Deposit: ${escapeHtml(peso(row.deposit_amount_php ?? row.payment_amount_php, row))}<br>Balance: ${escapeHtml(peso(row.balance_amount_php, row))}</td><td data-label="Booking">${bookingStatusPill(field(row, ['booking_status', 'status']))}</td><td data-label="Payment">${pill(field(row, ['payment_status', 'booking_payment_status']))}<br><span class="muted">${escapeHtml(row.provider_payment_id || row.provider_session_id || 'No provider ID yet')}</span></td><td data-label="Verification">${pill(field(row, ['payment_verification_status']))}<br><span class="muted">${escapeHtml(field(row, ['verification_error', 'verification_note', 'verification_notes']))}</span></td><td data-label=""><button class="r360-view" type="button" onclick="window.openReservation360(${index})">View 360</button></td></tr>`;
     }).join('');
   };
 
