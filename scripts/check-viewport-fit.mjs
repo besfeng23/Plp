@@ -6,7 +6,7 @@ const root = process.cwd();
 
 const routeHtmlFiles = [
   { route: '/', file: 'index.html' },
-  { route: '/booking', file: 'public/booking.html' },
+  { route: '/booking', file: 'booking.html' },
   { route: '/accommodation', file: 'public/accommodation.html' },
   { route: '/experiences', file: 'public/experiences.html' },
   { route: '/reservation-policy', file: 'public/reservation-policy.html' },

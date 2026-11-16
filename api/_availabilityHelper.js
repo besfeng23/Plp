@@ -1,13 +1,8 @@
 import { findAccommodationByName, insertRow, selectRows, updateRows } from './_supabase.js';
+import { nightsBetween, occupiedNights } from '../lib/booking-dates.js';
 
 function enc(value) {
   return encodeURIComponent(String(value));
-}
-
-function datesAreUsable(startDate, endDate) {
-  const shape = /^\d{4}-\d{2}-\d{2}$/;
-  if (!shape.test(String(startDate || '')) || !shape.test(String(endDate || ''))) return false;
-  return new Date(`${endDate}T00:00:00Z`) > new Date(`${startDate}T00:00:00Z`);
 }
 
 export async function getAccommodation(name) {
@@ -16,8 +11,8 @@ export async function getAccommodation(name) {
   return accommodation;
 }
 
-export async function getAvailabilityConflicts({ accommodationName, accommodationId, checkIn, checkOut, excludeReference }) {
-  if (!datesAreUsable(checkIn, checkOut)) {
+export async function getAvailabilityConflicts({ accommodationName, accommodationId, checkIn, checkOut, excludeReference, calendar = false }) {
+  if (!nightsBetween(checkIn, checkOut)) {
     return { available: false, invalidDateRange: true, activeBookings: [], blockedDates: [], conflictCount: 0 };
   }
 
@@ -26,18 +21,16 @@ export async function getAvailabilityConflicts({ accommodationName, accommodatio
     return { available: false, missingAccommodation: true, activeBookings: [], blockedDates: [], conflictCount: 0 };
   }
 
-  const activeBookings = await selectRows(
-    'plp_active_booking_holds',
-    `accommodation_id=eq.${enc(accommodation.id)}&check_in=lt.${enc(checkOut)}&check_out=gt.${enc(checkIn)}&select=*`
-  );
+  const roomFilter = `accommodation_id=eq.${enc(accommodation.id)}`;
+  const [activeBookings, blockedDates] = await Promise.all([
+    selectRows('plp_active_booking_holds',
+      `${roomFilter}&check_in=lt.${enc(checkOut)}&check_out=gt.${enc(checkIn)}&select=${calendar ? 'check_in,check_out' : '*'}`),
+    selectRows('plp_active_blocked_dates',
+      `${roomFilter}&start_date=lt.${enc(checkOut)}&end_date=gt.${enc(checkIn)}&select=${calendar ? 'start_date,end_date' : '*'}`),
+  ]);
   const filteredBookings = excludeReference
     ? activeBookings.filter((row) => row.booking_reference !== excludeReference)
     : activeBookings;
-
-  const blockedDates = await selectRows(
-    'plp_active_blocked_dates',
-    `accommodation_id=eq.${enc(accommodation.id)}&start_date=lt.${enc(checkOut)}&end_date=gt.${enc(checkIn)}&select=*`
-  );
 
   return {
     accommodation,
@@ -46,6 +39,26 @@ export async function getAvailabilityConflicts({ accommodationName, accommodatio
     blockedDates,
     conflictCount: filteredBookings.length + blockedDates.length,
   };
+}
+
+export async function getUnavailableNights(accommodationName, start, end) {
+  const conflicts = await getAvailabilityConflicts({
+    accommodationName, checkIn: start, checkOut: end, calendar: true,
+  });
+  if (conflicts.missingAccommodation) return null;
+
+  const ranges = [
+    ...conflicts.activeBookings.map(row => [row.check_in, row.check_out]),
+    ...conflicts.blockedDates.map(row => [row.start_date, row.end_date]),
+  ];
+  const unavailable = new Set();
+  for (const [firstNight, checkout] of ranges) {
+    if (!nightsBetween(firstNight, checkout)) throw new Error('Calendar contains an invalid range');
+    for (const day of occupiedNights(firstNight < start ? start : firstNight, checkout > end ? end : checkout)) {
+      unavailable.add(day);
+    }
+  }
+  return [...unavailable].sort();
 }
 
 export async function requireAvailability(input) {

@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { CONCIERGE_EMAIL as conciergeEmail } from '../lib/contact.js';
+import { formatPeso, PLP_ROOMS } from '../lib/pricing.js';
 
 const root = process.cwd();
 const publicDir = path.join(root, 'public');
-const conciergeEmail = 'plpvillas@gmail.com';
 
+const accommodationRates = new Map(PLP_ROOMS.map(room => [room.key, room.rate]));
 const excludePatterns = [/photo-library/i, /admin/i, /ops/i];
 
 const trustStrip = `<section class="plp-trust-strip" data-plp-trust-strip="true" aria-label="Reservation trust details"><div class="plp-trust-strip__inner"><div><span>Location</span><strong>High Boracay</strong></div><div><span>Booking</span><strong>Room + dates first</strong></div><div><span>Arrival</span><strong>Port transfer support</strong></div><div><span>Concierge</span><strong>${conciergeEmail}</strong></div></div></section>`;
@@ -58,9 +60,23 @@ function ensureRoomSpecificBookingLinks(html, fileName) {
     .replace('href="/booking">Request Smart Room Premium dates<', 'href="/booking?room=smartRoomPremium">Request Smart Room Premium dates<');
 }
 
+function renderRates(html) {
+  return html.replace(/(data-plp-nightly-rate="([^"]+)">)[^<]*(<\/)/g, (_, start, key, end) => {
+    if (!accommodationRates.has(key)) throw new Error('Unknown accommodation rate key: ' + key);
+    return start + formatPeso(accommodationRates.get(key)) + end;
+  });
+}
+
 async function main() {
   const entries = await fs.readdir(publicDir, { withFileTypes: true });
   const pages = entries.filter(entry => entry.isFile() && shouldProcess(entry.name));
+
+  for (const route of ['boracay-villa-with-private-pool', 'private-villas-boracay']) {
+    const file = path.join(publicDir, route, 'index.html');
+    const original = await fs.readFile(file, 'utf8');
+    const rendered = renderRates(original);
+    if (rendered !== original) await fs.writeFile(file, rendered, 'utf8');
+  }
 
   for (const page of pages) {
     const filePath = path.join(publicDir, page.name);
@@ -72,6 +88,7 @@ async function main() {
     html = ensureTrustStrip(html, page.name);
     html = ensureMobileAction(html, page.name);
     html = ensureRoomSpecificBookingLinks(html, page.name);
+    html = renderRates(html);
 
     if (html !== original) {
       await fs.writeFile(filePath, html, 'utf8');

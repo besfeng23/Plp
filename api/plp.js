@@ -124,6 +124,19 @@ async function handleContent(req, res) {
   }
 }
 
+function handleAnalyticsConfig(req, res) {
+  if (req.method !== 'GET') return json(res, 405, { error: 'Method not allowed' });
+  res.setHeader('Cache-Control', 'no-store');
+  const googleId = process.env.PLP_GA4_MEASUREMENT_ID || '';
+  const token = process.env.PLP_POSTHOG_PROJECT_TOKEN || '';
+  const host = process.env.PLP_POSTHOG_HOST || '';
+  const allowedHosts = ['https://us.i.posthog.com', 'https://eu.i.posthog.com'];
+  return json(res, 200, {
+    googleId: /^G-[A-Z0-9]{6,20}$/.test(googleId) ? googleId : null,
+    posthog: /^phc_[A-Za-z0-9_-]+$/.test(token) && allowedHosts.includes(host) ? { token, host } : null,
+  });
+}
+
 async function handleAnalytics(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' });
   const body = parseBody(req);
@@ -151,6 +164,7 @@ async function handleAnalytics(req, res) {
 export default async function handler(req, res) {
   const action = actionOf(req);
   if (action === 'content' || (!action && req.method === 'GET')) return handleContent(req, res);
+  if (action === 'analytics-config') return handleAnalyticsConfig(req, res);
   if (action === 'analytics') return handleAnalytics(req, res);
   return json(res, 404, { ok: false, error: 'Unknown PLP action' });
 }

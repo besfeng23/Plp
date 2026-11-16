@@ -21,7 +21,7 @@ function oneOnly(html, markerStart, markerEnd) {
 }
 
 async function patchFile(fileName) {
-  const filePath = path.join(publicDir, fileName);
+  const filePath = path.join(fileName === 'booking.html' ? root : publicDir, fileName);
   let html = await fs.readFile(filePath, 'utf8');
   const original = html;
 
