@@ -4,7 +4,7 @@
     ['Confirmation Workflow', 'saveConfirmationStatus'],
     ['Guest Profile 360', 'plpGuestProfiles'],
     ['Concierge Queue', 'plpConciergeQueue'],
-    ['Availability Board', 'plpAvailabilityBoard'],
+    ['Availability Board', 'availabilityBoardWrap'],
     ['Housekeeping Readiness', 'plpHousekeepingReadiness'],
     ['Staff Tasks', 'refreshStaffTasks'],
     ['Concierge Actions', 'refreshConciergeTaskActions'],
@@ -30,7 +30,11 @@
   }
 
   function statusCard([name, key]) {
-    const ok = window[key] !== undefined;
+    // The availability board renders into a DOM container instead of exposing
+    // a window global. Check that its content rendered before marking it ready.
+    const ok = key === 'availabilityBoardWrap'
+      ? Boolean(document.getElementById(key)?.firstElementChild)
+      : window[key] !== undefined;
     return `<article class="admin-qa-card"><strong>${esc(name)}</strong><span>${ok ? 'Loaded' : 'Waiting / unavailable'}</span></article>`;
   }
 
