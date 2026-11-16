@@ -26,21 +26,19 @@ npm run dev
 npm run build
 ```
 
-## Temporary live test pricing
+## Reservation pricing
 
-For live PayPal go-live verification the nightly rates are intentionally low so a
-real guest can complete a real PayPal deposit without a large charge. These are
-temporary test prices, not the final published rates.
+The public rate catalog in `lib/pricing.js` supplies the accommodation pages,
+booking calendar and server-side quote.
 
-| Accommodation | Nightly rate | 30% deposit (1 night) |
-| --- | --- | --- |
-| Grand Ocean Villa | 300 | 90 |
-| Sunset Suite | 200 | 60 |
-| Smart Room Premium | 100 | 30 |
+| Accommodation | Nightly rate (PHP) | 30% deposit for one night (PHP) |
+| --- | ---: | ---: |
+| Grand Ocean Villa | 80,000 | 24,000 |
+| Sunset Suite | 60,000 | 18,000 |
+| Smart Room Premium | 40,000 | 12,000 |
 
-The 30% deposit rule is unchanged. The server-side deposit computed and stored
-by `/api/bookings` is the single source of truth; a browser-supplied amount can
-never override the server-computed deposit sent to PayPal.
+Verify pricing and availability without entering a live payment. Use a PayPal
+sandbox environment for payment rehearsals.
 
 ## Production environment variables (Vercel Production)
 
@@ -68,7 +66,7 @@ RESEND_API_KEY=<production Resend key>
 BOOKINGS_FROM_EMAIL=<verified sender>
 BOOKINGS_TO_EMAIL=<staff inbox>
 LEADS_FROM_EMAIL=
-LEADS_TO_EMAIL=
+LEADS_TO_EMAIL=<legacy staff routing fallback>
 ```
 
 Legacy Xendit reconciliation variables remain optional and only affect the
@@ -80,6 +78,21 @@ XENDIT_SECRET_KEY=
 XENDIT_WEBHOOK_TOKEN=
 ```
 
+
+The Vercel Supabase integration uses the paired `plp_SUPABASE_URL` and
+`plp_SUPABASE_SERVICE_ROLE_KEY` variables with the `plp_runtime` Data API
+schema when present. The legacy pair supports existing local environments.
+The inquiry email endpoint uses the public concierge address in
+`lib/contact.js`.
+
+## Optional guest analytics
+
+Set `PLP_POSTHOG_PROJECT_TOKEN`, `PLP_POSTHOG_HOST` and
+`PLP_GA4_MEASUREMENT_ID` in the intended Vercel environment. Set each provider
+in its own project or property. Use a separate destination for preview tests.
+Disable enhanced measurement in the GA4 stream so the site sends each page
+view once. The public tracker waits for consent and tracks only allowed pages
+and actions. It excludes guest fields, dates and payment routes.
 
 ## PLP Telegram Command Bot
 
@@ -210,8 +223,8 @@ Vercel Production:
 
 1. Open `GET /api/paypal/health` and confirm `mode` is `live` and every `has*`
    field is `true`. It must never expose secret values.
-2. Open `/booking`, select a room, and confirm the temporary test pricing shows
-   `300 / 200 / 100` per night with `90 / 60 / 30` as the 30% deposit.
+2. Open `/booking`, select a room, and compare the calendar, dropdown, stay
+   total and deposit against the reservation pricing table above.
 3. Submit reservation details and continue to PayPal live checkout.
 4. Pay the deposit through a real PayPal account.
 5. Confirm you return to `/booking/success` and that the booking is marked

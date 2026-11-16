@@ -1,6 +1,5 @@
 (function () {
-  var SITE_EMAIL = 'plpboracay@gmail.com';
-  var LEGACY_EMAILS = ['plpvillas@gmail.com'];
+  var SITE_EMAIL = 'mfr@e-mango.com';
 
   function ensureImagePlacementStylesheet() {
     if (document.querySelector('link[data-plp-image-placement]')) return;
@@ -27,51 +26,6 @@
   function skipUxLayer() {
     var path = getPath();
     return isReactApp() || path === '/' || path.indexOf('/api') === 0 || path.indexOf('/photo-library') === 0 || path.indexOf('/admin') === 0 || path.indexOf('/content-ops') === 0 || path.indexOf('/availability-ops') === 0;
-  }
-
-  function replaceLegacyEmails(root) {
-    if (!root || !document.body) return;
-    var container = root.nodeType === 9 ? document.body : root;
-
-    LEGACY_EMAILS.forEach(function (legacy) {
-      document.querySelectorAll('a[href*="' + legacy + '"]').forEach(function (anchor) {
-        anchor.setAttribute('href', anchor.getAttribute('href').replace(legacy, SITE_EMAIL));
-      });
-
-      document.querySelectorAll('input, textarea').forEach(function (field) {
-        ['value', 'placeholder'].forEach(function (prop) {
-          if (field[prop] && field[prop].indexOf(legacy) >= 0) field[prop] = field[prop].replace(legacy, SITE_EMAIL);
-        });
-      });
-    });
-
-    if (typeof NodeFilter === 'undefined' || !document.createTreeWalker) return;
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-    var node;
-    while ((node = walker.nextNode())) {
-      LEGACY_EMAILS.forEach(function (legacy) {
-        if (node.nodeValue && node.nodeValue.indexOf(legacy) >= 0) node.nodeValue = node.nodeValue.replace(legacy, SITE_EMAIL);
-      });
-    }
-  }
-
-  function observeEmailReplacements() {
-    if (!document.body || typeof MutationObserver === 'undefined') return;
-    replaceLegacyEmails(document);
-    var observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (mutation) {
-        if (mutation.type === 'attributes') replaceLegacyEmails(mutation.target);
-        mutation.addedNodes.forEach(function (node) {
-          if (node.nodeType === 1) replaceLegacyEmails(node);
-          if (node.nodeType === 3) {
-            LEGACY_EMAILS.forEach(function (legacy) {
-              if (node.nodeValue && node.nodeValue.indexOf(legacy) >= 0) node.nodeValue = node.nodeValue.replace(legacy, SITE_EMAIL);
-            });
-          }
-        });
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'value', 'placeholder'] });
   }
 
   function addTrustItem(parent, label, value) {
@@ -164,7 +118,6 @@
     ensureMobileAction();
     ensureBookingAssurance();
     ensureRoomBookingLinks();
-    replaceLegacyEmails(document);
   }
 
   function getValue(object, path) {
@@ -278,12 +231,6 @@
     if (path !== '/accommodation' && path !== '/accommodations') return;
     var acc = content.accommodation || {};
     var villa = acc.grandOceanVilla || {};
-    // Nightly rates on /accommodation are hydrated by the generic
-    // [data-content-money] handler above (grandOceanVilla.rate, sunsetSuite.rate,
-    // smartRoomPremium.rate), so they always reflect lib/pricing.js. The old
-    // literal-price updateFirstMatch() calls were removed: with premium pricing
-    // the Smart Room legitimately shows ₱40,000, and a literal '₱40,000' match
-    // would have overwritten it with the villa rate.
     updateFirstMatch('p', 'up to 8 guests', 'The Grand Ocean Villa is positioned for up to ' + (villa.capacity || 8) + ' guests, with ' + (villa.bedrooms || 4) + ' bedrooms, private pool atmosphere, living space, kitchen comfort, and hillside views.');
   }
 
@@ -306,7 +253,6 @@
     applyBooking(content);
     applyImageCaptions();
     ensureRoomBookingLinks();
-    replaceLegacyEmails(document);
     window.dispatchEvent(new CustomEvent('plp:content', { detail: content }));
   }
 
@@ -322,7 +268,6 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      observeEmailReplacements();
       ensureProductionLayer();
       applyImageCaptions();
       loadContent();
@@ -330,7 +275,6 @@
       setTimeout(loadContent, 1800);
     });
   } else {
-    observeEmailReplacements();
     ensureProductionLayer();
     applyImageCaptions();
     loadContent();

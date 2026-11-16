@@ -1,5 +1,9 @@
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// The PLP integration injects a namespaced pair. Keep the legacy pair
+// together for local and older environments that have no PLP binding.
+const dedicatedProject = Boolean(process.env.plp_SUPABASE_URL || process.env.plp_SUPABASE_SERVICE_ROLE_KEY);
+const SUPABASE_URL = dedicatedProject ? process.env.plp_SUPABASE_URL : process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = dedicatedProject ? process.env.plp_SUPABASE_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY;
+const schemaHeaders = dedicatedProject ? { 'Accept-Profile': 'plp_runtime', 'Content-Profile': 'plp_runtime' } : {};
 
 export function isSupabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -29,6 +33,7 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
+      ...schemaHeaders,
       Prefer: prefer,
     },
     body: body === undefined ? undefined : JSON.stringify(stripUndefined(body)),
@@ -38,7 +43,9 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
   const data = text ? JSON.parse(text) : null;
   if (!response.ok) {
     const detail = typeof data === 'object' && data ? data.message || data.details || JSON.stringify(data) : text;
-    throw new Error(detail || `Supabase request failed: ${response.status}`);
+    const error = new Error(detail || `Supabase request failed: ${response.status}`);
+    error.code = data?.code;
+    throw error;
   }
   return data;
 }

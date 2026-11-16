@@ -1,161 +1,172 @@
-(function () {
-  var viewport = document.querySelector('meta[name="viewport"]');
-  if (viewport) {
-    var current = viewport.getAttribute('content') || '';
-    if (current.indexOf('viewport-fit=cover') === -1) viewport.setAttribute('content', current + (current ? ', ' : '') + 'viewport-fit=cover');
+(() => {
+  const consentKey = 'plp_analytics_consent_v1';
+  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking']);
+  const pages = new Set([
+    '/', '/accommodation', '/accommodations', '/accommodation/grand-ocean-villa',
+    '/accommodation/sunset-suite', '/accommodation/smart-room-premium', '/experiences',
+    '/gallery', '/getting-here', '/booking', '/contact', '/exclusive-offer',
+    '/reservation-policy', '/privacy-policy', '/terms-of-service',
+    '/private-villas-boracay', '/boracay-villa-with-private-pool', '/boracay-family-villa',
+    '/boracay-wellness-stay', '/high-boracay-location',
+  ]);
+  const noAds = { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' };
+  let config;
+  let consent;
+  let lastPath;
+  let analyticsPanel;
+  let googleTag;
+  let postHog;
+  let pendingPostHog;
+  try { consent = localStorage.getItem(consentKey); } catch { /* Browser storage is optional. */ }
+
+  function publicPath() {
+    const path = location.pathname.replace(/\/$/, '') || '/';
+    return pages.has(path) ? path : null;
   }
 
-  var sessionKey = 'plp_session_id';
-  function sessionId() {
-    try {
-      var id = window.sessionStorage.getItem(sessionKey);
-      if (id) return id;
-      id = 'plp_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-      window.sessionStorage.setItem(sessionKey, id);
-      return id;
-    } catch (error) {
-      return 'plp_session';
-    }
-  }
+  function enableGoogle(path) {
+    const id = config?.googleId;
+    if (!id) return;
+    window['ga-disable-' + id] = false;
+    if (googleTag) return;
 
-  function safePayload(payload) {
-    var output = {};
-    payload = payload || {};
-    Object.keys(payload).forEach(function (name) {
-      if (['name', 'email', 'phone', 'message', 'specialRequests'].indexOf(name) >= 0) return;
-      var value = payload[name];
-      if (typeof value === 'string') output[name] = value.slice(0, 240);
-      else if (typeof value === 'number' || typeof value === 'boolean') output[name] = value;
-      else if (value == null) output[name] = null;
+    window.dataLayer = window.dataLayer || [];
+    googleTag = function () { window.dataLayer.push(arguments); };
+    googleTag('consent', 'default', { ...noAds, analytics_storage: 'denied' });
+    googleTag('consent', 'update', { ...noAds, analytics_storage: 'granted' });
+    googleTag('js', new Date());
+    googleTag('config', id, {
+      send_page_view: false,
+      allow_google_signals: false,
+      allow_ad_personalization_signals: false,
+      cookie_domain: 'none',
+      page_location: location.origin + path,
+      page_referrer: '',
     });
-    return output;
+
+    const tag = document.createElement('script');
+    tag.async = true;
+    tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+    document.head.append(tag);
   }
 
-  function track(eventName, payload) {
-    try {
-      window.fetch('/api/plp?action=analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: eventName, payload: safePayload(payload), path: window.location.pathname, sessionId: sessionId() }),
-        keepalive: true
-      }).catch(function () {});
-    } catch (error) {}
+  function getPostHog() {
+    if (!config?.posthog) return Promise.resolve(null);
+    if (!pendingPostHog) {
+      pendingPostHog = import('/plp-posthog.js')
+        .then(module => {
+          if (consent !== 'allow') {
+            pendingPostHog = undefined;
+            return null;
+          }
+          postHog = module.initializePostHog(config.posthog);
+          return postHog;
+        })
+        .catch(() => null);
+    }
+    return pendingPostHog;
   }
 
-  window.plpTrack = track;
-
-  function money(value) {
-    return '₱' + Number(value || 0).toLocaleString('en-PH');
+  function send(event, path = publicPath()) {
+    if (consent !== 'allow' || !config || !path) return;
+    enableGoogle(path);
+    googleTag?.('event', event, {
+      send_to: config.googleId,
+      page_location: location.origin + path,
+      page_referrer: '',
+    });
+    void getPostHog().then(client => {
+      if (client && consent === 'allow') {
+        client.capture(event === 'page_view' ? '$pageview' : event, {
+          $current_url: location.origin + path,
+          $pathname: path,
+        });
+      }
+    });
   }
 
-  function syncBookingNightlyPrices() {
-    if (window.location.pathname !== '/booking') return;
-    var rates = { grandOceanVilla: 300, sunsetSuite: 200, smartRoomPremium: 100 };
-    var names = { grandOceanVilla: 'Grand Ocean Villa', sunsetSuite: 'Sunset Suite', smartRoomPremium: 'Smart Room Premium' };
-    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var syncing = false;
-
-    function selectedKey() {
-      var select = document.getElementById('roomSelect');
-      return select && rates[select.value] ? select.value : 'grandOceanVilla';
+  function recordPage() {
+    const path = publicPath();
+    if (path && path !== lastPath) {
+      lastPath = path;
+      send('page_view', path);
     }
-    function asDate(value) {
-      return value ? new Date(value + 'T00:00:00') : null;
-    }
-    function pretty(value) {
-      var date = asDate(value);
-      return date && !Number.isNaN(date.getTime()) ? months[date.getMonth()] + ' ' + date.getDate() : '—';
-    }
-    function nightsCount() {
-      var checkIn = document.getElementById('checkIn');
-      var checkOut = document.getElementById('checkOut');
-      var start = asDate(checkIn && checkIn.value);
-      var end = asDate(checkOut && checkOut.value);
-      if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
-      var diff = end.getTime() - start.getTime();
-      return diff > 0 ? Math.round(diff / 86400000) : 0;
-    }
-    function syncSelect() {
-      var select = document.getElementById('roomSelect');
-      if (!select) return;
-      Array.prototype.forEach.call(select.options || [], function (option) {
-        if (rates[option.value]) option.textContent = names[option.value] + ' · ' + money(rates[option.value]) + ' / night';
-      });
-    }
-    function syncCalendarRates() {
-      var rate = money(rates[selectedKey()]);
-      document.querySelectorAll('.day-rate').forEach(function (node) {
-        if (node.textContent !== rate) node.textContent = rate;
-      });
-    }
-    function syncSummary() {
-      var summary = document.getElementById('summaryLine');
-      var checkIn = document.getElementById('checkIn');
-      var checkOut = document.getElementById('checkOut');
-      var nights = nightsCount();
-      if (!summary || !nights) return;
-      var key = selectedKey();
-      var total = rates[key] * nights;
-      var html = names[key] + ' <span>·</span> ' + pretty(checkIn && checkIn.value) + ' to ' + pretty(checkOut && checkOut.value) + ' <span>·</span> ' + nights + ' night' + (nights > 1 ? 's' : '') + ' <span>·</span> ' + money(total);
-      if (summary.innerHTML !== html) summary.innerHTML = html;
-    }
-    function sync() {
-      if (syncing) return;
-      syncing = true;
-      syncSelect();
-      syncCalendarRates();
-      syncSummary();
-      syncing = false;
-    }
-
-    sync();
-    document.addEventListener('change', function () { setTimeout(sync, 0); });
-    document.addEventListener('click', function () { setTimeout(sync, 0); });
-    if (typeof MutationObserver !== 'undefined' && document.body) new MutationObserver(function () { setTimeout(sync, 0); }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
-  function syncBookingExpectationCopy() {
-    if (window.location.pathname !== '/booking') return;
-    var estimateNote = document.querySelector('.estimate-note');
-    if (estimateNote) estimateNote.textContent = 'Estimates for planning only. If online deposit checkout is available, you may be redirected after submitting your request. Final rate, availability, and booking confirmation still require resort review.';
-    var items = document.querySelectorAll('.reassure li');
-    if (items && items.length >= 4) {
-      items[2].textContent = 'Secure deposit step may open after submission';
-      items[3].textContent = 'Final confirmation follows team review';
+  function setConsent(value) {
+    consent = value;
+    try { localStorage.setItem(consentKey, value); } catch { /* Keep the choice for this page. */ }
+    analyticsPanel.hidden = true;
+    if (value === 'allow') {
+      if (googleTag) googleTag('consent', 'update', { ...noAds, analytics_storage: 'granted' });
+      postHog?.opt_in_capturing({ captureEventName: false });
+      lastPath = null;
+      recordPage();
+      return;
     }
-    var fine = document.querySelector('.fine');
-    if (fine) fine.textContent = 'Submitting opens a reservation request and may direct you to a secure deposit step when online checkout is available. Final confirmation follows resort availability review and team confirmation.';
+
+    if (config.googleId) {
+      window['ga-disable-' + config.googleId] = true;
+      const propertyCookie = '_ga_' + config.googleId.slice(2);
+      for (const cookie of ['_ga', propertyCookie]) {
+        document.cookie = cookie + '=; Max-Age=0; Path=/; SameSite=Lax';
+      }
+    }
+    postHog?.opt_out_capturing();
   }
 
-  function trackView() {
-    track('view_page', { title: document.title });
-    if (window.location.pathname === '/booking') track('view_booking', { title: document.title });
-    syncBookingNightlyPrices();
-    syncBookingExpectationCopy();
+  function addSettings() {
+    if (analyticsPanel) return;
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = '/analytics-consent.css';
+    document.head.append(css);
+
+    analyticsPanel = document.createElement('section');
+    analyticsPanel.className = 'plp-analytics-consent';
+    analyticsPanel.setAttribute('aria-label', 'Optional analytics');
+    analyticsPanel.innerHTML = '<p>Allow optional analytics to help improve this site.</p><div><button type="button" data-choice="decline">Decline</button><button type="button" data-choice="allow">Allow analytics</button></div>';
+    analyticsPanel.hidden = consent === 'allow' || consent === 'decline';
+    analyticsPanel.addEventListener('click', event => {
+      const choice = event.target.dataset.choice;
+      if (choice) setConsent(choice);
+    });
+    document.body.append(analyticsPanel);
+
+    const settings = document.createElement('button');
+    settings.type = 'button';
+    settings.className = 'plp-analytics-settings';
+    settings.textContent = 'Analytics settings';
+    settings.addEventListener('click', () => {
+      analyticsPanel.hidden = false;
+      analyticsPanel.querySelector('button').focus();
+    });
+    (document.querySelector('.policy-card') || document.querySelector('footer') || document.body).append(settings);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', trackView);
-  else trackView();
+  window.plpTrack = event => {
+    if (events.has(event)) send(event);
+  };
+  window.addEventListener('plp:navigation', recordPage);
+  document.addEventListener('click', event => {
+    const link = event.target.closest?.('a[href], [data-plp-track]');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    if (link.dataset.plpTrack) window.plpTrack(link.dataset.plpTrack);
+    else if (href.startsWith('mailto:')) window.plpTrack('click_email');
+    else if (href.startsWith('tel:')) window.plpTrack('click_phone');
+    else if (href === '/booking' || href.startsWith('/booking?room=')) window.plpTrack('click_reserve');
+  }, true);
 
-  document.addEventListener('click', function (event) {
-    var target = event.target && event.target.closest ? event.target.closest('a,button') : null;
-    if (!target) return;
-    var label = (target.getAttribute('aria-label') || target.textContent || '').trim().slice(0, 80);
-    var href = target.getAttribute('href') || '';
-    var search = (label + ' ' + href).toLowerCase();
-    if (search.indexOf('reserve') >= 0 || search.indexOf('/booking') >= 0) track('click_reserve', { label: label, href: href });
-    if (search.indexOf('mailto:') >= 0 || search.indexOf('email') >= 0) track('click_email', { label: label, href: href });
-    if (search.indexOf('concierge') >= 0) track('click_concierge', { label: label, href: href });
-    if (window.location.pathname === '/booking' && search.indexOf('continue') >= 0) track('start_booking', { label: label });
-  });
-
-  document.addEventListener('submit', function (event) {
-    var form = event.target;
-    if (!form || form.id !== 'bookingForm') return;
-    var accommodation = document.getElementById('roomSelect');
-    var checkIn = document.getElementById('checkIn');
-    var checkOut = document.getElementById('checkOut');
-    var guests = document.getElementById('guests');
-    track('submit_booking', { accommodation: accommodation && accommodation.value, hasDates: Boolean(checkIn && checkIn.value && checkOut && checkOut.value), guests: guests ? Number(guests.value || 0) : null });
-  });
+  if (!publicPath()) return;
+  fetch('/api/plp?action=analytics-config', { cache: 'no-store' })
+    .then(response => response.ok ? response.json() : null)
+    .then(options => {
+      if (!publicPath() || (!options?.googleId && !options?.posthog)) return;
+      config = options;
+      addSettings();
+      lastPath = null;
+      recordPage();
+    })
+    .catch(() => { /* Provider availability must not affect the guest journey. */ });
 })();

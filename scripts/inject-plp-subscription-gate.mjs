@@ -35,7 +35,10 @@ function inject(html) {
   return html.replace(/<head([^>]*)>/i, (tag) => tag + head);
 }
 
-for (const file of await htmlFiles(publicDir)) {
+const pages = await htmlFiles(publicDir);
+pages.push({ full: path.join(root, 'booking.html'), rel: 'booking.html' });
+
+for (const file of pages) {
   const original = await fs.readFile(file.full, 'utf8');
   const updated = inject(original);
   if (updated !== original) {

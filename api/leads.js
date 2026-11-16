@@ -1,3 +1,5 @@
+import { CONCIERGE_EMAIL } from '../lib/contact.js';
+
 const required = ['name', 'email', 'interest'];
 
 function isValidEmail(email) {
@@ -35,7 +37,7 @@ export default async function handler(req, res) {
 
     let emailDelivered = false;
 
-    if (process.env.RESEND_API_KEY && process.env.LEADS_TO_EMAIL) {
+    if (process.env.RESEND_API_KEY) {
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -44,7 +46,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           from: process.env.LEADS_FROM_EMAIL || 'Pueblo La Perla <onboarding@resend.dev>',
-          to: [process.env.LEADS_TO_EMAIL],
+          to: [CONCIERGE_EMAIL],
           subject: `New Pueblo La Perla inquiry: ${lead.interest}`,
           text: [
             `Name: ${lead.name}`,
@@ -67,7 +69,7 @@ export default async function handler(req, res) {
       emailDelivered,
       note: emailDelivered
         ? 'Lead email delivered.'
-        : 'Lead accepted. Add RESEND_API_KEY and LEADS_TO_EMAIL in Vercel to enable email delivery.',
+        : 'Email delivery is currently unavailable.',
     });
   } catch (error) {
     return res.status(500).json({
