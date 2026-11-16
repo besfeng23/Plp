@@ -1,0 +1,22 @@
+/* Focused operational workspaces, shared by direct and embedded Resort Command. */
+html, body { max-width: 100%; }
+.main, .main > section, .main > section > div { min-width: 0; max-width: 100%; }
+.main > section[hidden], .record-scope[hidden] { display: none !important; }
+.main > section { overflow-x: auto; }
+.main > section input, .main > section select, .main > section textarea { min-width: 0; max-width: 100%; }
+.main > section table { max-width: 100%; }
+.ops-workspace-nav { display: flex; gap: 7px; flex-wrap: wrap; padding: 16px 0 8px; border-bottom: 1px solid var(--soft-line); }
+.ops-workspace-nav button { min-height: 42px; border-radius: 5px; font-size: 12px; padding: 10px 14px; }
+.ops-workspace-nav button[aria-pressed="true"] { background: var(--teak); color: #fffdf8; border-color: var(--teak); }
+.record-scope { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 16px; margin-top: 16px; background: #f3efe3; border: 1px solid #dcd5c3; color: #665b3d; font-size: 12px; }
+.embedded-authorized .auth-card { display: none; }
+.embedded-authorized .topbar { margin-bottom: 0; }
+.embedded-authorized .hero-copy h1 { font-size: clamp(30px,4vw,46px); }
+@media (max-width: 760px) {
+  .main { padding: 16px 14px 40px; }
+  .ops-workspace-nav { gap: 6px; }
+  .ops-workspace-nav button { flex: 1 1 130px; font-size: 12px; }
+  .record-scope { align-items: flex-start; }
+  .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .metric-card { padding: 16px; }
+}

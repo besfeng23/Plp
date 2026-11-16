@@ -73,5 +73,6 @@
   };
 
   window.refreshOtaDryRun = async function refreshOtaDryRun() { renderShell('Loading OTA dry-run foundation…'); await renderConflicts(); };
-  setTimeout(() => { renderShell('No live OTA sync is enabled.'); renderConflicts(); }, 700);
+  window.addEventListener('plp:authorized', () => { if (staffCode()) window.refreshOtaDryRun(); });
+  setTimeout(() => { renderShell('No live OTA sync is enabled.'); if (staffCode()) renderConflicts(); }, 700);
 })();
