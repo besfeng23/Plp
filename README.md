@@ -86,6 +86,10 @@ tables in `public`, set `PLP_SUPABASE_SCHEMA=public`. Site subscription rows
 use the `public` schema. The inquiry email endpoint uses the public
 concierge address in `lib/contact.js`.
 
+The resort site and reservation calendar are public by default. A deployment
+can enable the separate site subscription feature by setting
+`PLP_SUBSCRIPTION_GATE_ENABLED=true` in its build and runtime environment.
+
 ## Optional guest analytics
 
 Set `PLP_POSTHOG_PROJECT_TOKEN`, `PLP_POSTHOG_HOST` and

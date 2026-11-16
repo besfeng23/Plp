@@ -3,6 +3,7 @@ import { getBaseUrl } from '../paypal/_paypal.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured } from '../_supabase.js';
 import { createPayPalSubscription, ensureMonthlyPlanId, SubscriptionPayPalError } from './_paypal.js';
 import { newSubscriptionState, safeReturnPath, setCookies, stateCookie } from './_session.js';
+import { subscriptionGateEnabled } from '../../lib/subscription-gate.js';
 
 function parseBody(body) {
   if (body && typeof body === 'object') return body;
@@ -21,6 +22,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, message: 'Method not allowed.' });
+  }
+  if (!subscriptionGateEnabled()) {
+    return res.status(404).json({ ok: false, message: 'Site subscriptions are currently unavailable.' });
   }
 
   const body = parseBody(req.body);

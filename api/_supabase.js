@@ -1,6 +1,7 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BOOKING_SCHEMA = process.env.PLP_SUPABASE_SCHEMA || 'plp_runtime';
+const PUBLIC_TABLES = new Set(['plp_site_subscriptions', 'plp_site_subscription_config']);
 
 export function isSupabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -26,7 +27,7 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
 
   // Subscription records are still in public; booking and resort operations
   // use the active project's PLP schema.
-  const schema = path.split('?')[0] === 'plp_site_subscriptions' ? 'public' : BOOKING_SCHEMA;
+  const schema = PUBLIC_TABLES.has(path.split('?')[0]) ? 'public' : BOOKING_SCHEMA;
   const response = await fetch(apiUrl(path), {
     method,
     headers: {

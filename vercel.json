@@ -104,6 +104,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/subscription/:operation(activate|cancel|create|status)",
+      "destination": "/api/subscription?operation=:operation"
+    },
+    {
       "source": "/subscribe/",
       "destination": "/subscribe/index.html"
     },
