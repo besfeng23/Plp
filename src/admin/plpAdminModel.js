@@ -49,9 +49,10 @@ export function checkOut(row) {
   return String(rowField(row, ['check_out', 'departure_date', 'checkOut'])).slice(0, 10);
 }
 
-export function php(value) {
+export function php(value, currency = 'USD') {
   const amount = Number(value);
-  return Number.isFinite(amount) ? new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(amount) : '—';
+  const code = String(currency || 'USD').toUpperCase();
+  return Number.isFinite(amount) ? new Intl.NumberFormat(code === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(amount) : '—';
 }
 
 export function manilaToday(date = new Date()) {

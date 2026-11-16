@@ -3,13 +3,13 @@ import { test } from 'node:test';
 import { nightsBetween, shiftMonth, todayAtResort } from '../lib/booking-dates.js';
 import { PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 
-test('all booking surfaces use the same PHP rates and 30% deposit calculation', () => {
+test('all booking surfaces use the same USD 1000 rates and 30% deposit calculation', () => {
   assert.deepEqual(PLP_ROOMS.map(room => quoteStay(room, 1)), [
-    { amount: 80000, deposit: 24000, balance: 56000 },
-    { amount: 60000, deposit: 18000, balance: 42000 },
-    { amount: 40000, deposit: 12000, balance: 28000 },
+    { amount: 1000, deposit: 300, balance: 700 },
+    { amount: 1000, deposit: 300, balance: 700 },
+    { amount: 1000, deposit: 300, balance: 700 },
   ]);
-  assert.deepEqual(quoteStay(PLP_ROOMS[0], 3), { amount: 240000, deposit: 72000, balance: 168000 });
+  assert.deepEqual(quoteStay(PLP_ROOMS[0], 3), { amount: 3000, deposit: 900, balance: 2100 });
 });
 
 test('the booking day follows Boracay time and invalid calendar dates fail validation', () => {

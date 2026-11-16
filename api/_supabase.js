@@ -1,3 +1,4 @@
+import { PLP_CURRENCY } from '../lib/pricing.js';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BOOKING_SCHEMA = process.env.PLP_SUPABASE_SCHEMA || 'plp_runtime';
@@ -144,7 +145,7 @@ export async function createPaymentRecord({ bookingReference, session, amount, c
       provider_session_id: providerSessionId,
       checkout_url: checkoutUrl || session?.checkoutUrl || null,
       amount_php: Number(amount || booking.deposit_amount_php || 0),
-      currency: 'PHP',
+      currency: PLP_CURRENCY,
       status: 'PENDING',
       verification_status: 'PENDING',
       verification_error: null,
@@ -161,7 +162,7 @@ export async function createPaymentRecord({ bookingReference, session, amount, c
     provider_reference_id: providerReferenceId,
     checkout_url: checkoutUrl || session?.checkoutUrl || null,
     amount_php: Number(amount || booking.deposit_amount_php || 0),
-    currency: 'PHP',
+    currency: PLP_CURRENCY,
     status: 'PENDING',
     verification_status: 'PENDING',
     raw_response: rawResponse || session || {},
@@ -214,8 +215,9 @@ function getVerificationResult({ booking, payment, amount, currency, paymentStat
   const receivedCurrency = String(currency || '').toUpperCase();
 
   if (isFinalPositiveStatus(paymentStatus)) {
-    if (receivedCurrency !== 'PHP') {
-      return { status: 'CURRENCY_MISMATCH', note: `Expected PHP but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
+    const expectedCurrency = String(payment.currency || PLP_CURRENCY).toUpperCase();
+    if (receivedCurrency !== expectedCurrency) {
+      return { status: 'CURRENCY_MISMATCH', note: `Expected ${expectedCurrency} but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
     }
     if (!receivedAmount || receivedAmount !== expectedAmount) {
       return { status: 'AMOUNT_MISMATCH', note: `Expected ${expectedAmount} but received ${receivedAmount || 'missing amount'}.`, expectedAmount };
@@ -254,7 +256,7 @@ export async function recordXenditWebhook({ webhookId, eventType, reference, pro
     currency: currency || null,
     status: status || null,
     expected_amount_php: verification.expectedAmount || payment?.amount_php || booking?.deposit_amount_php || null,
-    expected_currency: 'PHP',
+    expected_currency: payment?.currency || PLP_CURRENCY,
     verification_status: verification.status,
     verification_notes: verification.note,
     payload: payload || {},
@@ -266,7 +268,7 @@ export async function recordXenditWebhook({ webhookId, eventType, reference, pro
       await updateRows('plp_payments', `id=eq.${payment.id}`, {
         provider_payment_id: providerPaymentId || null,
         amount_php: amount ? Number(amount) : payment.amount_php,
-        currency: currency || 'PHP',
+        currency: currency || PLP_CURRENCY,
         status: paymentStatus,
         verification_status: 'VERIFIED',
         verification_error: null,

@@ -3,7 +3,7 @@
   const esc = (value) => String(value ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const status = (value) => String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-  const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+  const money = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
 
   function dateOnly(value) {
     if (!value) return null;

@@ -190,19 +190,19 @@ for (const [input, expected] of commandCases) {
 }
 
 // --- pricing single source of truth ---
-test('PLP prices are the premium tiers 80000 / 60000 / 40000', () => {
-  assert.equal(PLP_PRICES.premium, 80000);
-  assert.equal(PLP_PRICES.mid, 60000);
-  assert.equal(PLP_PRICES.entry, 40000);
+test('PLP prices are USD 1000 for every room tier', () => {
+  assert.equal(PLP_PRICES.premium, 1000);
+  assert.equal(PLP_PRICES.mid, 1000);
+  assert.equal(PLP_PRICES.entry, 1000);
 });
 
 test('accommodation names map to the correct tier price', () => {
-  assert.equal(PLP_TIER_BY_ACCOMMODATION['Grand Ocean Villa'], 80000);
-  assert.equal(PLP_TIER_BY_ACCOMMODATION['Sunset Suite'], 60000);
-  assert.equal(PLP_TIER_BY_ACCOMMODATION['Smart Room Premium'], 40000);
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Grand Ocean Villa'], 1000);
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Sunset Suite'], 1000);
+  assert.equal(PLP_TIER_BY_ACCOMMODATION['Smart Room Premium'], 1000);
 });
 
-test('formatPeso renders grouped pesos', () => {
-  assert.equal(formatPeso(80000), '₱80,000');
-  assert.equal(formatPeso(40000), '₱40,000');
+test('formatPeso renders grouped US dollars', () => {
+  assert.equal(formatPeso(1000), '$1,000');
+  assert.equal(formatPeso(40000), '$40,000');
 });

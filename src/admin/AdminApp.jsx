@@ -96,8 +96,8 @@ async function adminApi(action, { method = 'GET', body, staffCode } = {}) {
   return data;
 }
 
-function money(value) {
-  return `₱${Number(value || 0).toLocaleString('en-PH')}`;
+function money(value, currency = 'USD') {
+  return new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
 }
 
 function pick(row, keys, fallback = '') {
@@ -354,7 +354,7 @@ function PaymentsView({ data }) {
   return <Panel title="Payment Exceptions" action={<button className="btnish" onClick={() => csvExport('plp-payment-exceptions.csv', data.exceptions)}>Export CSV</button>}>
     {data.loading && <LoadingState text="Loading payment exceptions..." />}
     {!data.loading && data.exceptions.length === 0 && <EmptyState text="No payment exceptions currently returned." />}
-    {!data.loading && data.exceptions.length > 0 && <Table columns={['Reference', 'Issue', 'Expected', 'Received', 'When']} rows={data.exceptions.map((row) => [pick(row, ['booking_reference', 'provider_reference_id', 'reference']), pick(row, ['verification_status', 'status'], 'Review'), `${money(pick(row, ['expected_amount_php', 'deposit_amount_php'], 0))} ${pick(row, ['expected_currency'], 'PHP')}`, `${money(pick(row, ['amount_php', 'received_amount_php'], 0))} ${pick(row, ['currency'], '')}`, date(pick(row, ['created_at', 'processed_at', 'payment_created_at']))])} />}
+    {!data.loading && data.exceptions.length > 0 && <Table columns={['Reference', 'Issue', 'Expected', 'Received', 'When']} rows={data.exceptions.map((row) => [pick(row, ['booking_reference', 'provider_reference_id', 'reference']), pick(row, ['verification_status', 'status'], 'Review'), `${money(pick(row, ['expected_amount_php', 'deposit_amount_php'], 0), pick(row, ['expected_currency', 'currency'], 'USD'))} ${pick(row, ['expected_currency', 'currency'], 'USD')}`, `${money(pick(row, ['amount_php', 'received_amount_php'], 0))} ${pick(row, ['currency'], '')}`, date(pick(row, ['created_at', 'processed_at', 'payment_created_at']))])} />}
   </Panel>;
 }
 

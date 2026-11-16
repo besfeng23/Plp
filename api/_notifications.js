@@ -1,7 +1,8 @@
+import { formatMoney } from '../lib/pricing.js';
 import { insertRow, selectRows, updateRows } from './_supabase.js';
 
-function currency(value) {
-  return `PHP ${Number(value || 0).toLocaleString('en-PH')}`;
+function currency(value, code) {
+  return formatMoney(value, code);
 }
 
 function getAdminRecipient() {

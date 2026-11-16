@@ -23,7 +23,7 @@ const STAY_FILTER_OPTIONS = ['All', 'Upcoming', 'In-house', 'Past'];
 const SORT_OPTIONS = ['Newest booking first', 'Check-in soonest', 'Guest name A-Z', 'Status A-Z'];
 const SECRET_FIELD_PATTERN = /(token|secret|key|password)/i;
 
-const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+const money = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
 const PAYMENT_STATUS_LABELS = {
   VERIFIED: 'Verified — matched booking, provider session, amount, and currency',
   PENDING: 'Pending — awaiting provider confirmation or staff review',
@@ -438,7 +438,7 @@ function SelectControl({ label, value, onChange, options }) {
 }
 
 function ExceptionsTable({ rows }) {
-  return <Panel title="Payment Exceptions" count={rows.length}><Table columns={['Reference', 'Provider', 'Issue', 'Expected', 'Received', 'Event', 'Notes']}>{rows.length === 0 ? <Empty colSpan={7} text="No payment exceptions." /> : rows.map((row) => <tr key={row.id || row.provider_event_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || row.provider_reference_id || '—'}</strong></td><td className="cell"><ProviderBadge row={row} /></td><td className="cell"><Pill value={row.verification_status} /><StatusHelp value={row.verification_status} /></td><td className="cell">{money(row.expected_amount_php)} {row.expected_currency || 'PHP'}</td><td className="cell">{money(row.amount_php)} {row.currency || ''}</td><td className="cell">{row.event_type || '—'}<br /><span className="muted">{row.provider_event_id || ''}</span></td><td className="cell">{row.verification_notes || '—'}</td></tr>)}</Table></Panel>;
+  return <Panel title="Payment Exceptions" count={rows.length}><Table columns={['Reference', 'Provider', 'Issue', 'Expected', 'Received', 'Event', 'Notes']}>{rows.length === 0 ? <Empty colSpan={7} text="No payment exceptions." /> : rows.map((row) => <tr key={row.id || row.provider_event_id || JSON.stringify(row)} className="hover:bg-[#F4F0E8]/40"><td className="cell"><strong>{row.booking_reference || row.provider_reference_id || '—'}</strong></td><td className="cell"><ProviderBadge row={row} /></td><td className="cell"><Pill value={row.verification_status} /><StatusHelp value={row.verification_status} /></td><td className="cell">{money(row.expected_amount_php, row.expected_currency || row.currency || 'USD')} {row.expected_currency || row.currency || 'USD'}</td><td className="cell">{money(row.amount_php)} {row.currency || ''}</td><td className="cell">{row.event_type || '—'}<br /><span className="muted">{row.provider_event_id || ''}</span></td><td className="cell">{row.verification_notes || '—'}</td></tr>)}</Table></Panel>;
 }
 
 function NotificationsTable({ rows }) {
