@@ -77,16 +77,25 @@ export async function createBlockedDate({ accommodationName, startDate, endDate,
   if (conflicts.invalidDateRange) return { ok: false, error: 'Invalid date range.' };
   if (conflicts.activeBookings.length > 0) return { ok: false, error: 'Date block overlaps an active booking.', conflicts: conflicts.activeBookings };
 
-  const row = await insertRow('plp_blocked_dates', {
-    accommodation_id: accommodation.id,
-    start_date: startDate,
-    end_date: endDate,
-    reason: String(reason || 'Manual staff block').slice(0, 300),
-    source: 'admin',
-    status: 'ACTIVE',
-    created_by: String(createdBy || 'staff').slice(0, 120),
-  });
-  return { ok: true, row };
+  try {
+    const row = await insertRow('plp_blocked_dates', {
+      accommodation_id: accommodation.id,
+      start_date: startDate,
+      end_date: endDate,
+      reason: String(reason || 'Manual staff block').slice(0, 300),
+      source: 'admin',
+      status: 'ACTIVE',
+      created_by: String(createdBy || 'staff').slice(0, 120),
+    });
+    return { ok: true, row };
+  } catch (error) {
+    // The database trigger is authoritative and closes the race between this
+    // availability read and the block insert.
+    if (error?.code === '23P01' || /overlaps active inventory|not available for those dates/i.test(String(error?.message || ''))) {
+      return { ok: false, error: 'Date block overlaps active inventory.' };
+    }
+    throw error;
+  }
 }
 
 export async function cancelBlockedDate(id) {
