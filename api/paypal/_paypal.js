@@ -1,3 +1,4 @@
+import { PLP_CURRENCY } from '../../lib/pricing.js';
 export class SafePayPalError extends Error {
   constructor(code, message, status = 500) {
     super(message);
@@ -120,11 +121,11 @@ export async function createPayPalOrder({ booking, req }) {
         custom_id: reference,
         description: `Pueblo La Perla reservation deposit ${reference}`.slice(0, 127),
         amount: {
-          currency_code: 'PHP',
+          currency_code: PLP_CURRENCY,
           value: amount,
           breakdown: {
             item_total: {
-              currency_code: 'PHP',
+              currency_code: PLP_CURRENCY,
               value: amount,
             },
           },
@@ -135,7 +136,7 @@ export async function createPayPalOrder({ booking, req }) {
             description: dateRange.slice(0, 127),
             quantity: '1',
             unit_amount: {
-              currency_code: 'PHP',
+              currency_code: PLP_CURRENCY,
               value: amount,
             },
             category: 'DIGITAL_GOODS',
@@ -180,7 +181,7 @@ export async function createPayPalOrder({ booking, req }) {
     id: data.id,
     reference,
     amount,
-    currency: 'PHP',
+    currency: PLP_CURRENCY,
     approveUrl,
     raw: data,
   };

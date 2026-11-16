@@ -31,11 +31,11 @@ npm run build
 The public rate catalog in `lib/pricing.js` supplies the accommodation pages,
 booking calendar and server-side quote.
 
-| Accommodation | Nightly rate (PHP) | 30% deposit for one night (PHP) |
+| Accommodation | Nightly rate (USD) | 30% deposit for one night (USD) |
 | --- | ---: | ---: |
-| Grand Ocean Villa | 80,000 | 24,000 |
-| Sunset Suite | 60,000 | 18,000 |
-| Smart Room Premium | 40,000 | 12,000 |
+| Grand Ocean Villa | 1,000 | 300 |
+| Sunset Suite | 1,000 | 300 |
+| Smart Room Premium | 1,000 | 300 |
 
 Verify pricing and availability without entering a live payment. Use a PayPal
 sandbox environment for payment rehearsals.

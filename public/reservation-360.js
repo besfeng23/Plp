@@ -1,6 +1,6 @@
 (() => {
   const SECRET_FIELD_PATTERN = /(token|secret|key|password)/i;
-  const peso = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+  const peso = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const text = (value) => value === undefined || value === null || value === '' ? '—' : String(value);
   const escapeHtml = (value) => text(value)

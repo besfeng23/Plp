@@ -1,4 +1,4 @@
-export const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+export const money = (value, currency = 'USD') => new Intl.NumberFormat(currency === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(Number(value || 0));
 
 export function safe(value, fallback = '—') {
   return value === undefined || value === null || value === '' ? fallback : value;

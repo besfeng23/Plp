@@ -129,7 +129,11 @@
   }
 
   function money(value) {
-    return '₱' + Number(value || 0).toLocaleString('en-PH');
+    try {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+    } catch (e) {
+      return '$' + Number(value || 0).toLocaleString('en-US');
+    }
   }
 
   function normalText(value) {

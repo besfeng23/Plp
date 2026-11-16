@@ -263,7 +263,7 @@
       { id: 'agoda', name: 'Agoda', status: 'not_connected', statusLabel: 'Prepared', description: 'Stage Agoda reservations, payment review, stay dates, and channel-sourced guest records for future sync.', lastSync: 'Sync not live', mapping: '0 / 3 mapped', health: 'Credentials not connected', primaryAction: 'Prepare Agoda', secondaryAction: 'View Notes' },
       { id: 'expedia', name: 'Expedia', status: 'coming_soon', statusLabel: 'Coming Soon', description: 'Prepare Expedia-sourced reservation review, availability conflicts, and payment exception workflows.', lastSync: 'Sync not live', mapping: '0 / 3 mapped', health: 'Future phase', primaryAction: 'Unavailable', secondaryAction: 'View Roadmap' },
     ];
-    const money = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+    const money = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
     const PAYMENT_STATUS_LABELS = {
       VERIFIED: 'Verified — matched booking, provider session, amount, and currency',
       PENDING: 'Pending — awaiting provider confirmation or staff review',

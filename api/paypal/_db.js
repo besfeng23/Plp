@@ -1,3 +1,4 @@
+import { PLP_CURRENCY } from '../../lib/pricing.js';
 import {
   findBookingByReference,
   getSupabaseConfigError,
@@ -61,8 +62,9 @@ function getVerificationResult({ booking, payment, orderId, amount, currency, pa
   const receivedAmount = Number(amount || 0);
   const receivedCurrency = String(currency || '').toUpperCase();
 
-  if (receivedCurrency !== 'PHP') {
-    return { status: 'CURRENCY_MISMATCH', note: `Expected PHP but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
+  const expectedCurrency = String(payment.currency || PLP_CURRENCY).toUpperCase();
+  if (receivedCurrency !== expectedCurrency) {
+    return { status: 'CURRENCY_MISMATCH', note: `Expected ${expectedCurrency} but received ${receivedCurrency || 'missing currency'}.`, expectedAmount };
   }
   if (!receivedAmount || receivedAmount !== expectedAmount) {
     return { status: 'AMOUNT_MISMATCH', note: `Expected ${expectedAmount} but received ${receivedAmount || 'missing amount'}.`, expectedAmount };
@@ -85,7 +87,7 @@ export async function createPayPalPaymentRecord({ bookingReference, session, amo
     provider_session_id: providerSessionId,
     checkout_url: checkoutUrl || session?.checkoutUrl || null,
     amount_php: Number(amount || booking.deposit_amount_php || 0),
-    currency: 'PHP',
+    currency: PLP_CURRENCY,
     status: 'PENDING',
     verification_status: 'PENDING',
     verification_error: null,
@@ -145,7 +147,7 @@ export async function recordPayPalCapture({ bookingReference, orderId, captureId
     currency: currency || null,
     status: status || null,
     expected_amount_php: expectedAmount,
-    expected_currency: 'PHP',
+    expected_currency: payment?.currency || PLP_CURRENCY,
     verification_status: verification.status,
     verification_notes: verification.note,
     payload: payload || {},

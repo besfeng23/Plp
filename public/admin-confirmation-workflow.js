@@ -4,7 +4,7 @@
   const esc = (value) => String(value ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
   const field = (row, names) => names.map((name) => row?.[name]).find((value) => value !== undefined && value !== null && String(value).trim() !== '') || '';
   const norm = (value) => String(value || '').trim().toUpperCase().replace(/[\s-]+/g, '_');
-  const peso = (value) => `₱${Number(value || 0).toLocaleString('en-PH')}`;
+  const peso = (value, currency = 'USD') => new Intl.NumberFormat(String(currency || 'USD').toUpperCase() === 'PHP' ? 'en-PH' : 'en-US', { style: 'currency', currency: String(currency || 'USD').toUpperCase(), maximumFractionDigits: 0 }).format(Number(value || 0));
   const provider = (row) => norm(field(row, ['provider', 'payment_provider'])) || 'UNKNOWN';
   const booking = (row) => norm(field(row, ['booking_status', 'status'])) || 'MISSING';
   const pay = (row) => norm(field(row, ['payment_status', 'booking_payment_status'])) || 'MISSING';
