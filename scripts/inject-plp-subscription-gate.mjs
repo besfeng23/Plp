@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { subscriptionGateEnabled } from '../lib/subscription-gate.js';
 
-const root = process.cwd();
-const publicDir = path.join(root, 'public');
+const outputDir = path.join(process.cwd(), 'dist');
 const skippedSegments = new Set(['subscribe', 'tg', 'telegram']);
 
 async function htmlFiles(dir, relative = '') {
@@ -35,11 +35,13 @@ function inject(html) {
   return html.replace(/<head([^>]*)>/i, (tag) => tag + head);
 }
 
-for (const file of await htmlFiles(publicDir)) {
-  const original = await fs.readFile(file.full, 'utf8');
-  const updated = inject(original);
-  if (updated !== original) {
-    await fs.writeFile(file.full, updated, 'utf8');
-    console.log(`subscription gate injected: ${file.rel}`);
+if (subscriptionGateEnabled()) {
+  for (const file of await htmlFiles(outputDir)) {
+    const original = await fs.readFile(file.full, 'utf8');
+    const updated = inject(original);
+    if (updated !== original) {
+      await fs.writeFile(file.full, updated, 'utf8');
+      console.log(`subscription gate injected: ${file.rel}`);
+    }
   }
 }

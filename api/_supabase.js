@@ -1,5 +1,7 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const BOOKING_SCHEMA = process.env.PLP_SUPABASE_SCHEMA || 'plp_runtime';
+const PUBLIC_TABLES = new Set(['plp_site_subscriptions', 'plp_site_subscription_config']);
 
 export function isSupabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -23,12 +25,17 @@ function stripUndefined(value) {
 async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=representation' } = {}) {
   if (!isSupabaseConfigured()) throw new Error(getSupabaseConfigError());
 
+  // Subscription records are still in public; booking and resort operations
+  // use the active project's PLP schema.
+  const schema = PUBLIC_TABLES.has(path.split('?')[0]) ? 'public' : BOOKING_SCHEMA;
   const response = await fetch(apiUrl(path), {
     method,
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
+      'Accept-Profile': schema,
+      'Content-Profile': schema,
       Prefer: prefer,
     },
     body: body === undefined ? undefined : JSON.stringify(stripUndefined(body)),
@@ -38,7 +45,9 @@ async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=re
   const data = text ? JSON.parse(text) : null;
   if (!response.ok) {
     const detail = typeof data === 'object' && data ? data.message || data.details || JSON.stringify(data) : text;
-    throw new Error(detail || `Supabase request failed: ${response.status}`);
+    const error = new Error(detail || `Supabase request failed: ${response.status}`);
+    error.code = data?.code;
+    throw error;
   }
   return data;
 }
@@ -86,6 +95,13 @@ export async function upsertGuest({ name, email, phone }) {
 }
 
 export async function createBookingRecord(booking) {
+  if (BOOKING_SCHEMA === 'plp_runtime') {
+    return supabaseRequest('rpc/create_booking_atomic', {
+      method: 'POST',
+      body: { p_booking: booking },
+    });
+  }
+
   const accommodation = await findAccommodationByName(booking.accommodation);
   const guest = await upsertGuest({ name: booking.name, email: booking.email, phone: booking.phone });
 

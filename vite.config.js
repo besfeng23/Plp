@@ -9,9 +9,15 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
+      preserveEntrySignatures: 'exports-only',
       input: {
         main: resolve(__dirname, 'index.html'),
         admin: resolve(__dirname, 'admin.html'),
+        booking: resolve(__dirname, 'booking.html'),
+        'plp-posthog': resolve(__dirname, 'src/plp-posthog.js'),
+      },
+      output: {
+        entryFileNames: chunk => chunk.name === 'plp-posthog' ? 'plp-posthog.js' : 'assets/[name]-[hash].js',
       },
     },
   },
