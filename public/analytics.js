@@ -12,12 +12,17 @@
   const noAds = { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' };
   let config;
   let consent;
+  let consentVersion = 0;
+  let consentStorage;
   let lastPath;
   let analyticsPanel;
   let googleTag;
   let postHog;
   let pendingPostHog;
-  try { consent = localStorage.getItem(consentKey); } catch { /* Browser storage is optional. */ }
+  try {
+    consentStorage = window.localStorage;
+    consent = consentStorage.getItem(consentKey);
+  } catch { /* Browser storage is optional. */ }
 
   function publicPath() {
     const path = location.pathname.replace(/\/$/, '') || '/';
@@ -60,6 +65,7 @@
             return null;
           }
           postHog = module.initializePostHog(config.posthog);
+          postHog?.opt_in_capturing({ captureEventName: false });
           return postHog;
         })
         .catch(() => null);
@@ -69,6 +75,7 @@
 
   function send(event, path = publicPath()) {
     if (consent !== 'allow' || !config || !path) return;
+    const version = consentVersion;
     enableGoogle(path);
     googleTag?.('event', event, {
       send_to: config.googleId,
@@ -76,7 +83,7 @@
       page_referrer: '',
     });
     void getPostHog().then(client => {
-      if (client && consent === 'allow') {
+      if (client && consent === 'allow' && version === consentVersion) {
         client.capture(event === 'page_view' ? '$pageview' : event, {
           $current_url: location.origin + path,
           $pathname: path,
@@ -93,10 +100,11 @@
     }
   }
 
-  function setConsent(value) {
+  function applyConsent(value) {
+    if (value !== consent) consentVersion += 1;
     consent = value;
-    try { localStorage.setItem(consentKey, value); } catch { /* Keep the choice for this page. */ }
-    analyticsPanel.hidden = true;
+    if (!analyticsPanel) return;
+    analyticsPanel.hidden = value === 'allow' || value === 'decline';
     if (value === 'allow') {
       if (googleTag) googleTag('consent', 'update', { ...noAds, analytics_storage: 'granted' });
       postHog?.opt_in_capturing({ captureEventName: false });
@@ -113,6 +121,11 @@
       }
     }
     postHog?.opt_out_capturing();
+  }
+
+  function setConsent(value) {
+    try { consentStorage?.setItem(consentKey, value); } catch { /* Keep the choice for this page. */ }
+    applyConsent(value);
   }
 
   function addSettings() {
@@ -147,6 +160,10 @@
   window.plpTrack = event => {
     if (events.has(event)) send(event);
   };
+  window.addEventListener('storage', event => {
+    if (!consentStorage || event.storageArea !== consentStorage || (event.key !== consentKey && event.key !== null)) return;
+    applyConsent(event.newValue);
+  });
   window.addEventListener('plp:navigation', recordPage);
   document.addEventListener('click', event => {
     const link = event.target.closest?.('a[href], [data-plp-track]');

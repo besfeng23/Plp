@@ -6,8 +6,8 @@ const track = name => window.plpTrack?.(name);
 const fullDate = new Intl.DateTimeFormat('en-PH', { dateStyle: 'full', timeZone: 'UTC' });
 const shortDate = new Intl.DateTimeFormat('en-PH', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const monthName = new Intl.DateTimeFormat('en-PH', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-const today = todayAtResort();
-const firstMonth = today.slice(0, 7);
+let today = todayAtResort();
+let firstMonth = today.slice(0, 7);
 const requestedRoom = (new URLSearchParams(location.search).get('room') || '').toLowerCase();
 
 let selected = PLP_ROOMS.find(room =>
@@ -174,6 +174,21 @@ function resetRange(focusDate) {
   renderCalendar(focusDate);
 }
 
+function refreshResortDay() {
+  const currentDay = todayAtResort();
+  if (currentDay === today) return;
+  today = currentDay;
+  firstMonth = today.slice(0, 7);
+  const needsCurrentMonth = month < firstMonth;
+  if (needsCurrentMonth) month = firstMonth;
+  if (checkIn && checkIn < today) {
+    resetRange();
+    showRangeStatus('The selected check-in date has passed. Choose a new date in Boracay.', 'bad');
+  }
+  if (needsCurrentMonth) void loadMonth();
+  else renderCalendar();
+}
+
 async function verifyRange() {
   const version = ++rangeVersion;
   rangeState = 'checking';
@@ -240,6 +255,7 @@ function setSubmitting(value) {
 
 async function submitReservation(event) {
   event.preventDefault();
+  refreshResortDay();
   if (rangeState !== 'available' || submitting || savedRequest) return;
   const status = element('status');
   setSubmitting(true);
@@ -322,7 +338,9 @@ element('roomSelect').addEventListener('change', () => {
 
 element('days').addEventListener('click', event => {
   const day = event.target.closest('button[data-date]');
-  if (day && !day.disabled) pickDate(day.dataset.date);
+  if (!day || day.disabled) return;
+  refreshResortDay();
+  if (day.dataset.date >= today && day.dataset.date.startsWith(month)) pickDate(day.dataset.date);
 });
 element('modifyDates').addEventListener('click', () => {
   resetRange();
@@ -337,6 +355,7 @@ for (const [id, offset] of [['prevMonth', -1], ['nextMonth', 1]]) {
 element('retryCalendar').addEventListener('click', loadMonth);
 element('retryRange').addEventListener('click', verifyRange);
 element('continueBtn').addEventListener('click', () => {
+  refreshResortDay();
   if (rangeState !== 'available') return;
   const guestForm = element('guestForm');
   guestForm.hidden = false;
@@ -344,5 +363,8 @@ element('continueBtn').addEventListener('click', () => {
   track('start_booking');
 });
 element('bookingForm').addEventListener('submit', submitReservation);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshResortDay();
+});
 updateSummary();
 void loadMonth();
