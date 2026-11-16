@@ -1,4 +1,5 @@
 .plp-analytics-consent {
+  box-sizing: border-box;
   position: fixed;
   z-index: 60;
   bottom: max(16px, env(safe-area-inset-bottom));

@@ -23,7 +23,9 @@ export function initializePostHog({ token, host }) {
     ip: false,
     before_send(event) {
       if (!event || !allowedEvents.has(event.event)) return null;
-      const properties = Object.fromEntries(Object.entries(event.properties).filter(([key]) => allowedProperties.includes(key)));
+      const properties = Object.fromEntries(Object.entries(event.properties).filter(([key, value]) =>
+        allowedProperties.includes(key) || (key === '$process_person_profile' && value === false)
+      ));
       return { ...event, properties };
     },
   });

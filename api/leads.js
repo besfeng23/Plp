@@ -36,8 +36,9 @@ export default async function handler(req, res) {
     };
 
     let emailDelivered = false;
+    const from = process.env.LEADS_FROM_EMAIL;
 
-    if (process.env.RESEND_API_KEY) {
+    if (process.env.RESEND_API_KEY && from) {
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -45,7 +46,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: process.env.LEADS_FROM_EMAIL || 'Pueblo La Perla <onboarding@resend.dev>',
+          from,
           to: [CONCIERGE_EMAIL],
           subject: `New Pueblo La Perla inquiry: ${lead.interest}`,
           text: [
@@ -63,13 +64,19 @@ export default async function handler(req, res) {
       emailDelivered = response.ok;
     }
 
+    if (!emailDelivered) {
+      return res.status(503).json({
+        ok: false,
+        emailDelivered,
+        error: `Online inquiry delivery is temporarily unavailable. Email ${CONCIERGE_EMAIL}.`,
+      });
+    }
+
     return res.status(200).json({
       ok: true,
       lead,
       emailDelivered,
-      note: emailDelivered
-        ? 'Lead email delivered.'
-        : 'Email delivery is currently unavailable.',
+      note: 'Lead email delivered.',
     });
   } catch (error) {
     return res.status(500).json({
