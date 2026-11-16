@@ -24,7 +24,7 @@ Public route, build, static and browser evidence supports a **controlled present
 
 ## Historical preparation baseline (superseded where noted above)
 
-## Delivery scope
+### Delivery scope (original plan)
 
 Prepare the public resort website and authenticated administration for an investor walkthrough. Base: `b28048932503a0250a0167efbda7b6e6969a36ff` in `besfeng23/Plp`. Baseline production: `dpl_GNxY6eecehHbqxvz5mk4cVzdpyD6` on the BarangayOS Vercel team.
 
@@ -36,7 +36,7 @@ Validation: repository tests, build, viewport contract, route audit against its 
 
 Rollback: revert the presentation commit or restore the baseline production deployment above. No migration or environment change is required.
 
-## Baseline observations
+### Baseline observations (before presentation PRs)
 
 - Public hero, accommodation, gallery and booking entry render; date selection produces a USD 1,000 one-night quote with a USD 300 deposit and USD 700 balance.
 - Homepage repeats its atmosphere section and renders a bracketed placeholder label.
