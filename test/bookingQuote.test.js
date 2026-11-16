@@ -29,32 +29,42 @@ function runRequest(handler, request) {
 }
 
 test('public calendar discloses occupied nights only and distinguishes outages from conflicts', async t => {
-  const legacyUrl = process.env.SUPABASE_URL;
-  const dedicatedUrl = process.env.plp_SUPABASE_URL;
-  const dedicatedServiceKey = process.env.plp_SUPABASE_SERVICE_ROLE_KEY;
-  process.env.SUPABASE_URL = 'https://legacy.invalid';
-  process.env.plp_SUPABASE_URL = 'https://dedicated.invalid';
-  process.env.plp_SUPABASE_SERVICE_ROLE_KEY = 'test-only';
+  const values = {
+    SUPABASE_URL: 'https://active.invalid',
+    SUPABASE_SERVICE_ROLE_KEY: 'test-only',
+    plp_SUPABASE_URL: 'https://paused.invalid',
+    plp_SUPABASE_SERVICE_ROLE_KEY: 'ignored',
+    PLP_SUPABASE_SCHEMA: 'plp_runtime',
+  };
+  const original = Object.fromEntries(Object.keys(values).map(key => [key, process.env[key]]));
+  Object.assign(process.env, values);
   t.after(() => {
-    for (const [key, original] of [
-      ['SUPABASE_URL', legacyUrl],
-      ['plp_SUPABASE_URL', dedicatedUrl],
-      ['plp_SUPABASE_SERVICE_ROLE_KEY', dedicatedServiceKey],
-    ]) {
-      if (original === undefined) delete process.env[key];
-      else process.env[key] = original;
+    for (const [key, value] of Object.entries(original)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
     }
   });
 
   const { default: handler } = await import('../api/check-availability.js');
   const { default: bookings } = await import('../api/bookings.js');
+  const { createBookingRecord, selectRows } = await import('../api/_supabase.js');
   let offline = false;
   const month = String(Number(todayAtResort().slice(0, 4)) + 1) + '-01';
   const nextMonth = shiftMonth(month, 1);
   const previousMonth = shiftMonth(month, -1);
   const mock = t.mock.method(globalThis, 'fetch', async (url, options) => {
-    assert.equal(new URL(url).origin, 'https://dedicated.invalid');
+    assert.equal(new URL(url).origin, 'https://active.invalid');
+    if (url.includes('/plp_site_subscriptions?')) {
+      assert.equal(options.headers['Accept-Profile'], 'public');
+      return Response.json([]);
+    }
     assert.equal(options.headers['Accept-Profile'], 'plp_runtime');
+    if (url.endsWith('/rpc/create_booking_atomic')) {
+      assert.equal(options.method, 'POST');
+      assert.equal(options.headers['Content-Profile'], 'plp_runtime');
+      assert.deepEqual(JSON.parse(options.body), { p_booking: { reference: 'test-only' } });
+      return Response.json({ id: 'synthetic-booking' });
+    }
     assert.equal(options.method, 'GET');
     if (offline) throw new Error('upstream unavailable');
     if (url.includes('/plp_accommodations?')) {
@@ -85,6 +95,9 @@ test('public calendar discloses occupied nights only and distinguishes outages f
   assert.equal(outage.status, 503);
   assert.deepEqual(outage.body, { ok: false, error: 'Availability is temporarily unavailable.' });
 
+  offline = false;
+  assert.deepEqual(await createBookingRecord({ reference: 'test-only' }), { id: 'synthetic-booking' });
+  assert.deepEqual(await selectRows('plp_site_subscriptions', 'limit=0'), []);
   const calls = mock.mock.callCount();
   const stale = await runRequest(bookings, {
     method: 'POST',
