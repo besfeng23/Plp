@@ -79,11 +79,12 @@ XENDIT_WEBHOOK_TOKEN=
 ```
 
 
-The Vercel Supabase integration uses the paired `plp_SUPABASE_URL` and
-`plp_SUPABASE_SERVICE_ROLE_KEY` variables with the `plp_runtime` Data API
-schema when present. The legacy pair supports existing local environments.
-The inquiry email endpoint uses the public concierge address in
-`lib/contact.js`.
+The active Vercel Supabase integration supplies `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY`. Reservations use the `plp_runtime` Data API
+schema and its atomic booking function. For legacy local databases with PLP
+tables in `public`, set `PLP_SUPABASE_SCHEMA=public`. Site subscription rows
+use the `public` schema. The inquiry email endpoint uses the public
+concierge address in `lib/contact.js`.
 
 ## Optional guest analytics
 

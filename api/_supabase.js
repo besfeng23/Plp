@@ -1,9 +1,6 @@
-// The PLP integration injects a namespaced pair. Keep the legacy pair
-// together for local and older environments that have no PLP binding.
-const dedicatedProject = Boolean(process.env.plp_SUPABASE_URL || process.env.plp_SUPABASE_SERVICE_ROLE_KEY);
-const SUPABASE_URL = dedicatedProject ? process.env.plp_SUPABASE_URL : process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = dedicatedProject ? process.env.plp_SUPABASE_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY;
-const schemaHeaders = dedicatedProject ? { 'Accept-Profile': 'plp_runtime', 'Content-Profile': 'plp_runtime' } : {};
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const BOOKING_SCHEMA = process.env.PLP_SUPABASE_SCHEMA || 'plp_runtime';
 
 export function isSupabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -27,13 +24,17 @@ function stripUndefined(value) {
 async function supabaseRequest(path, { method = 'GET', body, prefer = 'return=representation' } = {}) {
   if (!isSupabaseConfigured()) throw new Error(getSupabaseConfigError());
 
+  // Subscription records are still in public; booking and resort operations
+  // use the active project's PLP schema.
+  const schema = path.split('?')[0] === 'plp_site_subscriptions' ? 'public' : BOOKING_SCHEMA;
   const response = await fetch(apiUrl(path), {
     method,
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
-      ...schemaHeaders,
+      'Accept-Profile': schema,
+      'Content-Profile': schema,
       Prefer: prefer,
     },
     body: body === undefined ? undefined : JSON.stringify(stripUndefined(body)),
@@ -93,6 +94,13 @@ export async function upsertGuest({ name, email, phone }) {
 }
 
 export async function createBookingRecord(booking) {
+  if (BOOKING_SCHEMA === 'plp_runtime') {
+    return supabaseRequest('rpc/create_booking_atomic', {
+      method: 'POST',
+      body: { p_booking: booking },
+    });
+  }
+
   const accommodation = await findAccommodationByName(booking.accommodation);
   const guest = await upsertGuest({ name: booking.name, email: booking.email, phone: booking.phone });
 
