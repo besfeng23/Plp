@@ -2,7 +2,7 @@
   const STATUSES = ['open', 'in_review', 'waiting_on_guest', 'waiting_on_ota', 'waiting_on_staff', 'resolved', 'ignored'];
   const TYPES = ['unknown', 'manual_entry_required', 'contact_guest', 'contact_ota', 'maintain_direct_booking', 'maintain_manual_block', 'update_room_mapping', 'update_rate_mapping', 'reject_ota_import', 'archive_duplicate', 'no_action_required'];
   const esc = (v) => String(v ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
-  const staffCode = () => window.PLP_STAFF_CODE || localStorage.getItem('plpStaffCode') || localStorage.getItem('plp_staff_code') || '';
+  const staffCode = () => window.PLP_STAFF_CODE || '';
   function api(action, options = {}) { return fetch(`/api/admin?action=${action}`, { ...options, headers: { 'Content-Type': 'application/json', 'x-plp-staff-code': staffCode(), ...(options.headers || {}) } }).then(async (res) => { const data = await res.json().catch(() => ({})); if (!res.ok || data.ok === false) throw new Error(data.error || data.detail || data.message || 'Admin API request failed'); return data; }); }
   function ensureStyles() {
     if (document.getElementById('otaConflictConsoleStyle')) return;

@@ -2,7 +2,7 @@
   const CHANNELS = ['', 'agoda', 'airbnb', 'expedia', 'booking_com', 'direct_website', 'google_hotel_ads', 'trip_com'];
   const ROOMS = ['', 'Grand Ocean Villa', 'Sunset Suite', 'Smart Room Premium'];
   const esc = (v) => String(v ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
-  const staffCode = () => window.PLP_STAFF_CODE || localStorage.getItem('plpStaffCode') || localStorage.getItem('plp_staff_code') || '';
+  const staffCode = () => window.PLP_STAFF_CODE || '';
   function api(action, options = {}) {
     return fetch(`/api/admin?action=${action}`, { ...options, headers: { 'Content-Type': 'application/json', 'x-plp-staff-code': staffCode(), ...(options.headers || {}) } }).then(async (res) => {
       const data = await res.json().catch(() => ({}));

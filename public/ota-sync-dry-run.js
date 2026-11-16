@@ -4,7 +4,7 @@
   ];
   const ROOMS = ['', 'Grand Ocean Villa', 'Sunset Suite', 'Smart Room Premium'];
   const esc = (v) => String(v ?? '—').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
-  const staffCode = () => window.PLP_STAFF_CODE || localStorage.getItem('plpStaffCode') || localStorage.getItem('plp_staff_code') || '';
+  const staffCode = () => window.PLP_STAFF_CODE || '';
 
   function ensureStyles() {
     if (document.getElementById('otaDryRunStyle')) return;
