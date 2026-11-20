@@ -51,7 +51,42 @@ export default function ClubView() {
       <p className="mt-5 text-sm leading-6 text-[#676259]">Activity inquiries are reviewed by the PLP team. Attendance is not automatically confirmed.</p>
     </section>
 
-    <section className="bg-[#1A1A1A] px-6 py-20 text-white md:px-12 md:py-24"><div className="mx-auto grid max-w-[1400px] gap-12 md:grid-cols-[1fr_1fr] md:gap-24"><div><p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">A regional vision</p><h2 className="font-serif text-4xl leading-tight md:text-6xl">Boracay first. More chapters later.</h2><p className="mt-6 text-base leading-8 text-white/75">One PLP Club concept, with separate local programs and member records as new chapters are approved.</p></div><div className="space-y-5 self-center"><div className="flex items-center justify-between border-b border-white/20 py-4"><span className="text-lg">Boracay, Philippines</span><span className="text-sm text-[#E3CE8B]">Pilot in development</span></div><div className="flex items-center justify-between border-b border-white/20 py-4"><span className="text-lg">Singapore</span><span className="text-sm text-white/60">Proposed</span></div><div className="flex items-center justify-between border-b border-white/20 py-4"><span className="text-lg">Malaysia</span><span className="text-sm text-white/60">Proposed</span></div></div></div></section>
+    <section className="bg-[#1A1A1A] px-6 py-20 text-white md:px-12 md:py-24" aria-labelledby="club-regions-title">
+      <div className="mx-auto max-w-[1400px]">
+        <div className="grid gap-12 md:grid-cols-[1fr_1fr] md:gap-24">
+          <div>
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">A regional vision</p>
+            <h2 id="club-regions-title" className="font-serif text-4xl leading-tight md:text-6xl">Boracay first. More chapters later.</h2>
+            <p className="mt-6 text-base leading-8 text-white/75">One PLP Club concept, with separate local programs and member records as new chapters are approved.</p>
+          </div>
+          <div className="space-y-5 self-center">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Boracay, Philippines</span><span className="text-sm text-[#E3CE8B]">Pilot in development</span></div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Singapore</span><span className="text-sm text-white/60">Proposed · Changi Beach Club</span></div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Malaysia</span><span className="text-sm text-white/60">Future chapter</span></div>
+          </div>
+        </div>
+
+        <div className="mt-16 border-t border-white/20 pt-12 md:mt-20 md:pt-16" aria-labelledby="club-singapore-title">
+          <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">Singapore · Planned chapter</p>
+          <div className="grid gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-20">
+            <div>
+              <h3 id="club-singapore-title" className="font-serif text-4xl leading-tight md:text-5xl">Changi Beach Club</h3>
+              <p className="mt-5 max-w-xl text-base leading-8 text-white/80">Our intended setting for a future Singapore senior community, subject to agreement with the venue. The idea is simple: time together, shared interests, and moments to look forward to.</p>
+              <p className="mt-6 text-sm leading-7 text-white/60">Proposed location · 2 Andover Road, Singapore 509984</p>
+            </div>
+            <div className="md:border-l md:border-white/20 md:pl-10">
+              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">Ideas under consideration</p>
+              <ul className="space-y-4 text-base leading-7 text-white/80">
+                <li className="border-b border-white/15 pb-4">Coffee mornings and social gatherings</li>
+                <li className="border-b border-white/15 pb-4">Culture, heritage, art, and music</li>
+                <li className="border-b border-white/15 pb-4">Gentle recreation and coastal outings</li>
+              </ul>
+              <p className="mt-6 max-w-md text-sm leading-7 text-white/60">Not open for enrollment. No PLP–Changi Beach Club partnership, event schedule, or facility access is confirmed. Changi Beach Club has its own separate membership program.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section className="mx-auto max-w-[1400px] px-6 py-20 text-center md:px-12 md:py-28"><HeartHandshake className="mx-auto mb-7 text-[#746130]" size={33} aria-hidden="true" /><h2 className="mx-auto max-w-2xl font-serif text-4xl md:text-6xl">Let's shape the first chapter together.</h2><p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[#45413A]">Have an interest in joining, suggesting an activity, or helping organize the Boracay pilot? Speak to the PLP team.</p><a href={inquiryHref()} className="mt-9 inline-flex min-h-12 items-center gap-3 bg-[#1A1A1A] px-8 py-4 text-sm font-semibold text-white hover:bg-[#746130]">Contact the club team <ArrowRight size={17} aria-hidden="true" /></a><p className="mx-auto mt-8 max-w-xl text-sm leading-6 text-[#676259]"><Users size={15} className="mr-2 inline" aria-hidden="true" />PLP Club is a proposed private membership program and does not issue government senior-citizen identification or statutory entitlements.</p></section>
   </main>;
