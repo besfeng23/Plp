@@ -483,3 +483,11 @@ textarea:focus-visible {
  .plp-accommodation-entry__actions .journey-primary { width: 100%; }
  .plp-accommodations-intro { padding-top: .75rem; }
 }
+
+/* The new hero owns its inner safe-area spacing; avoid double-padding on phones. */
+@media (max-width: 640px) {
+  #main-content [data-plp-hero="true"].plp-home-hero {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
