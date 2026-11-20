@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ArrowLeft, ArrowRight, Bell, CalendarDays, CheckCircle2, ChevronRight, CircleAlert, CreditCard, Eye, House, LayoutDashboard, LockKeyhole, LogOut, Menu, RefreshCw, Search, Settings, ShieldCheck, Users, X } from 'lucide-react';
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, needsStaffReview, php, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
+import ClubAdminView from './ClubAdminView.jsx';
 import './plp-enterprise-admin.css';
 
 const PAGES = [
@@ -10,6 +11,7 @@ const PAGES = [
   { id: 'operations', label: 'Operations', icon: CalendarDays },
   { id: 'vision', label: 'Vision', icon: Eye },
   { id: 'guests', label: 'Guest Experience', icon: Users },
+  { id: 'club', label: 'PLP Club', icon: Users },
   { id: 'team', label: 'Team & Access', icon: ShieldCheck },
   { id: 'revenue', label: 'Revenue', icon: CreditCard },
   { id: 'attention', label: 'Needs You', icon: CircleAlert },
@@ -212,6 +214,7 @@ export default function PlpEnterpriseAdminApp() {
         {page === 'overview' && <><div className="plp-metrics"><Metric title="Reservations loaded" value={rows.filter(row => !isTestRecord(row)).length} description="Live source count" /><Metric title="Open staff tasks" value={summary.openTasks.length} description="Persisted task records" /><Metric title="Payment exceptions" value={summary.exceptionCount} description="Reconciliation exceptions" tone /><Metric title="Notifications" value={summary.notificationCount} description="Recorded sends and outcomes" /></div><Panel title="Upcoming stays" note="Chronological arrivals from current reservations."><BookingList rows={summary.upcoming} onOpen={setSelected} emptyTitle="No upcoming stays yet" emptyDetail="Confirmed and requested stays will appear in arrival order." /></Panel><p className="plp-disclosure">Counts reflect the returned API rows, not an independently reconciled occupancy or accounting ledger.</p></>}
         {page === 'operations' && <><Panel title="Reservations" note="Search live booking records; open the original record for full details."><div className="plp-filters"><label><Search size={16} /><input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Guest, reference, accommodation" aria-label="Search reservations" /></label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter booking status"><option value="all">All booking statuses</option>{['PENDING_PAYMENT','PAID_DEPOSIT','CONFIRMED','CANCELLED','PAYMENT_PROCESSING'].map((value) => <option key={value} value={value}>{bookingStatus(value)}</option>)}</select></div><BookingList rows={matchingRows} onOpen={setSelected} /></Panel></>}
         {page === 'vision' && <Panel title="Vision" note="Camera operations must use an approved, authenticated source."><Blank title="Camera feed not connected" detail="Live property monitoring will appear here once an approved camera source is connected." /></Panel>}
+        {page === 'club' && <ClubAdminView code={code} />}
         {page === 'guests' && <><div className="plp-metrics"><Metric title="Guests in loaded records" value={guests.length} description="Grouped by recorded email" /><Metric title="Guest requests" value={guests.reduce((n, guest) => n + guest.requests.length, 0)} description="Notes captured on reservations" /><Metric title="Arrivals today" value={summary.arrivals.length} description="Guest preparation" /><Metric title="In house" value={summary.inHouse.length} description="Stay dates" /></div><Panel title="Guest roster" note="Records visible only to authenticated PLP staff."><div className="plp-guest-grid">{guests.map((guest) => <article className="plp-guest-card" key={guest.key}><strong>{guest.name}</strong><small>{guest.email || 'Email not recorded'}</small><span>{guest.reservations.length} reservation{guest.reservations.length === 1 ? '' : 's'} · {guest.requests.length} request note{guest.requests.length === 1 ? '' : 's'}</span><button className="plp-text-button" onClick={() => setSelected(guest.reservations[0])}>View latest record <ArrowRight size={14} /></button></article>)}{!guests.length && <Blank title="No guest records returned" />}</div></Panel></>}
         {page === 'team' && <>
           <Panel title="Staff tasks" note="Only tasks already persisted in the PLP staff task register appear here.">
