@@ -438,3 +438,48 @@ textarea:focus-visible {
   .plp-experience-photo img,
   .plp-club-program__photo img { transition: none!important; transform: none!important; }
 }
+
+/* Booking navigation and full accommodation collection */
+.plp-public-nav-reserve { border-color: currentColor; letter-spacing: .19em; }
+.plp-public-nav-reserve:hover { background: #fafaf7; color: #22231f!important; border-color: #fafaf7; }
+.plp-mobile-action { pointer-events: none; }
+.plp-mobile-action__inner { pointer-events: auto; margin: 0 auto; width: min(100%,32rem); display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr); padding: .45rem; gap: .45rem; border: 1px solid #ddd5c7; background: #fafaf7f5; box-shadow: 0 10px 36px #0003; backdrop-filter: blur(18px); }
+.plp-mobile-action__inner > a { display: inline-flex; align-items: center; justify-content: center; min-height: 45px; text-align: center; padding: .65rem .5rem; text-decoration: none; font-size: .7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.plp-mobile-action__book { color: #fff; background: #242721; }
+.plp-mobile-action__book:hover { background: #464a3e; }
+.plp-mobile-action__concierge { color: #25261f; border: 1px solid #c6c0b4; }
+.plp-mobile-action__concierge:hover { background: #eae6dc; }
+.plp-accommodations-page { background: #fafaf7; }
+.plp-accommodations-intro { padding-top: clamp(1rem,3vw,2.5rem); }
+#main-content .plp-accommodations-intro h1 { font-size: clamp(3.3rem,7vw,6.4rem); line-height: .96; font-weight: 400; }
+.plp-accommodations-list { display: grid; gap: clamp(5rem,11vw,10rem); }
+.plp-accommodation-entry { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr); gap: clamp(2.5rem,6vw,7rem); align-items: center; }
+.plp-accommodation-entry--reverse { grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); }
+.plp-accommodation-entry--reverse .plp-accommodation-entry__media { order: 2; }
+.plp-accommodation-entry--reverse .plp-accommodation-entry__copy { order: 1; }
+.plp-accommodation-entry__media { position: relative; background: #eee9df; }
+.plp-accommodation-entry__media img { display: block; width: 100%; height: auto; min-height: 350px; object-fit: cover; }
+.plp-accommodation-entry__ordinal { position: absolute; right: -1px; bottom: -1px; background: #fafaf7; min-width: 5.2rem; padding: .5rem 1rem 0; color: #867656; font-family: var(--plp-guest-serif); font-size: 2.5rem; text-align: center; }
+#main-content .plp-accommodation-entry__copy h2 { font-size: clamp(3rem,5vw,5.4rem); font-weight: 400; line-height: .95; margin: .7rem 0 1.5rem; }
+.plp-accommodation-entry__description { max-width: 30rem; color: #49463d; line-height: 1.9; }
+.plp-accommodation-entry__best { margin-top: 1.25rem; max-width: 27rem; color: #6b6253; font-size: .87rem; line-height: 1.7; }
+.plp-accommodation-entry__facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; border-top: 1px solid #ddd7ca; margin: 1.9rem 0 1.5rem; padding-top: 1.3rem; }
+.plp-accommodation-entry__facts > div:last-child { grid-column: 1/-1; }
+.plp-accommodation-entry__facts dt { text-transform: uppercase; color: #6b614f; font-size: .65rem; letter-spacing: .13em; margin-bottom: .3rem; }
+.plp-accommodation-entry__facts dd { color: #292921; font-family: var(--plp-guest-serif); font-size: 1.65rem; line-height: 1.2; }
+.plp-accommodation-entry__features { display: flex; flex-wrap: wrap; gap: .5rem; max-width: 32rem; }
+.plp-accommodation-entry__features span { border: 1px solid #e4dfd5; padding: .4rem .6rem; text-transform: uppercase; font-size: .61rem; letter-spacing: .06em; color: #514a3b; }
+.plp-accommodation-entry__actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-top: 2rem; }
+.plp-accommodation-entry__actions .journey-link { border: 0; background: none; color: #34332d; padding: .5rem 0; cursor: pointer; }
+@media (max-width: 950px) {
+ .plp-accommodation-entry,.plp-accommodation-entry--reverse { grid-template-columns: 1fr; gap: 2rem; }
+ .plp-accommodation-entry--reverse .plp-accommodation-entry__media,.plp-accommodation-entry--reverse .plp-accommodation-entry__copy { order: initial; }
+ .plp-accommodation-entry__media img { min-height: 0; }
+ .plp-accommodations-list { gap: 5rem; }
+}
+@media (max-width: 430px) {
+ .plp-mobile-action__inner > a { font-size: .66rem; }
+ .plp-accommodation-entry__actions { align-items: stretch; }
+ .plp-accommodation-entry__actions .journey-primary { width: 100%; }
+ .plp-accommodations-intro { padding-top: .75rem; }
+}
