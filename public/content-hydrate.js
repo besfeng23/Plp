@@ -143,12 +143,6 @@
     return String(value);
   }
 
-  function setText(selector, value) {
-    if (!value) return;
-    var el = document.querySelector(selector);
-    if (el) el.textContent = value;
-  }
-
   function updateFirstMatch(tag, contains, value) {
     if (!value) return;
     var nodes = document.querySelectorAll(tag);
@@ -215,15 +209,6 @@
     });
   }
 
-  function applyHome(content) {
-    var home = content.homepage || {};
-    var path = getPath();
-    if (path !== '/') return;
-    setText('h1', home.heroTitle);
-    updateFirstMatch('p', 'private hillside retreat', home.heroSubtitle);
-    updateFirstMatch('button', 'reserve your stay', home.primaryCta);
-  }
-
   function applyBooking(content) {
     if (typeof window.plpApplyBookingContent === 'function') {
       window.plpApplyBookingContent(content);
@@ -242,7 +227,6 @@
     if (!content) return;
     ensureProductionLayer();
     hydrateBoundElements(content);
-    applyHome(content);
     applyAccommodation(content);
     // Experience paragraphs and lists have explicit data-content bindings;
     // replacing the first list item with its paragraph repeated that copy.
@@ -252,29 +236,20 @@
     window.dispatchEvent(new CustomEvent('plp:content', { detail: content }));
   }
 
+  var cachedContent;
   function loadContent() {
     ensureProductionLayer();
+    applyImageCaptions();
     fetch('/api/plp?action=content', { headers: { Accept: 'application/json' } })
-      .then(function (response) { return response.json(); })
-      .then(function (data) { applyContent(data.content || {}); })
-      .catch(function () { applyImageCaptions(); ensureProductionLayer(); });
+      .then(function (response) { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
+      .then(function (data) { cachedContent = data.content || {}; applyContent(cachedContent); })
+      .catch(function () { /* The server-rendered page keeps its default content. */ });
   }
 
   window.plpHydrateContent = applyContent;
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      ensureProductionLayer();
-      applyImageCaptions();
-      loadContent();
-      setTimeout(loadContent, 700);
-      setTimeout(loadContent, 1800);
-    });
-  } else {
-    ensureProductionLayer();
-    applyImageCaptions();
-    loadContent();
-    setTimeout(loadContent, 700);
-    setTimeout(loadContent, 1800);
-  }
+  window.addEventListener('plp:navigation', function () {
+    if (cachedContent) applyContent(cachedContent);
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadContent, { once: true });
+  else loadContent();
 })();

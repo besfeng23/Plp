@@ -1,10 +1,10 @@
 (() => {
   const consentKey = 'plp_analytics_consent_v1';
-  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking']);
+  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'submit_enquiry']);
   const pages = new Set([
     '/', '/accommodation', '/accommodations', '/accommodation/grand-ocean-villa',
     '/accommodation/sunset-suite', '/accommodation/smart-room-premium', '/experiences',
-    '/gallery', '/getting-here', '/booking', '/contact', '/exclusive-offer',
+    '/club', '/gallery', '/getting-here', '/booking', '/contact', '/exclusive-offer',
     '/reservation-policy', '/privacy-policy', '/terms-of-service',
     '/private-villas-boracay', '/boracay-villa-with-private-pool', '/boracay-family-villa',
     '/boracay-wellness-stay', '/high-boracay-location',

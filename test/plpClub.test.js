@@ -110,3 +110,40 @@ test('activity creation stays draft and validates event times', async () => {
     assert.match(result.body.error, /start and end/i);
   });
 });
+
+test('the Boracay roster cursor reaches older members even when a provider page is short', async t => {
+  const code = 'local-staff-fixture';
+  const created = '2026-11-20T18:00:00.123456+00:00';
+  const recent = '00000000-0000-4000-8000-000000000002';
+  const older = '00000000-0000-4000-8000-000000000001';
+  const pages = [[{id:recent,created_at:created,status:'PENDING'}],[{id:older,created_at:created,status:'ACTIVE'}],[]];
+  const filters = [];
+  t.mock.method(globalThis, 'fetch', async url => {
+    const query = new URL(url).searchParams;
+    assert.equal(query.get('chapter_code'), 'eq.boracay');
+    assert.equal(query.get('order'), 'created_at.desc,id.desc');
+    filters.push(query.get('or'));
+    return new Response(JSON.stringify(pages.shift()));
+  });
+  await withEnv({ SUPABASE_URL:'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY:'fixture', PLP_STAFF_CODE:code }, async () => {
+    const ids = [];
+    let next;
+    do {
+      const req = request('GET', 'members', {code});
+      Object.assign(req.query,next);
+      const res = response();
+      await clubHandler(req,res);
+      assert.equal(res.statusCode,200);
+      ids.push(...res.body.members.map(member => member.id));
+      next = res.body.next;
+    } while (next);
+    assert.deepEqual(ids,[recent,older]);
+    assert.deepEqual(filters,[null,...[recent,older].map(id => '(created_at.lt.' + created + ',and(created_at.eq.' + created + ',id.lt.' + id + '))')]);
+    const invalid = request('GET','members',{code});
+    invalid.query.beforeId = older;
+    const res = response();
+    await clubHandler(invalid,res);
+    assert.equal(res.statusCode,400);
+    assert.equal(filters.length,3);
+  });
+});

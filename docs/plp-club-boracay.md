@@ -15,7 +15,7 @@ The experience should feel like the PLP brand: editorial, unhurried, warm, and p
 1. Discover `/club` from the public navigation (separate from resort booking).
 2. Read the Boracay program's purpose and *possible* activity themes.
 3. View only future, staff-published activities; no fabricated sessions or dates.
-4. Contact the team to express interest. This does **not** create a membership or RSVP.
+4. Choose an activity interest or ask about membership. With the concierge migration installed, the form creates a staff enquiry that can be followed up in Guest Experience and PLP Club. Staff review membership separately.
 5. Staff explain terms and collect express consent, then record a **PENDING** application in protected Admin → Client Workspace → PLP Club.
 6. Staff review eligibility and approve or decline. Only **ACTIVE** records count as members.
 
@@ -33,16 +33,21 @@ No activity should claim medical benefit, accessibility, transfer inclusions, or
 ## Current engineering scope
 
 - Public route `/club`: editorial invitation, proposed pillars, server-backed published calendar, concierge inquiry.
-- Staff-only PLP Club page: member intake with consent acknowledgment; PENDING → ACTIVE / DECLINED / INACTIVE decisions; draft/publish/cancel activities.
+- Staff-only PLP Club page: member intake with consent acknowledgment; PENDING → ACTIVE / DECLINED / INACTIVE decisions; draft/publish/cancel activities. A separate attendance migration lets staff check active Boracay members into published activities after the start and correct check-ins. Concurrent check-ins share the activity capacity.
 - Club actions are dispatched through the existing `/api/plp?action=club&operation=...` serverless function, with isolated implementation in `lib/club-handler.js` and `api/_clubDb.js`. This avoids a thirteenth Vercel function on the Hobby plan and does not change booking or payment clients.
 - New chapter-aware tables: `plp_club_chapters`, `plp_club_members`, `plp_club_activities`.
 - Row-level security enabled and API table privileges revoked from `anon` and `authenticated`.
 - No new credentials, payment mandates, PayPal transactions, or modifications to reservations.
 
+### Guest and staff release dependencies
+Apply the approved migrations in order. The foundation `20261120174220` enables the Boracay calendar and private member and activity records. Migration `20261120230000` enables staff attendance. Migration `20261120231000` enables the private concierge inbox in the resort runtime schema. The last two are separate additions.
+
+Once the inbox is available, a guest submission returns success only after it is recorded. Staff can open Guest Experience for all enquiries, or PLP Club for membership and activity enquiries. Without the inbox, the form can use a configured concierge email sender or prepare a guest email draft. Reverting the application to the prior deployment preserves recorded enquiries and attendance.
+
 ## Important limitations — *not yet built*
 
 - Public self-service enrollment, OTP/email verification, identity checks, family/caregiver authorization, and individual member login.
-- Event RSVPs, attendance tracking, guest limits, waitlists, capacity enforcement, and member communications.
+- Advance event reservations, companion registration, waitlists, and automated member messages.
 - Paid membership, renewal, invoicing, government discount handling, refund/cancellation policies, and tax analysis.
 - Verified age and any legal benefit or ID acceptance process.
 - Role-specific access: the first iteration reuses the existing PLP shared staff code and cannot enforce separate club operators per person.

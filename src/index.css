@@ -252,17 +252,6 @@ textarea:focus-visible {
   }
 }
 
-/*
-  Homepage restraint pass:
-  These details matter, but they were overpowering the homepage.
-  Keep the homepage editorial and let booking/legal paths carry the policy depth.
-*/
-#main-content > section[aria-labelledby="trust-proof-title"],
-#main-content > section[aria-labelledby="booking-policy-title"],
-#main-content > section[aria-labelledby="faq-title"] {
-  display: none;
-}
-
 @layer components {
   .inputish {
     @apply w-full bg-white border border-[#E5E0D8] text-[#17130F] rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-[#B8977E] focus:ring-1 focus:ring-[#B8977E] transition-colors placeholder:text-[#6A645B];
@@ -283,4 +272,38 @@ textarea:focus-visible {
   .drawer-action {
     @apply w-full text-left px-4 py-2.5 rounded-sm hover:bg-[#F4F0E8] text-[#17130F] text-sm transition-colors border border-transparent hover:border-[#E5E0D8];
   }
+}
+
+.journey-wrap { width: min(100%, 82rem); margin-inline: auto; padding: clamp(3.25rem, 6vw, 6rem) clamp(1.25rem, 5vw, 4rem); }
+.journey-wrap h2, .concierge-wrap h1 { font-family: Georgia, serif; font-size: clamp(2.25rem, 4.8vw, 4.25rem); line-height: 1.08; font-weight: 400; }
+.journey-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem; }
+.journey-kicker { margin-bottom: .9rem; font-size: .75rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #6b5a2d; }
+.journey-field { display: grid; gap: .45rem; font-size: .95rem; font-weight: 600; }
+.journey-field :is(input,select,textarea) { min-width: 0; width: 100%; border: 1px solid #aaa596; border-radius: .15rem; background: #fff; color: #211f1a; padding: .7rem .8rem; min-height: 46px; font: inherit; font-weight: 400; }
+.journey-link { display: inline-flex; align-items: center; gap: .55rem; min-height: 46px; font-size: .95rem; font-weight: 600; text-decoration: underline; text-underline-offset: .35em; }
+.journey-link:hover { text-decoration-thickness: 2px; }
+.journey-primary { display: inline-flex; justify-content: center; align-items: center; min-height: 48px; width: fit-content; padding: .8rem 1.5rem; background: #282a24; color: #fff; font-size: 1rem; font-weight: 600; }
+.journey-primary-light { background: #f7f4eb; color: #24241d; }
+.journey-primary:disabled { opacity: .7; }
+.stay-options { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: clamp(1.1rem, 3vw, 2.5rem); }
+.stay-options article { min-width: 0; }
+.stay-photo, .experience-link { display: block; }
+.stay-photo img, .experience-link img, .club-invitation > img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.stay-options h3, .experience-link span, .stay-group h3 { font: 400 clamp(1.5rem, 2.3vw, 2.2rem)/1.18 Georgia, serif; }
+.stay-options h3 { margin-block: .9rem .45rem; }
+.stay-options article > p { font-size: .95rem; color: #525047; }
+.stay-group { border-left: 2px solid #aa9c74; padding: .4rem 1.2rem; }
+.stay-group p { max-width: 42rem; margin-block: .8rem; }
+.experience-link span { display: flex; justify-content: space-between; align-items: center; padding-block: 1rem; gap: .8rem; }
+.club-invitation, .concierge-wrap { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: center; gap: clamp(2rem, 6vw, 6rem); }
+.concierge-wrap { padding-block: 2rem; align-items: start; }
+.concierge-direct, .concierge-form { display: grid; gap: 1rem; }
+.concierge-direct { margin-top: 1.7rem; gap: .25rem; }
+.concierge-direct a { width: fit-content; min-height: 44px; font: 400 clamp(1.25rem, 2vw, 1.65rem)/1.5 Georgia, serif; text-decoration: underline; text-underline-offset: .2em; }
+.concierge-form { background: #f2efe7; padding: clamp(1.1rem, 3vw, 2.5rem); }
+.concierge-identity { display: grid; gap: 1rem; }
+@media (max-width: 700px) {
+  .stay-options, .club-invitation, .concierge-wrap { grid-template-columns: 1fr; }
+  .stay-options { gap: 1.8rem; }
+  .journey-heading { align-items: start; }
 }

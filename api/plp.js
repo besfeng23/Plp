@@ -6,7 +6,7 @@ const DEFAULT_CONTENT = {
   homepage: {
     heroTitle: 'Pueblo La Perla',
     heroSubtitle: 'A private hillside retreat above Boracay’s white sands, shaped around villa living, wellness, and quiet island days.',
-    primaryCta: 'Reserve your stay'
+    primaryCta: 'Check availability'
   },
   accommodation: {
     grandOceanVilla: {

@@ -1,6 +1,8 @@
 import { formatPeso, PLP_DEPOSIT_RATE, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, occupiedNights, shiftMonth, todayAtResort } from '../lib/booking-dates.js';
 
+import { requestedGuests } from '../lib/guest-journey.js';
+
 const element = id => document.getElementById(id);
 const track = name => window.plpTrack?.(name);
 const fullDate = new Intl.DateTimeFormat('en-PH', { dateStyle: 'full', timeZone: 'UTC' });
@@ -324,6 +326,8 @@ for (const room of PLP_ROOMS) {
 }
 element('roomSelect').value = selected.key;
 element('guests').max = selected.capacity;
+const initialGuests = requestedGuests(new URLSearchParams(location.search).get('guests'), selected.capacity);
+if (initialGuests !== null) element('guests').value = initialGuests;
 element('depositRate').textContent = '(' + Math.round(PLP_DEPOSIT_RATE * 100) + '%)';
 element('roomSelect').addEventListener('change', () => {
   selected = PLP_ROOMS.find(room => room.key === element('roomSelect').value);
