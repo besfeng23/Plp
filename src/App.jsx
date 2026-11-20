@@ -120,7 +120,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
   return <header className={`fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}>
     <div className='mx-auto flex h-24 max-w-[1400px] items-center justify-between px-5 pt-[var(--safe-top)] md:px-12'>
       <PageLink target='home' navigate={navigate} className={`flex flex-col items-center ${logoColor}`} aria-label='Pueblo La Perla home'><span className='font-serif text-xl font-medium tracking-[0.15em] sm:text-2xl'>PUEBLO LA PERLA</span><span className='mt-1 text-[10px] uppercase tracking-[0.3em] opacity-80'>Boracay</span></PageLink>
-      <nav className='hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.14em] xl:flex 2xl:gap-7'>{links.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} aria-current={view === id ? 'page' : undefined} className={`inline-flex min-h-11 items-center transition-colors ${itemColor} ${id === 'booking' ? 'rounded-sm border px-4' : ''}`}>{label}</PageLink>)}</nav>
+      <nav className='hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.14em] xl:flex 2xl:gap-7'>{links.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} aria-current={view === id ? 'page' : undefined} className={`inline-flex min-h-11 items-center transition-colors ${itemColor} ${id === 'booking' ? 'plp-public-nav-reserve border px-5' : ''}`}>{label}</PageLink>)}</nav>
       <button onClick={() => setIsOpen(!isOpen)} className='min-h-11 min-w-11 p-2 xl:hidden' aria-label={isOpen ? 'Close menu' : 'Open menu'} aria-expanded={isOpen} aria-controls={mobileMenuId}>{isOpen ? <X className={`h-6 w-6 ${logoColor}`} /> : <Menu className={`h-6 w-6 ${logoColor}`} />}</button>
     </div>
     {isOpen && <div id={mobileMenuId} className='fixed inset-x-0 bottom-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] pb-[calc(6rem+var(--safe-bottom))] xl:hidden'>
@@ -148,7 +148,12 @@ function PublicFooter({ navigate }) {
 }
 
 function MobileActionBar({ navigate }) {
-  return <div className='fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-[#FAFAF7]/95 px-4 pt-3 shadow-[0_-12px_30px_rgba(0,0,0,0.06)] backdrop-blur md:hidden' style={{ paddingBottom: 'calc(0.75rem + var(--safe-bottom))' }}><div className='grid grid-cols-3 gap-2 text-center text-xs font-semibold uppercase tracking-[0.12em]'><PageLink target='booking' navigate={navigate} className='flex min-h-12 items-center justify-center bg-[#1A1A1A] px-2 py-3 text-white'>Reserve</PageLink><a href={'mailto:' + CONCIERGE_EMAIL} className='flex min-h-12 items-center justify-center border border-stone-300 px-2 py-3 text-[#1A1A1A]'>Email</a><PageLink target='contact' navigate={navigate} className='flex min-h-12 items-center justify-center border border-stone-300 px-2 py-3 text-[#1A1A1A]'>Concierge</PageLink></div></div>;
+  return <div className='plp-mobile-action fixed inset-x-0 bottom-0 z-40 px-4 md:hidden' style={{ paddingBottom: 'calc(0.75rem + var(--safe-bottom))' }}>
+    <div className='plp-mobile-action__inner'>
+      <PageLink target='booking' navigate={navigate} className='plp-mobile-action__book'>Check availability</PageLink>
+      <PageLink target='contact' navigate={navigate} className='plp-mobile-action__concierge'>Ask concierge</PageLink>
+    </div>
+  </div>;
 }
 
 function EditorialSection({ label, title, text, imageSrc, imageAlt, topic, align = 'right' }) {
@@ -157,7 +162,41 @@ function EditorialSection({ label, title, text, imageSrc, imageAlt, topic, align
   return <div className='mx-auto max-w-[1400px] px-6 py-20 md:px-12 md:py-24'><div className='grid grid-cols-1 items-center gap-16 md:gap-24 lg:grid-cols-2'>{align === 'left' ? <><div className='order-2 lg:order-1'>{content}</div><div className='order-1 lg:order-2'>{image}</div></> : <><div className='order-1'>{image}</div><div className='order-2'>{content}</div></>}</div></div>;
 }
 
-function AccommodationsView({ navigate }) { return <main id='main-content' className='min-h-screen bg-[#FAFAF7] pb-24 pt-32'><div className='mx-auto max-w-[1400px] px-6 md:px-12'><div className='mb-10 max-w-3xl md:mb-14'><h1 className='mb-6 font-serif text-5xl md:text-6xl'>Accommodation</h1><p className='text-lg leading-relaxed text-[#3F3F3F]'>Spacious, private, and deeply connected to the island landscape. From grand villas to quiet premium rooms.</p></div><div className='space-y-28 md:space-y-32'>{ACCOMMODATIONS.map((acc,index)=><div key={acc.id} className={`flex flex-col gap-12 lg:gap-24 ${index % 2 !== 0 ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}><div className='w-full lg:w-3/5'><ImageBlock label={`[ ${acc.name} Image ]`} ratio='aspect-[16/10]' src={acc.heroSrc} alt={acc.heroAlt || `${acc.name} at Pueblo La Perla Boracay`} /></div><div className='flex w-full flex-col justify-center lg:w-2/5'><p className='mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>{acc.imageTag}</p><h2 className='mb-6 font-serif text-3xl md:text-4xl'>{acc.name}</h2><p className='mb-5 leading-relaxed text-[#3F3F3F]'>{acc.description}</p><p className='mb-8 border-l border-[#7A6A3A]/50 pl-5 text-sm leading-relaxed text-[#3F3F3F]'>Best for: {acc.bestFor}</p><div className='mb-8 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-stone-200 pt-6 text-sm text-[#3F3F3F]'><div className='flex items-center'><Users className='mr-3 h-4 w-4 text-stone-500' /> Up to {acc.capacity} Guests</div><div className='flex items-center'><MapPin className='mr-3 h-4 w-4 text-stone-500' /> {acc.bedrooms} Bedrooms</div><div className='col-span-2 text-[#1A1A1A]'>From {formatMoney(acc.rate)} / night</div></div><div className='mb-10 flex flex-wrap gap-2'>{acc.features.map((feature)=><span key={feature} className='bg-stone-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]'>{feature}</span>)}</div><div className='flex flex-wrap items-center gap-6'><button onClick={()=>navigate(acc.slug)} className='border border-[#1A1A1A] px-7 py-3.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition hover:bg-[#1A1A1A] hover:text-white'>View {acc.type.toLowerCase()} details</button><a href={'/booking?room=' + acc.slug} className='journey-link'>Check dates</a></div></div></div>)}</div></div></main>; }
+function AccommodationsView({ navigate }) {
+  return <main id='main-content' className='plp-accommodations-page min-h-screen bg-[#FAFAF7] pb-24 pt-32'>
+    <div className='mx-auto max-w-[1400px] px-6 md:px-12'>
+      <div className='plp-accommodations-intro mb-12 max-w-3xl md:mb-16'>
+        <p className='journey-kicker'>The accommodation collection</p>
+        <h1 className='mb-6 font-serif text-5xl md:text-6xl'>Stay somewhere extraordinary.</h1>
+        <p className='text-lg leading-relaxed text-[#3F3F3F]'>From a private hillside villa to a quiet suite or modern room, find a space that feels like your own corner of Boracay.</p>
+      </div>
+      <div className='plp-accommodations-list'>
+        {ACCOMMODATIONS.map((acc, index) => <article key={acc.id} className={'plp-accommodation-entry' + (index % 2 !== 0 ? ' plp-accommodation-entry--reverse' : '')}>
+          <div className='plp-accommodation-entry__media'>
+            <ImageBlock label={acc.name} ratio='aspect-[16/10]' src={acc.heroSrc} alt={acc.heroAlt || acc.name + ' at Pueblo La Perla Boracay'} />
+            <span className='plp-accommodation-entry__ordinal' aria-hidden='true'>0{index + 1}</span>
+          </div>
+          <div className='plp-accommodation-entry__copy'>
+            <p className='journey-kicker'>{acc.imageTag}</p>
+            <h2>{acc.name}</h2>
+            <p className='plp-accommodation-entry__description'>{acc.description}</p>
+            <p className='plp-accommodation-entry__best'>Best for: {acc.bestFor}</p>
+            <dl className='plp-accommodation-entry__facts'>
+              <div><dt>Guests</dt><dd>Up to {acc.capacity}</dd></div>
+              <div><dt>Bedrooms</dt><dd>{acc.bedrooms}</dd></div>
+              <div><dt>Rate from</dt><dd>{formatMoney(acc.rate)} / night</dd></div>
+            </dl>
+            <div className='plp-accommodation-entry__features'>{acc.features.map(feature => <span key={feature}>{feature}</span>)}</div>
+            <div className='plp-accommodation-entry__actions'>
+              <a href={'/booking?room=' + acc.slug} className='journey-primary'>Check dates <ChevronRight size={17} aria-hidden='true' /></a>
+              <button onClick={() => navigate(acc.slug)} className='journey-link'>Explore {acc.type.toLowerCase()} <ChevronRight size={16} aria-hidden='true' /></button>
+            </div>
+          </div>
+        </article>)}
+      </div>
+    </div>
+  </main>;
+}
 
 function RoomDetailView({ room, navigate }) {
   const others = ACCOMMODATIONS.filter((item) => item.slug !== room.slug);
