@@ -21,7 +21,7 @@ export default function ClubView() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch('/api/club?operation=activities', { signal: controller.signal })
+    fetch('/api/plp?action=club&operation=activities', { signal: controller.signal })
       .then((response) => { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
       .then((data) => { setActivities(Array.isArray(data.activities) ? data.activities : []); setStatus('ready'); })
       .catch((error) => { if (error.name !== 'AbortError') setStatus('unavailable'); });

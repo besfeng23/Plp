@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import clubHandler from '../api/club.js';
+import clubHandler from '../lib/club-handler.js';
+import plpHandler from '../api/plp.js';
 
 function response() {
   return {
@@ -39,6 +40,15 @@ test('public calendar is empty without database config; no anonymous PII access'
     await clubHandler(request('GET', 'members'), protectedResult);
     assert.equal(protectedResult.statusCode, 403);
     assert.equal(protectedResult.body.members, undefined);
+  });
+});
+
+test('club endpoint dispatches through existing PLP function without a thirteenth Vercel function', async () => {
+  await withEnv({ SUPABASE_URL: undefined, SUPABASE_SERVICE_ROLE_KEY: undefined }, async () => {
+    const result = response();
+    await plpHandler({ method: 'GET', query: { action: 'club', operation: 'activities' }, headers: {} }, result);
+    assert.equal(result.statusCode, 200);
+    assert.deepEqual(result.body.activities, []);
   });
 });
 

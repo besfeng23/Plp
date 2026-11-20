@@ -5,7 +5,7 @@ const EMPTY_MEMBER = { full_name: '', email: '', phone: '', age_declared_60plus:
 const EMPTY_ACTIVITY = { title: '', summary: '', category: 'connection', starts_at: '', ends_at: '', capacity: '', location_note: '', accessibility_notes: '' };
 
 async function clubRequest(operation, code, { method = 'GET', body } = {}) {
-  const response = await fetch(`/api/club?operation=${encodeURIComponent(operation)}`, {
+  const response = await fetch(`/api/plp?action=club&operation=${encodeURIComponent(operation)}`, {
     method,
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json', 'X-PLP-Staff-Code': code },

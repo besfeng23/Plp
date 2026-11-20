@@ -34,7 +34,7 @@ No activity should claim medical benefit, accessibility, transfer inclusions, or
 
 - Public route `/club`: editorial invitation, proposed pillars, server-backed published calendar, concierge inquiry.
 - Staff-only PLP Club page: member intake with consent acknowledgment; PENDING → ACTIVE / DECLINED / INACTIVE decisions; draft/publish/cancel activities.
-- New isolated server routes `/api/club` and `/api/_clubDb.js` using the existing configured server-side Supabase access (no change to booking or payment clients).
+- Club actions are dispatched through the existing `/api/plp?action=club&operation=...` serverless function, with isolated implementation in `lib/club-handler.js` and `api/_clubDb.js`. This avoids a thirteenth Vercel function on the Hobby plan and does not change booking or payment clients.
 - New chapter-aware tables: `plp_club_chapters`, `plp_club_members`, `plp_club_activities`.
 - Row-level security enabled and API table privileges revoked from `anon` and `authenticated`.
 - No new credentials, payment mandates, PayPal transactions, or modifications to reservations.
