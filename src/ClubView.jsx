@@ -4,10 +4,10 @@ import { calendarFile } from '../lib/club-calendar.js';
 import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 
 const IDEAS = [
-  { key: 'connection', title: 'Connection', description: 'Coffee mornings, conversation circles, and gatherings designed around friendship.' },
-  { key: 'wellbeing', title: 'Gentle wellbeing', description: 'Relaxed movement and quiet wellness sessions, with accessibility considered for each event.' },
-  { key: 'culture', title: 'Culture & learning', description: 'Creative workshops, local stories, music, and opportunities to learn together.' },
-  { key: 'island', title: 'Island experiences', description: 'Thoughtfully paced Boracay outings, subject to venue, transport, and safety arrangements.' },
+  { key: 'connection', title: 'Connection', description: 'Coffee mornings, conversation circles, and gatherings designed around friendship.', image: '/images/plp-private-breakfast-pool.webp', imageAlt: 'Breakfast table overlooking the pool at Pueblo La Perla' },
+  { key: 'wellbeing', title: 'Gentle wellbeing', description: 'Relaxed movement and quiet wellness sessions, with accessibility considered for each event.', image: '/images/plp-wellness-bath-ritual.webp', imageAlt: 'Wellness bath prepared at Pueblo La Perla' },
+  { key: 'culture', title: 'Culture & learning', description: 'Creative workshops, local stories, music, and opportunities to learn together.', image: '/images/plp-rooftop-evening-lounge.webp', imageAlt: 'Rooftop lounge setting at Pueblo La Perla in the evening' },
+  { key: 'island', title: 'Island experiences', description: 'Thoughtfully paced Boracay outings, subject to venue, transport, and safety arrangements.', image: '/images/plp-day-balcony-sea-view.webp', imageAlt: 'View of the sea from a Pueblo La Perla hillside balcony' },
 ];
 
 const inquiryHref = (activity) => `mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent(activity ? `PLP Club Boracay — ${activity}` : 'PLP Club Boracay — Membership Interest')}`;
@@ -43,7 +43,7 @@ export default function ClubView() {
     <section id="membership" aria-labelledby="club-membership-title" className="mx-auto grid max-w-[1400px] gap-10 px-6 py-20 md:grid-cols-[1fr_1fr] md:gap-20 md:px-12 md:py-28">
       <div><p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Introducing the Boracay chapter</p><h2 id="club-membership-title" className="max-w-xl font-serif text-4xl leading-tight md:text-6xl">How membership works</h2></div>
       <div className="max-w-xl self-center text-base leading-8 text-[#45413A]">
-        <ol className="list-decimal space-y-3 pl-6">
+        <ol className="plp-club-steps space-y-3">
           <li>Tell the Boracay team which activities interest you. You can enquire for yourself or help a family member get in touch.</li>
           <li>For an application, staff record the applicant’s consent and declaration that they are 60 or above, then review eligibility.</li>
           <li>Check the published calendar and contact the team about attending. You can enquire without booking a room.</li>
@@ -52,7 +52,28 @@ export default function ClubView() {
       </div>
     </section>
 
-    <section className="bg-[#F2EEE5] px-6 py-20 md:px-12 md:py-24" aria-labelledby="club-activities-title"><div className="mx-auto max-w-[1400px]"><p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Program directions · For discussion</p><h2 id="club-activities-title" className="mb-5 font-serif text-4xl md:text-6xl">Which activities interest you?</h2><p className="mb-12 max-w-2xl text-base leading-8 text-[#45413A]">Tell us what you would enjoy. These ideas will help shape the Boracay program.</p><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">{IDEAS.map((item) => <article className="border-t border-[#B4A784] bg-white/70 p-7" key={item.key}><h3 className="mb-4 font-serif text-2xl">{item.title}</h3><p className="text-base leading-7 text-[#45413A]">{item.description}</p><a href={'/contact?topic=club-activity&program=' + item.key} className="journey-link mt-4">Express interest<span className="sr-only"> in {item.title}</span></a></article>)}</div></div></section>
+    <section className="plp-club-programs bg-[#F2EEE5] px-6 py-20 md:px-12 md:py-24" aria-labelledby="club-activities-title">
+      <div className="mx-auto max-w-[1400px]">
+        <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Program directions · For discussion</p>
+        <div className="plp-club-programs__heading">
+          <h2 id="club-activities-title" className="font-serif text-4xl md:text-6xl">Made for life together.</h2>
+          <p>Tell us which experiences you would enjoy. These are proposed ideas, not confirmed events or benefits.</p>
+        </div>
+        <div className="plp-club-programs__grid">
+          {IDEAS.map((item, index) => <article className="plp-club-program" key={item.key}>
+            <div className="plp-club-program__photo">
+              <img src={item.image} alt={item.imageAlt} loading="lazy" decoding="async" width="540" height="640" />
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            </div>
+            <div className="plp-club-program__body">
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <a href={'/contact?topic=club-activity&program=' + item.key} className="journey-link">Express interest <ArrowRight size={16} aria-hidden="true" /><span className="sr-only"> in {item.title}</span></a>
+            </div>
+          </article>)}
+        </div>
+      </div>
+    </section>
 
     <section id="club-calendar" className="mx-auto max-w-[1400px] scroll-mt-20 px-6 py-20 md:px-12 md:py-24" aria-labelledby="club-calendar-title"><div className="mb-10 flex flex-wrap items-end justify-between gap-7"><div><p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Boracay · Local time</p><h2 id="club-calendar-title" className="font-serif text-4xl md:text-6xl">Upcoming activities</h2></div><CalendarDays className="text-[#746130]" size={30} aria-hidden="true" /></div>
       {activities.length ? <div className="divide-y divide-stone-300 border-y border-stone-300">{activities.map((activity) => <article key={activity.id} className="grid gap-5 py-8 md:grid-cols-[0.7fr_1.3fr_auto] md:items-center md:gap-8"><p className="text-sm font-semibold text-[#746130]">{formatSchedule(activity.starts_at)}</p><div><h3 className="font-serif text-3xl">{activity.title}</h3><p className="mt-2 max-w-2xl text-base leading-7 text-[#45413A]">{activity.summary}</p>{activity.location_note && <p className="mt-2 text-sm text-[#45413A]">Location: {activity.location_note}</p>}{activity.accessibility_notes && <p className="mt-2 text-sm text-[#45413A]">Access notes: {activity.accessibility_notes}</p>}</div><div className="grid justify-items-start gap-1"><a href={inquiryHref(activity.title)} className="inline-flex min-h-12 items-center justify-center gap-2 border border-[#1A1A1A] px-5 py-3 text-sm font-semibold hover:bg-[#1A1A1A] hover:text-white">Ask about attending <ArrowRight size={16} /></a>
@@ -68,7 +89,7 @@ export default function ClubView() {
             <h2 id="club-regions-title" className="font-serif text-4xl leading-tight md:text-6xl">Boracay first. More chapters later.</h2>
             <p className="mt-6 text-base leading-8 text-white/75">One PLP Club concept, with separate local programs and member records as new chapters are approved.</p>
           </div>
-          <div className="space-y-5 self-center">
+          <div className="plp-club-chapters space-y-5 self-center">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Boracay, Philippines</span><span className="text-sm text-[#E3CE8B]">Pilot in development</span></div>
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Singapore</span><span className="text-sm text-white/60">Proposed · Changi Beach Club</span></div>
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Malaysia</span><span className="text-sm text-white/60">Future chapter</span></div>
