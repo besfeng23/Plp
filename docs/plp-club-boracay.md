@@ -1,6 +1,6 @@
 # PLP Club — Boracay Senior Membership Pilot
 
-**Status:** Proposed program; implementation on an isolated feature branch. Not an approved commercial offer or a confirmed event schedule.
+**Status:** Proposed program; the Boracay website and code foundation are merged, but this is not an approved commercial offer, operational launch, or confirmed event schedule.
 
 ## Product decision
 
@@ -64,6 +64,14 @@ No activity should claim medical benefit, accessibility, transfer inclusions, or
 **Phase 3 — Commercial program:** only after price/benefit decisions, add fees/renewal/payment, operational reporting, member activity insights, consent-based reminders and partner benefits.
 
 **Phase 4 — Regional chapters:** Singapore and Malaysia with explicit location availability, localized age/consumer/privacy review, currency/time-zone and program coordinators, chapter-scoped access policies. No replication of Boracay members across regions by default.
+
+### Singapore venue direction — 21 November 2026
+
+The owner has identified **Changi Beach Club**, 2 Andover Road, Singapore 509984, as the **intended venue** for the future Singapore PLP Club chapter. This is a planning decision, not evidence of a venue agreement, sponsorship, joint operation, existing PLP premises, or member access. CBC has its own independent membership program.
+
+The public `/club` page may identify the planned venue only with the explicit qualification that **no PLP–CBC partnership, scheduled activity, or facility privilege is confirmed**. Proposed 60+ activity themes include social mornings, cultural and heritage gatherings, gentle recreation, and coastal outings; none are published events or benefits. No Changi Beach Club images or marks are licensed for PLP use by this decision.
+
+Source checks: [CBC official site](https://changibc.org.sg/) and [facilities/contact](https://changibc.org.sg/facilities-information-booking/) (main address and independent venue), reviewed 21 November 2026. The owner's Changi Beach Club research document was the planning input, not an agreement. Confirm the authorized contracting entity, permission to use the venue and brand, event spaces, liability/accessibility, actual availability, Singapore PDPA requirements, local membership terms, fees and staff before any Singapore enrollment, payment or activity booking. The database chapter remains `PLANNED`; the Boracay calendar and staff flows must not be relabeled as Singapore functionality.
 
 ## Required owner decisions
 
