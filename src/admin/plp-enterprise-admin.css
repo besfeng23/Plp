@@ -159,3 +159,44 @@ html[data-admin-experience="plp-enterprise-admin"] body { margin: 0; background:
 .plp-enquiry h4 { margin: 0; font: 400 1.3rem Georgia, serif; }
 .plp-enquiry time { font-size: .85rem; color: #625c4e; }
 .plp-enquiry p { margin: .6rem 0; line-height: 1.55; }
+
+/* November 2026: owner-first visual hierarchy; the existing data sources stay intact. */
+.plp-admin-header { border-bottom: 0; box-shadow: 0 1px 0 #e7e4da; }
+.plp-admin-content { padding-top: clamp(1.6rem,3vw,3rem); }
+.plp-workspace-intro { margin-bottom: clamp(1.6rem,3vw,2.5rem); }
+.plp-workspace-intro > div { align-items: flex-end; }
+.plp-workspace-intro h1 { line-height: 1.14; margin-top: .8rem; letter-spacing: -.04em; }
+.plp-today-board { padding: clamp(1.2rem,2.4vw,2.25rem); margin-bottom: 1.4rem; background: #f0ede4; border: 1px solid #e5e0d3; }
+.plp-today-board__heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem; }
+.plp-today-board__heading h2 { margin: .4rem 0 0; color: var(--plp-ink); font: 400 clamp(1.65rem,2.9vw,2.45rem)/1.2 'Libre Baskerville',Georgia,serif; letter-spacing: -.04em; }
+.plp-today-board .plp-text-button { min-height: 42px; }
+.plp-metrics--today { margin: 0; gap: clamp(.5rem,1vw,1rem); }
+.plp-metrics--today .plp-metric { min-height: 143px; background: #fffefa; border-color: #ddd9cf; padding: clamp(1rem,1.6vw,1.5rem); }
+.plp-metrics--today .plp-metric > span { color: #5e5d53; letter-spacing: .1em; font-size: 10px; }
+.plp-metrics--today .plp-metric strong { font-size: clamp(1.8rem,2.8vw,2.75rem); letter-spacing: -.055em; margin: 1.05rem 0 .5rem; }
+.plp-metrics--today .plp-metric small { color: #67665e; font-size: 11px; }
+.plp-metrics--today .plp-metric--attention { border-left: 3px solid #8d7750; }
+.plp-admin-root .plp-two-columns .plp-panel { min-height: 18rem; }
+.plp-admin-root .plp-panel__head h3 { line-height: 1.35; }
+.plp-admin-root .plp-panel__head p { font-size: 12px; }
+.plp-admin-root .plp-record { transition: background-color .18s; }
+.plp-admin-root .plp-record:focus-visible { outline-offset: -2px; }
+.plp-admin-root .plp-record__primary strong { font-size: 13px; }
+.plp-admin-root .plp-record__primary small { font-size: 11px; line-height: 1.55; }
+.plp-admin-root .plp-status { font-size: 10px; }
+.plp-admin-root .plp-sidebar-link.active { background: #25261e; border-left: 2px solid #bbab86; padding-left: 12px; }
+@media (max-width: 600px) {
+  .plp-today-board { padding: 1rem; }
+  .plp-today-board__heading { align-items: flex-start; flex-direction: column; gap: .3rem; }
+  .plp-today-board__heading h2 { font-size: 1.6rem; }
+  .plp-metrics--today { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
+  .plp-metrics--today .plp-metric { min-height: 130px; padding: 1rem .75rem; }
+  .plp-metrics--today .plp-metric strong { font-size: 1.9rem; }
+  .plp-metrics--today .plp-metric small { font-size: 10px; }
+  .plp-workspace-intro > div { align-items: flex-start; gap: 1rem; }
+  .plp-workspace-intro h1 { font-size: clamp(1.6rem,7vw,2.4rem); }
+  .plp-admin-root .plp-two-columns .plp-panel { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plp-admin-root .plp-record { transition: none; }
+}
