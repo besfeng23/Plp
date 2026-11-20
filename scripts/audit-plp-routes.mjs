@@ -8,6 +8,7 @@ const routes = [
   '/accommodation',
   '/accommodations',
   '/experiences',
+  '/club',
   '/gallery',
   '/getting-here',
   '/contact',

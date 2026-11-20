@@ -172,6 +172,14 @@
       "destination": "/experiences.html"
     },
     {
+      "source": "/club",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/club/",
+      "destination": "/index.html"
+    },
+    {
       "source": "/reservation-policy",
       "destination": "/reservation-policy.html"
     },
