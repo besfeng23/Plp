@@ -2,10 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function VideoSection() {
   const ref = useRef(null);
+  const videoRef = useRef(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [playing, setPlaying] = useState(true);
 
   useEffect(() => {
-    if (!ref.current || shouldLoadVideo) return;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => setReduceMotion(media.matches);
+    media.addEventListener('change', updatePreference);
+    return () => media.removeEventListener('change', updatePreference);
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion) videoRef.current?.pause();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (!ref.current || shouldLoadVideo || reduceMotion) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -19,7 +33,17 @@ export default function VideoSection() {
 
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [shouldLoadVideo]);
+  }, [shouldLoadVideo, reduceMotion]);
+
+  const togglePlayback = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      void videoRef.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    } else {
+      videoRef.current.pause();
+      setPlaying(false);
+    }
+  };
 
   return (
     <section ref={ref} className='bg-[#FAFAF7] px-6 pb-24 md:px-12'>
@@ -31,11 +55,12 @@ export default function VideoSection() {
         </div>
         <div className='relative aspect-[16/9] w-full overflow-hidden bg-stone-900 md:aspect-[21/9]'>
           <img src='/images/plp-hillside-villas.jpeg' alt='Pueblo La Perla hillside villas in Boracay' className='absolute inset-0 h-full w-full object-cover' loading='lazy' />
-          {shouldLoadVideo && (
-            <video className='absolute inset-0 h-full w-full object-cover' autoPlay muted loop playsInline preload='none' poster='/images/plp-hillside-villas.jpeg' aria-label='Pueblo La Perla hillside atmosphere video'>
+          {shouldLoadVideo && !reduceMotion && <>
+            <video ref={videoRef} className='absolute inset-0 h-full w-full object-cover' autoPlay muted loop playsInline preload='none' poster='/images/plp-hillside-villas.jpeg' aria-label='Pueblo La Perla hillside atmosphere video'>
               <source src='/videos/plp-living-hillside-loop.mp4' type='video/mp4' />
             </video>
-          )}
+            <button type='button' onClick={togglePlayback} className='absolute bottom-4 right-4 z-10 min-h-11 border border-white/60 bg-black/65 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' aria-label={playing ? 'Pause resort video' : 'Play resort video'}>{playing ? 'Pause video' : 'Play video'}</button>
+          </>}
         </div>
       </div>
     </section>

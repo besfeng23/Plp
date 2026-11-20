@@ -53,6 +53,24 @@
       ]
     },
     {
+      "source": "/booking/success",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/booking/cancel",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/images/(.*)",
       "headers": [
         {
@@ -148,6 +166,22 @@
       "destination": "/booking.html"
     },
     {
+      "source": "/booking/success",
+      "destination": "/booking/success.html"
+    },
+    {
+      "source": "/booking/success/",
+      "destination": "/booking/success.html"
+    },
+    {
+      "source": "/booking/cancel",
+      "destination": "/booking/cancel.html"
+    },
+    {
+      "source": "/booking/cancel/",
+      "destination": "/booking/cancel.html"
+    },
+    {
       "source": "/accommodation",
       "destination": "/accommodation.html"
     },
@@ -173,11 +207,11 @@
     },
     {
       "source": "/club",
-      "destination": "/index.html"
+      "destination": "/club.html"
     },
     {
       "source": "/club/",
-      "destination": "/index.html"
+      "destination": "/club.html"
     },
     {
       "source": "/reservation-policy",
@@ -229,19 +263,75 @@
     },
     {
       "source": "/privacy-policy",
-      "destination": "/index.html"
+      "destination": "/privacy-policy.html"
     },
     {
       "source": "/privacy-policy/",
-      "destination": "/index.html"
+      "destination": "/privacy-policy.html"
     },
     {
       "source": "/terms-of-service",
-      "destination": "/index.html"
+      "destination": "/terms-of-service.html"
     },
     {
       "source": "/terms-of-service/",
-      "destination": "/index.html"
+      "destination": "/terms-of-service.html"
+    },
+    {
+      "source": "/gallery",
+      "destination": "/gallery.html"
+    },
+    {
+      "source": "/gallery/",
+      "destination": "/gallery.html"
+    },
+    {
+      "source": "/getting-here",
+      "destination": "/getting-here.html"
+    },
+    {
+      "source": "/getting-here/",
+      "destination": "/getting-here.html"
+    },
+    {
+      "source": "/exclusive-offer",
+      "destination": "/exclusive-offer.html"
+    },
+    {
+      "source": "/exclusive-offer/",
+      "destination": "/exclusive-offer.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/contact/",
+      "destination": "/contact.html"
+    },
+    {
+      "source": "/accommodation/grand-ocean-villa",
+      "destination": "/accommodation/grand-ocean-villa.html"
+    },
+    {
+      "source": "/accommodation/grand-ocean-villa/",
+      "destination": "/accommodation/grand-ocean-villa.html"
+    },
+    {
+      "source": "/accommodation/sunset-suite",
+      "destination": "/accommodation/sunset-suite.html"
+    },
+    {
+      "source": "/accommodation/sunset-suite/",
+      "destination": "/accommodation/sunset-suite.html"
+    },
+    {
+      "source": "/accommodation/smart-room-premium",
+      "destination": "/accommodation/smart-room-premium.html"
+    },
+    {
+      "source": "/accommodation/smart-room-premium/",
+      "destination": "/accommodation/smart-room-premium.html"
     },
     {
       "source": "/((?!api/|tg/|telegram/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
