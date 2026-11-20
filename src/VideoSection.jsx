@@ -5,7 +5,7 @@ export default function VideoSection() {
   const videoRef = useRef(null);
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -15,7 +15,10 @@ export default function VideoSection() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) videoRef.current?.pause();
+    if (reduceMotion) {
+      videoRef.current?.pause();
+      setPlaying(false);
+    }
   }, [reduceMotion]);
 
   useEffect(() => {
@@ -38,10 +41,9 @@ export default function VideoSection() {
   const togglePlayback = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
-      void videoRef.current.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      void videoRef.current.play().catch(() => {});
     } else {
       videoRef.current.pause();
-      setPlaying(false);
     }
   };
 
@@ -56,7 +58,8 @@ export default function VideoSection() {
         <div className='relative aspect-[16/9] w-full overflow-hidden bg-stone-900 md:aspect-[21/9]'>
           <img src='/images/plp-hillside-villas.jpeg' alt='Pueblo La Perla hillside villas in Boracay' className='absolute inset-0 h-full w-full object-cover' loading='lazy' />
           {shouldLoadVideo && !reduceMotion && <>
-            <video ref={videoRef} className='absolute inset-0 h-full w-full object-cover' autoPlay muted loop playsInline preload='none' poster='/images/plp-hillside-villas.jpeg' aria-label='Pueblo La Perla hillside atmosphere video'>
+            <video ref={videoRef} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
+              onEnded={() => setPlaying(false)} onError={() => setPlaying(false)} className='absolute inset-0 h-full w-full object-cover' autoPlay muted loop playsInline preload='none' poster='/images/plp-hillside-villas.jpeg' aria-label='Pueblo La Perla hillside atmosphere video'>
               <source src='/videos/plp-living-hillside-loop.mp4' type='video/mp4' />
             </video>
             <button type='button' onClick={togglePlayback} className='absolute bottom-4 right-4 z-10 min-h-11 border border-white/60 bg-black/65 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white' aria-label={playing ? 'Pause resort video' : 'Play resort video'}>{playing ? 'Pause video' : 'Play video'}</button>

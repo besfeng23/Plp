@@ -81,7 +81,8 @@ test('attendance read and write are staff-only', async () => {
   }
 });
 
-test('concierge enquiry offers email draft mode without a configured sender', async t => {
+test('concierge enquiry offers email draft mode when both the desk and email sender are unavailable', async t => {
+  t.mock.method(globalThis, 'fetch', async () => { throw new Error('Offline test desk'); });
   const original = process.env.LEADS_FROM_EMAIL;
   t.after(() => { if (original !== undefined) process.env.LEADS_FROM_EMAIL=original; else delete process.env.LEADS_FROM_EMAIL; });
   delete process.env.LEADS_FROM_EMAIL;

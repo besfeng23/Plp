@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-export default function ActivityRegister({ activity, members, request, code, onClose }) {
+export default function ActivityRegister({ activity, members, request, code, refreshVersion, onClose }) {
   const [attendees, setAttendees] = useState(null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -10,34 +10,67 @@ export default function ActivityRegister({ activity, members, request, code, onC
     return () => clearTimeout(timer);
   }, [activity.starts_at, now]);
   const [memberId, setMemberId] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const busy = saving || loading;
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const title = useRef(null);
-  const reload = useCallback(async signal => {
-    const data = await request('attendance', code, { activity: activity.id, signal });
-    if (!Array.isArray(data.attendees)) throw new Error('Attendance could not be loaded.');
-    if (!signal?.aborted) setAttendees(data.attendees);
-  }, [request, code, activity.id]);
+  const currentRead = useRef(null);
+  const mounted = useRef(false);
+  const writing = useRef(false);
+
   useEffect(() => {
-    const controller = new AbortController();
+    mounted.current = true;
     title.current?.focus();
-    reload(controller.signal).catch(err => { if (!controller.signal.aborted) setError(err.message); });
-    return () => controller.abort();
-  }, [reload]);
+    return () => {
+      mounted.current = false;
+      currentRead.current?.abort();
+    };
+  }, []);
+
+  const reload = useCallback(async () => {
+    if (!mounted.current) return;
+    currentRead.current?.abort();
+    const controller = new AbortController();
+    currentRead.current = controller;
+    setLoading(true);
+    try {
+      const data = await request('attendance', code, { activity: activity.id, signal: controller.signal });
+      if (!Array.isArray(data.attendees)) throw new Error('Attendance could not be loaded.');
+      if (!controller.signal.aborted) setAttendees(data.attendees);
+    } catch (err) {
+      if (!controller.signal.aborted) { setAttendees(null); setError(err.message); }
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
+  }, [request, code, activity.id]);
+
+  useEffect(() => {
+    setError('');
+    void reload();
+    return () => currentRead.current?.abort();
+  }, [reload, refreshVersion]);
 
   async function mark(id, present) {
-    setBusy(true); setError(''); setNotice('');
+    if (writing.current || loading) return;
+    writing.current = true;
+    currentRead.current?.abort();
+    setSaving(true); setError(''); setNotice('');
     try {
       await request('attendance', code, { method: 'POST', body: { activity: activity.id, member: id, present } });
-      setMemberId('');
-      await reload();
-      setNotice(present ? 'Check-in recorded.' : 'Check-in removed.');
+      if (mounted.current) {
+        setMemberId('');
+        setNotice(present ? 'Check-in recorded.' : 'Check-in removed.');
+      }
     } catch (err) {
-      setError(err.message);
-      // Re-read authoritative state after a capacity conflict or an interrupted response.
-      try { await reload(); } catch { setAttendees(null); }
-    } finally { setBusy(false); }
+      if (mounted.current) setError(err.message);
+    } finally {
+      // A correction or an interrupted write always gets a fresh authoritative read.
+      await reload();
+      writing.current = false;
+      if (mounted.current) setSaving(false);
+    }
   }
 
   const checked = new Set((attendees || []).map(row => row.id));
@@ -50,7 +83,7 @@ export default function ActivityRegister({ activity, members, request, code, onC
       <p>{attendees === null ? (error ? 'Register unavailable' : 'Loading the activity register…') : attendees.length + ' checked in' + (activity.capacity ? ' · Capacity ' + activity.capacity : '')}</p></div>
       <button type="button" className="plp-secondary" onClick={onClose}>Close register</button>
     </div>
-    {error && <p role="alert" className="plp-form-error">{error} <button type="button" className="plp-text-button" disabled={busy} onClick={async () => { try { await reload(); setError(''); } catch (err) { setError(err.message); } }}>Refresh register</button></p>}
+    {error && <p role="alert" className="plp-form-error">{error} <button type="button" className="plp-text-button" disabled={busy} onClick={() => { setError(''); void reload(); }}>Refresh register</button></p>}
     {notice && <p role="status" className="plp-task-feedback">{notice}</p>}
     {attendees !== null && <>
       {canCheckIn ? <form className="plp-task-form" onSubmit={event => { event.preventDefault(); if (memberId) void mark(memberId, true); }}>

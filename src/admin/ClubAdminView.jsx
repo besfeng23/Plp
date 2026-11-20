@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ConciergeInbox from './ConciergeInbox.jsx';
 import ActivityRegister from './ActivityRegister.jsx';
 import { ArrowRight, CalendarDays, RefreshCw, Users } from 'lucide-react';
@@ -6,9 +6,11 @@ import { ArrowRight, CalendarDays, RefreshCw, Users } from 'lucide-react';
 const EMPTY_MEMBER = { full_name: '', email: '', phone: '', age_declared_60plus: false, consent_recorded: false };
 const EMPTY_ACTIVITY = { title: '', summary: '', category: 'connection', starts_at: '', ends_at: '', capacity: '', location_note: '', accessibility_notes: '' };
 
-async function clubRequest(operation, code, { method = 'GET', body, activity, signal } = {}) {
+async function clubRequest(operation, code, { method = 'GET', body, activity, before, beforeId, signal } = {}) {
   const query = new URLSearchParams({ action: 'club', operation });
   if (activity) query.set('activity', activity);
+  if (before) query.set('before', before);
+  if (beforeId) query.set('beforeId', beforeId);
   const response = await fetch('/api/plp?' + query, {
     signal,
     method,
@@ -21,6 +23,17 @@ async function clubRequest(operation, code, { method = 'GET', body, activity, si
   return result;
 }
 
+async function loadClubMembers(code, signal) {
+  const members = [];
+  let next = null;
+  do {
+    const page = await clubRequest('members', code, { ...next, signal });
+    members.push(...page.members);
+    next = page.next;
+  } while (next);
+  return members;
+}
+
 const manilaFormat = (date) => new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(date));
 
 function asManilaIso(value) {
@@ -29,8 +42,12 @@ function asManilaIso(value) {
 
 export default function ClubAdminView({ code, refreshedAt }) {
   const [members, setMembers] = useState([]);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [memberLimit, setMemberLimit] = useState(20);
   const [activities, setActivities] = useState([]);
   const [registerId, setRegisterId] = useState('');
+  const [registerVersion, setRegisterVersion] = useState(0);
+  const recordsRequest = useRef(null);
   const [member, setMember] = useState(EMPTY_MEMBER);
   const [activity, setActivity] = useState(EMPTY_ACTIVITY);
   const [loading, setLoading] = useState(true);
@@ -40,26 +57,42 @@ export default function ClubAdminView({ code, refreshedAt }) {
   const [notice, setNotice] = useState('');
 
   const reload = useCallback(async () => {
+    recordsRequest.current?.abort();
+    const controller = new AbortController();
+    recordsRequest.current = controller;
     setError(''); setLoading(true);
     try {
-      const [memberData, activityData] = await Promise.all([
-        clubRequest('members', code),
-        clubRequest('admin-activities', code),
+      const [roster, activityData] = await Promise.all([
+        loadClubMembers(code, controller.signal),
+        clubRequest('admin-activities', code, { signal: controller.signal }),
       ]);
-      setMembers(memberData.members || []);
+      if (controller.signal.aborted) return;
+      setMembers(roster);
       setActivities(activityData.activities || []);
       setRecordsReady(true);
-    } catch (caught) { setRecordsReady(false); setError(caught.message || 'Club records unavailable.'); }
-    finally { setLoading(false); }
+      setRegisterVersion(version => version + 1);
+    } catch (caught) {
+      if (!controller.signal.aborted) { setRecordsReady(false); setError(caught.message || 'Club records unavailable.'); }
+    } finally {
+      if (!controller.signal.aborted) setLoading(false);
+    }
   }, [code]);
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    void reload();
+    return () => recordsRequest.current?.abort();
+  }, [reload, refreshedAt]);
 
   const counts = useMemo(() => ({
     active: members.filter((row) => row.status === 'ACTIVE').length,
     pending: members.filter((row) => row.status === 'PENDING').length,
     published: activities.filter((row) => row.status === 'PUBLISHED' && Date.parse(row.starts_at) > Date.now()).length,
   }), [members, activities]);
+
+  const matchedMembers = useMemo(() => {
+    const term = memberSearch.trim().toLowerCase();
+    return term ? members.filter(row => [row.full_name, row.email].some(value => value?.toLowerCase().includes(term))) : members;
+  }, [members, memberSearch]);
 
   async function addMember(event) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('');
@@ -114,7 +147,11 @@ export default function ClubAdminView({ code, refreshedAt }) {
     <ConciergeInbox code={code} clubOnly refreshedAt={refreshedAt} />
 
     <section className="plp-panel"><div className="plp-panel__head"><div><h3><Users size={18} className="inline" /> Members</h3><p>Record an application after the person has consented; approve only after a staff eligibility review.</p></div></div>
-      {members.length ? <div className="plp-task-list">{members.map((item) => <div className="plp-task" key={item.id}><div><strong>{item.full_name}</strong><small>{item.email} · {item.phone || 'No phone'} · {item.status}</small><small>Consent recorded {manilaFormat(item.consent_at)}</small></div><div className="plp-club-actions">{item.status === 'PENDING' && <><button type="button" disabled={busy} onClick={() => decideMember(item.id, 'ACTIVE')} className="plp-secondary">Approve</button><button type="button" disabled={busy} onClick={() => decideMember(item.id, 'DECLINED')} className="plp-secondary">Decline</button></>}{item.status === 'ACTIVE' && <button type="button" disabled={busy} onClick={() => decideMember(item.id, 'INACTIVE')} className="plp-secondary">Deactivate</button>}</div></div>)}</div> : <p className="plp-disclosure">{recordsReady ? 'No Boracay club members recorded yet.' : 'Member records are unavailable.'}</p>}
+      {members.length > 0 && <label className="plp-task-form">Find a member by name or email
+        <input type="search" value={memberSearch} onChange={event => { setMemberSearch(event.target.value); setMemberLimit(20); }} />
+      </label>}
+      {matchedMembers.length ? <div className="plp-task-list">{matchedMembers.slice(0, memberLimit).map((item) => <div className="plp-task" key={item.id}><div><strong>{item.full_name}</strong><small>{item.email} · {item.phone || 'No phone'} · {item.status}</small><small>Consent recorded {manilaFormat(item.consent_at)}</small></div><div className="plp-club-actions">{item.status === 'PENDING' && <><button type="button" disabled={busy} onClick={() => decideMember(item.id, 'ACTIVE')} className="plp-secondary">Approve</button><button type="button" disabled={busy} onClick={() => decideMember(item.id, 'DECLINED')} className="plp-secondary">Decline</button></>}{item.status === 'ACTIVE' && <button type="button" disabled={busy} onClick={() => decideMember(item.id, 'INACTIVE')} className="plp-secondary">Deactivate</button>}</div></div>)}</div> : <p className="plp-disclosure">{members.length ? 'No members match your search.' : recordsReady ? 'No Boracay club members recorded yet.' : 'Member records are unavailable.'}</p>}
+      {matchedMembers.length > memberLimit && <button type="button" className="plp-secondary" onClick={() => setMemberLimit(limit => limit + 20)}>Show more members</button>}
     </section>
 
     <section className="plp-panel"><div className="plp-panel__head"><div><h3>Add membership application</h3><p>Do not enter a person without permission. No government IDs, full birthdates, or medical details are collected.</p></div></div>
@@ -134,7 +171,7 @@ export default function ClubAdminView({ code, refreshedAt }) {
 
     {activities.some(item => item.id === registerId) && <ActivityRegister key={registerId}
       activity={activities.find(item => item.id === registerId)} members={members}
-      request={clubRequest} code={code} onClose={() => setRegisterId('')} />}
+      request={clubRequest} code={code} refreshVersion={registerVersion} onClose={() => setRegisterId('')} />}
 
     <section className="plp-panel"><div className="plp-panel__head"><div><h3>Schedule an activity</h3><p>All times are entered and displayed in Philippine time (Asia/Manila). New activities stay in draft.</p></div></div>
       <form onSubmit={addActivity} className="plp-task-form plp-club-form">
