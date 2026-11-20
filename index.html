@@ -73,17 +73,6 @@
         ]
       }
     </script>
-    <script>
-      (function () {
-        var nativePushState = window.history.pushState;
-        window.history.pushState = function (state, title, url) {
-          if (url === '/booking' || url === 'booking') { window.location.href = '/booking'; return; }
-          if (url === '/accommodation' || url === 'accommodation' || url === '/accommodations' || url === 'accommodations') { window.location.href = '/accommodation'; return; }
-          if (url === '/experiences' || url === 'experiences') { window.location.href = '/experiences'; return; }
-          return nativePushState.apply(window.history, arguments);
-        };
-      })();
-    </script>
     <script src="/analytics.js" defer></script>
     <script src="/content-hydrate.js" defer></script>
     <title>Pueblo La Perla Boracay</title>

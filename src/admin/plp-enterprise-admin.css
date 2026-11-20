@@ -150,3 +150,12 @@ html[data-admin-experience="plp-enterprise-admin"] body { margin: 0; background:
 @media (max-width: 600px) { .plp-admin-header { padding: 10px 14px; min-height: 70px; } .plp-admin-header__title strong { font-size: 15px; } .plp-sync { display: none; } .plp-admin-content { padding: 25px 15px 55px; } .plp-mode-grid,.plp-settings-grid { grid-template-columns: 1fr; } .plp-mode-grid { margin-top: 26px; } .plp-mode-card { min-height: 260px; } .plp-metrics { gap: 8px; } .plp-metric { min-height: 127px; padding: 16px 13px; } .plp-metric strong { font-size: 23px; } .plp-workspace-intro > div { align-items: start; } .plp-workspace-intro .plp-secondary { font-size: 10px; padding: 8px; } .plp-record { flex-wrap: wrap; gap: 8px; } .plp-record__primary { flex-basis: 75%; } .plp-record__dates { flex: 1 0 70%; padding-left: 2px; } .plp-record .plp-status { flex: 0 0 auto; } .plp-task-form { grid-template-columns: 1fr; } .plp-task { align-items: flex-start; } .plp-dialog dl > div { grid-template-columns: 105px 1fr; } .plp-admin-management { height: calc(100dvh - 70px); } }
 @media (max-width: 600px) { .plp-club-form { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .plp-admin-sidebar,.plp-mode-card { transition: none; } .plp-spin { animation: none; } }
+
+.plp-month-picker { display: grid; gap: 5px; font-size: .85rem; }
+.plp-month-picker :is(input,select) { min-height: 44px; padding: .45rem .65rem; border: 1px solid #aaa596; font: inherit; color: inherit; background: white; }
+
+.plp-enquiry { padding: 1rem 0; border-top: 1px solid #ded8cd; overflow-wrap: anywhere; }
+.plp-enquiry header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.plp-enquiry h4 { margin: 0; font: 400 1.3rem Georgia, serif; }
+.plp-enquiry time { font-size: .85rem; color: #625c4e; }
+.plp-enquiry p { margin: .6rem 0; line-height: 1.55; }

@@ -1,3 +1,5 @@
+import { staffEnquiries } from '../lib/concierge-desk.js';
+import { monthBounds, websiteBookingMonth } from '../lib/owner-month.js';
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
 import { getSupabaseConfigError, insertRow, isSupabaseConfigured, listPaymentExceptions, listPaymentReconciliation, selectRows, updateRows } from './_supabase.js';
@@ -136,6 +138,26 @@ export default async function handler(req, res) {
     const action = actionOf(req);
     if (action === 'health') return await handleHealth(req, res);
     if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });
+    if (action === 'concierge-inbox') {
+      res.setHeader('Cache-Control', 'private, no-store');
+      try {
+        const [status, result] = await staffEnquiries(req.method, req.method === 'PATCH' ? parseBody(req) : req.query);
+        return json(res,status,result);
+      } catch {
+        return json(res,503,{ok:false,error:'The concierge inbox is unavailable.'});
+      }
+    }
+    if (action === 'owner-month') {
+      res.setHeader('Cache-Control', 'private, no-store');
+      if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+      const month = req.query?.month;
+      if (!monthBounds(month)) return json(res, 400, { ok: false, error: 'Choose a valid reporting month.' });
+      try {
+        return json(res, 200, { ok: true, month, ...await websiteBookingMonth(month, selectRows) });
+      } catch {
+        return json(res, 503, { ok: false, error: 'Monthly reservation totals are unavailable.' });
+      }
+    }
     if (action === 'operations') return await handleOperations(req, res);
     if (action === 'notifications') return await handleNotifications(req, res);
     if (action === 'booking-status') return await handleBookingStatus(req, res);

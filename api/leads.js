@@ -1,3 +1,4 @@
+import { deskAvailable, receiveEnquiry } from '../lib/concierge-desk.js';
 import { CONCIERGE_EMAIL } from '../lib/contact.js';
 
 const required = ['name', 'email', 'interest'];
@@ -7,16 +8,26 @@ function isValidEmail(email) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method === 'GET') {
+    if (await deskAvailable()) return res.status(200).json({ available: true, channel: 'desk' });
+    const email = Boolean(process.env.RESEND_API_KEY && process.env.LEADS_FROM_EMAIL);
+    return res.status(200).json(email ? { available: true, channel: 'email' } : { available: false });
+  }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
-    const missing = required.filter((field) => !body[field]);
+    if (body?.channel === 'desk') {
+      const [status, result] = await receiveEnquiry(body);
+      return res.status(status).json(result);
+    }
+    const missing = required.filter((field) => typeof body?.[field] !== 'string' || !body[field].trim());
 
-    if (missing.length > 0 || !isValidEmail(body.email)) {
+    if (missing.length > 0 || !isValidEmail(body?.email?.trim?.())) {
       return res.status(400).json({
         ok: false,
         error: 'Missing or invalid lead fields',
@@ -26,9 +37,9 @@ export default async function handler(req, res) {
 
     const lead = {
       name: String(body.name).slice(0, 120),
-      email: String(body.email).slice(0, 180),
+      email: body.email.trim().slice(0, 180),
       phone: String(body.phone || '').slice(0, 60),
-      interest: String(body.interest).slice(0, 120),
+      interest: body.interest.trim().replace(/[\r\n]+/g, ' ').slice(0, 120),
       preferredDates: String(body.preferredDates || '').slice(0, 120),
       message: String(body.message || '').slice(0, 1200),
       source: 'website',
@@ -39,15 +50,18 @@ export default async function handler(req, res) {
     const from = process.env.LEADS_FROM_EMAIL;
 
     if (process.env.RESEND_API_KEY && from) {
+      const requestId = typeof body.requestId === 'string' && /^[0-9a-f-]{36}$/i.test(body.requestId) ? body.requestId : null;
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
           'Content-Type': 'application/json',
+          ...(requestId && { 'Idempotency-Key': 'plp-enquiry/' + requestId }),
         },
         body: JSON.stringify({
           from,
           to: [CONCIERGE_EMAIL],
+          reply_to: lead.email,
           subject: `New Pueblo La Perla inquiry: ${lead.interest}`,
           text: [
             `Name: ${lead.name}`,
@@ -74,7 +88,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      lead,
+      ...(body.channel !== 'email' && { lead }),
       emailDelivered,
       note: 'Lead email delivered.',
     });
