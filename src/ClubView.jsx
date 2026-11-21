@@ -59,6 +59,7 @@ export default function ClubView() {
           <h2 id="club-activities-title" className="font-serif text-4xl md:text-6xl">Made for life together.</h2>
           <p>Tell us which experiences you would enjoy. These are proposed ideas, not confirmed events or benefits.</p>
         </div>
+        <p className="plp-club-programs__photo-note">Photography shows Pueblo La Perla property settings. Activities pictured or described are concepts, not confirmed Club sessions.</p>
         <div className="plp-club-programs__grid">
           {IDEAS.map((item, index) => <article className="plp-club-program" key={item.key}>
             <div className="plp-club-program__photo">
@@ -96,7 +97,9 @@ export default function ClubView() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-white/20 pt-12 md:mt-20 md:pt-16" aria-labelledby="club-singapore-title">
+        <details className="plp-future-chapter mt-12 border-t border-white/20 pt-7 md:mt-16" aria-labelledby="club-singapore-title">
+          <summary className="plp-future-chapter__summary"><span>Future chapter · Singapore</span><strong>Explore our proposed Changi vision</strong><ArrowRight size={19} aria-hidden="true" /></summary>
+          <div className="pt-10">
           <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">Singapore · Planned chapter</p>
           <div className="grid gap-10 md:grid-cols-[1.15fr_0.85fr] md:gap-20">
             <div>
@@ -115,6 +118,7 @@ export default function ClubView() {
             </div>
           </div>
         </div>
+        </details>
       </div>
     </section>
 
