@@ -165,7 +165,7 @@ export default function ClubAdminView({ code, refreshedAt }) {
       </form>
     </section>
 
-    <section className="plp-panel"><div className="plp-panel__head"><div><h3><CalendarDays size={18} className="inline" /> Activity calendar</h3><p>Drafts are private; only published future activities appear on the public PLP Club page.</p></div></div>
+    <section className="plp-panel"><div className="plp-panel__head"><div><h3><CalendarDays size={18} className="inline" /> Activity calendar</h3><p>Drafts are private; only published future activities appear on the public Pearl Club page.</p></div></div>
       {activities.length ? <div className="plp-task-list">{activities.map((item) => <div className="plp-task" key={item.id}><div><strong>{item.title}</strong><small>{manilaFormat(item.starts_at)} · {item.category} · {item.status}</small><small>{item.location_note || 'Location to be confirmed'}</small></div><div className="plp-club-actions">{item.status !== 'DRAFT' && <button className="plp-secondary" type="button" aria-pressed={registerId === item.id} onClick={() => setRegisterId(item.id)}>Attendance</button>}{item.status === 'DRAFT' && <button className="plp-secondary" type="button" disabled={busy} onClick={() => changeActivity(item.id, 'PUBLISHED')}>Publish</button>}{item.status === 'PUBLISHED' && <button className="plp-secondary" type="button" disabled={busy} onClick={() => changeActivity(item.id, 'CANCELLED')}>Cancel</button>}</div></div>)}</div> : <p className="plp-disclosure">{recordsReady ? 'No activities saved yet.' : 'Activity records are unavailable.'}</p>}
     </section>
 
