@@ -4,6 +4,7 @@ const states = { NEW: 'New', IN_PROGRESS: 'In progress', CLOSED: 'Closed' };
 const displayDate = new Intl.DateTimeFormat('en-PH', {timeZone:'Asia/Manila',month:'short',day:'numeric',year:'numeric'});
 export default function ConciergeInbox({ code, clubOnly = false, refreshedAt }) {
   const [status,setStatus] = useState('NEW');
+  const [scope,setScope] = useState('club');
   const [pages,setPages] = useState([null]);
   const [loaded,setLoaded] = useState(null);
   const [error,setError] = useState('');
@@ -11,12 +12,12 @@ export default function ConciergeInbox({ code, clubOnly = false, refreshedAt }) 
   const [busy,setBusy] = useState(false);
   const [version,setVersion] = useState(0);
   const cursor = pages[pages.length - 1];
-  const heading = clubOnly ? 'Boracay Club enquiries' : 'Concierge inbox';
+  const heading = clubOnly ? 'Pearl Club enquiries' : 'Concierge inbox';
 
   useEffect(() => {
     const controller = new AbortController();
     setLoaded(null); setError('');
-    const query = new URLSearchParams({action:'concierge-inbox',status,scope:clubOnly ? 'club' : 'all'});
+    const query = new URLSearchParams({action:'concierge-inbox',status,scope:clubOnly ? scope : 'all'});
     if (cursor) { query.set('before',cursor.created_at); query.set('beforeId',cursor.id); }
     fetch('/api/admin?' + query, {cache:'no-store',signal:controller.signal,headers:{'X-PLP-Staff-Code':code}})
       .then(async response => {
@@ -25,7 +26,7 @@ export default function ConciergeInbox({ code, clubOnly = false, refreshedAt }) 
         if (!controller.signal.aborted) setLoaded(data);
       }).catch(err => { if (!controller.signal.aborted) setError(err.message); });
     return () => controller.abort();
-  }, [code, clubOnly, status, cursor, version, refreshedAt]);
+  }, [code, clubOnly, scope, status, cursor, version, refreshedAt]);
 
   async function move(row, next) {
     setBusy(true); setActionError('');
@@ -42,10 +43,14 @@ export default function ConciergeInbox({ code, clubOnly = false, refreshedAt }) 
   }
 
   return <section className="plp-panel" aria-label={heading}>
-    <div className="plp-panel__head"><div><h3>{heading}</h3><p>{clubOnly ? 'Membership and activity messages from the Boracay enquiry form.' : 'Guest messages submitted through the website enquiry form.'}</p></div>
+    <div className="plp-panel__head"><div><h3>{heading}</h3><p>{clubOnly ? (scope === 'residential' ? 'Separate interest in the proposed residential concept. No admissions or medical services are offered.' : 'Membership and activity messages from the Boracay enquiry form.') : 'Guest messages submitted through the website enquiry form.'}</p></div>
       <label className="plp-month-picker">Enquiry status<select value={status} disabled={busy} onChange={e => { setStatus(e.target.value); setPages([null]); setActionError(''); }}>
         {Object.entries(states).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
     </div>
+    {clubOnly && <div className="plp-club-actions" role="group" aria-label="Pearl Club enquiry categories">
+      <button type="button" className="plp-secondary" aria-pressed={scope === 'club'} onClick={() => { setScope('club'); setPages([null]); }}>Club &amp; activities</button>
+      <button type="button" className="plp-secondary" aria-pressed={scope === 'residential'} onClick={() => { setScope('residential'); setPages([null]); }}>Senior-living interest</button>
+    </div>}
     {actionError && <p className="plp-form-error" role="alert">{actionError}</p>}
     {error ? <p role="alert">{error} <button className="plp-text-button" onClick={() => setVersion(value => value + 1)}>Try again</button></p>
       : !loaded ? <p role="status">Loading enquiries…</p>
