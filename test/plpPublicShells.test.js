@@ -17,7 +17,7 @@ test('all React landing routes provide page-specific first-response metadata and
     assert.ok(html.includes(`<title>${PAGE_META[view][0].replace(/&/g, '&amp;')}</title>`), view);
     assert.ok(html.includes(`<link rel="canonical" href="${url}"`), view);
     assert.ok(html.includes(`<meta property="og:url" content="${url}"`), view);
-    assert.ok(html.includes(`<h1 class="initial-shell__title">${heading}</h1>`), view);
+    assert.ok(html.includes(`<h1 class="initial-shell__title">${heading.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\'/g, '&#39;')}</h1>`), view);
     assert.ok(html.includes(summary.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;')), view);
     assert.ok(html.includes('id="root"'), view);
     assert.ok(!html.includes('"@type": "FAQPage"'), view);
