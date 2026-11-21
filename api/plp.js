@@ -1,6 +1,5 @@
 import { insertRow, isSupabaseConfigured, selectRows } from './_supabase.js';
 import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
-import clubHandler from '../lib/club-handler.js';
 
 const DEFAULT_CONTENT = {
   homepage: {
@@ -167,6 +166,6 @@ export default async function handler(req, res) {
   if (action === 'content' || (!action && req.method === 'GET')) return handleContent(req, res);
   if (action === 'analytics-config') return handleAnalyticsConfig(req, res);
   if (action === 'analytics') return handleAnalytics(req, res);
-  if (action === 'club') return clubHandler(req, res);
+  if (action === 'club') { res.setHeader('Cache-Control', 'no-store'); return json(res, 404, { ok: false, error: 'Not found' }); }
   return json(res, 404, { ok: false, error: 'Unknown PLP action' });
 }

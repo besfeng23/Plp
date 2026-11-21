@@ -100,6 +100,31 @@
   ],
   "redirects": [
     {
+      "source": "/club",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/club/",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/club.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/club/index.html",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/club/:path*",
+      "destination": "/",
+      "permanent": false
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy-policy",
       "permanent": true
@@ -204,14 +229,6 @@
     {
       "source": "/experiences/",
       "destination": "/experiences.html"
-    },
-    {
-      "source": "/club",
-      "destination": "/club.html"
-    },
-    {
-      "source": "/club/",
-      "destination": "/club.html"
     },
     {
       "source": "/reservation-policy",
