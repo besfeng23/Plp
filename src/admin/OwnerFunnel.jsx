@@ -48,7 +48,7 @@ export default function OwnerFunnel({ code, refreshedAt }) {
         <span>{label}</span><strong>{data.metrics[key]}</strong>
       </div>)}</div>
       <p className="plp-disclosure">{data.scanned === 0 ? 'No consented website events were recorded in the selected month. ' : ''}
-        These are event counts, not unique visitors or confirmed customers. Booking confirmation and payment must be checked against the separate reservation ledger. Older events may have different tracking coverage.
+        These are event counts, not unique visitors or confirmed customers. Booking confirmation and payment must be checked against the separate reservation ledger. Historical, unclassified events are excluded from this report.
       </p></>}
   </section>;
 }
