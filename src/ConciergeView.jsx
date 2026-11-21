@@ -47,7 +47,7 @@ export default function ConciergeView() {
     if (sendLock.current) return;
     sendLock.current = true;
     setState('sending');
-    const fields = { name: name.trim(), email: email.trim(), interest, channel, topic, program, room, message: message.trim() };
+    const fields = { name: name.trim(), email: email.trim(), interest, channel, topic, program, room, purpose: residentialInterest && topic === 'club' ? 'residential-interest' : null, message: message.trim() };
     const fingerprint = JSON.stringify(fields);
     try {
       if (submission.current?.fingerprint !== fingerprint) {
