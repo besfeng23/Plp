@@ -6,13 +6,12 @@ const source = file => readFileSync(new URL('../' + file, import.meta.url), 'utf
 
 test('PLP editorial home retains booking, room discovery, and real property image references', () => {
   const home = source('src/HomeView.jsx');
-  for (const path of ['/booking', '#find-your-stay', '/gallery', '/contact?topic=arrival']) {
+  for (const path of ['/booking', '#find-your-stay', '/gallery', '/club', '/contact?topic=arrival']) {
     assert.ok(home.includes(path), 'missing homepage journey: ' + path);
   }
   for (const asset of ['plp-pool-ocean-view.webp', 'plp-private-breakfast-pool.webp']) {
     assert.ok(home.includes(asset), 'missing property photograph: ' + asset);
   }
-  assert.ok(!home.includes('/club'), 'Club must not appear on unpaid public homepage');
   assert.match(home, /data-content-key="homepage\.heroTitle"/);
   assert.match(home, /data-content-key="homepage\.primaryCta"/);
 });

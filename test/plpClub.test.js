@@ -43,13 +43,12 @@ test('public calendar is empty without database config; no anonymous PII access'
   });
 });
 
-test('unpaid Club API is inaccessible through the live PLP dispatcher', async () => {
+test('club endpoint dispatches through existing PLP function without a thirteenth Vercel function', async () => {
   await withEnv({ SUPABASE_URL: undefined, SUPABASE_SERVICE_ROLE_KEY: undefined }, async () => {
     const result = response();
     await plpHandler({ method: 'GET', query: { action: 'club', operation: 'activities' }, headers: {} }, result);
-    assert.equal(result.statusCode, 404);
-    assert.equal(result.body.error, 'Not found');
-    assert.equal(result.body.activities, undefined);
+    assert.equal(result.statusCode, 200);
+    assert.deepEqual(result.body.activities, []);
   });
 });
 

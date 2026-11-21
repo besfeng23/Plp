@@ -220,7 +220,6 @@ html[data-admin-experience="plp-enterprise-admin"] body { margin: 0; background:
 .plp-day-quicklinks__head { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem; }
 .plp-day-quicklinks__head p { margin:0; font-size:12px; color:#55564f; line-height:1.6; }
 .plp-day-quicklinks__grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
-.plp-day-quicklinks__grid--single { grid-template-columns: minmax(0, 1fr); max-width: 440px; }
 .plp-day-quicklink { position:relative; border:1px solid #e2ded4; background:var(--plp-paper); color:var(--plp-ink); padding:clamp(1rem,2vw,1.6rem); min-height:154px; display:flex; align-items:flex-start; flex-direction:column; gap:.5rem; text-align:left; transition:border-color .18s ease, background .18s ease; }
 .plp-day-quicklink:hover { border-color:#a99b7f; background:#fcfaf4; }
 .plp-day-quicklink:focus-visible { outline:2px solid #6b5a35; outline-offset:3px; }

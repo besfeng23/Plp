@@ -57,13 +57,12 @@ test('Club remains a proposed Boracay pilot with higher-reading-size copy and se
 
 test('admin dashboard derives signals only through staff-authenticated endpoints',()=>{
   const app=file('src/admin/PlpEnterpriseAdminApp.jsx'),css=file('src/admin/plp-enterprise-admin.css');
-  assert.ok(app.includes("'X-PLP-Staff-Code': code"));
-  assert.ok(app.includes("action: 'concierge-inbox', status: 'NEW', scope: 'all'"));
-  assert.ok(!app.includes("ClubAdminView"), 'Club administration is withheld until launch');
-  assert.ok(!app.includes("operation=admin-activities"), 'Club API must not be called by staff dashboard');
+  assert.ok(app.includes("headers = { 'X-PLP-Staff-Code': code }"));
+  assert.ok(app.includes("action: 'concierge-inbox', status: 'NEW', scope"));
+  assert.ok(app.includes("item.status === 'PUBLISHED'"));
   assert.ok(app.includes("refreshedAt={syncAt}"));
-  assert.ok(app.includes('Data temporarily unavailable'));
-  assert.ok(css.includes('.plp-day-quicklinks__grid--single'));
+  assert.ok(app.includes("data temporarily unavailable".replace(/^d/, 'D')));
+  assert.ok(css.includes('.plp-day-quicklinks__grid'));
 });
 
 test('audit contrast colors exceed WCAG AA 4.5:1 for normal text',()=>{

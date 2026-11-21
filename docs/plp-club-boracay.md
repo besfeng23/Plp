@@ -86,3 +86,7 @@ Source checks: [CBC official site](https://changibc.org.sg/) and [facilities/con
 4. Should the club be branded **PLP Club**, **PLP Senior Club**, or another approved name?
 
 Until approved, the public page uses cautious "proposed" language and does not accept money or create memberships automatically.
+
+## Owner-authorized Club public reopening — 22 November 2026
+
+The owner has expressly instructed the PLP Club Boracay website and staff workflows to be reopened, reporting that Doctora has paid for the underlying PLP engagement. This is **owner-reported confirmation**, not an independently verified finance transaction or proof of any paid Club memberships. The reopening reverses the focused temporary public launch hold from PR #81 while preserving later PLP editorial branding and existing reservations/security. The Boracay Club is available as an informational and enquiry-led 60+ community pilot with staff-managed consenting membership applications and publish-only scheduled activities. It does **not** advertise a finalized membership price, guaranteed activities/venues, automatic senior-citizen statutory discounts, paid membership checkout, or operating Singapore/Malaysia chapters. Staff authentication and protected Club member records remain required. Do not create members or activities automatically.

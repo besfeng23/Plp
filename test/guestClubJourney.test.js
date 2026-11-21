@@ -112,7 +112,7 @@ test('concierge accepts a real send only on provider acceptance and reuses the s
 test('desk intake rejects invalid topics and missing messages before contacting storage', async () => {
   for (const fields of [{topic:'singapore'},{message:'  '},{requestId:'bad'},{email:'invalid'},{name:'x'.repeat(121)}]) {
     const res=response();
-    await leads({method:'POST',body:{requestId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',channel:'desk',topic:'stay',
+    await leads({method:'POST',body:{requestId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',channel:'desk',topic:'club',
       name:'Test',email:'test@example.invalid',message:'Please explain the pilot.',...fields}},res);
     assert.equal(res.statusCode,400);
     assert.equal(res.body.received,undefined);

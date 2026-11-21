@@ -40,6 +40,22 @@ export default function HomeView({ rooms }) {
       </div>
     </section>
 
+    <section className="plp-club-home" aria-labelledby="home-club-title">
+      <div className="journey-wrap club-invitation">
+        <div className="plp-club-home__photo">
+          <img src="/images/plp-private-breakfast-pool.webp" alt="Breakfast beside the pool at Pueblo La Perla" width="760" height="540" loading="lazy" decoding="async" />
+          <span>Life, shared well</span>
+        </div>
+        <div className="plp-club-home__copy">
+          <p className="journey-kicker">PLP Club · Boracay</p>
+          <h2 id="home-club-title">A place to belong.</h2>
+          <p className="my-6 max-w-md text-base leading-8">Our proposed senior community for adults aged 60 and above brings friendship, gentle wellbeing, culture, and island days together.</p>
+          <p className="plp-club-home__note">Boracay pilot in development · Membership terms to be confirmed</p>
+          <a href="/club" className="journey-link">Discover PLP Club <ArrowRight size={17} aria-hidden="true" /></a>
+        </div>
+      </div>
+    </section>
+
     <section className="journey-wrap plp-experiences-section" aria-labelledby="home-experiences-title">
       <div className="journey-heading">
         <div><p className="journey-kicker">Curated experiences</p><h2 id="home-experiences-title">Days on the island</h2></div>
