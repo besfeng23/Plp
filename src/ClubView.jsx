@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, CalendarDays, HeartHandshake, Users } from 'lucide-react';
 import { calendarFile } from '../lib/club-calendar.js';
+import ClubApplyForm from './ClubApplyForm.jsx';
 import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 
 const IDEAS = [
@@ -35,24 +36,26 @@ export default function ClubView() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/85 via-black/70 to-black/25" />
       <div className="mx-auto max-w-[1400px]"><p className="mb-8 text-xs font-semibold uppercase tracking-[0.25em] text-[#E3CE8B]">Pearl Club · Boracay Chapter</p>
         <h1 className="max-w-3xl font-serif text-5xl leading-[1.07] md:text-7xl">Pearl Club Boracay</h1>
-        <p className="mt-8 max-w-xl text-base leading-8 text-white/90 md:text-lg">A Boracay community for adults aged 60 and above. Get in touch about membership, suggest an activity, or check the calendar.</p>
-        <div className="mt-8 flex flex-wrap items-center gap-6"><a href="/contact?topic=club" className="inline-flex min-h-12 items-center gap-3 bg-[#FAFAF7] px-7 py-3 text-sm font-semibold text-[#1A1A1A] transition hover:bg-[#E3CE8B]">Ask about membership <ArrowRight size={17} aria-hidden="true" /></a><a className="journey-link" href="#club-calendar">See upcoming activities</a></div>
+        <p className="mt-8 max-w-xl text-base leading-8 text-white/90 md:text-lg">A Boracay membership community for adults aged 60 and above. Submit an application for staff review, explore activities, and stay connected.</p>
+        <div className="mt-8 flex flex-wrap items-center gap-6"><a href="#club-application" className="inline-flex min-h-12 items-center gap-3 bg-[#FAFAF7] px-7 py-3 text-sm font-semibold text-[#1A1A1A] transition hover:bg-[#E3CE8B]">Apply for membership <ArrowRight size={17} aria-hidden="true" /></a><a className="journey-link" href="#club-calendar">See upcoming activities</a></div>
       </div>
     </section>
 
     <section id="membership" aria-labelledby="club-membership-title" className="mx-auto grid max-w-[1400px] gap-10 px-6 py-20 md:grid-cols-[1fr_1fr] md:gap-20 md:px-12 md:py-28">
-      <div><p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Introducing the Boracay chapter</p><h2 id="club-membership-title" className="max-w-xl font-serif text-4xl leading-tight md:text-6xl">How membership works</h2></div>
+      <div><p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">Pearl Club · Boracay membership</p><h2 id="club-membership-title" className="max-w-xl font-serif text-4xl leading-tight md:text-6xl">How membership works</h2></div>
       <div className="max-w-xl self-center text-base leading-8 text-[#45413A]">
         <ol className="plp-club-steps space-y-3">
-          <li>Tell the Boracay team which activities interest you. You can enquire for yourself or help a family member get in touch.</li>
-          <li>For an application, staff record the applicant’s consent and declaration that they are 60 or above, then review eligibility.</li>
-          <li>Check the published calendar and contact the team about attending. You can enquire without booking a room.</li>
+          <li>Submit the online application with your contact details and 60+ age declaration. No payment is required.</li>
+          <li>Our Boracay team reviews applications and contacts applicants about eligibility and next steps.</li>
+          <li>Once your membership is approved, explore published activities and ask about attendance. You can join without booking resort accommodation.</li>
         </ol>
-        <p className="mt-5">Membership fees, benefits and launch dates are still being finalized.</p>
+        <p className="mt-5">Applications can be reviewed now. Membership fees and benefits are not yet being sold online; any future terms must be explained separately.</p>
         <p className="mt-4 rounded-sm border-l-2 border-[#746130] pl-5 text-sm leading-7">Considering future senior living? Pearl Club membership and residential admission are separate approvals. Membership would be a prerequisite, not a guarantee of a residential place. Accommodation, healthcare services and residential pricing are still proposals, not available services.</p>
-        <a href="/senior-living" className="mt-5 inline-flex min-h-12 items-center border-b border-[#746130] text-sm font-semibold">Explore proposed senior living <ArrowRight size={17} className="ml-2" aria-hidden="true" /></a>
+        <a href="/senior-living" className="mt-5 inline-flex min-h-12 items-center border-b border-[#746130] text-sm font-semibold">Learn about the senior-living pathway <ArrowRight size={17} className="ml-2" aria-hidden="true" /></a>
       </div>
     </section>
+
+    <ClubApplyForm />
 
     <section className="plp-club-programs bg-[#F2EEE5] px-6 py-20 md:px-12 md:py-24" aria-labelledby="club-activities-title">
       <div className="mx-auto max-w-[1400px]">
