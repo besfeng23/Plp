@@ -56,6 +56,7 @@ test('owner funnel aggregates real event rows only within the Manila monthly win
     const q = new URLSearchParams(raw);
     assert.deepEqual(q.getAll('created_at'), ['gte.2026-10-31T16:00:00.000Z', 'lt.2026-11-30T16:00:00.000Z']);
     assert.equal(q.get('select'), 'event_name');
+    assert.equal(q.get('payload->>collection'), 'eq.plp_consent_v2');
     assert.equal(q.get('limit'), '500');
     assert.equal(q.get('offset'), '0');
     return data;
