@@ -25,7 +25,7 @@ test('senior living is a concept with separate residential admission and no paym
   assert.match(page, /club membership does not guarantee a residential place/);
   assert.match(page, /Residential accommodation and medical care are not yet available/);
   assert.match(page, /Residential accommodation, healthcare services and residential prices require separate authorization/);
-  assert.match(page, /do not submit medical records, diagnoses or other sensitive health details/);
+  assert.match(page, /do not submit medical records, diagnoses or other sensitive health details/i);
   assert.doesNotMatch(page, /SGD\s*6,?000|guaranteed refund|payment checkout/i);
 });
 
