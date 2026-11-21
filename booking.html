@@ -35,10 +35,19 @@
       .month-head .month-btn.prev { display: block; height: 70px; }
       .month-title { padding: 0 5px; text-align: center; font-size: clamp(19px, 5.5vw, 29px); }
     }
+    /* Design audit: brand continuity, clear estimates, keyboard focus */
+    .top .brand { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .top .brand img { height:30px; width:30px; margin:0 auto .35rem; }
+    .top .brand strong { font-size:clamp(1.6rem,3vw,2.1rem); letter-spacing:.18em; }
+    .top .brand span { font-size:.6rem; letter-spacing:.23em; margin-top:.35rem; }
+    .estimate-note { font-size:14px; color:#454039; line-height:1.7; }
+    .estimate-note strong { color:#353126; }
+    :is(button,a,input,select,textarea):focus-visible { outline:2px solid #6b5a35; outline-offset:3px; }
+    @media(max-width:480px){ .top .brand img{height:26px;width:26px} }
   </style>
 </head>
 <body>
-  <header class="top"><div class="wrap top-inner"><a class="rooms-link" href="/accommodation">Rooms</a><a class="brand" href="/"><strong>PLP</strong><span>Boracay</span></a><a class="close" href="/" aria-label="Close booking">×</a></div></header>
+  <header class="top"><div class="wrap top-inner"><a class="rooms-link" href="/accommodation">Rooms</a><a class="brand" href="/" aria-label="Pueblo La Perla Boracay home"><img src="/favicon.svg" alt="" width="36" height="36" /><strong>PLP</strong><span>Boracay</span></a><a class="close" href="/" aria-label="Close booking">×</a></div></header>
   <div class="bar"><div class="wrap bar-inner">Calendar</div></div>
   <main class="wrap booking">
     <form id="bookingForm">
@@ -67,7 +76,7 @@
           <button class="modify" id="retryCalendar" type="button" hidden>Retry calendar</button>
         </div>
       </section>
-      <section class="estimate" id="estimateCard" aria-label="Estimated pricing" hidden><p class="estimate-head">Estimate for planning</p><div class="estimate-rows"><div class="estimate-row"><span>Estimated stay</span><strong id="estStay">—</strong></div><div class="estimate-row"><span>Expected deposit <em id="depositRate"></em></span><strong id="estDeposit">—</strong></div><div class="estimate-row"><span>Balance due after deposit</span><strong id="estBalance">—</strong></div></div><p class="estimate-note">Online deposit checkout may open after you submit your request. The resort team confirms the stay after reviewing availability and payment.</p></section>
+      <section class="estimate" id="estimateCard" aria-label="Estimated pricing" hidden><p class="estimate-head">Estimate for planning</p><div class="estimate-rows"><div class="estimate-row"><span>Estimated stay</span><strong id="estStay">—</strong></div><div class="estimate-row"><span>Expected deposit <em id="depositRate"></em></span><strong id="estDeposit">—</strong></div><div class="estimate-row"><span>Balance due after deposit</span><strong id="estBalance">—</strong></div></div><p class="estimate-note"><strong>Provisional website estimate:</strong> The configured rates and deposit amounts are awaiting an approved resort tariff. Review the displayed amount carefully. Online deposit checkout may open after you submit your request; your stay still requires resort verification and final confirmation.</p></section>
       <section class="compact-summary" aria-label="Stay summary"><div class="summary-line" id="summaryLine">Select dates to continue</div><button type="button" class="continue" id="continueBtn" disabled>Continue</button></section>
       <div id="availability" class="availability" hidden>
         <span id="availabilityStatus" role="status"></span>
