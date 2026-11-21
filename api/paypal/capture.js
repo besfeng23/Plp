@@ -112,6 +112,6 @@ export default async function handler(req, res) {
     const reason = databaseResult.verificationStatus || capture.status || 'capture-not-verified';
     return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=${encodeURIComponent(reason)}`);
   } catch (error) {
-    return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=${encodeURIComponent(error.message || 'paypal-capture-failed')}`);
+    return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=payment-review-required`);
   }
 }
