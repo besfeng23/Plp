@@ -1,10 +1,10 @@
 (() => {
   const consentKey = 'plp_analytics_consent_v1';
-  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'submit_enquiry']);
+  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'booking_created', 'submit_enquiry', 'submit_club_enquiry', 'submit_residential_interest']);
   const pages = new Set([
     '/', '/accommodation', '/accommodations', '/accommodation/grand-ocean-villa',
     '/accommodation/sunset-suite', '/accommodation/smart-room-premium', '/experiences',
-    '/club', '/gallery', '/getting-here', '/booking', '/contact', '/exclusive-offer',
+    '/club', '/senior-living', '/gallery', '/getting-here', '/booking', '/contact', '/exclusive-offer',
     '/reservation-policy', '/privacy-policy', '/terms-of-service',
     '/private-villas-boracay', '/boracay-villa-with-private-pool', '/boracay-family-villa',
     '/boracay-wellness-stay', '/high-boracay-location',
@@ -82,6 +82,17 @@
       page_location: location.origin + path,
       page_referrer: '',
     });
+    // First-party counts receive only an event category and an approved page
+    // pathname. No form fields, URL query, referrer, IP-derived session ID or
+    // person identifier is included. Optional tracking requires consent.
+    const category = event === 'page_view' ? 'view_page' : event;
+    void fetch('/api/plp?action=analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'omit',
+      keepalive: true,
+      body: JSON.stringify({ event: category, path, privacyConsent: true }),
+    }).catch(() => {});
     void getPostHog().then(client => {
       if (client && consent === 'allow' && version === consentVersion) {
         client.capture(event === 'page_view' ? '$pageview' : event, {
@@ -179,11 +190,19 @@
   fetch('/api/plp?action=analytics-config', { cache: 'no-store' })
     .then(response => response.ok ? response.json() : null)
     .then(options => {
-      if (!publicPath() || (!options?.googleId && !options?.posthog)) return;
-      config = options;
+      if (!publicPath()) return;
+      config = options || {};
       addSettings();
       lastPath = null;
       recordPage();
     })
-    .catch(() => { /* Provider availability must not affect the guest journey. */ });
+    .catch(() => {
+      // First-party anonymous analytics still require an affirmative choice,
+      // but the page remains usable even if external config is unreachable.
+      if (!publicPath()) return;
+      config = {};
+      addSettings();
+      lastPath = null;
+      recordPage();
+    });
 })();
