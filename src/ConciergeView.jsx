@@ -18,7 +18,7 @@ export default function ConciergeView() {
   const [room, setRoom] = useState(initial.room);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState(() => residentialInterest ? 'I would like to learn about the proposed Pearl Club senior-living community and future admission process. Please contact me with information when available. I understand this is an enquiry only, not an application or membership approval.' : '');
+  const [message, setMessage] = useState(() => residentialInterest ? 'I am interested in future senior-living opportunities connected to Pearl Club. Please contact me about the separate residential process. I understand this is an enquiry, not a residential application, reservation or membership approval.' : '');
   const [channel, setChannel] = useState('draft');
   const online = channel !== 'draft';
   const [state, setState] = useState('idle');
@@ -81,7 +81,7 @@ export default function ConciergeView() {
         {['stay','group'].includes(topic) && <label className="journey-field">Accommodation<select value={room} onChange={e => setRoom(e.target.value)}><option value="">Help me choose</option>{PLP_ROOMS.map(r => <option value={r.slug} key={r.slug}>{r.name}</option>)}</select></label>}
         {topic.startsWith('club') && <label className="journey-field">Activity interest<select value={program} onChange={e => setProgram(e.target.value)}><option value="">General enquiry</option>{Object.entries(CLUB_PROGRAMS).map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select></label>}
         <label className="journey-field">Your message<textarea required rows={4} maxLength={1200} value={message} onChange={e => setMessage(e.target.value)} aria-describedby="enquiry-hint" /></label>
-        <p id="enquiry-hint" className="text-sm leading-6 text-stone-600">{residentialInterest && topic === 'club' ? 'This is a nonbinding enquiry about a proposed program. Please do not include medical records, diagnoses or sensitive health information.' : TOPIC_HINT[topic] || 'Share the dates or arrangements you have in mind.'}</p>
+        <p id="enquiry-hint" className="text-sm leading-6 text-stone-600">{residentialInterest && topic === 'club' ? 'This is a nonbinding enquiry about future residential options, not a reservation. Please do not include medical records, diagnoses or sensitive health information.' : TOPIC_HINT[topic] || 'Share the dates or arrangements you have in mind.'}</p>
         {online && <div className="concierge-identity"><label className="journey-field">Your name<input required autoComplete="name" maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label><label className="journey-field">Reply email<input required type="email" autoComplete="email" maxLength={180} value={email} onChange={e => setEmail(e.target.value)} /></label></div>}
         </fieldset>
         {state === 'error' && <div role="alert" ref={resultRef} tabIndex={-1}>We couldn’t confirm delivery. <a className="underline" href={draft}>Open an email draft with your details</a> or call the concierge.</div>}
