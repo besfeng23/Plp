@@ -23,6 +23,7 @@ let calendarVersion = 0;
 let rangeVersion = 0;
 let submitting = false;
 let savedRequest = false;
+let pendingBooking = null;
 const calendarMonths = new Map();
 
 function canCheckOut(date) {
@@ -169,6 +170,8 @@ function resetRange(focusDate) {
   rangeVersion += 1;
   rangeState = 'empty';
   savedRequest = false;
+  pendingBooking = null;
+  element('submitBtn').textContent = 'Send reservation request';
   element('submitBtn').disabled = false;
   element('guestForm').hidden = true;
   showRangeStatus('');
@@ -228,6 +231,8 @@ function pickDate(date) {
   rangeVersion += 1;
   rangeState = 'empty';
   savedRequest = false;
+  pendingBooking = null;
+  element('submitBtn').textContent = 'Send reservation request';
   element('submitBtn').disabled = false;
   element('guestForm').hidden = true;
   showRangeStatus('');
@@ -250,7 +255,7 @@ function setSubmitting(value) {
   for (const id of ['submitBtn', 'roomSelect', 'guests', 'modifyDates', 'retryCalendar']) {
     element(id).disabled = value;
   }
-  element('submitBtn').disabled = value || savedRequest;
+  element('submitBtn').disabled = value;
   updateSummary();
   renderCalendar();
 }
@@ -258,12 +263,12 @@ function setSubmitting(value) {
 async function submitReservation(event) {
   event.preventDefault();
   refreshResortDay();
-  if (rangeState !== 'available' || submitting || savedRequest) return;
+  if (rangeState !== 'available' || submitting) return;
   const status = element('status');
   setSubmitting(true);
   status.className = 'status';
-  status.textContent = 'Preparing your reservation request…';
-  track('submit_booking');
+  status.textContent = pendingBooking ? 'Resuming your saved deposit checkout…' : 'Preparing your reservation request…';
+  if (!pendingBooking) track('submit_booking');
   const { amount, deposit } = quoteStay(selected, nightsBetween(checkIn, checkOut));
   const payload = {
     name: element('name').value,
@@ -276,30 +281,34 @@ async function submitReservation(event) {
     message: element('message').value,
     quote: { amount, deposit },
   };
-  let booking;
+  let booking = pendingBooking;
   try {
-    const response = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const result = await response.json();
-    if (!response.ok || result.booking?.persisted !== true) {
-      if (response.status === 409 && /available/i.test(result.error || '')) {
-        resetRange();
-        calendarMonths.clear();
-        void loadMonth();
-        showRangeStatus('These dates are no longer available. Choose another stay.', 'bad');
-        element('calendar').focus();
-        return;
+    if (!booking) {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok || result.booking?.persisted !== true) {
+        if (response.status === 409 && /available/i.test(result.error || '')) {
+          resetRange();
+          calendarMonths.clear();
+          void loadMonth();
+          showRangeStatus('These dates are no longer available. Choose another stay.', 'bad');
+          element('calendar').focus();
+          return;
+        }
+        throw new Error(result.error || 'Your request could not be saved. Please try again or contact concierge.');
       }
-      throw new Error(result.error || 'Your request could not be saved. Please try again or contact concierge.');
+      booking = result.booking;
+      pendingBooking = booking;
+      savedRequest = true;
+      element('submitBtn').textContent = 'Retry secure deposit checkout';
+      track('booking_created');
     }
-    booking = result.booking;
-    savedRequest = true;
-    track('booking_created');
 
-    const checkoutResponse = await fetch('/api/xendit/create-session', {
+    const checkoutResponse = await fetch('/api/paypal/create-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ booking }),
@@ -315,7 +324,7 @@ async function submitReservation(event) {
   } catch (error) {
     status.className = 'status error';
     status.textContent = booking
-      ? 'Your reservation request was saved. Contact concierge to arrange the deposit. The stay is still awaiting confirmation.'
+      ? 'Your reservation request was saved. You may retry secure deposit checkout using the same request, or contact concierge. The stay is not confirmed.'
       : error.message;
   } finally {
     setSubmitting(false);
