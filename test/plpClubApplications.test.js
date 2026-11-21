@@ -130,7 +130,7 @@ test('public membership UI and senior-living page lead to a genuine private revi
   const club = src('src/ClubView.jsx');
   const form = src('src/ClubApplyForm.jsx');
   const senior = src('src/SeniorLivingView.jsx');
-  const migration = src('supabase/migrations/20261122060000_pearl_club_boracay_web_applications.sql');
+  const migration = src('supabase/migrations/20261121221252_pearl_club_boracay_web_applications.sql');
   assert.match(club, /<ClubApplyForm\s*\/>/);
   assert.match(form, /operation=apply/);
   assert.match(form, /operation=application-status/);
