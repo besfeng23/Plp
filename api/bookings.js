@@ -108,6 +108,11 @@ export default async function handler(req, res) {
     if (/rate does not match|price or deposit is invalid/i.test(error.message)) {
       return res.status(409).json({ ok: false, error: 'The rate has changed. Refresh this page to review the updated quote.' });
     }
+    // Log only the PostgreSQL error class, never guest PII, payloads, credentials,
+    // or raw database details. A generic 503 is still appropriate for guests.
+    const sqlState = typeof error?.code === 'string' && /^[A-Z0-9]{5}$/.test(error.code)
+      ? error.code : 'UNKNOWN';
+    console.error('[plp-booking] unable to persist reservation request', { sqlState });
     return res.status(503).json({ ok: false, error: 'Your request could not be saved. Please contact concierge.' });
   }
 }
