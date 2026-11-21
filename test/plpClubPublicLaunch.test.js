@@ -40,7 +40,10 @@ test('Club enquiries and server dispatcher restored without opening public membe
   assert.doesNotMatch(leads, /body\.topic === 'club' \|\| body\.topic === 'club-activity'/);
   const club = source('lib/club-handler.js');
   assert.match(club, /if \(!staff\(req\)\) return reply\(res, 403/);
-  assert.match(source('src/ClubView.jsx'), /fees, benefits and launch dates are still being finalized/i);
+  assert.match(club, /operation === 'apply'/);
+  assert.match(club, /status: 'PENDING'/);
+  assert.match(source('src/ClubView.jsx'), /Applications can be reviewed now/i);
+  assert.match(source('src/ClubApplyForm.jsx'), /consent_recorded/);
 });
 
 
