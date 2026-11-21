@@ -117,7 +117,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
   const itemColor = solid ? 'text-[#1A1A1A] hover:text-[#7A6A3A]' : 'text-white hover:text-white/80';
   const links = [['home', 'Overview'], ['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['club', 'PLP Club'], ['gallery', 'Gallery'], ['getting-here', 'Getting Here'], ['booking', 'Reserve']];
   const mobileMenuId = 'public-mobile-menu';
-  return <header className={`fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}>
+  return <header className={`plp-public-header fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}>
     <div className='mx-auto flex h-24 max-w-[1400px] items-center justify-between px-5 pt-[var(--safe-top)] md:px-12'>
       <PageLink target='home' navigate={navigate} className={`plp-public-brand ${logoColor}`} aria-label='Pueblo La Perla home'><img className='plp-public-brand__mark' src='/favicon.svg' alt='' width='43' height='43' /><span className='plp-public-brand__type'><span className='plp-public-brand__full'>PUEBLO LA PERLA</span><span className='plp-public-brand__short' aria-hidden='true'>PLP</span><span className='plp-public-brand__location'>Boracay</span></span></PageLink>
       <nav className='hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.14em] xl:flex 2xl:gap-7'>{links.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} aria-current={view === id ? 'page' : undefined} className={`inline-flex min-h-11 items-center transition-colors ${itemColor} ${id === 'booking' ? 'plp-public-nav-reserve border px-5' : ''}`}>{label}</PageLink>)}</nav>
