@@ -3,6 +3,8 @@ import test from 'node:test';
 import { createBookingReference } from '../lib/booking-reference.js';
 import { evaluatePayPalCapture } from '../lib/paypal-capture-guard.js';
 import { capturePayPalOrder, getBookingReference, SafePayPalError } from '../api/paypal/_paypal.js';
+import { isCheckoutAllowed } from '../api/paypal/create-session.js';
+import { readFileSync } from 'node:fs';
 
 const ref = 'PLP-0123456789ABCDEF01234567';
 const orderToken = 'ORDERTEST1234567890';
@@ -104,4 +106,20 @@ test('callback rejects mismatched stored order before any provider capture', asy
   assert.match(response.headers.Location,/reason=payment-needs-review/);
   assert.equal(response.headers['Cache-Control'],'no-store');
   assert.equal(mock.mock.callCount(),2);
+});
+
+test('checkout creation rejects expired or terminal reservation holds before contacting PayPal', () => {
+  assert.equal(isCheckoutAllowed({ status:'PAYMENT_PROCESSING', payment_status:'PROCESSING', expires_at:'2026-11-23T00:00:00Z' }, now), true);
+  assert.equal(isCheckoutAllowed({ status:'PAYMENT_PROCESSING', payment_status:'PROCESSING', expires_at:'2026-11-21T00:00:00Z' }, now), false);
+  assert.equal(isCheckoutAllowed({ status:'CANCELLED', payment_status:'PENDING' }, now), false);
+  assert.equal(isCheckoutAllowed({ status:'PAID_DEPOSIT', payment_status:'SUCCEEDED' }, now), false);
+});
+
+test('guest checkout retries reuse persisted reservation and canonical PayPal endpoint', () => {
+  const bookingScript = readFileSync(new URL('../src/booking.js', import.meta.url),'utf8');
+  assert.match(bookingScript, /let booking = pendingBooking/);
+  assert.match(bookingScript, /if \(!booking\) \{\s*const response = await fetch\('\/api\/bookings'/);
+  assert.match(bookingScript, /pendingBooking = booking;/);
+  assert.match(bookingScript, /fetch\('\/api\/paypal\/create-session'/);
+  assert.doesNotMatch(bookingScript, /fetch\('\/api\/xendit\/create-session'/);
 });
