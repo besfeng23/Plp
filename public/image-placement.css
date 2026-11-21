@@ -35,28 +35,15 @@
   --plp-dining-breakfast: url('/images/plp-private-breakfast-pool.webp');
 }
 
-/* Homepage hero: bound to semantic data hooks in the React markup, not to
-   utility classes that can change (the hero previously used .h-screen and the
-   binding broke when it became min-h-[100svh]). */
-[data-plp-hero]::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.74)),
-    var(--plp-hero-sunset) center / cover no-repeat !important;
-}
-
+/* One cinematic hero image; React owns the independent contrast overlay.
+   Never paint a second pseudo-element above the new text. */
+[data-plp-hero]::before { content: none !important; }
 [data-plp-hero-bg] {
-  background:
-    linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.74)),
-    var(--plp-hero-sunset) center / cover no-repeat !important;
+  z-index: -2 !important;
+  background: var(--plp-hero-sunset) center / cover no-repeat !important;
 }
-
-[data-plp-hero-placeholder] {
-  display: none !important;
-}
+[data-plp-hero] .plp-home-hero__shade { z-index: -1 !important; }
+[data-plp-hero-placeholder] { display: none !important; }
 
 /* Shared ImageBlock placeholder fallback (semantic hook, not the raw
    .bg-stone-200 utility). Only shows when no <img> is supplied. */
