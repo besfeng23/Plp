@@ -135,7 +135,7 @@ async function handleAnalytics(req, res) {
     await insertRow('plp_analytics_events', {
       ...event,
       session_id: null,
-      payload: {},
+      payload: { collection: 'plp_consent_v2' },
       user_agent: null,
       referrer: null,
       created_at: new Date().toISOString(),
