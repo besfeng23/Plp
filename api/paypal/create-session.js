@@ -5,6 +5,7 @@
 // /api/xendit/create-session route is kept as a thin backward-compatible alias
 // that delegates here, because the public booking form still POSTs to that path.
 import { createPayPalPaymentRecord } from './_db.js';
+import { isCheckoutAllowed } from '../../lib/paypal-checkout-policy.js';
 import { SafePayPalError, createPayPalOrder, getBaseUrlSource, getPayPalMode } from './_paypal.js';
 import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured, selectRows } from '../_supabase.js';
 
@@ -59,33 +60,6 @@ async function requestMatchesPersistedGuest({ booking, persistedBooking }) {
   const guest = guests?.[0];
   const persistedEmail = normalizeEmail(guest?.normalized_email || guest?.email);
   return Boolean(persistedEmail && submittedEmail === persistedEmail);
-}
-
-function isCheckoutAllowed(booking) {
-  const bookingStatus = String(booking?.status || '').trim().toUpperCase();
-  const paymentStatus = String(booking?.payment_status || '').trim().toUpperCase();
-  const terminalBookingStatuses = new Set([
-    'PAID_DEPOSIT',
-    'DEPOSIT_VERIFIED',
-    'CONFIRMED',
-    'CANCELLED',
-    'VOIDED',
-    'FAILED',
-    'EXPIRED',
-    'REFUNDED',
-  ]);
-  const terminalPaymentStatuses = new Set([
-    'SUCCEEDED',
-    'CAPTURED',
-    'VERIFIED',
-    'FAILED',
-    'CANCELLED',
-    'VOIDED',
-    'EXPIRED',
-    'REFUNDED',
-  ]);
-
-  return !terminalBookingStatuses.has(bookingStatus) && !terminalPaymentStatuses.has(paymentStatus);
 }
 
 export default async function handler(req, res) {

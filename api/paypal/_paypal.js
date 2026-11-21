@@ -1,4 +1,5 @@
 import { PLP_CURRENCY } from '../../lib/pricing.js';
+import { createHash } from 'node:crypto';
 export class SafePayPalError extends Error {
   constructor(code, message, status = 500) {
     super(message);
@@ -93,7 +94,11 @@ function safeText(value, fallback, max = 120) {
 }
 
 export function getBookingReference(booking) {
-  return safeText(booking?.reference || booking?.booking_reference || booking?.id, `PLP-${Date.now().toString().slice(-8)}`, 64).replace(/[^a-zA-Z0-9_-]/g, '');
+  const reference = safeText(booking?.reference || booking?.booking_reference || booking?.id, '', 64);
+  if (!/^[A-Za-z0-9_-]{6,64}$/.test(reference)) {
+    throw new SafePayPalError('INVALID_BOOKING_REFERENCE', 'A valid persisted booking reference is required.', 400);
+  }
+  return reference;
 }
 
 export function getDepositAmount(booking) {
@@ -165,6 +170,7 @@ export async function createPayPalOrder({ booking, req }) {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
+      'PayPal-Request-Id': `PLP-ORDER-${createHash('sha256').update(reference).digest('hex').slice(0, 44)}`,
     },
     body: JSON.stringify(payload),
   });
@@ -197,6 +203,7 @@ export async function capturePayPalOrder(orderId) {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
+      'PayPal-Request-Id': `PLP-CAPTURE-${createHash('sha256').update(orderId).digest('hex').slice(0, 44)}`,
     },
   });
 
