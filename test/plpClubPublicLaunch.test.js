@@ -20,7 +20,7 @@ test('Club public routes are published, not redirected, and included in discover
 test('Club is discoverable in public pages and available only via protected admin workflows', () => {
   const app = source('src/App.jsx');
   assert.match(app, /import ClubView from/);
-  assert.match(app, /\['club', 'PLP Club'\]/);
+  assert.match(app, /\['club', 'Pearl Club'\]/);
   assert.match(app, /case 'club': return <ClubView\/>/);
   assert.match(source('src/HomeView.jsx'), /plp-club-home/);
   assert.match(source('src/ConciergeView.jsx'), /CLUB_PROGRAMS/);
