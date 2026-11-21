@@ -520,3 +520,22 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .plp-public-header, .plp-public-header * { transition: none!important; }
 }
+
+/* Accessible Boracay Club editorial copy and intentionally secondary future chapters */
+.plp-club-programs__photo-note { max-width: 44rem; margin: -.8rem 0 2rem; color:#504b41; font-size:1rem; line-height:1.65; }
+#main-content .plp-club-program__body p { font-size:1rem; line-height:1.8; }
+#main-content .plp-club-program__body .journey-link { font-size:1rem; }
+#main-content .plp-club-steps li { font-size:1rem; line-height:1.8; }
+.plp-future-chapter__summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:1rem; min-height:58px; padding:.5rem 0; color:#f6f1e7; }
+.plp-future-chapter__summary::-webkit-details-marker { display:none; }
+.plp-future-chapter__summary > span { color:#e3ce8b; font-size:.72rem; letter-spacing:.15em; text-transform:uppercase; }
+.plp-future-chapter__summary > strong { margin-left:auto; font-size:.95rem; font-weight:600; }
+.plp-future-chapter__summary > svg { transition:transform .2s ease; flex-shrink:0; }
+.plp-future-chapter[open] .plp-future-chapter__summary > svg { transform:rotate(90deg); }
+.plp-future-chapter__summary:focus-visible { outline:2px solid #e3ce8b; outline-offset:4px; }
+@media (max-width:700px) {
+  .plp-future-chapter__summary { flex-wrap:wrap; gap:.45rem; }
+  .plp-future-chapter__summary > strong { margin-left:0; width:calc(100% - 2rem); }
+  .plp-future-chapter__summary > svg { margin-left:auto; }
+}
+@media (prefers-reduced-motion:reduce) { .plp-future-chapter__summary > svg { transition:none; } }
