@@ -58,6 +58,11 @@ export default function ConciergeView() {
       if (!response.ok || !data.ok || (channel === 'desk' ? data.received !== true : data.emailDelivered !== true)) throw new Error('unconfirmed');
       setState('sent');
       window.plpTrack?.('submit_enquiry');
+      if (topic === 'club') {
+        window.plpTrack?.(residentialInterest ? 'submit_residential_interest' : 'submit_club_enquiry');
+      } else if (topic === 'club-activity') {
+        window.plpTrack?.('submit_club_enquiry');
+      }
     } catch { setState('error'); }
     finally { sendLock.current = false; }
   }
