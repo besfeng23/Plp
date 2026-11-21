@@ -47,11 +47,11 @@ export default function HomeView({ rooms }) {
           <span>Life, shared well</span>
         </div>
         <div className="plp-club-home__copy">
-          <p className="journey-kicker">PLP Club · Boracay</p>
+          <p className="journey-kicker">Pearl Club · Boracay</p>
           <h2 id="home-club-title">A place to belong.</h2>
           <p className="my-6 max-w-md text-base leading-8">Our proposed senior community for adults aged 60 and above brings friendship, gentle wellbeing, culture, and island days together.</p>
           <p className="plp-club-home__note">Boracay pilot in development · Membership terms to be confirmed</p>
-          <a href="/club" className="journey-link">Discover PLP Club <ArrowRight size={17} aria-hidden="true" /></a>
+          <a href="/club" className="journey-link">Discover Pearl Club <ArrowRight size={17} aria-hidden="true" /></a>
         </div>
       </div>
     </section>

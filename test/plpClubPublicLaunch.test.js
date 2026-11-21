@@ -12,7 +12,7 @@ test('Club public routes are published, not redirected, and included in discover
   }
   const routes = source('lib/public-routes.js');
   assert.match(routes, /club:\s*'\/club'/);
-  assert.match(routes, /club:\s*\['PLP Club Boracay'/);
+  assert.match(routes, /club:\s*\['Pearl Club Boracay'/);
   assert.match(source('public/sitemap.xml'), /https:\/\/plp-boracay\.vercel\.app\/club/);
   assert.doesNotMatch(source('public/robots.txt'), /Disallow:\s*\/club(?:\s|$)/m);
 });
@@ -29,7 +29,7 @@ test('Club is discoverable in public pages and available only via protected admi
   }
   const admin = source('src/admin/PlpEnterpriseAdminApp.jsx');
   assert.match(admin, /import ClubAdminView/);
-  assert.match(admin, /\{ id: 'club', label: 'PLP Club'/);
+  assert.match(admin, /\{ id: 'club', label: 'Pearl Club'/);
   assert.match(admin, /<ClubAdminView code=\{code\}/);
 });
 
@@ -41,4 +41,14 @@ test('Club enquiries and server dispatcher restored without opening public membe
   const club = source('lib/club-handler.js');
   assert.match(club, /if \(!staff\(req\)\) return reply\(res, 403/);
   assert.match(source('src/ClubView.jsx'), /fees, benefits and launch dates are still being finalized/i);
+});
+
+
+test('Pearl Club names the approved programme and separates membership from residential admission', () => {
+  const club = source('src/ClubView.jsx');
+  assert.match(club, /Pearl Club Boracay/);
+  assert.match(club, /membership and residential admission are separate approvals/i);
+  assert.match(club, /not a guarantee of a residential place/i);
+  assert.match(club, /Accommodation, healthcare services and residential pricing are still proposals/i);
+  assert.doesNotMatch(club, /SGD\s*6,?000/i);
 });

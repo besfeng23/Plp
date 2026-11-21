@@ -115,7 +115,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
   const navBg = solid ? 'bg-[#FAFAF7] text-[#1A1A1A] border-b border-stone-200' : 'bg-gradient-to-b from-black/75 to-black/35 text-white';
   const logoColor = solid ? 'text-[#1A1A1A]' : 'text-white';
   const itemColor = solid ? 'text-[#1A1A1A] hover:text-[#7A6A3A]' : 'text-white hover:text-white/80';
-  const links = [['home', 'Overview'], ['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['club', 'PLP Club'], ['gallery', 'Gallery'], ['getting-here', 'Getting Here'], ['booking', 'Reserve']];
+  const links = [['home', 'Overview'], ['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['club', 'Pearl Club'], ['gallery', 'Gallery'], ['getting-here', 'Getting Here'], ['booking', 'Reserve']];
   const mobileMenuId = 'public-mobile-menu';
   return <header className={`plp-public-header fixed top-0 z-50 w-full transition-all duration-500 ${navBg}`}>
     <div className='mx-auto flex h-24 max-w-[1400px] items-center justify-between px-5 pt-[var(--safe-top)] md:px-12'>
@@ -130,7 +130,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
 }
 
 function PublicFooter({ navigate }) {
-  const explore = [['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['club', 'PLP Club'], ['gallery', 'Gallery'], ['getting-here', 'Getting Here'], ['vip-package', 'Exclusive Offer']];
+  const explore = [['accommodations', 'Accommodation'], ['experiences', 'Experiences'], ['club', 'Pearl Club'], ['gallery', 'Gallery'], ['getting-here', 'Getting Here'], ['vip-package', 'Exclusive Offer']];
   return <footer className='bg-[#1A1A1A] px-6 pb-32 pt-20 text-white md:px-12 md:pb-20'>
     <div className='mx-auto grid max-w-[1400px] grid-cols-1 gap-12 md:grid-cols-4'>
       <div className='md:col-span-2'><img src='/brand/PLP_Editorial_Reversed_Ivory.svg' alt='' width='45' height='63' className='mb-5 h-[63px] w-[45px] object-contain' /><h3 className='mb-4 font-serif text-2xl tracking-[0.15em]'>PUEBLO LA PERLA</h3><p className='max-w-md text-sm leading-relaxed text-white/75'>A private hillside retreat in Boracay, designed for villa living, wellness, and quiet island experiences.</p></div>
