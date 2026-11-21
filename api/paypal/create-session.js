@@ -61,7 +61,11 @@ async function requestMatchesPersistedGuest({ booking, persistedBooking }) {
   return Boolean(persistedEmail && submittedEmail === persistedEmail);
 }
 
-function isCheckoutAllowed(booking) {
+export function isCheckoutAllowed(booking, now = Date.now()) {
+  if (booking?.expires_at) {
+    const expiration = Date.parse(booking.expires_at);
+    if (!Number.isFinite(expiration) || expiration <= now) return false;
+  }
   const bookingStatus = String(booking?.status || '').trim().toUpperCase();
   const paymentStatus = String(booking?.payment_status || '').trim().toUpperCase();
   const terminalBookingStatuses = new Set([
