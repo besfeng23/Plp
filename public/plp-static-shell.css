@@ -42,7 +42,7 @@ main .plp-static-rate-caption { display:block; margin-top:.35rem; font-size:.73r
   body:has(.plp-static-menu[open]) [data-plp-mobile-action='true'] { display:none; }
 }
 @media(max-width:620px) {
-  .nav { height:76px; }
+  .nav { height:88px; }
   .nav-inner { gap:.55rem; padding-inline:1rem; }
   .nav .brand img { width:39px; height:39px; }
   .nav .brand { gap:.45rem; }
