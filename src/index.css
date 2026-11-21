@@ -491,3 +491,51 @@ textarea:focus-visible {
     padding-bottom: 0;
   }
 }
+
+/* Nov 2026 design-audit fixes: shared PLP brand, screen widths and keyboard focus */
+.plp-public-header > div { height: 88px; }
+.plp-public-brand { display: inline-flex; align-items: center; gap: .7rem; min-width: 0; text-decoration: none; }
+.plp-public-brand__mark { flex: 0 0 43px; width: 43px; height: 43px; object-fit: contain; }
+.plp-public-brand__type { display: grid; min-width: 0; line-height: 1.1; }
+.plp-public-brand__full { font-family: 'Cormorant Garamond',Georgia,serif; font-size: clamp(1.22rem,1.9vw,1.65rem); font-weight: 500; letter-spacing: .1em; white-space: nowrap; }
+.plp-public-brand__short { display: none; font-family: 'Cormorant Garamond',Georgia,serif; font-size: 1.65rem; letter-spacing: .12em; }
+.plp-public-brand__location { text-transform: uppercase; font-size: .58rem; letter-spacing: .23em; margin-top: .25rem; opacity: .85; }
+.plp-public-header #public-mobile-menu { top: 88px; }
+.plp-public-header nav a[aria-current='page'] { text-decoration: underline; text-underline-offset: .4rem; }
+.plp-public-header #public-mobile-menu a { min-height: 48px; }
+.plp-public-header :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.plp-mobile-action__inner { max-width: min(32rem,100%); }
+.plp-mobile-action { z-index: 39; }
+#main-content :is(input,select,textarea):focus-visible { outline: 2px solid #746039; outline-offset: 2px; }
+@media (max-width: 640px) {
+  .plp-public-brand__full { font-size: 1.18rem; letter-spacing: .075em; }
+  .plp-public-brand__mark { width: 39px; height: 39px; flex-basis: 39px; }
+  .plp-public-brand { gap: .45rem; max-width: calc(100vw - 6.5rem); }
+}
+@media (max-width: 430px) {
+  .plp-public-brand__full { display:none; }
+  .plp-public-brand__short { display:block; }
+  .plp-public-brand__location { font-size: .55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plp-public-header, .plp-public-header * { transition: none!important; }
+}
+
+/* Accessible Boracay Club editorial copy and intentionally secondary future chapters */
+.plp-club-programs__photo-note { max-width: 44rem; margin: -.8rem 0 2rem; color:#504b41; font-size:1rem; line-height:1.65; }
+#main-content .plp-club-program__body p { font-size:1rem; line-height:1.8; }
+#main-content .plp-club-program__body .journey-link { font-size:1rem; }
+#main-content .plp-club-steps li { font-size:1rem; line-height:1.8; }
+.plp-future-chapter__summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:1rem; min-height:58px; padding:.5rem 0; color:#f6f1e7; }
+.plp-future-chapter__summary::-webkit-details-marker { display:none; }
+.plp-future-chapter__summary > span { color:#e3ce8b; font-size:.72rem; letter-spacing:.15em; text-transform:uppercase; }
+.plp-future-chapter__summary > strong { margin-left:auto; font-size:.95rem; font-weight:600; }
+.plp-future-chapter__summary > svg { transition:transform .2s ease; flex-shrink:0; }
+.plp-future-chapter[open] .plp-future-chapter__summary > svg { transform:rotate(90deg); }
+.plp-future-chapter__summary:focus-visible { outline:2px solid #e3ce8b; outline-offset:4px; }
+@media (max-width:700px) {
+  .plp-future-chapter__summary { flex-wrap:wrap; gap:.45rem; }
+  .plp-future-chapter__summary > strong { margin-left:0; width:calc(100% - 2rem); }
+  .plp-future-chapter__summary > svg { margin-left:auto; }
+}
+@media (prefers-reduced-motion:reduce) { .plp-future-chapter__summary > svg { transition:none; } }
