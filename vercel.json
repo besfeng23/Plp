@@ -214,6 +214,14 @@
       "destination": "/club.html"
     },
     {
+      "source": "/senior-living",
+      "destination": "/senior-living.html"
+    },
+    {
+      "source": "/senior-living/",
+      "destination": "/senior-living.html"
+    },
+    {
       "source": "/reservation-policy",
       "destination": "/reservation-policy.html"
     },
