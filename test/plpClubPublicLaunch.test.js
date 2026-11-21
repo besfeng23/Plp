@@ -52,3 +52,12 @@ test('Pearl Club names the approved programme and separates membership from resi
   assert.match(club, /Accommodation, healthcare services and residential pricing are still proposals/i);
   assert.doesNotMatch(club, /SGD\s*6,?000/i);
 });
+
+
+test('legacy static hospitality pages and activity admin use the official Pearl Club name', () => {
+  for (const path of ['public/accommodation.html', 'public/experiences.html', 'src/admin/ClubAdminView.jsx']) {
+    const content = source(path);
+    assert.match(content, /Pearl Club/);
+    assert.doesNotMatch(content, /PLP Club/);
+  }
+});
