@@ -20,6 +20,8 @@ test('future senior living has a real deep link and route-specific metadata', ()
 test('senior living is a concept with separate residential admission and no payment promises', () => {
   const page = source('src/SeniorLivingView.jsx');
   assert.match(page, /Membership first\. Admission separately\./);
+  assert.match(page, /Dr\. Marichi Fong Ramos has proposed/);
+  assert.match(page, /Her proposal outlines a possible pathway/);
   assert.match(page, /membership would not automatically approve residential admission/);
   assert.match(page, /not an operating retirement residence or an offer of medical care/);
   assert.match(page, /No residential inventory, opening date, clinical services/);
