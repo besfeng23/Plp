@@ -24,7 +24,7 @@ export default function SeniorLivingView() {
     <section className="mx-auto grid max-w-[1200px] gap-12 px-6 py-20 md:grid-cols-2 md:gap-20 md:px-12 md:py-28" aria-labelledby="senior-living-how">
       <div><p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">A proposed pathway</p><h2 id="senior-living-how" className="font-serif text-4xl leading-tight md:text-6xl">Membership first. Admission separately.</h2></div>
       <div className="space-y-7 text-base leading-8 text-[#45413A]">
-        <p>Dr. Ramos has proposed Pearl Club membership as a prerequisite before someone could be considered for the retirement community. Club membership would not automatically approve residential admission.</p>
+        <p>Dr. Marichi Fong Ramos has proposed Pearl Club membership as a prerequisite for consideration for a future retirement community. Her proposal outlines a possible pathway: club membership would not automatically approve residential admission.</p>
         <ol className="space-y-5 border-l border-[#746130]/40 pl-6">
           <li><strong>01 · Explore Pearl Club.</strong> Enquire about the proposed club, activities and eligibility. No paid enrollment is available online.</li>
           <li><strong>02 · Express residential interest.</strong> Share contact details so the PLP team can discuss the concept. An enquiry is not an application or a reservation.</li>
