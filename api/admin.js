@@ -1,4 +1,6 @@
 import { staffEnquiries } from '../lib/concierge-desk.js';
+import { websiteInterestFunnel } from '../lib/owner-funnel.js';
+import { hasLegacyStaffAccess } from '../lib/staff-access.js';
 import { monthBounds, websiteBookingMonth } from '../lib/owner-month.js';
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
@@ -20,7 +22,7 @@ const PHASE_2D_BLOCK_MESSAGE = 'Phase 2D is mapping-review only. Live OTA sync, 
 const PHASE_2E_BLOCK_MESSAGE = 'Phase 2E is preflight-readiness only. Live OTA sync, credentials, booking, payment, and guest-message actions are disabled.';
 
 function json(res, status, payload) { res.statusCode = status; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(payload)); }
-function hasStaffAccess(req) { const expected = process.env.PLP_STAFF_CODE; const provided = req.headers['x-plp-staff-code']; return Boolean(expected && provided && String(provided) === String(expected)); }
+function hasStaffAccess(req) { return hasLegacyStaffAccess(req); }
 function actionOf(req) { return String(req.query?.action || req.query?.route || '').trim().toLowerCase(); }
 function parseBody(req) { try { return typeof req.body === 'object' && req.body ? req.body : JSON.parse(req.body || '{}'); } catch { return {}; } }
 function cleanSection(value) { return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 80); }
@@ -133,6 +135,7 @@ async function handleOtaPreflightItems(req, res) { if (req.method !== 'GET') ret
 async function handleOtaPreflightRun(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledMappingAction(body)) return json(res, 400, { ok: false, error: PHASE_2E_BLOCK_MESSAGE }); const result = await runOtaPreflightChecks({ ...body, createdBy: body.createdBy || staffName(req) }); return json(res, 200, { ...result, message: 'Preflight completed. No OTA sync, booking, payment, or guest-message action was performed.' }); }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'private, no-store');
   if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
   try {
     const action = actionOf(req);
@@ -156,6 +159,17 @@ export default async function handler(req, res) {
         return json(res, 200, { ok: true, month, ...await websiteBookingMonth(month, selectRows) });
       } catch {
         return json(res, 503, { ok: false, error: 'Monthly reservation totals are unavailable.' });
+      }
+    }
+    if (action === 'owner-funnel') {
+      res.setHeader('Cache-Control', 'private, no-store');
+      if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+      const month = req.query?.month;
+      if (!monthBounds(month)) return json(res, 400, { ok: false, error: 'Choose a valid reporting month.' });
+      try {
+        return json(res, 200, { ok: true, ...await websiteInterestFunnel(month, selectRows) });
+      } catch {
+        return json(res, 503, { ok: false, error: 'Anonymous website engagement data is unavailable.' });
       }
     }
     if (action === 'operations') return await handleOperations(req, res);
