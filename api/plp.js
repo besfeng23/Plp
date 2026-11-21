@@ -1,6 +1,7 @@
 import { insertRow, isSupabaseConfigured, selectRows } from './_supabase.js';
 import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 import clubHandler from '../lib/club-handler.js';
+import { safeAnalyticsEvent } from '../lib/analytics-policy.js';
 
 const DEFAULT_CONTENT = {
   homepage: {
@@ -56,13 +57,6 @@ const DEFAULT_CONTENT = {
   }
 };
 
-const ALLOWED_EVENTS = new Set([
-  'view_page', 'click_reserve', 'click_email', 'click_concierge', 'view_booking', 'view_booking_calendar',
-  'select_room', 'select_dates', 'select_calendar_date', 'check_availability', 'availability_result',
-  'start_booking', 'submit_booking', 'booking_created', 'start_checkout', 'checkout_error',
-  'payment_return_success', 'payment_return_cancel', 'view_accommodation', 'view_experiences', 'view_seo_page'
-]);
-
 function json(res, status, payload, cache = false) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json');
@@ -80,17 +74,6 @@ function cleanSection(value) {
 
 function cleanString(value, max = 160) {
   return String(value || '').replace(/[\r\n\t]+/g, ' ').trim().slice(0, max);
-}
-
-function cleanPayload(payload = {}) {
-  const safe = {};
-  for (const [key, value] of Object.entries(payload || {})) {
-    if (['name', 'email', 'phone', 'message', 'specialRequests'].includes(key)) continue;
-    if (typeof value === 'string') safe[key] = cleanString(value, 240);
-    else if (typeof value === 'number' || typeof value === 'boolean') safe[key] = value;
-    else if (value == null) safe[key] = null;
-  }
-  return safe;
 }
 
 function parseBody(req) {
@@ -139,22 +122,23 @@ function handleAnalyticsConfig(req, res) {
 }
 
 async function handleAnalytics(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' });
-  const body = parseBody(req);
-  const eventName = cleanString(body.event, 80);
-  if (!ALLOWED_EVENTS.has(eventName)) return json(res, 202, { ok: true, skipped: true });
-
+  // This is optional visitor analytics, never a source of verified bookings or
+  // member records. Anonymous traffic is untrusted and deliberately has no PII.
+  const size = Number(req.headers?.['content-length'] || 0);
+  if (size > 512) return json(res, 413, { ok: false, error: 'Analytics payload too large' });
+  const event = safeAnalyticsEvent(parseBody(req));
+  if (!event) return json(res, 202, { ok: true, stored: false, reason: 'not_collected' });
   if (!isSupabaseConfigured()) return json(res, 202, { ok: true, stored: false, reason: 'analytics_not_configured' });
-
   try {
     await insertRow('plp_analytics_events', {
-      event_name: eventName,
-      page_path: cleanString(body.path || req.headers.referer || '/', 240),
-      session_id: cleanString(body.sessionId, 80) || null,
-      payload: cleanPayload(body.payload || {}),
-      user_agent: cleanString(req.headers['user-agent'], 240),
-      referrer: cleanString(req.headers.referer, 240),
-      created_at: new Date().toISOString()
+      ...event,
+      session_id: null,
+      payload: {},
+      user_agent: null,
+      referrer: null,
+      created_at: new Date().toISOString(),
     });
     return json(res, 200, { ok: true, stored: true });
   } catch {
