@@ -26,7 +26,7 @@ test('public navigation is responsive and static routes share the same site shel
   assert.match(css,/\.plp-public-brand__full/);
   assert.match(css,/@media \(max-width: 430px\)/);
   assert.ok(app.includes('menuOpen={isOpen}'));
-  assert.ok(app.includes("event.key==='Escape'"));
+  assert.match(app,/event\.key\s*===\s*'Escape'/);
   assert.ok(!placement.includes('.plp-mobile-action')); // Static-only dock selectors must not bleed into React.
   assert.ok(placement.includes('[data-plp-mobile-action="true"]'));
   assert.ok(placement.includes('[data-plp-hero]::before { content: none !important; }'));
@@ -79,4 +79,18 @@ test('unapproved tariffs are labelled provisional without altering pricing or ch
   assert.ok(rooms.includes('Pending approved tariff'));
   assert.ok(booking.includes('Provisional website estimate:'));
   assert.match(file('index.html'),/<title>Pueblo La Perla Boracay \| Private Hillside Villas<\/title>/);
+});
+
+test('open mobile menu covers the viewport below the header, not just the first link',()=>{
+  const css=file('src/index.css');
+  const app=file('src/App.jsx');
+  assert.doesNotMatch(css,/\.plp-public-header\s*>\s*div\s*\{\s*height:/);
+  assert.match(css,/\.plp-public-header\s*>\s*div:first-child\s*\{\s*height:\s*88px;/);
+  assert.match(css,/#public-mobile-menu\s*\{[^}]*height:\s*calc\(100dvh - 88px\)/);
+  assert.match(css,/#public-mobile-menu\s*\{[^}]*overflow-y:\s*auto/);
+  assert.ok(app.includes('Mobile site navigation'));
+  assert.ok(app.includes("document.body.style.overflow = 'hidden'"));
+  assert.ok(app.includes("document.body.style.overflow = previousOverflow"));
+  assert.ok(app.includes('menuOpen={isOpen}'));
+  assert.ok(app.includes("toggle?.focus()"));
 });

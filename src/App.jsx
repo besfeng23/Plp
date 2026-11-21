@@ -123,7 +123,7 @@ function PublicNavbar({ view, navigate, isScrolled, isOpen, setIsOpen }) {
       <nav className='hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.14em] xl:flex 2xl:gap-7'>{links.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} aria-current={view === id ? 'page' : undefined} className={`inline-flex min-h-11 items-center transition-colors ${itemColor} ${id === 'booking' ? 'plp-public-nav-reserve border px-5' : ''}`}>{label}</PageLink>)}</nav>
       <button onClick={() => setIsOpen(!isOpen)} className='min-h-11 min-w-11 p-2 xl:hidden' aria-label={isOpen ? 'Close menu' : 'Open menu'} aria-expanded={isOpen} aria-controls={mobileMenuId}>{isOpen ? <X className={`h-6 w-6 ${logoColor}`} /> : <Menu className={`h-6 w-6 ${logoColor}`} />}</button>
     </div>
-    {isOpen && <div id={mobileMenuId} className='fixed inset-x-0 bottom-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] pb-[calc(6rem+var(--safe-bottom))] xl:hidden'>
+    {isOpen && <div id={mobileMenuId} role='navigation' aria-label='Mobile site navigation' className='fixed inset-x-0 bottom-0 top-24 z-40 overflow-y-auto border-t border-stone-200 bg-[#FAFAF7] pb-[calc(6rem+var(--safe-bottom))] xl:hidden'>
       <div className='flex flex-col items-center space-y-8 px-6 pt-14 text-sm font-semibold uppercase tracking-[0.2em] text-[#1A1A1A]'>{links.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} aria-current={view === id ? 'page' : undefined} className={id === 'booking' ? 'mt-8 flex min-h-11 items-center text-[#7A6A3A]' : 'flex min-h-11 items-center'}>{label}</PageLink>)}<PageLink target='contact' navigate={navigate} className='flex min-h-11 items-center text-xs text-stone-600 hover:text-stone-900'>Contact Inquiry</PageLink></div>
     </div>}
   </header>;
@@ -326,7 +326,39 @@ function GalleryView({ navigate }) {
     <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>{visible.map((image, position) => <button key={image.src} onClick={(event) => openAt(image, event)} className='group relative block aspect-[4/3] overflow-hidden bg-stone-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6A5A2D] focus-visible:ring-offset-2' aria-label={`Open image: ${image.alt}`}><img src={image.src} alt={image.alt} loading={position < 6 ? 'eager' : 'lazy'} className='absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105' /><span className='pointer-events-none absolute inset-x-0 bottom-0 flex items-end bg-gradient-to-t from-black/45 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100'><span className='text-[10px] font-semibold uppercase tracking-[0.18em] text-white'>{image.category}</span></span></button>)}</div>
     <div className='mt-24 border-t border-stone-200 pt-16 text-center'><p className='mb-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A6A3A]'>Ready to see it in person</p><h2 className='mx-auto mb-10 max-w-2xl font-serif text-4xl leading-tight md:text-5xl'>Choose where you will stay.</h2><div className='flex flex-col items-center justify-center gap-5 sm:flex-row sm:gap-8'><button onClick={() => navigate('accommodations')} className='border-b border-[#1A1A1A] pb-1 text-[11px] font-semibold uppercase tracking-[0.2em] hover:border-[#7A6A3A] hover:text-[#7A6A3A]'>View accommodation</button><button onClick={() => navigate('booking')} className='border border-[#1A1A1A] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] transition hover:bg-[#1A1A1A] hover:text-white'>Begin private reservation</button></div></div></div>{activeIndex !== null && <GalleryLightbox images={visible} index={activeIndex} onClose={close} onPrev={() => step(-1)} onNext={() => step(1)} />}</main>;
 }
-function App(){ const [view,setView]=useState(getInitialView); const [isScrolled,setIsScrolled]=useState(false); const [isOpen,setIsOpen]=useState(false); const navigate=(target)=>{ if (['accommodations', 'experiences', 'booking'].includes(target)) { if (target === 'booking') window.plpTrack?.('click_reserve'); window.location.assign(ROUTES[target]); return; } const path=ROUTES[target] || '/'; window.history.pushState({},'',path); setView(target); setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }; useEffect(()=>{ const onScroll=()=>setIsScrolled(window.scrollY>40); const onPop=()=>setView(getInitialView()); onScroll(); window.addEventListener('scroll',onScroll); window.addEventListener('popstate',onPop); return()=>{window.removeEventListener('scroll',onScroll); window.removeEventListener('popstate',onPop);};},[]); useEffect(()=>{if(!isOpen)return; const onKey=(event)=>{if(event.key==='Escape')setIsOpen(false);}; document.addEventListener('keydown',onKey);return()=>document.removeEventListener('keydown',onKey);},[isOpen]); useEffect(()=>{ const meta=PAGE_META[view]||PAGE_META.home; document.title=meta[0]; let description=document.querySelector('meta[name="description"]'); if(!description){description=document.createElement('meta'); description.setAttribute('name','description'); document.head.appendChild(description);} description.setAttribute('content',meta[1]); let canonical=document.querySelector('link[rel="canonical"]'); if(!canonical){canonical=document.createElement('link'); canonical.setAttribute('rel','canonical'); document.head.appendChild(canonical);} canonical.setAttribute('href',`${SITE_URL}${ROUTES[view] || '/'}`);window.dispatchEvent(new Event('plp:navigation'));
+function App(){ const [view,setView]=useState(getInitialView); const [isScrolled,setIsScrolled]=useState(false); const [isOpen,setIsOpen]=useState(false); const navigate=(target)=>{ if (['accommodations', 'experiences', 'booking'].includes(target)) { if (target === 'booking') window.plpTrack?.('click_reserve'); window.location.assign(ROUTES[target]); return; } const path=ROUTES[target] || '/'; window.history.pushState({},'',path); setView(target); setIsOpen(false); window.scrollTo({top:0,behavior:'smooth'}); }; useEffect(()=>{ const onScroll=()=>setIsScrolled(window.scrollY>40); const onPop=()=>setView(getInitialView()); onScroll(); window.addEventListener('scroll',onScroll); window.addEventListener('popstate',onPop); return()=>{window.removeEventListener('scroll',onScroll); window.removeEventListener('popstate',onPop);};},[]); useEffect(()=>{
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const toggle = document.querySelector('[aria-controls="public-mobile-menu"]');
+    const onKey = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsOpen(false);
+        toggle?.focus();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const menu = document.getElementById('public-mobile-menu');
+      if (!menu) return;
+      const controls = [toggle, ...menu.querySelectorAll('a[href], button:not([disabled])')].filter(Boolean);
+      if (controls.length === 0) return;
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    const onResize = () => { if (window.innerWidth >= 1280) setIsOpen(false); };
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
+    };
+  },[isOpen]); useEffect(()=>{ const meta=PAGE_META[view]||PAGE_META.home; document.title=meta[0]; let description=document.querySelector('meta[name="description"]'); if(!description){description=document.createElement('meta'); description.setAttribute('name','description'); document.head.appendChild(description);} description.setAttribute('content',meta[1]); let canonical=document.querySelector('link[rel="canonical"]'); if(!canonical){canonical=document.createElement('link'); canonical.setAttribute('rel','canonical'); document.head.appendChild(canonical);} canonical.setAttribute('href',`${SITE_URL}${ROUTES[view] || '/'}`);window.dispatchEvent(new Event('plp:navigation'));
   if (window.location.hash) {
     const target = document.getElementById(window.location.hash.slice(1));
     if (target) requestAnimationFrame(() => target.scrollIntoView());
