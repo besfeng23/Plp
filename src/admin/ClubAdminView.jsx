@@ -134,7 +134,7 @@ export default function ClubAdminView({ code, refreshedAt }) {
 
   return <div className="plp-club-stack">
     <div className="plp-metrics">
-      <div className="plp-metric"><span>Pending applications</span><strong>{loading || !recordsReady ? '—' : counts.pending}</strong><small>Staff-recorded consent</small></div>
+      <div className="plp-metric"><span>Pending applications</span><strong>{loading || !recordsReady ? '—' : counts.pending}</strong><small>Online and staff-entered applications</small></div>
       <div className="plp-metric"><span>Active members</span><strong>{loading || !recordsReady ? '—' : counts.active}</strong><small>Boracay chapter only</small></div>
       <div className="plp-metric"><span>Upcoming activities</span><strong>{loading || !recordsReady ? '—' : counts.published}</strong><small>Published dates only</small></div>
       <div className="plp-metric"><span>Region</span><strong>Boracay</strong><small>Singapore and Malaysia planned</small></div>
@@ -146,7 +146,7 @@ export default function ClubAdminView({ code, refreshedAt }) {
 
     <ConciergeInbox code={code} clubOnly refreshedAt={refreshedAt} />
 
-    <section className="plp-panel"><div className="plp-panel__head"><div><h3><Users size={18} className="inline" /> Members</h3><p>Record an application after the person has consented; approve only after a staff eligibility review.</p></div></div>
+    <section className="plp-panel"><div className="plp-panel__head"><div><h3><Users size={18} className="inline" /> Members</h3><p>Review incoming online applications or record a consenting applicant manually. Activate only after staff eligibility review.</p></div></div>
       {members.length > 0 && <label className="plp-task-form">Find a member by name or email
         <input type="search" value={memberSearch} onChange={event => { setMemberSearch(event.target.value); setMemberLimit(20); }} />
       </label>}
