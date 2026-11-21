@@ -21,6 +21,10 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+    // Club enrollment is not launched. Keep existing resort enquiries operational.
+    if (body.topic === 'club' || body.topic === 'club-activity') {
+      return res.status(404).json({ ok: false, error: 'Not found' });
+    }
     if (body?.channel === 'desk') {
       const [status, result] = await receiveEnquiry(body);
       return res.status(status).json(result);
