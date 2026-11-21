@@ -3,6 +3,7 @@ import { notifyBookingCreated } from './_notifications.js';
 import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
 import { PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, todayAtResort } from '../lib/booking-dates.js';
+import { createBookingReference } from '../lib/booking-reference.js';
 
 const required = ['name', 'email', 'phone', 'accommodation', 'checkIn', 'checkOut', 'guests'];
 
@@ -42,7 +43,7 @@ export default async function handler(req, res) {
     if (body.quote && (body.quote.amount !== amount || body.quote.deposit !== deposit)) {
       return res.status(409).json({ ok: false, error: 'The rate has changed. Refresh this page to review the updated quote.' });
     }
-    const reference = `PLP-${Date.now().toString().slice(-8)}`;
+    const reference = createBookingReference();
 
     const booking = {
       reference,
