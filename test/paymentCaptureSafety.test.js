@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createBookingReference } from '../lib/booking-reference.js';
 import { evaluatePayPalCapture } from '../lib/paypal-capture-guard.js';
 import { capturePayPalOrder, getBookingReference, SafePayPalError } from '../api/paypal/_paypal.js';
-import { isCheckoutAllowed } from '../api/paypal/create-session.js';
+import { isCheckoutAllowed } from '../lib/paypal-checkout-policy.js';
 import { readFileSync } from 'node:fs';
 
 const ref = 'PLP-0123456789ABCDEF01234567';
