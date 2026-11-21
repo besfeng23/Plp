@@ -100,3 +100,13 @@ test('public tracker requires affirmative consent and transmits no form or healt
   assert.match(source('src/booking.js'), /track\('booking_created'\)/);
   assert.match(source('src/admin/PlpEnterpriseAdminApp.jsx'), /<OwnerFunnel code=\{code\}/);
 });
+
+test('owner funnel is inaccessible without staff authentication and responses are not cacheable', async () => {
+  const { default: admin } = await import('../api/admin.js');
+  const res = response();
+  await admin({ method: 'GET', headers: {}, query: { action: 'owner-funnel', month: '2026-11' } }, res);
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.headers['Cache-Control'], 'private, no-store');
+  assert.equal(res.body.ok, false);
+  assert.ok(!('metrics' in res.body));
+});
