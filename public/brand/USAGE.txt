@@ -1,0 +1,14 @@
+PUEBLO LA PERLA — SHARED LOGO ASSETS
+
+Use PLP_Editorial_Vector_Logo.svg as the preferred website brand mark: genuine resolution-independent SVG paths.
+Use PLP_Editorial_Web_1024.webp if the site cannot render SVG.
+Use PLP_Editorial_4K_Transparent.png for print/presentation exports.
+Use PLP_Editorial_App_512.png for app identity.
+Use favicon-32.png, favicon-64.png, apple-touch-icon-180.png for browser/PWA icons.
+Use PLP_Editorial_Reversed_Ivory.svg for ivory-only detail on dark backgrounds (interior stays transparent).
+Use PLP_Refined_Rendered_4K.png for the subtly shaded/photorealistic appearance.
+
+Color palette: deep brown #421909; warm ivory #FAF1E0.
+Visual identity: shared master for PLP Boracay, PLP Changi, and future PLP chapters.
+Keep location labels in page text beside the crest rather than changing the master mark.
+Note: SVG is vector-traced from the refined design; this is not the original artist source file.

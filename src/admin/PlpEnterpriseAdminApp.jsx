@@ -213,7 +213,7 @@ export default function PlpEnterpriseAdminApp() {
     setRows([]); setExceptions([]); setNotifications([]); setTasks([]); setBlocks([]); setSyncAt(null);
   }
 
-  if (!authenticated) return <div className="plp-admin-login"><div className="plp-admin-login__mark">PLP <span>·</span> ENTERPRISE</div><form onSubmit={(event) => { event.preventDefault(); load(code, true); }} className="plp-admin-login__card">
+  if (!authenticated) return <div className="plp-admin-login"><div className="plp-admin-login__mark"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" width="54" height="76" className="plp-admin-login__crest" /><div>PLP <span>·</span> ENTERPRISE</div></div><form onSubmit={(event) => { event.preventDefault(); load(code, true); }} className="plp-admin-login__card">
     <span className="plp-eyebrow">Pueblo La Perla Boracay</span><h1>Private resort administration.</h1><p>Your private workspace for reservations, guest care, and resort operations.</p>
     <label htmlFor="plp-admin-code">Staff access code</label><input id="plp-admin-code" autoComplete="off" type="password" value={code} onChange={(event) => setCode(event.target.value)} required placeholder="Enter access code" />
     {error && <p className="plp-form-error" role="alert">{error}</p>}<button className="plp-primary" disabled={loading} type="submit"><LockKeyhole size={17} /> {loading ? 'Verifying access…' : 'Open PLP Admin'}</button>
@@ -227,7 +227,7 @@ export default function PlpEnterpriseAdminApp() {
 
   return <div className="plp-admin-root">
     <aside className={`plp-admin-sidebar ${mobileNav ? 'is-open' : ''}`} aria-label="PLP Admin navigation">
-      <div className="plp-sidebar-brand"><span className="plp-sidebar-logo"><img src="/favicon.svg" alt="" width="42" height="42" /></span><div><small>Pueblo La Perla</small><strong>Administration</strong></div></div>
+      <div className="plp-sidebar-brand"><span className="plp-sidebar-logo"><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="" width="36" height="50" /></span><div><small>Pueblo La Perla</small><strong>Administration</strong></div></div>
       <div className="plp-sidebar-divider" />
       <button className={`plp-sidebar-link ${mode === 'choose' ? 'active' : ''}`} onClick={() => { setMode('choose'); setMobileNav(false); }}><LayoutDashboard size={17} /> Admin Home</button>
       <button className={`plp-sidebar-link ${mode === 'manage' ? 'active' : ''}`} onClick={enterManage}><ShieldCheck size={17} /> Manage Client</button>

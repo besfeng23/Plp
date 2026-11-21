@@ -551,3 +551,7 @@ textarea:focus-visible {
   .plp-future-chapter__summary > svg { margin-left:auto; }
 }
 @media (prefers-reduced-motion:reduce) { .plp-future-chapter__summary > svg { transition:none; } }
+
+/* Official shared PLP Editorial Brand Pack, supplied 2026-11-21. Oval logo is an untouched master with independent location label. */
+.plp-public-brand__mark{width:43px;height:60px;flex:0 0 43px;object-fit:contain}
+@media(max-width:640px){.plp-public-brand__mark{width:36px;height:50px;flex-basis:36px}}
