@@ -1,10 +1,13 @@
 import { waitUntil } from '@vercel/functions';
 import { notifyPaymentException, notifyPaymentVerified } from '../_notifications.js';
 import { recordPayPalCapture } from './_db.js';
+import { findBookingByReference, selectRows } from '../_supabase.js';
+import { evaluatePayPalCapture } from '../../lib/paypal-capture-guard.js';
 import { capturePayPalOrder, getBaseUrl } from './_paypal.js';
 
 function redirect(res, location) {
   res.statusCode = 302;
+  res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Location', location);
   return res.end();
 }
@@ -30,6 +33,13 @@ export default async function handler(req, res) {
   const orderToken = firstQueryValue(req.query?.token);
   const bookingRef = firstQueryValue(req.query?.bookingRef);
   const bookingQuery = buildBookingQuery(bookingRef);
+  // PayPal redirects with GET. Reject unapproved methods without side effects.
+  if (req.method && req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    res.statusCode = 405;
+    return res.end();
+  }
+
 
   if (!orderToken) {
     return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=missing-paypal-token`);
@@ -40,6 +50,24 @@ export default async function handler(req, res) {
   }
 
   try {
+    // A payment capture MUST be tied to the exact stored PayPal order. Do not
+    // contact PayPal for a missing/mismatched/expired/previously paid record.
+    if (typeof orderToken !== 'string' || !/^[A-Za-z0-9_-]{6,128}$/.test(orderToken) ||
+        typeof bookingRef !== 'string' || !/^[A-Za-z0-9_-]{6,64}$/.test(bookingRef)) {
+      return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=invalid-payment-return`);
+    }
+    const booking = await findBookingByReference(bookingRef);
+    const records = await selectRows('plp_payments',
+      `provider=eq.PAYPAL&provider_reference_id=eq.${encodeURIComponent(bookingRef)}&provider_session_id=eq.${encodeURIComponent(orderToken)}&select=id,booking_id,provider_reference_id,provider_session_id,amount_php,currency,status,verification_status&limit=1`);
+    const state = evaluatePayPalCapture({
+      booking, payment: records?.[0], bookingRef, orderToken,
+    });
+    if (state.decision === 'already_paid') {
+      return redirect(res, `${baseUrl}/booking/success?${bookingQuery}provider=paypal&paypalOrderId=${encodeURIComponent(orderToken)}`);
+    }
+    if (state.decision !== 'capture') {
+      return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=payment-needs-review`);
+    }
     const capture = await capturePayPalOrder(orderToken);
     const databaseResult = await recordPayPalCapture({
       bookingReference: bookingRef,
