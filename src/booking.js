@@ -297,6 +297,7 @@ async function submitReservation(event) {
     }
     booking = result.booking;
     savedRequest = true;
+    track('booking_created');
 
     const checkoutResponse = await fetch('/api/xendit/create-session', {
       method: 'POST',
