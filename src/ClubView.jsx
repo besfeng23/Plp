@@ -10,7 +10,7 @@ const IDEAS = [
   { key: 'island', title: 'Island experiences', description: 'Thoughtfully paced Boracay outings, subject to venue, transport, and safety arrangements.', image: '/images/plp-day-balcony-sea-view.webp', imageAlt: 'View of the sea from a Pueblo La Perla hillside balcony' },
 ];
 
-const inquiryHref = (activity) => `mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent(activity ? `PLP Club Boracay — ${activity}` : 'PLP Club Boracay — Membership Interest')}`;
+const inquiryHref = (activity) => `mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent(activity ? `Pearl Club Boracay — ${activity}` : 'Pearl Club Boracay — Membership Interest')}`;
 
 function formatSchedule(date) {
   return new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(date));
@@ -33,8 +33,8 @@ export default function ClubView() {
     <section className="relative isolate overflow-hidden bg-[#171915] px-6 pb-20 pt-44 text-white md:px-12 md:pb-28 md:pt-52">
       <img className="absolute inset-0 -z-20 h-full w-full object-cover object-center" src="/images/plp-property-overview-wide.webp" alt="Pueblo La Perla hillside setting in Boracay" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/85 via-black/70 to-black/25" />
-      <div className="mx-auto max-w-[1400px]"><p className="mb-8 text-xs font-semibold uppercase tracking-[0.25em] text-[#E3CE8B]">PLP Club · Boracay Chapter</p>
-        <h1 className="max-w-3xl font-serif text-5xl leading-[1.07] md:text-7xl">PLP Club Boracay</h1>
+      <div className="mx-auto max-w-[1400px]"><p className="mb-8 text-xs font-semibold uppercase tracking-[0.25em] text-[#E3CE8B]">Pearl Club · Boracay Chapter</p>
+        <h1 className="max-w-3xl font-serif text-5xl leading-[1.07] md:text-7xl">Pearl Club Boracay</h1>
         <p className="mt-8 max-w-xl text-base leading-8 text-white/90 md:text-lg">A Boracay community for adults aged 60 and above. Get in touch about membership, suggest an activity, or check the calendar.</p>
         <div className="mt-8 flex flex-wrap items-center gap-6"><a href="/contact?topic=club" className="inline-flex min-h-12 items-center gap-3 bg-[#FAFAF7] px-7 py-3 text-sm font-semibold text-[#1A1A1A] transition hover:bg-[#E3CE8B]">Ask about membership <ArrowRight size={17} aria-hidden="true" /></a><a className="journey-link" href="#club-calendar">See upcoming activities</a></div>
       </div>
@@ -49,6 +49,8 @@ export default function ClubView() {
           <li>Check the published calendar and contact the team about attending. You can enquire without booking a room.</li>
         </ol>
         <p className="mt-5">Membership fees, benefits and launch dates are still being finalized.</p>
+        <p className="mt-4 rounded-sm border-l-2 border-[#746130] pl-5 text-sm leading-7">Considering future senior living? Pearl Club membership and residential admission are separate approvals. Membership would be a prerequisite, not a guarantee of a residential place. Accommodation, healthcare services and residential pricing are still proposals, not available services.</p>
+        <a href="/senior-living" className="mt-5 inline-flex min-h-12 items-center border-b border-[#746130] text-sm font-semibold">Explore proposed senior living <ArrowRight size={17} className="ml-2" aria-hidden="true" /></a>
       </div>
     </section>
 
@@ -88,12 +90,13 @@ export default function ClubView() {
           <div>
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E3CE8B]">A regional vision</p>
             <h2 id="club-regions-title" className="font-serif text-4xl leading-tight md:text-6xl">Boracay first. More chapters later.</h2>
-            <p className="mt-6 text-base leading-8 text-white/75">One PLP Club concept, with separate local programs and member records as new chapters are approved.</p>
+            <p className="mt-6 text-base leading-8 text-white/75">One Pearl Club concept, with separate local programs and member records as new chapters are approved.</p>
           </div>
           <div className="plp-club-chapters space-y-5 self-center">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Boracay, Philippines</span><span className="text-sm text-[#E3CE8B]">Pilot in development</span></div>
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Singapore</span><span className="text-sm text-white/60">Proposed · Changi Beach Club</span></div>
-            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Malaysia</span><span className="text-sm text-white/60">Future chapter</span></div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Malaysia</span><span className="text-sm text-white/60">Future chapter · No venue selected</span></div>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-white/20 py-4"><span className="text-lg">Bali, Indonesia</span><span className="text-sm text-white/60">Exploratory · No venue selected</span></div>
           </div>
         </div>
 
@@ -122,6 +125,6 @@ export default function ClubView() {
       </div>
     </section>
 
-    <section className="mx-auto max-w-[1400px] px-6 py-20 text-center md:px-12 md:py-28"><HeartHandshake className="mx-auto mb-7 text-[#746130]" size={33} aria-hidden="true" /><h2 className="mx-auto max-w-2xl font-serif text-4xl md:text-6xl">Let's shape the first chapter together.</h2><p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[#45413A]">Have an interest in joining, suggesting an activity, or helping organize the Boracay pilot? Speak to the PLP team.</p><div className="mt-9 flex flex-wrap justify-center gap-4"><a href="/contact?topic=club" className="inline-flex min-h-12 items-center gap-3 bg-[#1A1A1A] px-8 py-4 text-sm font-semibold text-white hover:bg-[#746130]">Enquire about membership <ArrowRight size={17} aria-hidden="true" /></a><a href={'tel:' + CONCIERGE_NUMBER} className="inline-flex min-h-12 items-center border border-[#1A1A1A] px-8 py-4 text-sm font-semibold text-[#1A1A1A]">Call {CONCIERGE_NUMBER_DISPLAY}</a></div><p className="mx-auto mt-8 max-w-xl text-sm leading-6 text-[#676259]"><Users size={15} className="mr-2 inline" aria-hidden="true" />PLP Club is a proposed private membership program and does not issue government senior-citizen identification or statutory entitlements.</p></section>
+    <section className="mx-auto max-w-[1400px] px-6 py-20 text-center md:px-12 md:py-28"><HeartHandshake className="mx-auto mb-7 text-[#746130]" size={33} aria-hidden="true" /><h2 className="mx-auto max-w-2xl font-serif text-4xl md:text-6xl">Let's shape the first chapter together.</h2><p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[#45413A]">Have an interest in joining, suggesting an activity, or helping organize the Boracay pilot? Speak to the PLP team.</p><div className="mt-9 flex flex-wrap justify-center gap-4"><a href="/contact?topic=club" className="inline-flex min-h-12 items-center gap-3 bg-[#1A1A1A] px-8 py-4 text-sm font-semibold text-white hover:bg-[#746130]">Enquire about membership <ArrowRight size={17} aria-hidden="true" /></a><a href={'tel:' + CONCIERGE_NUMBER} className="inline-flex min-h-12 items-center border border-[#1A1A1A] px-8 py-4 text-sm font-semibold text-[#1A1A1A]">Call {CONCIERGE_NUMBER_DISPLAY}</a></div><p className="mx-auto mt-8 max-w-xl text-sm leading-6 text-[#676259]"><Users size={15} className="mr-2 inline" aria-hidden="true" />Pearl Club is a proposed private membership program and does not issue government senior-citizen identification or statutory entitlements.</p></section>
   </main>;
 }

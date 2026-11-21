@@ -13,7 +13,7 @@ const PAGES = [
   { id: 'operations', label: 'Operations', icon: CalendarDays },
   { id: 'vision', label: 'Vision', icon: Eye },
   { id: 'guests', label: 'Guest Experience', icon: Users },
-  { id: 'club', label: 'PLP Club', icon: Users },
+  { id: 'club', label: 'Pearl Club', icon: Users },
   { id: 'team', label: 'Team & Access', icon: ShieldCheck },
   { id: 'revenue', label: 'Revenue', icon: CreditCard },
   { id: 'attention', label: 'Needs You', icon: CircleAlert },

@@ -13,8 +13,13 @@ const contrast = (a,b) => {
   return (hi+.05)/(lo+.05);
 };
 
-test('PLP brand mark is consistently sourced from the existing verified favicon',()=>{
-  for(const path of ['src/App.jsx','src/admin/PlpEnterpriseAdminApp.jsx','public/accommodation.html','public/experiences.html','booking.html'])
+test('PLP brand mark uses official editorial crest in the React shell, with a favicon on static pages',()=>{
+  for (const path of ['src/App.jsx','src/admin/PlpEnterpriseAdminApp.jsx']) {
+    const source = file(path);
+    assert.ok(source.includes('/brand/PLP_Editorial_Vector_Logo.svg'), path);
+    assert.ok(source.includes('/brand/PLP_Editorial_Reversed_Ivory.svg'), path);
+  }
+  for (const path of ['public/accommodation.html','public/experiences.html','booking.html'])
     assert.ok(file(path).includes('/favicon.svg'), path);
 });
 
