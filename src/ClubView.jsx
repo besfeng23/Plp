@@ -50,6 +50,7 @@ export default function ClubView() {
         </ol>
         <p className="mt-5">Membership fees, benefits and launch dates are still being finalized.</p>
         <p className="mt-4 rounded-sm border-l-2 border-[#746130] pl-5 text-sm leading-7">Considering future senior living? Pearl Club membership and residential admission are separate approvals. Membership would be a prerequisite, not a guarantee of a residential place. Accommodation, healthcare services and residential pricing are still proposals, not available services.</p>
+        <a href="/senior-living" className="mt-5 inline-flex min-h-12 items-center border-b border-[#746130] text-sm font-semibold">Explore proposed senior living <ArrowRight size={17} className="ml-2" aria-hidden="true" /></a>
       </div>
     </section>
 
