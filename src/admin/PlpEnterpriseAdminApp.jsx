@@ -6,6 +6,8 @@ import ConciergeInbox from './ConciergeInbox.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
 import OwnerFunnel from './OwnerFunnel.jsx';
 import ClubAdminView from './ClubAdminView.jsx';
+import OwnerWorkspace from './pearl/OwnerWorkspace.jsx';
+import useWorkingFile from './pearl/useWorkingFile.js';
 import './plp-enterprise-admin.css';
 
 const PAGES = [
@@ -149,6 +151,7 @@ function ReservationDetails({ row, onClose, onManage }) {
 }
 
 export default function PlpEnterpriseAdminApp() {
+  const pearlFile = useWorkingFile();
   const [code, setCode] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [mode, setMode] = useState('choose');
@@ -201,7 +204,10 @@ export default function PlpEnterpriseAdminApp() {
       if (first) setMode('choose');
     } catch (err) {
       setError(err.message || 'Staff access could not be verified.');
-      if (first || /access|401|403/i.test(err.message || '')) setAuthenticated(false);
+      if (first || /access|401|403/i.test(err.message || '')) {
+        pearlFile.reset();
+        setAuthenticated(false);
+      }
     } finally { setLoading(false); }
   }
 
@@ -220,6 +226,8 @@ export default function PlpEnterpriseAdminApp() {
   }
 
   function logout() {
+    if (pearlFile.dirty && !window.confirm('Sign out and discard the unsaved Pearl Club working file?')) return;
+    pearlFile.reset();
     setAuthenticated(false); setShowTestRecords(false); setCode(''); setMode('choose'); setPage('home'); setSelected(null);
     setRows([]); setExceptions([]); setNotifications([]); setTasks([]); setBlocks([]); setSyncAt(null);
   }
@@ -254,12 +262,12 @@ export default function PlpEnterpriseAdminApp() {
       {testCount > 0 && mode === 'workspace' && <div className="plp-record-scope"><span>{showTestRecords ? 'Test records visible · excluded from business totals' : `${testCount} test reservations excluded from business totals`}</span><button className="plp-text-button" aria-pressed={showTestRecords} onClick={() => { setShowTestRecords(value => !value); setSelected(null); }}>{showTestRecords ? 'Hide test records' : 'Show test records'}</button></div>}
       {mode === 'choose' && <main className="plp-admin-content"><div className="plp-intro"><span className="plp-eyebrow">PLP · Administration</span><h1>One resort. Two ways to work.</h1><p>Manage daily operations or step into the owner workspace for a clear view of the resort.</p></div><div className="plp-mode-grid"><button onClick={enterManage} className="plp-mode-card"><span className="plp-mode-icon"><ShieldCheck size={26} /></span><small>01 / Resort Command</small><h2>Manage Client</h2><p>Reservations, payment review, housekeeping, guest requests, and availability in one operational workspace.</p><span>Open operations <ArrowRight size={18} /></span></button><button onClick={enterWorkspace} className="plp-mode-card"><span className="plp-mode-icon"><House size={26} /></span><small>02 / Enterprise Workspace</small><h2>Enter Client Workspace</h2><p>A clear view of stays, guest care, booking value, and decisions that need your attention.</p><span>Enter workspace <ArrowRight size={18} /></span></button></div><p className="plp-disclosure">Connected to PLP reservation records. Test records are excluded from business totals.</p></main>}
       {mode === 'manage' && <main className="plp-admin-management" aria-label="Existing PLP Resort Command"><iframe title="PLP Resort Command — operational controls" src="/admin-ops.html" onLoad={(event) => event.currentTarget.contentWindow?.postMessage({ type: 'PLP_ADMIN_AUTH', code }, window.location.origin)} /></main>}
-      {mode === 'workspace' && <main className="plp-admin-content" id="plp-workspace"><div className="plp-workspace-intro"><span className="plp-eyebrow">Enterprise Workspace · {manilaToday()}</span><div><h1>{page === "home" ? "Your day at a glance." : page === "overview" ? "The wider picture." : page === "guests" ? "Every guest, attended to." : page === "club" ? "The Boracay chapter." : page === "attention" ? "What needs your attention." : pageTitle}</h1><button className="plp-secondary" onClick={enterManage}>Manage Client <ArrowRight size={15} /></button></div></div>
+      {mode === 'workspace' && <main className="plp-admin-content" id="plp-workspace">{page !== 'club' && <div className="plp-workspace-intro"><span className="plp-eyebrow">Enterprise Workspace · {manilaToday()}</span><div><h1>{page === "home" ? "Your day at a glance." : page === "overview" ? "The wider picture." : page === "guests" ? "Every guest, attended to." : page === "attention" ? "What needs your attention." : pageTitle}</h1><button className="plp-secondary" onClick={enterManage}>Manage Client <ArrowRight size={15} /></button></div></div>}
         {page === 'home' && <><section className="plp-today-board" aria-label="Today's operating picture"><div className="plp-today-board__heading"><div><span className="plp-eyebrow">Daily operations</span><h2>Today's priorities</h2></div><button className="plp-text-button" onClick={() => toPage('attention')}>Review attention <ArrowRight size={14} /></button></div><div className="plp-metrics plp-metrics--today"><Metric title="Arriving today" value={summary.arrivals.length} description="From reservation records" /><Metric title="In house" value={summary.inHouse.length} description="Active stay dates" /><Metric title="Departing today" value={summary.departures.length} description="Scheduled departures" /><Metric title="Needs review" value={summary.review.length + summary.exceptionCount} description="Booking and payment cues" tone /></div></section><DailySignals code={code} refreshedAt={syncAt} onNavigate={toPage} /><div className="plp-two-columns"><Panel title="Arrivals" note="Expected today, from live stays." action={<button className="plp-text-button" onClick={() => toPage('operations')}>All reservations <ArrowRight size={14} /></button>}><BookingList rows={summary.arrivals} onOpen={setSelected} compact emptyTitle="No arrivals scheduled today" emptyDetail="Your next arrivals will appear here." /></Panel><Panel title="Needs You" note="Review first; no automatic confirmation." action={<button className="plp-text-button" onClick={() => toPage('attention')}>View attention <ArrowRight size={14} /></button>}><BookingList rows={summary.review.slice(0, 5)} onOpen={setSelected} compact emptyTitle="No reservations need review" emptyDetail="New decisions will appear here as stays progress." /></Panel></div></>}
         {page === 'overview' && <><OwnerMonth code={code} refreshedAt={syncAt} /><OwnerFunnel code={code} refreshedAt={syncAt} /><div className="plp-metrics"><Metric title="Reservations loaded" value={rows.filter(row => !isTestRecord(row)).length} description="Live source count" /><Metric title="Open staff tasks" value={summary.openTasks.length} description="Persisted task records" /><Metric title="Payment exceptions" value={summary.exceptionCount} description="Reconciliation exceptions" tone /><Metric title="Notifications" value={summary.notificationCount} description="Recorded sends and outcomes" /></div><Panel title="Upcoming stays" note="Chronological arrivals from current reservations."><BookingList rows={summary.upcoming} onOpen={setSelected} emptyTitle="No upcoming stays yet" emptyDetail="Confirmed and requested stays will appear in arrival order." /></Panel><p className="plp-disclosure">Counts reflect the returned API rows, not an independently reconciled occupancy or accounting ledger.</p></>}
         {page === 'operations' && <><Panel title="Reservations" note="Search live booking records; open the original record for full details."><div className="plp-filters"><label><Search size={16} /><input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Guest, reference, accommodation" aria-label="Search reservations" /></label><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter booking status"><option value="all">All booking statuses</option>{['PENDING_PAYMENT','PAID_DEPOSIT','CONFIRMED','CANCELLED','PAYMENT_PROCESSING'].map((value) => <option key={value} value={value}>{bookingStatus(value)}</option>)}</select></div><BookingList rows={matchingRows} onOpen={setSelected} /></Panel></>}
         {page === 'vision' && <Panel title="Vision" note="Camera operations must use an approved, authenticated source."><Blank title="Camera feed not connected" detail="Live property monitoring will appear here once an approved camera source is connected." /></Panel>}
-        {page === 'club' && <ClubAdminView code={code} refreshedAt={syncAt} />}
+        {page === 'club' && <OwnerWorkspace file={pearlFile} staffRegister={<ClubAdminView code={code} refreshedAt={syncAt} />} />}
         {page === 'guests' && <><ConciergeInbox code={code} refreshedAt={syncAt} /><div className="plp-metrics"><Metric title="Guests in loaded records" value={guests.length} description="Grouped by recorded email" /><Metric title="Guest requests" value={guests.reduce((n, guest) => n + guest.requests.length, 0)} description="Notes captured on reservations" /><Metric title="Arrivals today" value={summary.arrivals.length} description="Guest preparation" /><Metric title="In house" value={summary.inHouse.length} description="Stay dates" /></div><Panel title="Guest roster" note="Records visible only to authenticated PLP staff."><div className="plp-guest-grid">{guests.map((guest) => <article className="plp-guest-card" key={guest.key}><strong>{guest.name}</strong><small>{guest.email || 'Email not recorded'}</small><span>{guest.reservations.length} reservation{guest.reservations.length === 1 ? '' : 's'} · {guest.requests.length} request note{guest.requests.length === 1 ? '' : 's'}</span><button className="plp-text-button" onClick={() => setSelected(guest.reservations[0])}>View latest record <ArrowRight size={14} /></button></article>)}{!guests.length && <Blank title="No guest records returned" />}</div></Panel></>}
         {page === 'team' && <>
           <Panel title="Staff tasks" note="Only tasks already persisted in the PLP staff task register appear here.">
