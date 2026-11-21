@@ -65,18 +65,19 @@ const GALLERY_GROUPS = [
 function LegalPageView({ type }) {
   const isPrivacy = type === 'privacy';
   const title = isPrivacy ? 'Privacy Policy' : 'Terms of Service';
-  const intro = isPrivacy ? 'Pueblo La Perla Boracay respects the privacy of guests and website visitors. This Privacy Policy explains how information may be collected and used when you visit the website or submit a reservation inquiry.' : 'These Terms of Service provide general conditions for using the Pueblo La Perla Boracay website and submitting reservation inquiries.';
+  const intro = isPrivacy ? 'Pueblo La Perla Boracay respects the privacy of guests and website visitors. This Privacy Policy explains how information may be collected and used when you visit the website, submit a reservation inquiry, or apply to Pearl Club Boracay.' : 'These Terms of Service provide general conditions for using the Pueblo La Perla Boracay website and submitting reservation inquiries.';
   const sections = isPrivacy ? [
-    ['Information We May Collect', 'When you submit a reservation inquiry, we may collect information such as your name, contact details, preferred dates, accommodation preference, number of guests, and any message or special request you choose to provide. We may also collect basic technical information, such as device type, browser type, pages visited, and general website usage data, if analytics or performance tools are used.'],
-    ['How Information Is Used', 'Information may be used to respond to inquiries, confirm availability, coordinate reservations, arrange guest requests, improve the website, and maintain the security and reliability of the service.'],
+    ['Information We May Collect', 'When you submit a reservation inquiry, we may collect your name, contact details, dates, accommodation preferences, guest count and any message. Pearl Club membership applications collect your name, email, optional telephone number, 60+ age declaration, consent time and application review status; the online form does not request identity documents, full birth dates or medical information. We may also collect basic technical information, such as device type, browser type, pages visited, and general website usage data, if analytics or performance tools are used.'],
+    ['How Information Is Used', 'Information may be used to respond to inquiries, process membership applications, allow PLP staff to assess eligibility and contact applicants, publish confirmed club activities, coordinate reservations, improve the website, and protect service reliability.'],
     ['Sharing of Information', 'Guest inquiry information is not sold. Information may be shared only when necessary to respond to a reservation request, coordinate guest services, comply with legal obligations, or protect the security of the website.'],
     ['Cookies and Analytics', 'Optional analytics are disabled until you choose to allow them. When enabled, first-party website counts record approved public page paths and action categories, not names, emails, booking references, health details, or full URL query strings. Google Analytics and PostHog may also be used only when configured. Payment-return pages are excluded. Use Analytics settings to change your choice.'],
     ['Data Security', 'Reasonable technical and organizational measures should be used to protect inquiry information. No website or online transmission can be guaranteed to be completely secure.'],
-    ['Data Retention', 'Inquiry information should be retained only as long as necessary for reservation handling, guest service, legal, operational, or legitimate business purposes.'],
-    ['Guest Requests', 'Guests may request access, correction, or deletion of their personal information by contacting the PLP team through the available reservation or contact channels.'],
+    ['Data Retention', 'Guest and membership application information should be retained only as long as necessary for staff review, reservations, guest services, legal obligations and legitimate operations. Please contact PLP for correction, withdrawal or deletion requests, subject to applicable recordkeeping obligations.'],
+    ['Guest Requests', 'Guests and Pearl Club applicants may request access, correction, withdrawal of an application, or deletion of personal information through the PLP concierge contact channels.'],
     ['Updates', 'This Privacy Policy may be updated from time to time. The latest version should be made available on this page.'],
   ] : [
     ['Website Use', 'The website is provided to introduce Pueblo La Perla Boracay, present accommodation and experience information, and allow visitors to submit reservation inquiries. Visitors agree not to misuse the website, interfere with its operation, attempt unauthorized access, or submit false or harmful information.'],
+    ['Pearl Club Applications', 'Submitting an application means the applicant has declared they are at least 60 and consented to staff review. An application is not membership approval, a residential admission, or a paid enrollment. The club team contacts applicants about eligibility and any future terms.'],
     ['Reservation Inquiries', 'Submitting a reservation inquiry does not automatically confirm a booking. Availability, rates, deposit requirements, payment timing, cancellation terms, and final booking details must be confirmed by the PLP team.'],
     ['Rates and Availability', 'Accommodation rates, inclusions, and availability may vary by date, season, guest count, and selected arrangement. Information shown on the website is provided for general guidance and may be updated.'],
     ['Payments and Deposits', 'A deposit or payment may be required to secure a reservation. Payment instructions, accepted methods, deadlines, and balance details will be provided before final confirmation.'],
@@ -148,12 +149,18 @@ function PublicFooter({ navigate }) {
   </footer>;
 }
 
-function MobileActionBar({ navigate, menuOpen = false }) {
+function MobileActionBar({ navigate, menuOpen = false, view }) {
   if (menuOpen) return null;
+  const clubRelated = view === 'club' || view === 'senior-living';
   return <div className='plp-mobile-action fixed inset-x-0 bottom-0 z-40 px-4 md:hidden' style={{ paddingBottom: 'calc(0.75rem + var(--safe-bottom))' }}>
     <div className='plp-mobile-action__inner'>
-      <PageLink target='booking' navigate={navigate} className='plp-mobile-action__book'>Check availability</PageLink>
-      <PageLink target='contact' navigate={navigate} className='plp-mobile-action__concierge'>Ask concierge</PageLink>
+      {clubRelated ? <>
+        <a href='/club#club-application' className='plp-mobile-action__book'>Apply to Pearl Club</a>
+        <a href={view === 'senior-living' ? '/contact?topic=club&purpose=residential-interest' : '/contact?topic=club'} className='plp-mobile-action__concierge'>Ask club team</a>
+      </> : <>
+        <PageLink target='booking' navigate={navigate} className='plp-mobile-action__book'>Check availability</PageLink>
+        <PageLink target='contact' navigate={navigate} className='plp-mobile-action__concierge'>Ask concierge</PageLink>
+      </>}
     </div>
   </div>;
 }
@@ -364,6 +371,6 @@ function App(){ const [view,setView]=useState(getInitialView); const [isScrolled
     const target = document.getElementById(window.location.hash.slice(1));
     if (target) requestAnimationFrame(() => target.scrollIntoView());
   }
-},[view]); const content=useMemo(()=>{ if(ROOM_BY_SLUG[view]) return <RoomDetailView room={ROOM_BY_SLUG[view]} navigate={navigate}/>; switch(view){ case 'accommodations': return <AccommodationsView navigate={navigate}/>; case 'experiences': return <ExperiencesView/>; case 'club': return <ClubView/>; case 'senior-living': return <SeniorLivingView/>; case 'gallery': return <GalleryView navigate={navigate}/>; case 'getting-here': return <GettingHereView navigate={navigate}/>; case 'vip-package': return <VipPackageView navigate={navigate}/>; case 'booking': return <BookingRedirectView/>; case 'payment-success': return <PaymentSuccessView navigate={navigate}/>; case 'payment-cancel': return <PaymentCancelView navigate={navigate}/>; case 'contact': return <ConciergeView/>; case 'privacy-policy': return <LegalPageView type='privacy'/>; case 'terms-of-service': return <LegalPageView type='terms'/>; default: return <HomeView rooms={ACCOMMODATIONS}/>; }},[view]); return <><a className='skip-link' href='#main-content'>Skip to content</a><PublicNavbar view={view} navigate={navigate} isScrolled={isScrolled} isOpen={isOpen} setIsOpen={setIsOpen}/>{content}<PublicFooter navigate={navigate}/><MobileActionBar navigate={navigate} menuOpen={isOpen}/></>; }
+},[view]); const content=useMemo(()=>{ if(ROOM_BY_SLUG[view]) return <RoomDetailView room={ROOM_BY_SLUG[view]} navigate={navigate}/>; switch(view){ case 'accommodations': return <AccommodationsView navigate={navigate}/>; case 'experiences': return <ExperiencesView/>; case 'club': return <ClubView/>; case 'senior-living': return <SeniorLivingView/>; case 'gallery': return <GalleryView navigate={navigate}/>; case 'getting-here': return <GettingHereView navigate={navigate}/>; case 'vip-package': return <VipPackageView navigate={navigate}/>; case 'booking': return <BookingRedirectView/>; case 'payment-success': return <PaymentSuccessView navigate={navigate}/>; case 'payment-cancel': return <PaymentCancelView navigate={navigate}/>; case 'contact': return <ConciergeView/>; case 'privacy-policy': return <LegalPageView type='privacy'/>; case 'terms-of-service': return <LegalPageView type='terms'/>; default: return <HomeView rooms={ACCOMMODATIONS}/>; }},[view]); return <><a className='skip-link' href='#main-content'>Skip to content</a><PublicNavbar view={view} navigate={navigate} isScrolled={isScrolled} isOpen={isOpen} setIsOpen={setIsOpen}/>{content}<PublicFooter navigate={navigate}/><MobileActionBar navigate={navigate} menuOpen={isOpen} view={view}/></>; }
 
 export default App;
