@@ -215,7 +215,6 @@ function PrivateOffice({onSignOut}) {
     try{const r=await ownerRequest('staff-directory');setStaff(r.staff||[]);setStaffStatus('ready');}
     catch(err){setStaffStatus('error');if(err.status===401)onSignOut(true);}
   }
-  async function decideItem(itemId,payload){
   async function loadDocuments(){
     setDocumentsStatus('loading');setDocumentsError('');
     try{const r=await ownerRequest('documents',{op:'list'});setDocuments(r.documents||[]);setDocumentsStatus('ready');}
@@ -245,6 +244,7 @@ function PrivateOffice({onSignOut}) {
     try{await ownerRequest('documents',{method:'PATCH',body:{op:'archive',document_id:documentId}});await loadDocuments();}
     catch(e){setDocumentsError(e.message);throw e;}finally{setDocumentsBusy(false);}
   }
+  async function decideItem(itemId,payload){
     setItemsBusy(true);setItemsError('');
     try{await ownerRequest('decide',{method:'POST',body:{id:itemId,...payload}});await loadItems();await loadApprovals();}
     catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false);}
