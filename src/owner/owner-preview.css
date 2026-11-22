@@ -1,0 +1,10 @@
+.owner-preview-notice{display:flex;align-items:flex-start;gap:12px;background:#f1eee5;border:1px solid #ded6c4;border-left:3px solid #887858;padding:14px 17px;margin:0 0 29px;color:#504a3d}
+.owner-preview-notice strong{font-size:13px}.owner-preview-notice p{margin:5px 0 0;line-height:1.6;font-size:12px;color:#666255}
+.owner-preview-body{font-size:13px;line-height:1.75;color:var(--owner-muted);margin:0 0 12px}
+.owner-preview-hint{font-size:11px;color:#82765b;line-height:1.6}
+.owner-preview-access{display:flex;align-items:center;justify-content:space-between;gap:28px}
+.owner-preview-access>div{max-width:580px}
+.owner-preview-access h3{margin:10px 0 9px}
+.owner-preview-access .owner-primary{flex-shrink:0}
+.owner-preview .owner-kpi strong{color:#9c998f}
+@media(max-width:720px){.owner-preview-access{align-items:stretch;flex-direction:column;gap:14px}.owner-preview-access .owner-primary{width:100%}}

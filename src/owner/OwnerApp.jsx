@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PublicPreview from './PublicPreview.jsx';
 import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, FileText, House, LockKeyhole, LogOut, Menu, RefreshCcw, ShieldCheck, Sparkles, Users, X } from 'lucide-react';
 
 const nav = [
@@ -163,10 +164,14 @@ function PrivateOffice({onSignOut}) {
  </div>;
 }
 export default function OwnerApp(){
- const [authenticated,setAuthenticated]=useState(false);
+ // A temporary, passcode-free preview never requests protected owner data.
+ // Supabase magic-link callbacks still enter the authenticated flow.
+ const [mode,setMode]=useState(()=>window.location.hash.includes('access_token=')?'login':'preview');
  async function signOut(expired=false){
-   if(!expired){try{await ownerRequest('logout',{method:'POST',body:{}});}catch{ /* Reload still clears visible data. */ }}
-   setAuthenticated(false);
+   if(!expired){try{await ownerRequest('logout',{method:'POST',body:{}});}catch{ /* A failed sign-out cannot keep sensitive data visible. */ }}
+   setMode('preview');
  }
- return authenticated?<PrivateOffice onSignOut={signOut}/>:<LogIn onAuthenticated={()=>setAuthenticated(true)}/>;
+ if(mode==='secure')return <PrivateOffice onSignOut={signOut}/>;
+ if(mode==='login')return <LogIn onAuthenticated={()=>setMode('secure')}/>;
+ return <PublicPreview onConnectPrivateData={()=>setMode('login')}/>;
 }
