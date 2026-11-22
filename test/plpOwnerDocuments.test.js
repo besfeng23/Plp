@@ -66,7 +66,7 @@ test('private storage migration, owner UI and API do not create public file acce
  const ui=read('src/owner/OwnerDocuments.jsx'),app=read('src/owner/OwnerApp.jsx'),api=read('lib/owner-handler.js');
  assert.match(sql,/values\('plp-owner-documents','plp-owner-documents',false,8388608/);
  assert.match(sql,/enable row level security/g);assert.match(sql,/revoke all on plp_runtime\.plp_owner_documents/);
- assert.match(sql,/expiresIn/);assert.match(ui,/8 MB/);assert.match(ui,/expires after five minutes/);
+ assert.match(read('lib/owner-documents.js'),/expiresIn:300/);assert.match(ui,/8 MB/);assert.match(ui,/expires after five minutes/);
  assert.match(app,/ownerRequest\('documents'/);assert.match(api,/requestOwnerDocumentUpload/);
  assert.doesNotMatch(ui,/storage_path|service_role|SUPABASE_SERVICE_ROLE_KEY/);
 });
