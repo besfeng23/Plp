@@ -14,7 +14,8 @@ export const statuses = [
 const blank = { chapter:'boracay',kind:'decision',title:'',details:'',status:'needs_decision',priority:'normal',due_on:'',reference_url:'' };
 const label = (pairs,value) => pairs.find(([key])=>key===value)?.[1]||value;
 function Form({ initial = blank, onSave, onClose, busy }) {
- const [form,setForm]=useState({...blank,...initial,due_on:initial.due_on||'',reference_url:initial.reference_url||''});
+ const [form,setForm]=useState({...blank,...Object.fromEntries(Object.keys(blank).map(key=>[key,initial[key]??blank[key]])),
+    due_on:initial.due_on||'',reference_url:initial.reference_url||''});
  const set=(name,value)=>setForm(state=>({...state,[name]:value}));
  return <form className="owner-work-form" onSubmit={e=>{e.preventDefault();onSave({
    ...form,due_on:form.due_on||null,reference_url:form.reference_url||null,
