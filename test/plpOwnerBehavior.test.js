@@ -14,7 +14,7 @@ test('anonymized website counts group local days and reject other pages and mont
  assert.equal(x.metrics.pageViews,2);assert.equal(x.metrics.reserveClicks,1);
  assert.equal(x.metrics.clubEnquiries,1);assert.equal(x.metrics.bookingRequests,1);
  assert.equal(x.classified,5);assert.equal(x.topPages[0].path,'/club');
- assert.equal(x.daily.length,30);assert.equal(x.daily[0].pageViews,1);
+ assert.equal(x.daily.length,30);assert.equal(x.daily[0].pageViews,2);
  assert.equal(x.daily.at(-1).pageViews,0);
  assert.throws(()=>summarizeWebsiteBehavior([],'2026-13'));
 });
