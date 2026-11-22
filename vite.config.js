@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         admin: resolve(__dirname, 'admin.html'),
+        owner: resolve(__dirname, 'owner.html'),
         booking: resolve(__dirname, 'booking.html'),
         'plp-posthog': resolve(__dirname, 'src/plp-posthog.js'),
       },
