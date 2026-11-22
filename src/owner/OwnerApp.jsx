@@ -73,7 +73,7 @@ function Panel({label,children,className=''}){return <section className={'owner-
 function Kpi({label,value,note,attention}){return <div className={'owner-kpi'+(attention?' owner-kpi-alert':'')}><span>{label}</span><strong>{cardLabel(value)}</strong><small>{note}</small></div>}
 function Unavailable({title}){return <div className="owner-empty"><ShieldCheck size={18}/><div><strong>{title} unavailable</strong><p>The protected source did not return a verified figure. No estimate is displayed.</p></div></div>}
 function DecisionCards({items=[],limit}) {
- const decisions=items.filter(x=>x.kind==='decision'&&x.status!=='archived'&&x.status!=='reviewed').slice(0,limit||items.length);
+ const decisions=items.filter(x=>x.kind==='decision'&&!['archived','reviewed','approved','declined'].includes(x.status)).slice(0,limit||items.length);
  if(!decisions.length)return <p className="owner-note">No outstanding decisions have been recorded in the private owner register.</p>;
  return <div className="owner-decision-list">{decisions.map((item,index)=><article key={item.id} className="owner-decision">
    <span className="owner-decision-index">{String(index+1).padStart(2,'0')}</span>
@@ -162,6 +162,21 @@ function Expansion({items=[],navigate}){return <><div className="owner-chapter-g
  </section></>}
 
 function Security({owner,onSignOut}){return <div className="owner-two"><Panel label="Authorized owner"><div className="owner-metric-stack"><div><span>Account</span><strong>{owner.email}</strong></div><div><span>Role</span><strong>PLP Owner</strong></div><div><span>Session</span><strong>Verified owner account</strong></div></div><button className="owner-primary" onClick={onSignOut}><LogOut size={17}/> Sign out</button></Panel><Panel label="Privacy and permissions"><p className="owner-note">The private office has its own email-verification and server-issued HttpOnly owner session. The shared PLP staff code cannot open owner reports. All business reports are read-only and require owner authorization on every request. A detailed per-staff role administration system is not yet activated.</p></Panel></div>}
+function ApprovalHistory({items=[],status='loading',onRefresh}) {
+ return <Panel label="Executive approvals & staff task tracking">
+  <div className="owner-work-heading"><p className="owner-note">Every approval or decline creates a task in the existing PLP staff worklog. Status changes are retained in the audit trail.</p>
+   <button type="button" className="owner-secondary" onClick={onRefresh}><RefreshCcw size={14}/> Refresh</button></div>
+  {status==='loading'?<p className="owner-note">Loading approval and task history…</p>
+   :status==='error'?<p className="owner-note">Approval history is temporarily unavailable.</p>
+   :!items.length?<p className="owner-work-empty">No owner approvals or declines have been recorded yet.</p>
+   :<div className="owner-work-list">{items.map(item=><article className="owner-work-item" key={item.id}>
+     <div className="owner-work-item-head"><div><span className="owner-eyebrow">{item.decision==='approved'?'Approved':'Declined'} · {item.created_at?.slice(0,10)}</span><h4>{item.task?.title||'Staff follow-up task'}</h4></div><span className="owner-pill">{item.task?.status||'Task unavailable'}</span></div>
+     <div className="owner-work-meta"><span>Assigned to: {item.task?.assigned_to_label||item.assigned_to_label}</span><span>Due: {item.task?.due_on||item.due_on}</span></div>
+     {item.notes&&<p>{item.notes}</p>}
+     {item.history?.length>0&&<div className="owner-work-history"><strong>Task audit history</strong>{item.history.map((event,i)=><p key={i}>{event.created_at?.slice(0,16).replace('T',' ')} · {event.action.replaceAll('_',' ')} · {event.previous_status||'—'} → {event.new_status||'—'} · {event.actor||'staff'}</p>)}</div>}
+   </article>)}</div>}
+ </Panel>;
+}
 function PrivateOffice({onSignOut}) {
  const [tab,setTab]=useState('overview'),[month,setMonth]=useState(thisMonth);
  const [summary,setSummary]=useState(null),[status,setStatus]=useState('loading');
@@ -169,9 +184,12 @@ function PrivateOffice({onSignOut}) {
  const [posthogData,setPosthogData]=useState(null),[posthogStatus,setPosthogStatus]=useState('idle');
  const [refresh,setRefresh]=useState(0),[mobile,setMobile]=useState(false),[owner,setOwner]=useState(null);
  const [items,setItems]=useState([]),[itemsStatus,setItemsStatus]=useState('loading'),[itemsError,setItemsError]=useState(''),[itemsBusy,setItemsBusy]=useState(false);
+  const [approvals,setApprovals]=useState([]),[approvalsStatus,setApprovalsStatus]=useState('idle');
+  const [staff,setStaff]=useState([]),[staffStatus,setStaffStatus]=useState('idle');
  async function loadItems(){setItemsStatus('loading');try{const res=await ownerRequest('items');setItems(res.items);setItemsStatus('ready');setItemsError('');}
    catch(err){setItemsStatus('error');setItemsError(err.message);if(err.status===401)onSignOut(true);}}
  useEffect(()=>{void loadItems();},[refresh]);
+  useEffect(()=>{if(tab==='decisions'){void loadApprovals();void loadStaff();}},[tab,refresh]);
  async function createItem(payload){
    setItemsBusy(true);setItemsError('');
    try{await ownerRequest('items',{method:'POST',body:payload});await loadItems();}
@@ -183,6 +201,21 @@ function PrivateOffice({onSignOut}) {
    catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false)}
  }
  async function loadHistory(id){const r=await ownerRequest('item-history',{id});return r.history;}
+  async function loadApprovals(){
+    setApprovalsStatus('loading');
+    try{const r=await ownerRequest('approvals');setApprovals(r.approvals||[]);setApprovalsStatus('ready');}
+    catch(err){setApprovalsStatus('error');if(err.status===401)onSignOut(true);}
+  }
+  async function loadStaff(){
+    setStaffStatus('loading');
+    try{const r=await ownerRequest('staff-directory');setStaff(r.staff||[]);setStaffStatus('ready');}
+    catch(err){setStaffStatus('error');if(err.status===401)onSignOut(true);}
+  }
+  async function decideItem(itemId,payload){
+    setItemsBusy(true);setItemsError('');
+    try{await ownerRequest('decide',{method:'POST',body:{id:itemId,...payload}});await loadItems();await loadApprovals();}
+    catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false);}
+  }
  async function fetchBehavior(){const report=await ownerRequest('behavior',{month});if(!report.complete)throw new Error('Analytics report incomplete');return report;}
 
  useEffect(()=>{ownerRequest('me').then(setOwner).catch(()=>onSignOut(true));},[onSignOut]);
@@ -231,8 +264,13 @@ function PrivateOffice({onSignOut}) {
      {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month} posthogData={posthogData} posthogStatus={posthogStatus}/>}
      {tab==='performance'&&<Performance report={summary}/>}
      {tab==='club'&&<Club report={summary} items={items} onNavigate={navigate}/>}
-     {tab==='decisions'&&<OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}
- onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} title="Decisions, documents & follow-ups"/>}
+     {tab==='decisions'&&<>
+  <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}
+    onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory}
+    onDecide={decideItem} staff={staff} staffStatus={staffStatus}
+    title="Decisions, documents & follow-ups"/>
+  <ApprovalHistory items={approvals} status={approvalsStatus} onRefresh={loadApprovals}/>
+</>}
      {tab==='expansion'&&<Expansion items={items} navigate={navigate}/>}
      {tab==='reports'&&<><OwnerReports month={month} summary={summary} behavior={behavior} items={items} onFetchBehavior={fetchBehavior}/>
  <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy} filterKind="document"

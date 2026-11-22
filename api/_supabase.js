@@ -72,6 +72,11 @@ export async function updateRows(table, filterQuery, payload) {
   return Array.isArray(rows) ? rows : [];
 }
 
+export async function callRpc(name, payload) {
+  if (typeof name !== 'string' || !/^[a-z][a-z0-9_]{1,80}$/.test(name)) throw new TypeError('Invalid RPC name');
+  return supabaseRequest(`rpc/${name}`, { method: 'POST', body: payload });
+}
+
 export async function findAccommodationByName(name) {
   const rows = await selectRows('plp_accommodations', `name=eq.${encodeFilterValue(name)}&select=id,name,nightly_rate_php,capacity,bedrooms,is_active&limit=1`);
   return rows?.[0] || null;
