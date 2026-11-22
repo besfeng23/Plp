@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PublicPreview from './PublicPreview.jsx';
 import OwnerWorkItems from './OwnerWorkItems.jsx';
 import OwnerReports from './OwnerReports.jsx';
+import OwnerDocuments from './OwnerDocuments.jsx';
 import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, FileText, House, LockKeyhole, LogOut, Menu, RefreshCcw, ShieldCheck, Sparkles, Users, X } from 'lucide-react';
 
 const nav = [
@@ -24,7 +25,7 @@ const locations = [
 const cardLabel = (number) => number == null ? '—' : Number(number).toLocaleString('en-PH');
 const thisMonth = () => new Date(Date.now() + 28800000).toISOString().slice(0,7);
 async function ownerRequest(action, options={}) {
- const url = '/api/plp?action=owner&operation=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'') + (options.id ? '&id='+encodeURIComponent(options.id):'');
+ const url = '/api/plp?action=owner&operation=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'') + (options.id ? '&id='+encodeURIComponent(options.id):'') + (options.op ? '&op='+encodeURIComponent(options.op):'');
  const response = await fetch(url,{ method:options.method||'GET',cache:'no-store',
    credentials:'same-origin',headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,signal:options.signal });
  const result = await response.json().catch(()=>({}));
@@ -186,10 +187,13 @@ function PrivateOffice({onSignOut}) {
  const [items,setItems]=useState([]),[itemsStatus,setItemsStatus]=useState('loading'),[itemsError,setItemsError]=useState(''),[itemsBusy,setItemsBusy]=useState(false);
   const [approvals,setApprovals]=useState([]),[approvalsStatus,setApprovalsStatus]=useState('idle');
   const [staff,setStaff]=useState([]),[staffStatus,setStaffStatus]=useState('idle');
+  const [documents,setDocuments]=useState([]),[documentsStatus,setDocumentsStatus]=useState('idle');
+  const [documentsBusy,setDocumentsBusy]=useState(false),[documentsError,setDocumentsError]=useState('');
  async function loadItems(){setItemsStatus('loading');try{const res=await ownerRequest('items');setItems(res.items);setItemsStatus('ready');setItemsError('');}
    catch(err){setItemsStatus('error');setItemsError(err.message);if(err.status===401)onSignOut(true);}}
  useEffect(()=>{void loadItems();},[refresh]);
   useEffect(()=>{if(tab==='decisions'){void loadApprovals();void loadStaff();}},[tab,refresh]);
+  useEffect(()=>{if(tab==='reports')void loadDocuments();},[tab,refresh]);
  async function createItem(payload){
    setItemsBusy(true);setItemsError('');
    try{await ownerRequest('items',{method:'POST',body:payload});await loadItems();}
@@ -212,6 +216,35 @@ function PrivateOffice({onSignOut}) {
     catch(err){setStaffStatus('error');if(err.status===401)onSignOut(true);}
   }
   async function decideItem(itemId,payload){
+  async function loadDocuments(){
+    setDocumentsStatus('loading');setDocumentsError('');
+    try{const r=await ownerRequest('documents',{op:'list'});setDocuments(r.documents||[]);setDocumentsStatus('ready');}
+    catch(e){setDocumentsStatus('error');setDocumentsError(e.message);if(e.status===401)onSignOut(true);}
+  }
+  async function uploadDocument(file,meta){
+    setDocumentsBusy(true);setDocumentsError('');
+    let documentId=null;
+    try{
+      const intent=await ownerRequest('documents',{method:'POST',body:{op:'upload-intent',name:file.name,mime:file.type,size:file.size,chapter:meta.chapter,item_id:meta.item_id||null}});
+      documentId=intent.document_id;
+      const response=await fetch(intent.upload_url,{method:'POST',headers:{'Content-Type':file.type,'x-upsert':'false'},body:file,cache:'no-store'});
+      if(!response.ok)throw new Error('The signed upload did not complete.');
+      await ownerRequest('documents',{method:'POST',body:{op:'complete',document_id:documentId}});
+      await loadDocuments();
+    }catch(e){
+      if(documentId)await ownerRequest('documents',{method:'POST',body:{op:'fail',document_id:documentId}}).catch(()=>{});
+      setDocumentsError(e.message||'Private document upload failed.');throw e;
+    }finally{setDocumentsBusy(false);}
+  }
+  async function prepareDocumentDownload(documentId){
+    const r=await ownerRequest('documents',{op:'download',id:documentId});
+    return r.url;
+  }
+  async function archiveDocument(documentId){
+    setDocumentsBusy(true);setDocumentsError('');
+    try{await ownerRequest('documents',{method:'PATCH',body:{op:'archive',document_id:documentId}});await loadDocuments();}
+    catch(e){setDocumentsError(e.message);throw e;}finally{setDocumentsBusy(false);}
+  }
     setItemsBusy(true);setItemsError('');
     try{await ownerRequest('decide',{method:'POST',body:{id:itemId,...payload}});await loadItems();await loadApprovals();}
     catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false);}
@@ -274,7 +307,9 @@ function PrivateOffice({onSignOut}) {
      {tab==='expansion'&&<Expansion items={items} navigate={navigate}/>}
      {tab==='reports'&&<><OwnerReports month={month} summary={summary} behavior={behavior} items={items} onFetchBehavior={fetchBehavior}/>
  <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy} filterKind="document"
- onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} title="Secure document reference register"/></>}
+ onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} title="Secure document reference register"/>
+ <OwnerDocuments documents={documents} status={documentsStatus} error={documentsError} busy={documentsBusy}
+   registerItems={items} onUpload={uploadDocument} onPrepareDownload={prepareDocumentDownload} onArchive={archiveDocument} onReload={loadDocuments}/></>}
      {tab==='security'&&<Security owner={owner||{email:'Verified owner'}} onSignOut={()=>onSignOut(false)}/>}
    </>}
    {status==='ready'&&summary?.unavailable?.length>0&&<p className="owner-disclosure" role="status">Some source systems are temporarily unavailable: {summary.unavailable.join(', ')}. Unavailable figures appear as a dash, not zero.</p>}
