@@ -25,7 +25,7 @@ function Form({ initial = blank, onSave, onClose, busy }) {
      <label>Chapter<select value={form.chapter} onChange={e=>set('chapter',e.target.value)}>{chapters.map(([value,title])=><option key={value} value={value}>{title}</option>)}</select></label></div>
    <label>Title<input value={form.title} maxLength={160} required onChange={e=>set('title',e.target.value)} placeholder="A decision, proposal or document reference"/></label>
    <label>Notes<textarea value={form.details} maxLength={2000} rows={3} onChange={e=>set('details',e.target.value)} placeholder="Context, owner instruction, evidence still needed"/></label>
-   <div className="owner-work-fields"><label>Review status<select value={form.status} onChange={e=>set('status',e.target.value)}>{statuses.map(([value,title])=><option key={value} value={value}>{title}</option>)}</select></label>
+   <div className="owner-work-fields"><label>Review status<select value={form.status} onChange={e=>set('status',e.target.value)}>{statuses.filter(([value])=>!['approved','declined'].includes(value)).map(([value,title])=><option key={value} value={value}>{title}</option>)}</select></label>
      <label>Priority<select value={form.priority} onChange={e=>set('priority',e.target.value)}><option value="normal">Normal</option><option value="high">High</option></select></label></div>
    <div className="owner-work-fields"><label>Target date (optional)<input type="date" value={form.due_on} onChange={e=>set('due_on',e.target.value)}/></label>
      <label>Evidence or document URL (optional)<input type="url" value={form.reference_url} maxLength={1000} pattern="https://.*" onChange={e=>set('reference_url',e.target.value)} placeholder="https://…"/></label></div>

@@ -264,9 +264,13 @@ function PrivateOffice({onSignOut}) {
      {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month} posthogData={posthogData} posthogStatus={posthogStatus}/>}
      {tab==='performance'&&<Performance report={summary}/>}
      {tab==='club'&&<Club report={summary} items={items} onNavigate={navigate}/>}
-     {tab==='decisions'&&<OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}
- onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} onDecide={decideItem
-  <ApprovalHistory items={approvals} status={approvalsStatus} onRefresh={loadApprovals}/>} staff={staff} staffStatus={staffStatus} title="Decisions, documents & follow-ups"/>}
+     {tab==='decisions'&&<>
+  <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}
+    onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory}
+    onDecide={decideItem} staff={staff} staffStatus={staffStatus}
+    title="Decisions, documents & follow-ups"/>
+  <ApprovalHistory items={approvals} status={approvalsStatus} onRefresh={loadApprovals}/>
+</>}
      {tab==='expansion'&&<Expansion items={items} navigate={navigate}/>}
      {tab==='reports'&&<><OwnerReports month={month} summary={summary} behavior={behavior} items={items} onFetchBehavior={fetchBehavior}/>
  <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy} filterKind="document"
