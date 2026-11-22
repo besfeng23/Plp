@@ -1,6 +1,7 @@
 import { insertRow, isSupabaseConfigured, selectRows } from './_supabase.js';
 import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 import clubHandler from '../lib/club-handler.js';
+import ownerHandler from '../lib/owner-handler.js';
 import { safeAnalyticsEvent } from '../lib/analytics-policy.js';
 
 const DEFAULT_CONTENT = {
@@ -152,5 +153,6 @@ export default async function handler(req, res) {
   if (action === 'analytics-config') return handleAnalyticsConfig(req, res);
   if (action === 'analytics') return handleAnalytics(req, res);
   if (action === 'club') return clubHandler(req, res);
+  if (action === 'owner') return ownerHandler(req, res);
   return json(res, 404, { ok: false, error: 'Unknown PLP action' });
 }

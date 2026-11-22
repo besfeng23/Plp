@@ -21,7 +21,7 @@ const locations = [
 const cardLabel = (number) => number == null ? '—' : Number(number).toLocaleString('en-PH');
 const thisMonth = () => new Date(Date.now() + 28800000).toISOString().slice(0,7);
 async function ownerRequest(action, options={}) {
- const url = '/api/owner?action=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'');
+ const url = '/api/plp?action=owner&operation=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'');
  const response = await fetch(url,{ method:options.method||'GET',cache:'no-store',
    credentials:'same-origin',headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,signal:options.signal });
  const result = await response.json().catch(()=>({}));

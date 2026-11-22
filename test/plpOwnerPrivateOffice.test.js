@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ownerConfigured, ownerOriginAllowed, signOwnerSession, verifyOwnerSession, readOwnerCookie, ownerCookie, validateOwnerBearer, validateCurrentOwner } from '../lib/owner-auth.js';
 import { ownerMonth, ownerSummary } from '../lib/owner-summary.js';
-import ownerHandler from '../api/owner.js';
+import ownerHandler from '../lib/owner-handler.js';
 
 const uuid='3c674ce1-7ab5-4823-b9ae-062a47c61f12';
 const env={PLP_OWNER_EMAIL:'fongramos@yahoo.com',PLP_OWNER_SESSION_SECRET:'a'.repeat(64),SUPABASE_URL:'https://jcyqixttuebxqqfkjonq.supabase.co',SUPABASE_ANON_KEY:'test-anon',SUPABASE_SERVICE_ROLE_KEY:'test-server-role'};
