@@ -102,6 +102,7 @@ function Performance({report}) {
  <div><span>New enquiries</span><strong>{report.enquiries.new}</strong></div>
  <div><span>Pearl Club enquiries</span><strong>{report.enquiries.club}</strong></div>
  </div>:<Unavailable title="Enquiry report"/>}</Panel>
+ <Panel label="Operational management"><p className="owner-note">For authorized staff actions, use the existing protected PLP Resort Command. This owner overview does not bypass staff verification or mutate guest, payment or booking records.</p><a className="owner-text-button" href="/admin">Open PLP Admin <ArrowRight size={15}/></a></Panel>
  <Panel label="Financial overview"><div className="owner-empty"><BarChart3 size={20}/><div><strong>Accounting-grade figures not connected</strong><p>Reservation counts are not confirmed payments or audited financial statements. No estimate of cash flow, profit or occupancy is displayed.</p></div></div></Panel></div></>;
 }
 function Club({report,items,onNavigate}){const c=report?.club;return <><div className="owner-kpis"><Kpi label="Applications to review" value={c?.pending} attention note="Boracay chapter only"/><Kpi label="Active memberships" value={c?.active} note="Protected PLP roster"/><Kpi label="Upcoming published activities" value={c?.upcoming} note="Future dates recorded in operations"/><Kpi label="Additional chapters" value={null} note="Singapore and Malaysia remain in planning"/></div>
@@ -178,6 +179,7 @@ function PrivateOffice({onSignOut}) {
    return()=>{alive=false;ctrl.abort()};
  },[tab,month,refresh,onSignOut]);
  const pageName=nav.find(([key])=>key===tab)?.[2]||'Overview';
+ const needsSummary=['overview','performance','club'].includes(tab);
  const navigate=next=>{setTab(next);setMobile(false)};
  const b=summary?.websiteBookings;
  return <div className="owner-app">
@@ -193,9 +195,9 @@ function PrivateOffice({onSignOut}) {
       <div><p>{tab==='overview'?'A considered view of resort performance, Pearl Club, and what needs your attention.':'Verified records, clearly separated from plans and unapproved programmes.'}</p>
         {['overview','analytics','performance','club'].includes(tab)&&<label className="owner-month-label">Reporting month <input aria-label="Reporting month" type="month" min="2020-01" max={thisMonth()} value={month} onChange={e=>{if(e.target.validity.valid&&e.target.value)setMonth(e.target.value)}}/></label>}</div>
    </div>
-   {status==='loading'&&tab!=='analytics'&&<div className="owner-panel" role="status">Loading verified PLP records…</div>}
-   {status==='error'&&tab!=='analytics'&&<Unavailable title="Owner business report"/>}
-   {(status==='ready'||tab==='analytics')&&<>
+   {status==='loading'&&needsSummary&&<div className="owner-panel" role="status">Loading verified PLP records…</div>}
+   {status==='error'&&needsSummary&&<Unavailable title="Owner business report"/>}
+   {(status==='ready'||!needsSummary)&&<>
      {tab==='overview'&&<Overview report={summary} onNavigate={navigate} items={items}/>}
      {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month}/>}
      {tab==='performance'&&<Performance report={summary}/>}
