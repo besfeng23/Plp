@@ -70,7 +70,7 @@
     renderOptions();
     const list = document.getElementById('staffTaskList');
     if (!list) return;
-    list.innerHTML = saved.length ? saved.map((task) => `<article class="staff-task-card"><strong>${esc(task.title)}</strong><p>${esc(task.booking_reference)} · ${esc(task.kind)} · ${esc(task.category)} · ${esc(task.priority)} · ${esc(task.status)}${task.note ? `<br>${esc(task.note)}` : ''}</p>${task.status === 'open' || task.status === 'in_progress' ? `<div class="staff-task-actions"><button data-staff-id="${esc(task.id)}" data-staff-status="in_progress">In progress</button><button data-staff-id="${esc(task.id)}" data-staff-status="done">Done</button><button data-staff-id="${esc(task.id)}" data-staff-status="cancelled">Cancel</button></div>` : ''}</article>`).join('') : '<div class="empty-state">No saved internal notes or staff tasks yet.</div>';
+    list.innerHTML = saved.length ? saved.map((task) => `<article class="staff-task-card"><strong>${esc(task.title)}</strong><p>${esc(task.booking_reference)} · ${esc(task.kind)} · ${esc(task.category)} · ${esc(task.priority)} · ${esc(task.status)}${task.assigned_to_label ? ` · Assigned to ${esc(task.assigned_to_label)}` : ''}${task.due_on ? ` · Due ${esc(task.due_on)}` : ''}${task.note ? `<br>${esc(task.note)}` : ''}</p>${task.status === 'open' || task.status === 'in_progress' ? `<div class="staff-task-actions"><button data-staff-id="${esc(task.id)}" data-staff-status="in_progress">In progress</button><button data-staff-id="${esc(task.id)}" data-staff-status="done">Done</button><button data-staff-id="${esc(task.id)}" data-staff-status="cancelled">Cancel</button></div>` : ''}</article>`).join('') : '<div class="empty-state">No saved internal notes or staff tasks yet.</div>';
   }
 
   function decorateDrawer(row) {
@@ -80,7 +80,7 @@
     const related = saved.filter((task) => task.booking_reference === reference).slice(0, 6);
     const box = document.createElement('div');
     box.className = 'r360-staff-worklog';
-    box.innerHTML = `<strong>Internal notes + staff tasks</strong>${related.length ? related.map((task) => `<p>${esc(task.title)} · ${esc(task.status)}${task.note ? `<br>${esc(task.note)}` : ''}</p>`).join('') : '<p>No saved internal notes or staff tasks for this booking yet.</p>'}`;
+    box.innerHTML = `<strong>Internal notes + staff tasks</strong>${related.length ? related.map((task) => `<p>${esc(task.title)} · ${esc(task.status)}${task.assigned_to_label ? ` · ${esc(task.assigned_to_label)}` : ''}${task.due_on ? ` · Due ${esc(task.due_on)}` : ''}${task.note ? `<br>${esc(task.note)}` : ''}</p>`).join('') : '<p>No saved internal notes or staff tasks for this booking yet.</p>'}`;
     body.prepend(box);
   }
 
