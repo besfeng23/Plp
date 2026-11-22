@@ -10,7 +10,7 @@
     "check:routes": "node scripts/audit-plp-routes.mjs",
     "check:viewport": "node scripts/check-viewport-fit.mjs",
     "test": "node --test test/*.test.js",
-    "prebuild": "npm test && npm run check:routes && npm run check:viewport"
+    "prebuild": "npm test && node --test test/plpOwnerOfficeWorkflow.test.js && npm run check:routes && npm run check:viewport"
   },
   "dependencies": {
     "@vercel/analytics": "latest",
