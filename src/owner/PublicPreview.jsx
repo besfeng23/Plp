@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, FileText, House, LockKeyhole, Menu, ShieldCheck, Users, X } from 'lucide-react';
 import './owner-preview.css';
+import PublicOfficeActions from './PublicOfficeActions.jsx';
 
 // No API calls, customer data, private decisions, member records or fabricated metrics.
 // Publicly visible owner workspace structure only; the private API stays authenticated.
@@ -111,6 +112,7 @@ export default function PublicPreview({onConnectPrivateData}) {
             <PreviewPanel title="Protected information"><div className="owner-empty"><LockKeyhole size={21}/><div><strong>Not available without verified owner access</strong><p>Actual business reports and confidential records stay on secured server-side endpoints.</p></div></div></PreviewPanel>
           </div>
         </>}
+        <PublicOfficeActions section={active}/>
         <section className="owner-panel owner-preview-access">
           <div><span className="owner-eyebrow">SECURE OWNER DATA</span><h3>Connect real business reporting when ready.</h3>
             <p className="owner-preview-body">There is no passcode for this preview. Verified email sign-in remains available for private records; the shared PLP staff code cannot unlock them.</p></div>

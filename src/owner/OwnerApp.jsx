@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PublicPreview from './PublicPreview.jsx';
+import OwnerWorkItems from './OwnerWorkItems.jsx';
+import OwnerReports from './OwnerReports.jsx';
 import { ArrowRight, BarChart3, CalendarDays, ClipboardCheck, FileText, House, LockKeyhole, LogOut, Menu, RefreshCcw, ShieldCheck, Sparkles, Users, X } from 'lucide-react';
 
 const nav = [
@@ -22,7 +24,7 @@ const locations = [
 const cardLabel = (number) => number == null ? '—' : Number(number).toLocaleString('en-PH');
 const thisMonth = () => new Date(Date.now() + 28800000).toISOString().slice(0,7);
 async function ownerRequest(action, options={}) {
- const url = '/api/plp?action=owner&operation=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'');
+ const url = '/api/plp?action=owner&operation=' + encodeURIComponent(action) + (options.month ? '&month='+encodeURIComponent(options.month):'') + (options.id ? '&id='+encodeURIComponent(options.id):'');
  const response = await fetch(url,{ method:options.method||'GET',cache:'no-store',
    credentials:'same-origin',headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,signal:options.signal });
  const result = await response.json().catch(()=>({}));
@@ -70,12 +72,20 @@ function LogIn({onAuthenticated}) {
 function Panel({label,children,className=''}){return <section className={'owner-panel '+className}><h3>{label}</h3>{children}</section>}
 function Kpi({label,value,note,attention}){return <div className={'owner-kpi'+(attention?' owner-kpi-alert':'')}><span>{label}</span><strong>{cardLabel(value)}</strong><small>{note}</small></div>}
 function Unavailable({title}){return <div className="owner-empty"><ShieldCheck size={18}/><div><strong>{title} unavailable</strong><p>The protected source did not return a verified figure. No estimate is displayed.</p></div></div>}
-function DecisionCards({limit}){return <div className="owner-decision-list">{important.slice(0,limit||important.length).map((row,index)=><article key={row.title} className="owner-decision"><span className="owner-decision-index">{String(index+1).padStart(2,'0')}</span><div><strong>{row.title}</strong><p>{row.desc}</p></div><span className="owner-pill">{row.state}</span></article>)}</div>}
-function Overview({report,onNavigate}) {
+function DecisionCards({items=[],limit}) {
+ const decisions=items.filter(x=>x.kind==='decision'&&x.status!=='archived'&&x.status!=='reviewed').slice(0,limit||items.length);
+ if(!decisions.length)return <p className="owner-note">No outstanding decisions have been recorded in the private owner register.</p>;
+ return <div className="owner-decision-list">{decisions.map((item,index)=><article key={item.id} className="owner-decision">
+   <span className="owner-decision-index">{String(index+1).padStart(2,'0')}</span>
+   <div><strong>{item.title}</strong><p>{item.details||'Owner review required'}</p></div>
+   <span className="owner-pill">{item.status==='needs_verification'?'Needs verification':'Needs decision'}</span>
+ </article>)}</div>;
+}
+function Overview({report,onNavigate,items}) {
  const b=report?.websiteBookings,club=report?.club,tasks=report?.tasks;
  return <>
  <div className="owner-kpis"><Kpi label="Website booking requests" value={b?.requests} note="Selected month · not confirmed revenue"/><Kpi label="Reservations confirmed" value={b?.confirmed} note="Website requests with confirmed/completed status"/><Kpi label="Pearl Club · pending" value={club?.pending} attention note="Boracay applications awaiting review"/><Kpi label="Open staff tasks" value={tasks?.open} note="Outstanding recorded operational tasks"/></div>
- <div className="owner-two"><Panel label="Needs your attention"><DecisionCards limit={3}/><button className="owner-text-button" onClick={()=>onNavigate('decisions')}>Review decisions <ArrowRight size={16}/></button></Panel>
+ <div className="owner-two"><Panel label="Needs your attention"><DecisionCards limit={3} items={items}/><button className="owner-text-button" onClick={()=>onNavigate('decisions')}>Review decisions <ArrowRight size={16}/></button></Panel>
  <Panel label="Pearl Club · Boracay"><div className="owner-metric-stack"><div><span>Active members</span><strong>{cardLabel(club?.active)}</strong></div><div><span>Pending applications</span><strong>{cardLabel(club?.pending)}</strong></div><div><span>Published future activities</span><strong>{cardLabel(club?.upcoming)}</strong></div></div><p className="owner-note">Live counts are read from the existing protected Boracay club records. Proposed benefits and pricing are not assumed.</p><button className="owner-text-button" onClick={()=>onNavigate('club')}>View Pearl Club <ArrowRight size={16}/></button></Panel></div>
  <Panel label="Your PLP chapters"><div className="owner-chapter-strip">{locations.map(loc=><article key={loc.name}><span>{loc.tag}</span><strong>{loc.name}</strong><small>{loc.state}</small></article>)}</div><button className="owner-text-button" onClick={()=>onNavigate('expansion')}>Review expansion <ArrowRight size={16}/></button></Panel>
  </>;
@@ -84,10 +94,22 @@ function Performance({report}) {
  const b=report?.websiteBookings;
  return <><div className="owner-kpis"><Kpi label="Website requests" value={b?.requests} note="Received in the reporting month"/><Kpi label="Confirmed/completed" value={b?.confirmed} note="Current recorded reservation status"/><Kpi label="Closed/expired" value={b?.closed} note="Canceled, void or expired"/><Kpi label="Other statuses" value={b?.other} note="Not independently verified payment"/></div>
  <div className="owner-two"><Panel label="Accommodation demand">{b?b.rooms.length?<div className="owner-rows">{b.rooms.map(room=><div key={room.name}><span>{room.name}</span><strong>{cardLabel(room.requests)} requests</strong></div>)}</div>:<p className="owner-note">No website reservations recorded for this month.</p>:<Unavailable title="Reservation report"/>}</Panel>
- <Panel label="Financial overview"><div className="owner-empty"><BarChart3 size={20}/><div><strong>Financial reconciliation not connected</strong><p>The figures above are reservation counts, not settled income, profit, bank balances, or audited revenue. Detailed financial reports require verified accounting and payment reconciliation.</p></div></div></Panel></div></>;
+ <Panel label="Today · Resort operations">{report?.today?<div className="owner-metric-stack">
+ <div><span>Arrivals</span><strong>{report.today.arriving}</strong></div><div><span>In house (confirmed)</span><strong>{report.today.inHouse}</strong></div><div><span>Departures</span><strong>{report.today.departing}</strong></div>
+ </div>:<Unavailable title="Daily stay report"/>}<p className="owner-note">Today's recorded stay dates, not independent occupancy reconciliation.</p></Panel>
+ <Panel label="Guest & membership enquiries">{report?.enquiries?<div className="owner-metric-stack">
+ <div><span>Enquiries recorded</span><strong>{report.enquiries.total}</strong></div>
+ <div><span>New enquiries</span><strong>{report.enquiries.new}</strong></div>
+ <div><span>Pearl Club enquiries</span><strong>{report.enquiries.club}</strong></div>
+ </div>:<Unavailable title="Enquiry report"/>}</Panel>
+ <Panel label="Operational management"><p className="owner-note">For authorized staff actions, use the existing protected PLP Resort Command. This owner overview does not bypass staff verification or mutate guest, payment or booking records.</p><a className="owner-text-button" href="/admin">Open PLP Admin <ArrowRight size={15}/></a></Panel>
+ <Panel label="Financial overview"><div className="owner-empty"><BarChart3 size={20}/><div><strong>Accounting-grade figures not connected</strong><p>Reservation counts are not confirmed payments or audited financial statements. No estimate of cash flow, profit or occupancy is displayed.</p></div></div></Panel></div></>;
 }
-function Club({report}){const c=report?.club;return <><div className="owner-kpis"><Kpi label="Applications to review" value={c?.pending} attention note="Boracay chapter only"/><Kpi label="Active memberships" value={c?.active} note="Protected PLP roster"/><Kpi label="Upcoming published activities" value={c?.upcoming} note="Future dates recorded in operations"/><Kpi label="Additional chapters" value={null} note="Singapore and Malaysia remain in planning"/></div>
- <Panel label="Pearl Club · Owner direction"><p className="owner-note">Define and authorize senior membership tiers, eligibility, benefits, activities, and application terms. The current planning workbook is separate from live member records. Approval of a working-file item does not publish an offer.</p><DecisionCards limit={2}/></Panel>
+function Club({report,items,onNavigate}){const c=report?.club;return <><div className="owner-kpis"><Kpi label="Applications to review" value={c?.pending} attention note="Boracay chapter only"/><Kpi label="Active memberships" value={c?.active} note="Protected PLP roster"/><Kpi label="Upcoming published activities" value={c?.upcoming} note="Future dates recorded in operations"/><Kpi label="Additional chapters" value={null} note="Singapore and Malaysia remain in planning"/></div>
+ <Panel label="Pearl Club · Owner direction"><p className="owner-note">Define and authorize senior membership tiers, eligibility, benefits, activities, and application terms. The current planning workbook is separate from live member records. Approval of a working-file item does not publish an offer.</p><DecisionCards limit={2} items={items}/></Panel>
+ <Panel label="Published Boracay activities">{report?.club?.publishedActivities?.length?<div className="owner-rows">{report.club.publishedActivities.map((activity,i)=><div key={i}>
+ <span>{activity.title}</span><strong>{new Date(activity.starts_at).toLocaleDateString('en-PH',{timeZone:'Asia/Manila',month:'short',day:'numeric',year:'numeric'})}</strong>
+ </div>)}</div>:<p className="owner-note">No published future club sessions are recorded. Do not publish unverified schedules.</p>}</Panel>
  <Panel label="Location boundaries"><div className="owner-rows"><div><span>Boracay</span><strong>First chapter</strong></div><div><span>Singapore / Changi</span><strong>Proposed · unverified permissions</strong></div><div><span>Malaysia</span><strong>No confirmed venue</strong></div></div></Panel></>;
 }
 function Analytics({data,status,month}) {
@@ -108,14 +130,40 @@ function Analytics({data,status,month}) {
  <p className="owner-disclosure">First-party PLP Boracay only. Counts exclude visitors who decline optional analytics. No linked visitor identities or verified visitor conversion rates are inferred.</p>
  </>;
 }
-function Expansion(){return <div className="owner-chapter-grid">{locations.map(loc=><article className="owner-panel" key={loc.name}><span className="owner-eyebrow">{loc.tag}</span><h3>{loc.name}</h3><p className="owner-note">{loc.description}</p><span className="owner-pill">{loc.state}</span></article>)}</div>}
-function Reports(){return <div className="owner-two"><Panel label="Executive reporting"><p className="owner-note">The monthly resort performance and website visitor event reports on this dashboard are sourced from PLP operations. This private office intentionally does not display unverified bank settlements, expense ledgers or profit totals.</p></Panel><Panel label="Private document library"><Unavailable title="Private document vault"/><p className="owner-note">A secure document repository and document-level permissions have not yet been connected. No confidential contracts or reports are exposed publicly.</p></Panel></div>}
+function Expansion({items=[],navigate}){return <><div className="owner-chapter-grid">{locations.map((loc,i)=><article className="owner-panel" key={loc.name}>
+ <span className="owner-eyebrow">{loc.tag}</span><h3>{loc.name}</h3><p className="owner-note">{loc.description}</p>
+ <div className="owner-metric-stack"><div><span>Owner work items</span><strong>{items.filter(item=>item.chapter===['boracay','singapore','malaysia'][i]&&item.status!=='archived').length}</strong></div></div>
+ <span className="owner-pill">{loc.state}</span>
+ </article>)}</div><section className="owner-panel"><h3>Expansion work register</h3>
+ <p className="owner-note">Maintain location-specific partner checks, pricing and policy decisions in the private register. The expansion chapters are not represented as operational or approved.</p>
+ <div className="owner-rows">{items.filter(item=>['singapore','malaysia'].includes(item.chapter)&&item.status!=='archived').slice(0,12).map(item=><div key={item.id}>
+ <span>{item.title} · {item.chapter}</span><strong>{item.status.replaceAll('_',' ')}</strong></div>)}</div>
+ <button className="owner-text-button" type="button" onClick={()=>navigate('decisions')}>Open editable register <ArrowRight size={15}/></button>
+ </section></>}
+
 function Security({owner,onSignOut}){return <div className="owner-two"><Panel label="Authorized owner"><div className="owner-metric-stack"><div><span>Account</span><strong>{owner.email}</strong></div><div><span>Role</span><strong>PLP Owner</strong></div><div><span>Session</span><strong>Verified owner account</strong></div></div><button className="owner-primary" onClick={onSignOut}><LogOut size={17}/> Sign out</button></Panel><Panel label="Privacy and permissions"><p className="owner-note">The private office has its own email-verification and server-issued HttpOnly owner session. The shared PLP staff code cannot open owner reports. All business reports are read-only and require owner authorization on every request. A detailed per-staff role administration system is not yet activated.</p></Panel></div>}
 function PrivateOffice({onSignOut}) {
  const [tab,setTab]=useState('overview'),[month,setMonth]=useState(thisMonth);
  const [summary,setSummary]=useState(null),[status,setStatus]=useState('loading');
  const [behavior,setBehavior]=useState(null),[behaviorStatus,setBehaviorStatus]=useState('idle');
  const [refresh,setRefresh]=useState(0),[mobile,setMobile]=useState(false),[owner,setOwner]=useState(null);
+ const [items,setItems]=useState([]),[itemsStatus,setItemsStatus]=useState('loading'),[itemsError,setItemsError]=useState(''),[itemsBusy,setItemsBusy]=useState(false);
+ async function loadItems(){setItemsStatus('loading');try{const res=await ownerRequest('items');setItems(res.items);setItemsStatus('ready');setItemsError('');}
+   catch(err){setItemsStatus('error');setItemsError(err.message);if(err.status===401)onSignOut(true);}}
+ useEffect(()=>{void loadItems();},[refresh]);
+ async function createItem(payload){
+   setItemsBusy(true);setItemsError('');
+   try{await ownerRequest('items',{method:'POST',body:payload});await loadItems();}
+   catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false)}
+ }
+ async function updateItem(itemId,updatedAt,payload){
+   setItemsBusy(true);setItemsError('');
+   try{await ownerRequest('items',{method:'PATCH',body:{...payload,id:itemId,updated_at:updatedAt}});await loadItems();}
+   catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false)}
+ }
+ async function loadHistory(id){const r=await ownerRequest('item-history',{id});return r.history;}
+ async function fetchBehavior(){const report=await ownerRequest('behavior',{month});if(!report.complete)throw new Error('Analytics report incomplete');return report;}
+
  useEffect(()=>{ownerRequest('me').then(setOwner).catch(()=>onSignOut(true));},[onSignOut]);
  useEffect(()=>{
    let alive=true;const ctrl=new AbortController();setStatus('loading');setSummary(null);
@@ -131,6 +179,7 @@ function PrivateOffice({onSignOut}) {
    return()=>{alive=false;ctrl.abort()};
  },[tab,month,refresh,onSignOut]);
  const pageName=nav.find(([key])=>key===tab)?.[2]||'Overview';
+ const needsSummary=['overview','performance','club'].includes(tab);
  const navigate=next=>{setTab(next);setMobile(false)};
  const b=summary?.websiteBookings;
  return <div className="owner-app">
@@ -146,16 +195,19 @@ function PrivateOffice({onSignOut}) {
       <div><p>{tab==='overview'?'A considered view of resort performance, Pearl Club, and what needs your attention.':'Verified records, clearly separated from plans and unapproved programmes.'}</p>
         {['overview','analytics','performance','club'].includes(tab)&&<label className="owner-month-label">Reporting month <input aria-label="Reporting month" type="month" min="2020-01" max={thisMonth()} value={month} onChange={e=>{if(e.target.validity.valid&&e.target.value)setMonth(e.target.value)}}/></label>}</div>
    </div>
-   {status==='loading'&&tab!=='analytics'&&<div className="owner-panel" role="status">Loading verified PLP records…</div>}
-   {status==='error'&&tab!=='analytics'&&<Unavailable title="Owner business report"/>}
-   {(status==='ready'||tab==='analytics')&&<>
-     {tab==='overview'&&<Overview report={summary} onNavigate={navigate}/>}
+   {status==='loading'&&needsSummary&&<div className="owner-panel" role="status">Loading verified PLP records…</div>}
+   {status==='error'&&needsSummary&&<Unavailable title="Owner business report"/>}
+   {(status==='ready'||!needsSummary)&&<>
+     {tab==='overview'&&<Overview report={summary} onNavigate={navigate} items={items}/>}
      {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month}/>}
      {tab==='performance'&&<Performance report={summary}/>}
-     {tab==='club'&&<Club report={summary}/>}
-     {tab==='decisions'&&<Panel label="Items requiring owner attention"><DecisionCards/><p className="owner-note">These are planning decisions, not submitted approval requests. No changes are executed or published by opening this page.</p></Panel>}
-     {tab==='expansion'&&<Expansion/>}
-     {tab==='reports'&&<Reports/>}
+     {tab==='club'&&<Club report={summary} items={items} onNavigate={navigate}/>}
+     {tab==='decisions'&&<OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}
+ onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} title="Decisions, documents & follow-ups"/>}
+     {tab==='expansion'&&<Expansion items={items} navigate={navigate}/>}
+     {tab==='reports'&&<><OwnerReports month={month} summary={summary} behavior={behavior} items={items} onFetchBehavior={fetchBehavior}/>
+ <OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy} filterKind="document"
+ onCreate={createItem} onUpdate={updateItem} onReload={loadItems} onHistory={loadHistory} title="Secure document reference register"/></>}
      {tab==='security'&&<Security owner={owner||{email:'Verified owner'}} onSignOut={()=>onSignOut(false)}/>}
    </>}
    {status==='ready'&&summary?.unavailable?.length>0&&<p className="owner-disclosure" role="status">Some source systems are temporarily unavailable: {summary.unavailable.join(', ')}. Unavailable figures appear as a dash, not zero.</p>}
@@ -167,6 +219,16 @@ export default function OwnerApp(){
  // A temporary, passcode-free preview never requests protected owner data.
  // Supabase magic-link callbacks still enter the authenticated flow.
  const [mode,setMode]=useState(()=>window.location.hash.includes('access_token=')?'login':'preview');
+ const checkOnce=React.useRef(false);
+ useEffect(()=>{
+   if(mode!=='preview'||checkOnce.current)return;
+   checkOnce.current=true;
+   let alive=true;
+   // A previously verified owner opens the full dashboard automatically,
+   // without re-entering a code or re-visiting the sign-in screen.
+   ownerRequest('me').then(result=>{if(alive&&result.role==='owner')setMode('secure')}).catch(()=>{});
+   return()=>{alive=false};
+ },[mode]);
  async function signOut(expired=false){
    if(!expired){try{await ownerRequest('logout',{method:'POST',body:{}});}catch{ /* A failed sign-out cannot keep sensitive data visible. */ }}
    setMode('preview');
