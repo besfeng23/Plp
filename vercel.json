@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "draft/pearl-club-owner-workspace": false
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
