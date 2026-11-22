@@ -1,0 +1,24 @@
+.plp-behavior-toolbar{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:23px}
+.plp-behavior-toolbar h2{font:400 clamp(28px,3vw,38px)/1.2 'Libre Baskerville',Georgia,serif;letter-spacing:-.045em;margin:10px 0}
+.plp-behavior-toolbar p{font-size:13px;color:var(--plp-muted);line-height:1.6;margin:0}
+.plp-behavior-controls{display:flex;gap:10px;align-items:end}
+.plp-behavior-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.plp-behavior-metrics .plp-metric{min-height:130px}
+.plp-behavior-chart{height:210px;display:grid;grid-template-columns:repeat(31,minmax(0,1fr));gap:3px;align-items:end;padding-top:12px}
+.plp-behavior-day{height:100%;min-width:0;display:flex;flex-direction:column;justify-content:flex-end}
+.plp-behavior-bar{display:block;background:#887551;border-radius:2px 2px 0 0}
+.plp-behavior-day small{height:18px;line-height:18px;text-align:center;font-size:9px;color:#646153}
+.plp-behavior-action{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:9px 0;border-bottom:1px solid var(--plp-line);font-size:12px}
+.plp-behavior-action strong{font:400 18px 'Libre Baskerville',Georgia,serif}
+.plp-behavior-scroll{max-width:100%;overflow-x:auto}
+.plp-behavior-table{width:100%;border-collapse:collapse;text-align:left;font-size:12px}
+.plp-behavior-table th,.plp-behavior-table td{padding:11px 13px;border-bottom:1px solid var(--plp-line);white-space:nowrap}
+.plp-behavior-table thead{background:#f4f2ea}
+.plp-behavior-unavailable{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.plp-behavior-unavailable>div{background:#f4f2ea;padding:14px;display:grid;gap:6px}
+.plp-behavior-unavailable strong{font-size:12px}
+.plp-behavior-unavailable span{font-size:11px;color:var(--plp-muted);line-height:1.5}
+.plp-analytics-entry{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 20px}
+.plp-analytics-entry small{font-size:11px;color:var(--plp-muted)}
+@media(max-width:850px){.plp-behavior-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:550px){.plp-behavior-unavailable{grid-template-columns:1fr}.plp-behavior-chart{gap:2px}.plp-behavior-metrics .plp-metric{min-height:110px;padding:13px}}
