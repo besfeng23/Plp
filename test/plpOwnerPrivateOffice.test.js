@@ -41,11 +41,11 @@ test('unconfigured or unauthenticated owner endpoints reveal no business data',a
  try {
    Object.assign(process.env,env);
    const res=response();
-   await ownerHandler({method:'GET',headers:{},query:{action:'summary',month:'2026-11'}},res);
+   await ownerHandler({method:'GET',headers:{},query:{operation:'summary',month:'2026-11'}},res);
    assert.equal(res.statusCode,401);assert.equal(res.headers['Cache-Control'],'private, no-store, max-age=0');
    assert.ok(!('club' in res.body));
    const cross=response();
-   await ownerHandler({method:'POST',headers:{host:'plp-boracay.vercel.app',origin:'https://attacker.test'},query:{action:'login'},body:{}},cross);
+   await ownerHandler({method:'POST',headers:{host:'plp-boracay.vercel.app',origin:'https://attacker.test'},query:{operation:'login'},body:{}},cross);
    assert.equal(cross.statusCode,403);
  } finally{for(const[k,v]of Object.entries(old)){if(v===undefined)delete process.env[k];else process.env[k]=v;}}
 });
@@ -62,7 +62,7 @@ test('owner reports use verified existing booking, club and task data only',asyn
  assert.equal(ownerMonth(new Date('2026-11-21T18:00:00Z')),'2026-11');
 });
 test('office is distinct from staff and excludes public indexing',()=>{
- const html=read('owner.html'),src=read('src/owner/OwnerApp.jsx'),api=read('api/owner.js');
+ const html=read('owner.html'),src=read('src/owner/OwnerApp.jsx'),api=read('lib/owner-handler.js');
  const config=JSON.parse(read('vercel.json'));
  assert.match(html,/noindex,nofollow/);
  assert.equal(config.rewrites.find(x=>x.source==='/owner')?.destination,'/owner.html');
@@ -70,5 +70,6 @@ test('office is distinct from staff and excludes public indexing',()=>{
  assert.match(src,/Website Analytics/);
  assert.doesNotMatch(src,/PLP_STAFF_CODE|X-PLP-Staff-Code|localStorage|sessionStorage|SUPABASE_SERVICE_ROLE_KEY/);
  assert.match(api,/validateCurrentOwner\(ticket.uid,env\)/);
+ assert.match(read('api/plp.js'),/if \(action === 'owner'\) return ownerHandler\(req, res\)/);
  assert.doesNotMatch(api,/action === 'staff'|PLP_STAFF_CODE/);
 });
