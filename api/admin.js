@@ -1,5 +1,6 @@
 import { staffEnquiries } from '../lib/concierge-desk.js';
 import { websiteInterestFunnel } from '../lib/owner-funnel.js';
+import { websiteBehaviorReport } from '../lib/owner-behavior.js';
 import { hasLegacyStaffAccess } from '../lib/staff-access.js';
 import { monthBounds, websiteBookingMonth } from '../lib/owner-month.js';
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
@@ -171,6 +172,13 @@ export default async function handler(req, res) {
       } catch {
         return json(res, 503, { ok: false, error: 'Anonymous website engagement data is unavailable.' });
       }
+    }
+    if (action === 'owner-behavior') {
+      if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
+      const month = req.query?.month;
+      if (!monthBounds(month)) return json(res, 400, { ok: false, error: 'Choose a valid reporting month.' });
+      try { return json(res, 200, { ok: true, ...await websiteBehaviorReport(month, selectRows) }); }
+      catch { return json(res, 503, { ok: false, error: 'Consented website analytics are unavailable.' }); }
     }
     if (action === 'operations') return await handleOperations(req, res);
     if (action === 'notifications') return await handleNotifications(req, res);
