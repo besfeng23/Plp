@@ -43,6 +43,12 @@ test('owner analytics endpoint is staff-guarded and private',async()=>{
  assert.equal(res.statusCode,401);assert.equal(res.headers['Cache-Control'],'private, no-store');
  assert.equal(res.body.ok,false);assert.ok(!('metrics' in res.body));
 });
+test('PostHog visitor cohorts are never exposed without staff authentication',async()=>{
+ const res={headers:{},setHeader(k,v){this.headers[k]=v},end(s){this.body=JSON.parse(s)}};
+ await adminHandler({method:'GET',query:{action:'posthog-analytics',month:'2026-11'},headers:{}},res);
+ assert.equal(res.statusCode,401);assert.equal(res.headers['Cache-Control'],'private, no-store');
+ assert.equal(res.body.ok,false);assert.ok(!('metrics' in res.body));
+});
 test('website analytics remains inside protected existing PLP workspace',()=>{
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
  assert.match(read('src/admin/PlpEnterpriseAdminApp.jsx'),/page === 'analytics' && <WebsiteAnalytics code=\{code\}/);
