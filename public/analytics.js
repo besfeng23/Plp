@@ -1,6 +1,6 @@
 (() => {
-  const consentKey = 'plp_analytics_consent_v1';
-  const events = new Set(['click_reserve', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'booking_created', 'submit_enquiry', 'submit_club_enquiry', 'submit_residential_interest']);
+  const consentKey = 'plp_analytics_consent_v2';
+  const events = new Set(['click_reserve', 'booking_interest', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'booking_created', 'submit_enquiry', 'submit_club_enquiry', 'submit_residential_interest']);
   const pages = new Set([
     '/', '/accommodation', '/accommodations', '/accommodation/grand-ocean-villa',
     '/accommodation/sunset-suite', '/accommodation/smart-room-premium', '/experiences',
@@ -95,10 +95,9 @@
     }).catch(() => {});
     void getPostHog().then(client => {
       if (client && consent === 'allow' && version === consentVersion) {
-        client.capture(event === 'page_view' ? '$pageview' : event, {
-          $current_url: location.origin + path,
-          $pathname: path,
-        });
+        const properties = { $current_url: location.origin + path, $pathname: path };
+        client.capture(event === 'page_view' ? '$pageview' : event, properties);
+        if (event === 'click_reserve') client.capture('booking_interest', properties);
       }
     });
   }

@@ -112,13 +112,14 @@ async function handleContent(req, res) {
 function handleAnalyticsConfig(req, res) {
   if (req.method !== 'GET') return json(res, 405, { error: 'Method not allowed' });
   res.setHeader('Cache-Control', 'no-store');
-  const googleId = process.env.PLP_GA4_MEASUREMENT_ID || '';
+  const googleId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
   const token = process.env.PLP_POSTHOG_PROJECT_TOKEN || '';
   const host = process.env.PLP_POSTHOG_HOST || '';
   const allowedHosts = ['https://us.i.posthog.com', 'https://eu.i.posthog.com'];
   return json(res, 200, {
     googleId: /^G-[A-Z0-9]{6,20}$/.test(googleId) ? googleId : null,
-    posthog: /^phc_[A-Za-z0-9_-]+$/.test(token) && allowedHosts.includes(host) ? { token, host } : null,
+    posthog: /^phc_[A-Za-z0-9_-]+$/.test(token) && allowedHosts.includes(host)
+      ? { token, host: host === 'https://us.i.posthog.com' ? '/ingest' : host } : null,
   });
 }
 
