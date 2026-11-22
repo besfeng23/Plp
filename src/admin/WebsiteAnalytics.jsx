@@ -18,10 +18,9 @@ const labels = {
  select_room:'Room selections',click_email:'Email clicks',click_phone:'Phone clicks',
 };
 const missing = [
- ['Unique and returning visitors','No visitor identifiers are stored in first-party events'],
- ['Sessions, bounce and engagement time','Requires a verified external analytics property'],
- ['Countries, devices and referral channels','Requires a verified and approved analytics property'],
- ['Session replay, heatmaps and click paths','Not enabled; requires privacy review and recording consent'],
+ ['Named returning clients','Requires verified guest authentication or a trusted, verified booking-to-client link; never inferred from a browser ID'],
+ ['Bounce and engagement time','Requires a verified external analytics property and consistent event definitions'],
+ ['Session replay, heatmaps and click paths','Not enabled; requires separate privacy review and recording consent'],
 ];
 function DailyChart({ data }) {
  const top = Math.max(1, ...data.map(x=>x.pageViews));
@@ -36,6 +35,7 @@ export default function WebsiteAnalytics({code, refreshedAt}) {
  const currentMonth=manilaToday().slice(0,7);
  const [month,setMonth]=useState(currentMonth), [retry,setRetry]=useState(0);
  const [status,setStatus]=useState('loading'), [report,setReport]=useState(null);
+ const [posthogStatus,setPosthogStatus]=useState('loading'), [posthogReport,setPosthogReport]=useState(null);
  useEffect(()=>{
    const ctrl=new AbortController();setStatus('loading');setReport(null);
    fetch('/api/admin?action=owner-behavior&month='+encodeURIComponent(month),{
@@ -48,6 +48,19 @@ export default function WebsiteAnalytics({code, refreshedAt}) {
    }).catch(()=>{if(!ctrl.signal.aborted)setStatus('error');});
    return ()=>ctrl.abort();
  },[code,month,retry,refreshedAt]);
+ useEffect(()=>{
+   const ctrl=new AbortController();setPosthogStatus('loading');setPosthogReport(null);
+   fetch('/api/admin?action=posthog-analytics&month='+encodeURIComponent(month),{
+     headers:{'X-PLP-Staff-Code':code},cache:'no-store',signal:ctrl.signal
+   }).then(async response=>{
+     if(!response.ok)throw new Error('PostHog report unavailable');
+     const data=await response.json();
+     if(data.ok!==true||!['connected','not_connected','unavailable'].includes(data.status))throw new Error('Invalid PostHog report');
+     if(!ctrl.signal.aborted){setPosthogReport(data);setPosthogStatus(data.status);}
+   }).catch(()=>{if(!ctrl.signal.aborted)setPosthogStatus('error');});
+   return ()=>ctrl.abort();
+ },[code,month,retry,refreshedAt]);
+
  return <div className="plp-behavior">
    <div className="plp-behavior-toolbar"><div><span className="plp-eyebrow">PLP Boracay · Owner insights</span><h2>Website performance</h2>
      <p>What visitors view and do, from consented anonymous website events.</p></div>
@@ -75,9 +88,28 @@ export default function WebsiteAnalytics({code, refreshedAt}) {
        </table></div>:<p>No classified public page activity recorded.</p>}
      </section>
    </React.Fragment>}
+   <section className="plp-panel" aria-label="PostHog new and returning visitors">
+     <div className="plp-panel__head"><div><h3>Visitor recognition</h3>
+       <p>PostHog · consented visits to the PLP Boracay website only</p></div></div>
+     {posthogStatus==='loading'&&<p role="status">Checking the PostHog property…</p>}
+     {posthogStatus==='not_connected'&&<p role="status">{posthogReport?.message||'A verified PLP PostHog connection is required.'} No visitor counts are assumed.</p>}
+     {(posthogStatus==='error'||posthogStatus==='unavailable')&&<p role="alert">PostHog visitor data is unavailable. No partial or estimated figures are shown.</p>}
+     {posthogStatus==='connected'&&posthogReport?.metrics&&<>
+       <div className="plp-metrics plp-behavior-metrics">
+         <div className="plp-metric"><span>Unique browsers / IDs</span><strong>{posthogReport.metrics.uniqueVisitors.toLocaleString('en-PH')}</strong><small>Observed pseudonymous visitors this month</small></div>
+         <div className="plp-metric"><span>First seen this month</span><strong>{posthogReport.metrics.newVisitors.toLocaleString('en-PH')}</strong><small>First recorded public pageview in this property</small></div>
+         <div className="plp-metric"><span>Returning visitors</span><strong>{posthogReport.metrics.returningVisitors.toLocaleString('en-PH')}</strong><small>Previously recorded on this PLP site</small></div>
+         <div className="plp-metric"><span>Sessions</span><strong>{posthogReport.metrics.sessions.toLocaleString('en-PH')}</strong><small>Distinct PostHog session IDs</small></div>
+       </div>
+       <p>Returning means the same consented browser identifier was observed earlier; it does not prove a person's identity across devices. This report excludes other websites in shared PostHog projects.</p>
+       <div className="plp-behavior-actions">
+         {posthogReport.referrers?.slice(0,5).map(source=><div className="plp-behavior-action" key={source.label}><span>{source.label}</span><strong>{source.value.toLocaleString('en-PH')} page views</strong></div>)}
+       </div>
+     </>}
+   </section>
    <section className="plp-panel"><div className="plp-panel__head"><div><h3>Additional visitor intelligence</h3><p>Unavailable metrics are not displayed as zero.</p></div></div>
      <div className="plp-behavior-unavailable">{missing.map(([title,reason])=><div key={title}><strong>{title}</strong><span>{reason}</span></div>)}</div>
    </section>
-   <p className="plp-disclosure">Source: existing PLP first-party database, after optional analytics consent only. Counts are events, not unique people or verified revenue; they exclude visits without consent. This screen uses the existing staff-code access gate, not a separate Doctora-only account. To add true unique visitors, sources, devices and retention, first verify a PLP-specific GA4 or PostHog property. Session recording remains disabled.</p>
+   <p className="plp-disclosure">Source: existing PLP first-party database, after optional analytics consent only. Counts are events, not unique people or verified revenue; they exclude visits without consent. This screen uses the existing staff-code access gate, not a separate Doctora-only account. Visitor recognition is shown only when a verified, project-scoped PostHog connection exists. The first-party source remains event counts only. Named guest identity requires a verified login or trusted guest-record match. Session recording remains disabled.</p>
  </div>;
 }
