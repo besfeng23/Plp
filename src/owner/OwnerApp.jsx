@@ -112,22 +112,42 @@ function Club({report,items,onNavigate}){const c=report?.club;return <><div clas
  </div>)}</div>:<p className="owner-note">No published future club sessions are recorded. Do not publish unverified schedules.</p>}</Panel>
  <Panel label="Location boundaries"><div className="owner-rows"><div><span>Boracay</span><strong>First chapter</strong></div><div><span>Singapore / Changi</span><strong>Proposed · unverified permissions</strong></div><div><span>Malaysia</span><strong>No confirmed venue</strong></div></div></Panel></>;
 }
-function Analytics({data,status,month}) {
+function Breakdown({title,rows,empty='No breakdown data is available.'}) {
+ return <Panel label={title}>{rows?.length?<div className="owner-rows">{rows.map((row,i)=><div key={i}><span>{row.label}</span><strong>{cardLabel(row.value)}</strong></div>)}</div>:<p className="owner-note">{empty}</p>}</Panel>;
+}
+function Analytics({data,status,month,posthogData,posthogStatus}) {
  const values=data?.metrics;
  const numbers=[['Page views','pageViews'],['Reserve clicks','reserveClicks'],['Booking starts','bookingStarts'],['Pearl Club enquiries','clubEnquiries'],['Booking requests','bookingRequests'],['Concierge enquiries','enquiries']];
  const max=Math.max(1,...(data?.daily||[]).map(x=>x.pageViews));
+ const ph=posthogData?.metrics;
  return <>
- {status==='loading'&&<Panel label="Website analytics">Loading consented event data…</Panel>}
- {status==='error'&&<Unavailable title="Website analytics"/>}
- {status==='limited'&&<Panel label="Website analytics">Event volume exceeded the complete reporting limit. Partial totals are intentionally hidden.</Panel>}
- {status==='ready'&&data&&!data.complete&&<Unavailable title="Complete analytics"/>}
- {status==='ready'&&values&&<><div className="owner-kpis">{numbers.map(([label,key])=><Kpi key={key} label={label} value={values[key]} note="Consented event count, not unique visitors"/>)}</div>
+ {status==='loading'&&<Panel label="First-party website analytics">Loading consented event data…</Panel>}
+ {status==='error'&&<Unavailable title="First-party website analytics"/>}
+ {status==='limited'&&<Panel label="First-party website analytics">Event volume exceeded the complete reporting limit. Partial totals are intentionally hidden.</Panel>}
+ {status==='ready'&&data&&!data.complete&&<Unavailable title="Complete first-party analytics"/>}
+ {status==='ready'&&values&&<><div className="owner-kpis">{numbers.map(([label,key])=><Kpi key={key} label={label} value={values[key]} note="First-party consented event count"/>)}</div>
    <div className="owner-two"><Panel label="Daily page views"><div className="owner-chart" role="img" aria-label={'Daily consented page views in '+month}>{data.daily.map(d=><div title={d.date+': '+d.pageViews+' views'} key={d.date}><span style={{height:(100*d.pageViews/max)+'%'}}/><small>{Number(d.date.slice(-2))%5===0?Number(d.date.slice(-2)):''}</small></div>)}</div></Panel>
    <Panel label="Actions on the website"><div className="owner-rows">{data.actionCounts.map(row=><div key={row.event}><span>{row.event.replaceAll('_',' ')}</span><strong>{cardLabel(row.count)}</strong></div>)}</div></Panel></div>
-   <Panel label="Most viewed pages">{data.topPages.length?<div className="owner-table-wrap"><table><thead><tr><th>Page</th><th>Views</th><th>Actions</th><th>Enquiries</th></tr></thead><tbody>{data.topPages.map(page=><tr key={page.path}><th>{page.path}</th><td>{cardLabel(page.pageViews)}</td><td>{cardLabel(page.actions)}</td><td>{cardLabel(page.enquiries)}</td></tr>)}</tbody></table></div>:<p className="owner-note">No consented page events were recorded in this reporting month.</p>}</Panel>
+   <Panel label="Most viewed pages · first-party">{data.topPages.length?<div className="owner-table-wrap"><table><thead><tr><th>Page</th><th>Views</th><th>Actions</th><th>Enquiries</th></tr></thead><tbody>{data.topPages.map(page=><tr key={page.path}><th>{page.path}</th><td>{cardLabel(page.pageViews)}</td><td>{cardLabel(page.actions)}</td><td>{cardLabel(page.enquiries)}</td></tr>)}</tbody></table></div>:<p className="owner-note">No consented page events were recorded in this reporting month.</p>}</Panel>
  </>}
- <Panel label="Additional visitor intelligence"><p className="owner-note">Unique and returning visitors, acquisition sources, countries, devices, time on site, navigation paths and session replays are not available from this anonymous event source. They require a separately verified PLP GA4/PostHog property and appropriate privacy safeguards. Session recording is disabled.</p></Panel>
- <p className="owner-disclosure">First-party PLP Boracay only. Counts exclude visitors who decline optional analytics. No linked visitor identities or verified visitor conversion rates are inferred.</p>
+ <Panel label="PostHog visitor intelligence">
+   {posthogStatus==='loading'&&<p className="owner-note" role="status">Loading aggregated PostHog visitor intelligence…</p>}
+   {posthogStatus==='not_connected'&&<div className="owner-empty"><ShieldCheck size={18}/><div><strong>Not connected</strong><p>Public-site PostHog capture is configured separately. Add a PostHog personal API key named <code>POSTHOG_PERSONAL_API_KEY</code> to the PLP Vercel production environment to enable private visitor reports. The key is never sent to the browser.</p></div></div>}
+   {posthogStatus==='error'&&<Unavailable title="PostHog visitor report"/>}
+   {posthogStatus==='unavailable'&&<p className="owner-note">PostHog is configured but its query service did not return a complete report. Retry later; no partial totals are shown.</p>}
+   {posthogStatus==='connected'&&ph&&<>
+     <div className="owner-kpis"><Kpi label="Unique visitors" value={ph.uniqueVisitors} note="Distinct pseudonymous pageview IDs"/><Kpi label="Sessions" value={ph.sessions} note="Distinct PostHog session IDs"/><Kpi label="Page views" value={ph.pageViews} note="PostHog public pageview events"/><Kpi label="Autocaptured clicks" value={ph.autocaptureClicks} note="Public links and buttons only"/><Kpi label="Booking interest" value={ph.bookingInterest} note="Explicit reserve-intent events"/></div>
+     <div className="owner-two"><Breakdown title="Top pages" rows={posthogData.topPages}/><Breakdown title="Referring sources" rows={posthogData.referrers}/><Breakdown title="Countries" rows={posthogData.countries} empty="No country enrichment is present in the returned events."/><Breakdown title="Devices" rows={posthogData.devices}/></div>
+     <Panel label="Booking-interest funnel"><div className="owner-metric-stack">
+       <div><span>Booking interest</span><strong>{cardLabel(posthogData.funnel?.interest)}</strong></div>
+       <div><span>Booking started after interest</span><strong>{cardLabel(posthogData.funnel?.started)}</strong></div>
+       <div><span>Reservation request submitted after start</span><strong>{cardLabel(posthogData.funnel?.submitted)}</strong></div>
+       <div><span>Booking record created after submission</span><strong>{cardLabel(posthogData.funnel?.created)}</strong></div>
+     </div><p className="owner-note">Distinct pseudonymous visitors, in event order, within the selected month. These are not paid bookings or revenue.</p></Panel>
+     <p className="owner-note">Source: PostHog project 526760. Only consented public-site events are included. Session replay is disabled.</p>
+   </>}
+ </Panel>
+ <p className="owner-disclosure">First-party event counts and PostHog visitor estimates are separate sources. Declined analytics choices are excluded. No form values, identities or booking details are sent to PostHog.</p>
  </>;
 }
 function Expansion({items=[],navigate}){return <><div className="owner-chapter-grid">{locations.map((loc,i)=><article className="owner-panel" key={loc.name}>
@@ -146,6 +166,7 @@ function PrivateOffice({onSignOut}) {
  const [tab,setTab]=useState('overview'),[month,setMonth]=useState(thisMonth);
  const [summary,setSummary]=useState(null),[status,setStatus]=useState('loading');
  const [behavior,setBehavior]=useState(null),[behaviorStatus,setBehaviorStatus]=useState('idle');
+ const [posthogData,setPosthogData]=useState(null),[posthogStatus,setPosthogStatus]=useState('idle');
  const [refresh,setRefresh]=useState(0),[mobile,setMobile]=useState(false),[owner,setOwner]=useState(null);
  const [items,setItems]=useState([]),[itemsStatus,setItemsStatus]=useState('loading'),[itemsError,setItemsError]=useState(''),[itemsBusy,setItemsBusy]=useState(false);
  async function loadItems(){setItemsStatus('loading');try{const res=await ownerRequest('items');setItems(res.items);setItemsStatus('ready');setItemsError('');}
@@ -178,6 +199,14 @@ function PrivateOffice({onSignOut}) {
      .catch(err=>{if(alive){setBehaviorStatus('error');if(err.status===401)onSignOut(true)}});
    return()=>{alive=false;ctrl.abort()};
  },[tab,month,refresh,onSignOut]);
+  useEffect(()=>{
+    if(tab!=='analytics')return;
+    let alive=true;const ctrl=new AbortController();setPosthogStatus('loading');setPosthogData(null);
+    ownerRequest('posthog-analytics',{month,signal:ctrl.signal}).then(r=>{
+      if(alive){setPosthogData(r);setPosthogStatus(r.status||'unavailable');}
+    }).catch(err=>{if(alive){setPosthogStatus('error');if(err.status===401)onSignOut(true)}});
+    return()=>{alive=false;ctrl.abort()};
+  },[tab,month,refresh,onSignOut]);
  const pageName=nav.find(([key])=>key===tab)?.[2]||'Overview';
  const needsSummary=['overview','performance','club'].includes(tab);
  const navigate=next=>{setTab(next);setMobile(false)};
@@ -199,7 +228,7 @@ function PrivateOffice({onSignOut}) {
    {status==='error'&&needsSummary&&<Unavailable title="Owner business report"/>}
    {(status==='ready'||!needsSummary)&&<>
      {tab==='overview'&&<Overview report={summary} onNavigate={navigate} items={items}/>}
-     {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month}/>}
+     {tab==='analytics'&&<Analytics data={behavior} status={behaviorStatus} month={month} posthogData={posthogData} posthogStatus={posthogStatus}/>}
      {tab==='performance'&&<Performance report={summary}/>}
      {tab==='club'&&<Club report={summary} items={items} onNavigate={navigate}/>}
      {tab==='decisions'&&<OwnerWorkItems items={items} status={itemsStatus} error={itemsError} busy={itemsBusy}

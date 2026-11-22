@@ -20,6 +20,11 @@ function isBookingPage(fileName) {
   return fileName === 'booking.html';
 }
 
+function ensureAnalyticsScript(html) {
+  if (html.includes('src="/analytics.js"')) return html;
+  return html.replace('</head>', '  <script src="/analytics.js" defer></script>\n</head>');
+}
+
 function ensureStylesheet(html) {
   if (html.includes('data-plp-image-placement="true"')) return html;
   return html.replace('</head>', '  <link rel="stylesheet" href="/image-placement.css" data-plp-image-placement="true" />\n</head>');
@@ -85,6 +90,7 @@ async function main() {
     const original = await fs.readFile(filePath, 'utf8');
     let html = original;
     html = ensureViewportFit(html);
+    html = ensureAnalyticsScript(html);
     html = ensureStylesheet(html);
     html = ensureTopReserve(html);
     html = ensureTrustStrip(html, page.name);
