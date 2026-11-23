@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#f6f7f8">
 <meta name="description" content="Pueblo La Perla Boracay social media marketing execution tracker — tasks, owners, deadlines, content calendar and approvals.">
-<title>PLP Social Media Marketing — Execution Tracker</title>
+<title>PLP V3 | Social Media Marketing Command Tracker</title>
 <link rel="icon" href="/favicon.svg">
 <style>
 :root{--ink:#252627;--muted:#657079;--brand:#421909;--line:#e0e4e7;--panel:#fff;--canvas:#f6f7f8;--chip:#f2f3f5;--blue:#285d8b;--orange:#8e6326;--green:#236545;--red:#9b4141}
@@ -100,16 +100,94 @@ tbody tr:hover{background:#fafbfc}
 @media(max-width:1030px){.metrics{grid-template-columns:repeat(2,1fr)}.quick{grid-template-columns:1fr}.calendar-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:740px){.shell{display:block}.sidebar{position:static;height:auto;border-bottom:1px solid var(--line);border-right:0;padding:11px 15px;gap:0}.brand{border-bottom:0;padding:0}.brand small,.sidebar-foot,.navtitle{display:none}.nav{display:flex;overflow-x:auto;margin-top:10px;gap:3px}.nav button{white-space:nowrap;width:auto;padding:8px 12px;font-size:12px}.nav .bullet{display:none}.main{padding:0 13px 40px}.topline{padding:10px 0}.masthead{padding:20px 0 17px}.metrics{gap:8px}.metric{padding:12px;min-height:89px}.metric b{font-size:23px}.section-head{padding:13px}.section-body{padding:13px}.calendar-grid{grid-template-columns:1fr}.toolbar input{min-width:120px;flex:1}.result-grid{grid-template-columns:1fr}.footer{text-align:left}}
 @media print{body{background:#fff}.sidebar,.utility-actions,.tools button,.status-select{display:none}.shell{display:block}.main{padding:0}.view{display:block!important;break-before:page}.view:first-of-type{break-before:auto}.section,.metric,.post{break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9px}th,td{padding:6px}h1{font-size:25px}.masthead{padding:10px}.notice{display:none}.footer{text-align:left}@page{size:A4;margin:12mm}}
+
+/* Command center: document-first operating tracker, not a resort site */
+:root{--ink:#24272b;--muted:#666e75;--brand:#421909;--line:#e1e5e8;--panel:#fff;--canvas:#f8f9fa}
+body{font-size:13px;background:#f7f8f9}
+.shell{display:block;min-height:100vh}
+.sidebar{height:auto;position:static;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:24px;max-width:none;padding:14px max(20px,calc((100vw - 1360px)/2));border-right:0;border-bottom:1px solid #d9dee1;background:#fff}
+.brand{border:0;padding:0;white-space:nowrap}
+.monogram{width:36px;height:36px;flex-basis:36px;border-radius:7px}
+.brand strong{font-size:13px}
+.brand small{font-size:10px}
+.nav{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:thin}
+.nav button{width:auto;margin:0;padding:10px 13px;white-space:nowrap;font-size:12px}
+.nav button[aria-current="page"]{background:#f8edea;box-shadow:inset 0 -2px var(--brand);border-radius:5px 5px 0 0}
+.nav .bullet,.sidebar .navtitle,.sidebar-foot{display:none}
+.main{max-width:1380px;margin:0 auto;padding:0 24px 65px}
+.topline{padding:14px 0;border-bottom:0}
+.masthead{padding:15px 0 22px}
+.masthead h1{font-size:clamp(24px,2.3vw,31px);letter-spacing:-.025em}
+.masthead p{font-size:13px;max-width:830px}
+.kicker{letter-spacing:.08em}
+.notice{background:#fdfbf7;border-color:#e8e1d4;color:#6f665b;margin:0 0 15px;padding:10px 14px}
+.metrics{gap:10px;margin-bottom:13px}
+.metric{border:1px solid #e3e6e9;border-radius:7px;min-height:99px;padding:15px 17px}
+.metric b{font-size:24px}
+.metric .metric-label{font-size:11px;font-weight:700}
+.section{border-radius:7px;margin-top:14px;border-color:#e1e4e8;box-shadow:none}
+.section-head{padding:16px 18px}
+.section-head h2{font-size:15px;font-weight:750}
+.section-body{padding:16px 18px}
+.view{animation:none}
+.control-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:7px 1px 4px}
+.control-intro h2{font-size:19px;line-height:1.3;margin:0 0 5px}
+.control-intro p{color:#67747d;margin:0;max-width:720px;font-size:12px}
+.control-intro button,.jump-btn{border:1px solid #d8dfe3;border-radius:5px;background:#fff;color:#4f5e68;padding:8px 12px;font-size:11px;font-weight:750;min-height:37px;white-space:nowrap}
+.board-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.command-section{margin-top:14px}
+.command-section .section-head{background:#fcfcfd}
+.command-list{padding:0 18px}
+.command-item{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;border-bottom:1px solid #edf0f2;padding:15px 0}
+.command-item:last-child{border-bottom:0}
+.command-index{display:grid;place-items:center;background:#f2f4f5;color:#6d7277;width:27px;height:27px;border-radius:6px;font-weight:750;font-size:11px}
+.command-item strong{font-size:13px;font-weight:750;display:block;margin-bottom:2px}
+.command-item p{font-size:11px;color:#6d7983;margin:0;line-height:1.55}
+.command-item button{border:1px solid #dde3e6;border-radius:5px;background:#fff;color:#65717a;padding:7px 9px;font-size:11px;min-height:34px}
+.command-status{display:flex;align-items:center;gap:7px;justify-content:flex-end;flex-wrap:wrap;min-width:115px}
+.command-state-title{display:inline-block;font-weight:650}
+.section-tail{border-top:1px solid #eef0f2;padding:12px 18px;font-size:11px;color:#7c8187;background:#fcfcfd}
+.workflow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0}
+.work-phase{padding:21px 18px;border-right:1px solid var(--line);min-height:180px}
+.work-phase:last-child{border-right:0}
+.work-phase .phase-count{font:750 10px system-ui;letter-spacing:.1em;color:#977054;text-transform:uppercase}
+.work-phase h3{font-size:15px;line-height:1.4;margin:10px 0 9px}
+.work-phase p{font-size:11px;line-height:1.5;color:#737a81;margin:0 0 12px}
+.work-phase .phase-meta{font-size:11px;font-weight:750;color:#755944}
+.visual-pipeline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 18px}
+.pipeline-card{border:1px solid #e2e6e9;border-radius:6px;padding:16px;background:#fff}
+.pipeline-card .pipeline-num{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#6e7a83;font-weight:700}
+.pipeline-card h3{font-size:15px;line-height:1.4;margin:10px 0 7px}
+.pipeline-card p{font-size:12px;line-height:1.6;color:#69737b;margin:0 0 16px}
+.pipeline-footer{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pipeline-footer button{border:1px solid #d8dfe4;border-radius:5px;background:#fff;color:#64737e;font-size:11px;min-height:33px;padding:6px 9px}
+.owner-capsule{font-size:12px;color:#705943}
+.readonly-callout{background:#f7f3ed;padding:15px 17px;border-left:3px solid #96734f;font-size:12px;color:#55473d;margin:14px 0}
+.readonly-callout strong{color:#3f2a20}
+.p-planned{background:#f0f2f4;color:#596775}
+.p-needs-info{background:#ffefd7;color:#8e5a13}
+.p-in-progress{background:#e8f0fc;color:#2a5f9b}
+.p-blocked{background:#fdeaea;color:#9e4646}
+.p-done{background:#e1f3e9;color:#1f6c45}
+.pill{font-size:10px}
+.result-cell{background:#fff}
+#shareMessage{font-size:11px;color:#327a50;min-height:14px}
+.status-help{font-size:11px;color:#7a858d}
+.overview-utility{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+@media(max-width:1060px){.sidebar{flex-wrap:wrap;gap:8px}.nav{width:100%}.board-grid{grid-template-columns:1fr}.workflow{grid-template-columns:repeat(2,minmax(0,1fr))}.work-phase:nth-child(2){border-right:0}.work-phase:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:740px){.sidebar{padding:11px 13px;display:block}.brand{margin-bottom:8px}.nav{gap:2px}.nav button{padding:9px 11px}.main{padding:0 13px 40px}.topline{gap:8px}.control-intro{align-items:flex-start;flex-direction:column}.board-grid,.visual-pipeline{grid-template-columns:1fr}.command-item{grid-template-columns:24px minmax(0,1fr);align-items:start}.command-status{grid-column:2;justify-content:flex-start;min-width:0}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow{grid-template-columns:1fr}.work-phase,.work-phase:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.work-phase:last-child{border-bottom:0}}
+@media print{.sidebar,.tools,.command-item button,.pipeline-footer button,.overview-utility,.jump-btn{display:none!important}.main{padding:0}.board-grid{grid-template-columns:1fr 1fr}.visual-pipeline{grid-template-columns:repeat(3,1fr)}.workflow{grid-template-columns:repeat(4,1fr)}.work-phase{border-bottom:0!important;border-right:1px solid var(--line)!important}.command-item{grid-template-columns:25px 1fr}.control-intro{display:block}.section{break-inside:avoid}}
+
 </style>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar" aria-label="Tracker navigation">
-<div class="brand"><div class="monogram">PLP</div><div><strong>Marketing Operations</strong><small>Execution tracker · V3</small></div></div>
+<div class="brand"><div class="monogram">PLP</div><div><strong>Social Media Marketing</strong><small>30-day execution tracker · V3</small></div></div>
 <div class="navtitle">TRACKER VIEWS</div>
 <nav class="nav" id="sideNav" aria-label="Tracker views">
-<button type="button" data-view="tasks" aria-current="page"><span class="bullet"></span>Task tracker</button>
-<button type="button" data-view="overview"><span class="bullet"></span>Overview</button>
+<button type="button" data-view="overview" aria-current="page"><span class="bullet"></span>Owner overview</button>
+<button type="button" data-view="tasks"><span class="bullet"></span>Full task register</button>
 <button type="button" data-view="calendar"><span class="bullet"></span>Content calendar</button>
 <button type="button" data-view="owner"><span class="bullet"></span>Owner inputs</button>
 <button type="button" data-view="results"><span class="bullet"></span>Results</button>
@@ -126,8 +204,8 @@ tbody tr:hover{background:#fafbfc}
 <button type="button" id="resetEdits" title="Clear only changes saved on this device">Reset local edits</button>
 </div>
 </header>
-<div class="masthead"><div class="kicker">IMPLEMENTATION TRACKER · NOV–DEC 2026</div><h1>PLP Social Media Marketing Tracker</h1>
-<p>Working checklist for the complete V3 launch: what needs doing, who handles it, when it is due, and what Doc needs to confirm. This is a project tracker, <strong>not a redesigned PLP website.</strong></p></div>
+<div class="masthead"><div class="kicker">PROJECT TRACKER · 23 NOV–23 DEC 2026 · V3 LOCKED</div><h1>Social Media & Booking Growth Plan</h1>
+<p><strong>Prepared for Dr. Marichi Fong Ramos.</strong> A working tracker of the PLP marketing launch, showing owner decisions, the team's immediate priorities, content production, deadlines and results. <strong>Not the PLP website.</strong></p></div>
 <div class="notice"><strong>Tracking note:</strong> Starting statuses are planning assumptions, not verified live progress. Status edits and notes are saved <strong>on this device only</strong>; they are not shared across visitors or synced with the PLP enterprise system. Export CSV to hand off changes. Only mark tasks Done after checking evidence.</div>
 <div class="metrics" aria-label="Plan summary">
 <div class="metric"><div class="metric-label">Tasks marked done</div><b id="doneCount">0 / 0</b><small>Manual tracker status, not automatic verification</small><div class="progressbar"><div id="progressFill" style="width:0%"></div></div></div>
@@ -136,7 +214,7 @@ tbody tr:hover{background:#fafbfc}
 <div class="metric"><div class="metric-label">Booking results</div><b>Not linked</b><small>No live lead or reservation feed connected</small></div>
 </div>
 
-<section class="view active" id="view-tasks" aria-labelledby="tasks-title">
+<section class="view" id="view-tasks" aria-labelledby="tasks-title">
 <div class="section">
 <div class="section-head"><div><h2 id="tasks-title">Full execution task list</h2><p>Scope: booking path, content production, Facebook / Instagram, distribution, concierge follow-up and measurement.</p></div>
 <div class="toolbar"><input id="taskSearch" type="search" placeholder="Search tasks…" aria-label="Search tasks"><select id="phaseFilter" aria-label="Filter phase"><option value="">All phases</option><option>First 48 hours</option><option>Launch week</option><option>Week 2</option><option>Ongoing</option></select><select id="statusFilter" aria-label="Filter status"><option value="">All statuses</option><option>Planned</option><option>Needs info</option><option>In progress</option><option>Blocked</option><option>Done</option></select></div></div>
@@ -145,21 +223,41 @@ tbody tr:hover{background:#fafbfc}
 </div>
 </section>
 
-<section class="view" id="view-overview" aria-labelledby="overview-title">
-<div class="quick">
-<div class="section"><div class="section-head"><div><h2 id="overview-title">This week's priorities</h2><p>Work that comes before promotional spending.</p></div><span class="flag">23–29 Nov</span></div><div class="section-body">
-<div class="checkrow"><div><b>Get the guest enquiry route working</b><small>Test the current site on mobile, capture dates and guest count, and route enquiries to a real concierge.</small></div><span class="pill p-planned">Week 1</span></div>
-<div class="checkrow"><div><b>Confirm the four commercial facts</b><small>Rates/capacity, availability, transport and official payment method.</small></div><span class="pill p-needs-info">Doc / team</span></div>
-<div class="checkrow"><div><b>Publish three proof videos</b><small>Actual arrival, beach access and sleeping configurations. Real footage only.</small></div><span class="pill p-planned">Week 1</span></div>
-</div></div>
-<div class="section"><div class="section-head"><div><h2>Milestone timeline</h2><p>Small launch first, scale on verified demand.</p></div></div><div class="section-body">
-<div class="gridline"><div class="date">Nov 23–24</div><div><b>Enquiry readiness</b><span>Site check, structured form, concierge handoff, owner inputs.</span></div></div>
-<div class="gridline"><div class="date">Nov 25–29</div><div><b>Video launch</b><span>Three actual-property walkthroughs, reviewed and posted.</span></div></div>
-<div class="gridline"><div class="date">Nov 30–Dec 6</div><div><b>Trust and reach</b><span>Lookbook, suitable listings and partner review.</span></div></div>
-<div class="gridline"><div class="date">December</div><div><b>Scheduled operation</b><span>Batch approved content, log enquiries, review bookings weekly.</span></div></div>
-</div></div>
+<section class="view active" id="view-overview" aria-labelledby="overview-title">
+<div class="control-intro">
+<div><h2 id="overview-title">The plan at a glance</h2><p>Owner view. See precisely what is awaiting confirmation, what the team must finish, and what evidence will show that the marketing plan is working.</p></div>
+<div class="overview-utility"><button type="button" class="jump-btn" id="copyBrief">Copy status update</button><button type="button" class="jump-btn" data-view-target="tasks">Open all 26 tasks</button><span id="shareMessage" role="status"></span></div>
 </div>
-<div class="section"><div class="section-head"><div><h2>Simple booking journey</h2><p>Every post and campaign should contribute to this path.</p></div></div><div class="section-body" style="font-size:13px">Social media discovery <b>→</b> Genuine property proof <b>→</b> Structured enquiry <b>→</b> Concierge quotation <b>→</b> Confirmed booking.<p style="color:#6b7780;font-size:12px;margin-bottom:0">Never promise an unverified price, transport time, room capacity, payment method or availability. Pearl Club is excluded from the public stay campaign.</p></div></div>
+<div class="readonly-callout"><strong>Plan status: preparation.</strong> This tracker does not automatically prove a task is complete. A task must be marked Done against its acceptance check. Campaign posts, available rooms, paid ads and booking results are <strong>not being claimed as live</strong>.</div>
+<div class="board-grid">
+<section class="section command-section" aria-label="Owner approvals">
+<div class="section-head"><div><h2>01 · Four confirmations from Doc</h2><p>These are the only immediate commercial inputs needed from the owner or property manager.</p></div><span class="flag">Needs owner/team input</span></div>
+<div class="command-list" id="decisionBoard"></div>
+<div class="section-tail">No routine permit-document collection is included as a marketing task. Never invent rates, availability, transport or payment details.</div>
+</section>
+<section class="section command-section" aria-label="Week-one delivery">
+<div class="section-head"><div><h2>02 · What the team must deliver this week</h2><p>In sequence: booking enquiry path, genuine footage, then the first three posts.</p></div><span class="flag">23–29 November</span></div>
+<div class="command-list" id="launchBoard"></div>
+<div class="section-tail">Pending information holds only the affected claims; it does not stop independent setup work.</div>
+</section>
+</div>
+<section class="section command-section" aria-label="Content production">
+<div class="section-head"><div><h2>03 · Video production pipeline</h2><p>Three authentic videos answer the real guest questions. Select any item to open its tracked task.</p></div><span class="pill p-planned">No videos verified live</span></div>
+<div class="visual-pipeline" id="videoPipeline"></div>
+</section>
+<section class="section command-section" aria-label="Marketing rollout phases">
+<div class="section-head"><div><h2>04 · Four-phase campaign roadmap</h2><p>Each phase has a clear deliverable. The full task register contains the detailed work.</p></div></div>
+<div class="workflow" id="phaseRoadmap"></div>
+</section>
+<section class="section command-section" aria-label="Business results">
+<div class="section-head"><div><h2>05 · What counts as success</h2><p>Our goal is confirmed stays, not likes and followers.</p></div><button type="button" class="jump-btn" data-view-target="results">View measurement plan</button></div>
+<div class="section-body"><div class="result-grid">
+<div class="result-cell">Serious enquiries<strong>Not linked</strong><small>Guest dates, number of people and contact details</small></div>
+<div class="result-cell">Concierge follow-up<strong>Not linked</strong><small>Responses, quotations and open follow-ups</small></div>
+<div class="result-cell">Confirmed bookings<strong>Not linked</strong><small>Verified reservations attributed to their source</small></div>
+</div></div>
+<div class="section-tail">Paid advertising requires a working enquiry path and a separate budget decision. Pearl Club is excluded from this accommodation campaign.</div>
+</section>
 </section>
 
 <section class="view" id="view-calendar" aria-labelledby="calendar-title">
@@ -242,12 +340,68 @@ document.querySelectorAll("#sideNav button").forEach(function(b){if(b.dataset.vi
 if(view==="tasks")document.getElementById("taskSearch").focus({preventScroll:true});
 }
 document.querySelectorAll("#sideNav button").forEach(function(b){b.addEventListener("click",function(){setView(b.dataset.view);});});
+
+/* Owner-first control room: all values derive from the same task statuses. */
+const COMMAND_OWNER=[["03","Approved rates & capacity","Prices, inclusions, sleeping arrangements"],["04","Live availability","December–February dates and reservation authority"],["05","Actual transport arrangements","Arrival, beach access, evening return"],["06","Verified payment method","Authorized business deposit/payment instructions"]];
+const COMMAND_LAUNCH=[["02","Check the mobile booking path","Test the existing public website"],["07","Make stay enquiries work","Form with dates, guest count and contacts"],["10","Gather actual property footage","Entrance, beach route, bedrooms and views"],["15","Publish approved Week-1 videos","Only after content and claims are checked"]];
+const VIDEO_ITEMS=[["11","01 · Arrive at PLP","Entrance, arrival route and actual view","26 Nov"],["12","02 · Reach White Beach","Accurate access logistics and evening return","27 Nov"],["13","03 · Rooms and capacity","Real beds, bathrooms and occupancy","29 Nov"]];
+const PHASES=[["First 48 hours","23–24 Nov","Working enquiry path and owner facts"],["Launch week","25–29 Nov","Three proof videos and official social CTAs"],["Week 2","30 Nov–6 Dec","Lookbook, trust channels, content queue"],["Ongoing","Dec onward","Lead follow-up, scheduling, measured bookings"]];
+function itemById(id){return TASKS.find(function(x){return x[0]===id;});}
+function commandRows(items){
+return items.map(function(item,index){
+const t=itemById(item[0]);const st=value(t);
+return '<div class="command-item"><div class="command-index">'+String(index+1).padStart(2,"0")+'</div><div><strong>'+safe(item[1])+'</strong><p>'+safe(item[2])+' · '+safe(t[4])+' · Due '+safe(t[5].slice(5))+'</p></div><div class="command-status"><span class="pill '+slug(st)+'">'+safe(st)+'</span><button type="button" data-open-task="'+safe(t[0])+'">Task</button></div></div>';
+}).join("");
+}
+function renderBrief(){
+document.getElementById("decisionBoard").innerHTML=commandRows(COMMAND_OWNER);
+document.getElementById("launchBoard").innerHTML=commandRows(COMMAND_LAUNCH);
+document.getElementById("videoPipeline").innerHTML=VIDEO_ITEMS.map(function(item){
+const t=itemById(item[0]),st=value(t);
+return '<div class="pipeline-card"><span class="pipeline-num">'+safe(item[1].split(" · ")[0])+' · Target '+safe(item[3])+'</span><h3>'+safe(item[1].split(" · ")[1])+'</h3><p>'+safe(item[2])+'</p><div class="pipeline-footer"><span class="pill '+slug(st)+'">'+safe(st)+'</span><button type="button" data-open-task="'+safe(t[0])+'">View task</button></div></div>';
+}).join("");
+document.getElementById("phaseRoadmap").innerHTML=PHASES.map(function(phase,i){
+const list=TASKS.filter(function(t){return t[6]===phase[0];});
+const done=list.filter(function(t){return value(t)==="Done";}).length;
+return '<div class="work-phase"><div class="phase-count">PHASE '+String(i+1).padStart(2,"0")+' · '+safe(phase[1])+'</div><h3>'+safe(phase[0])+'</h3><p>'+safe(phase[2])+'</p><div class="phase-meta">'+done+' / '+list.length+' tasks marked done</div><div class="progressbar"><div style="width:'+(list.length?100*done/list.length:0)+'%"></div></div></div>';
+}).join("");
+}
+function openTrackedTask(id){
+const t=itemById(id);if(!t)return;
+document.getElementById("taskSearch").value=t[1];
+document.getElementById("phaseFilter").value="";
+document.getElementById("statusFilter").value="";
+renderTasks();setView("tasks");
+const row=document.querySelector('#taskBody [data-status="'+id+'"]');if(row)row.scrollIntoView({block:"center",behavior:"smooth"});
+}
+document.addEventListener("click",function(event){
+const jump=event.target.closest("[data-view-target]");
+if(jump){setView(jump.dataset.viewTarget);return;}
+const open=event.target.closest("[data-open-task]");
+if(open){openTrackedTask(open.dataset.openTask);}
+});
+document.getElementById("copyBrief").addEventListener("click",async function(){
+const done=TASKS.filter(function(t){return value(t)==="Done";}).length;
+const lines=["PLP SOCIAL MEDIA MARKETING TRACKER · V3","Status: manually maintained; not a live PLP booking report","Progress: "+done+"/"+TASKS.length+" tasks marked done","","DOC / OPERATIONS INPUTS"];
+COMMAND_OWNER.forEach(function(x){lines.push("• "+x[1]+": "+value(itemById(x[0])));});
+lines.push("","LAUNCH ITEMS");
+COMMAND_LAUNCH.forEach(function(x){lines.push("• "+x[1]+": "+value(itemById(x[0])));});
+lines.push("","Videos: "+VIDEO_ITEMS.map(function(x){return x[1]+" ("+value(itemById(x[0]))+")";}).join("; "));
+lines.push("Plan link: https://plp-boracay.vercel.app/plp-growth-plan.html");
+const output=lines.join("\n");
+try{await navigator.clipboard.writeText(output);document.getElementById("shareMessage").textContent="Copied";}catch(e){
+window.prompt("Copy this owner status update:",output);
+document.getElementById("shareMessage").textContent="Copy manually";
+}
+});
+
 function metrics(){
 let done=TASKS.filter(function(t){return value(t)==="Done";}).length;
 let needs=TASKS.filter(function(t){return value(t)==="Needs info";}).length;
 document.getElementById("doneCount").textContent=done+" / "+TASKS.length;
 document.getElementById("needsCount").textContent=String(needs);
 document.getElementById("progressFill").style.width=(100*done/TASKS.length)+"%";
+renderBrief();
 }
 function renderTasks(){
 let q=document.getElementById("taskSearch").value.trim().toLowerCase();
@@ -262,7 +416,12 @@ list.forEach(function(t){const i=document.querySelector('input[data-note="'+t[0]
 document.getElementById("taskBody").addEventListener("change",function(e){
 const el=e.target;if(!el.matches("[data-status]"))return;
 const id=el.dataset.status;const t=TASKS.find(function(x){return x[0]===id;});if(!t||!allowed.includes(el.value))return;
-const state=stored[id]||{};state.status=el.value;stored[id]=state;persist();metrics();renderTasks();renderOwner();renderCalendar();
+const state=stored[id]||{};
+if(el.value==="Done" && (!state.note || state.note.trim().length<8)){
+const evidence=window.prompt("What did you verify before marking this task Done? Enter a short evidence note (at least 8 characters).",state.note||"");
+if(!evidence || evidence.trim().length<8){el.value=value(t);return;}state.note=evidence.trim().slice(0,500);
+}
+state.status=el.value;stored[id]=state;persist();metrics();renderTasks();renderOwner();renderCalendar();
 });
 document.getElementById("taskBody").addEventListener("input",function(e){
 const el=e.target;if(!el.matches("[data-note]"))return;
@@ -293,7 +452,7 @@ if(!confirm("Clear only the local task-status and note edits on this browser? Th
 stored={};try{localStorage.removeItem(KEY);}catch(e){}
 metrics();renderTasks();renderOwner();renderCalendar();
 });
-metrics();renderTasks();renderOwner();renderCalendar();
+metrics();renderTasks();renderOwner();renderCalendar();setView("overview");
 })();
 </script>
 </body>
