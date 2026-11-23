@@ -90,8 +90,9 @@ test('calendar navigation obeys local dates and evidence gates on activities', (
 
 test('the working file is isolated from live services and keeps the existing protected club entry point', () => {
   const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
-  const shell = read('src/admin/PlpEnterpriseAdminApp.jsx');
-  assert.match(shell, /page === 'club' && <OwnerWorkspace file=\{pearlFile\} staffRegister=\{<ClubAdminView/);
+  const shell = read('src/admin/PlpAdminApp.jsx');
+  assert.match(shell, /case 'workbook': return <OwnerWorkspace file=\{pearlFile\} \/>/);
+  assert.match(shell, /case 'register': return <ClubAdminView code=\{code\}/);
   for (const file of ['useWorkingFile.js','OwnerWorkspace.jsx','WorkbookUI.jsx','Registers.jsx','workingFile.js']) {
     assert.doesNotMatch(read('src/admin/pearl/' + file), /fetch\s*\(|localStorage|sessionStorage|\/api\/|XMLHttpRequest/);
   }

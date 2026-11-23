@@ -70,10 +70,11 @@ test('the operational date uses Asia/Manila rather than server UTC', () => {
 
 test('admin is private, checks server-side staff access, and never persists staff code in storage', () => {
   const admin = readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
-  const shell = readFileSync(new URL('../src/admin/PlpEnterpriseAdminApp.jsx', import.meta.url), 'utf8');
+  const shell = readFileSync(new URL('../src/admin/PlpAdminApp.jsx', import.meta.url), 'utf8');
   const legacy = readFileSync(new URL('../public/admin-ops.html', import.meta.url), 'utf8');
   assert.match(admin, /noindex,nofollow/);
-  assert.match(shell, /await adminRequest\('operations', codeToUse\)/);
+  assert.match(shell, /const who = await adminRequest\('session', codeToUse\)/);
+  assert.doesNotMatch(shell, /localStorage|sessionStorage/);
   assert.match(legacy, /event.origin !== window.location.origin/);
   assert.match(legacy, /event.source !== window.parent/);
   assert.doesNotMatch(legacy, /localStorage\.(getItem|setItem)\('plp_staff_code'/);

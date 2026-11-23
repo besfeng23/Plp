@@ -2,7 +2,7 @@ import { staffEnquiries } from '../lib/concierge-desk.js';
 import { websiteInterestFunnel } from '../lib/owner-funnel.js';
 import { websiteBehaviorReport } from '../lib/owner-behavior.js';
 import { posthogOwnerAnalytics } from '../lib/posthog-owner-analytics.js';
-import { auditActor, authorizeStaffRequest, handleAccessRegister, handleStaffAuth } from '../lib/access-control.js';
+import { auditActor, authorizeStaffRequest, authV2Enabled, handleAccessRegister, handleStaffAuth, permissionsFor } from '../lib/access-control.js';
 import { monthBounds, websiteBookingMonth } from '../lib/owner-month.js';
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
@@ -146,6 +146,7 @@ export default async function handler(req, res) {
   req.plpAuth = auth;
   try {
     const action = requested;
+    if (action === 'session') return json(res, 200, { ok: true, role: auth.actor.role, email: auth.actor.email, verified: auth.actor.verified, individualAccounts: authV2Enabled(), permissions: permissionsFor(auth.actor.role) });
     if (action === 'access') return await handleAccessRegister(req, res, auth);
     if (action === 'health') return await handleHealth(req, res);
     if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });

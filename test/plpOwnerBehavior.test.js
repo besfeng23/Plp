@@ -51,8 +51,8 @@ test('PostHog visitor cohorts are never exposed without staff authentication',as
 });
 test('website analytics remains inside protected existing PLP workspace',()=>{
  const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
- assert.match(read('src/admin/PlpEnterpriseAdminApp.jsx'),/page === 'analytics' && <WebsiteAnalytics code=\{code\}/);
- assert.match(read('src/admin/PlpEnterpriseAdminApp.jsx'),/id: 'analytics', label: 'Website Analytics'/);
+ assert.match(read('src/admin/PlpAdminApp.jsx'),/case 'analytics': return <WebsiteAnalytics code=\{code\}/);
+ assert.match(read('src/admin/adminNavigation.js'),/id: 'analytics', label: 'Website analytics'/);
  assert.match(read('api/admin.js'),/action === 'owner-behavior'/);
  assert.doesNotMatch(read('src/admin/WebsiteAnalytics.jsx'),/localStorage|sessionStorage|POST/);
 });

@@ -27,9 +27,9 @@ test('Club is discoverable in public pages and available only via protected admi
   for (const path of ['public/accommodation.html', 'public/experiences.html']) {
     assert.match(source(path), /href="\/club"/, path);
   }
-  const admin = source('src/admin/PlpEnterpriseAdminApp.jsx');
+  const admin = source('src/admin/PlpAdminApp.jsx');
   assert.match(admin, /import ClubAdminView/);
-  assert.match(admin, /\{ id: 'club', label: 'Pearl Club'/);
+  assert.match(source('src/admin/adminNavigation.js'), /\{ id: 'club', label: 'Pearl Club'/);
   assert.match(admin, /<ClubAdminView code=\{code\}/);
 });
 

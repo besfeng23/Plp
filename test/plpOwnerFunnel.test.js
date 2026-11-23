@@ -98,7 +98,7 @@ test('public tracker requires affirmative consent and transmits no form or healt
   assert.match(script, /body: JSON\.stringify\(\{ event: category, path, privacyConsent: true \}\)/);
   assert.match(source('src/ConciergeView.jsx'), /'submit_residential_interest'/);
   assert.match(source('src/booking.js'), /track\('booking_created'\)/);
-  assert.match(source('src/admin/PlpEnterpriseAdminApp.jsx'), /<OwnerFunnel code=\{code\}/);
+  assert.match(source('src/admin/PlpAdminApp.jsx'), /<OwnerFunnel code=\{code\}/);
 });
 
 test('owner funnel is inaccessible without staff authentication and responses are not cacheable', async () => {

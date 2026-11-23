@@ -164,7 +164,7 @@ test('shared code can be retired only when V2 is on; access register fails close
 
 test('admin UI shows individual sign-in only when the server enables it', async () => {
   const fs = await import('node:fs');
-  const ui = fs.readFileSync(new URL('../src/admin/PlpEnterpriseAdminApp.jsx', import.meta.url), 'utf8');
+  const ui = fs.readFileSync(new URL('../src/admin/PlpAdminApp.jsx', import.meta.url), 'utf8');
   assert.match(ui, /auth-config/); assert.match(ui, /individualAccounts/); assert.match(ui, /staff-verify/);
   const sql = fs.readFileSync(new URL('../supabase/pending/20261123060000_plp_auth_v2_staff_roles.sql', import.meta.url), 'utf8');
   assert.match(sql, /PENDING OWNER APPROVAL/); assert.match(sql, /role in \('manager','staff'\)/);

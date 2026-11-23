@@ -38,14 +38,16 @@ test('guest and admin presentation respect mobile screens and reduced motion', (
   const guest = source('src/index.css');
   const app = source('src/App.jsx');
   const admin = source('src/admin/plp-enterprise-admin.css');
-  const adminApp = source('src/admin/PlpEnterpriseAdminApp.jsx');
+  const adminApp = source('src/admin/PlpAdminApp.jsx');
+  const adminShell = source('src/admin/plp-admin.css');
   assert.ok(guest.includes('@media (prefers-reduced-motion: reduce)'));
   assert.ok(guest.includes('.plp-mobile-action__inner'));
   assert.ok(guest.includes('@media (max-width: 430px)'));
   assert.ok(app.includes("target='booking'"));
   assert.ok(app.includes("target='contact'"));
   assert.ok(admin.includes('.plp-today-board'));
-  assert.ok(adminApp.includes('aria-label="Today\'s operating picture"'));
+  assert.ok(adminShell.includes('@media (prefers-reduced-motion: reduce)'));
+  assert.ok(adminShell.includes('env(safe-area-inset-bottom)'));
   assert.ok(adminApp.includes("summary.arrivals.length"));
   assert.ok(adminApp.includes('summary.exceptionCount'));
 });
