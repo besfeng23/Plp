@@ -26,11 +26,38 @@ const PAGES = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
+// Individual PLP accounts (PLP_AUTH_V2_ENABLED). Rendered only when the server
+// reports that individual accounts are enabled; otherwise the shared code form is unchanged.
+function StaffAccountSignIn({ onSignedIn }) {
+  const [email, setEmail] = useState(''), [otp, setOtp] = useState(''), [stage, setStage] = useState('email'), [note, setNote] = useState('');
+  const post = async (action, body) => {
+    const response = await fetch('/api/admin?action=' + action, { method: 'POST', cache: 'no-store', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok === false) throw new Error(data.error || 'Sign-in could not be completed.');
+    return data;
+  };
+  return <div className="plp-admin-account-signin">
+    <label htmlFor="plp-admin-email">Your work email</label>
+    <input id="plp-admin-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" />
+    {stage === 'code' && <><label htmlFor="plp-admin-otp">Sign-in code</label><input id="plp-admin-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={8} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ''))} /></>}
+    <button type="button" className="plp-primary" onClick={async () => {
+      setNote('');
+      try {
+        if (stage === 'email') { const r = await post('staff-login', { email }); setStage('code'); setNote(r.message); }
+        else { await post('staff-verify', { email, code: otp }); onSignedIn(); }
+      } catch (err) { setNote(err.message); }
+    }}>{stage === 'email' ? 'Send my sign-in code' : 'Verify and open PLP Admin'}</button>
+    {note && <p className="plp-form-error" role="status">{note}</p>}
+  </div>;
+}
+
 async function adminRequest(action, code, options = {}) {
   const response = await fetch(`/api/admin?action=${encodeURIComponent(action)}`, {
     method: options.method || 'GET',
     cache: 'no-store',
-    headers: { 'Content-Type': 'application/json', 'X-PLP-Staff-Code': code },
+    // Individual-account sessions travel in an HttpOnly cookie; the legacy
+    // shared code is sent only when one was entered in this tab.
+    headers: code ? { 'Content-Type': 'application/json', 'X-PLP-Staff-Code': code } : { 'Content-Type': 'application/json' },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
@@ -43,7 +70,7 @@ function DailySignals({ code, refreshedAt, onNavigate }) {
   useEffect(() => {
     const controller = new AbortController();
     setSnapshot({ state: 'loading', newEnquiries: null, clubEnquiries: null, upcoming: null });
-    const headers = { 'X-PLP-Staff-Code': code };
+    const headers = code ? { 'X-PLP-Staff-Code': code } : {};
     const loadInbox = async (scope) => {
       const query = new URLSearchParams({ action: 'concierge-inbox', status: 'NEW', scope });
       const response = await fetch('/api/admin?' + query, { cache: 'no-store', headers, signal: controller.signal });
@@ -156,6 +183,11 @@ export default function PlpEnterpriseAdminApp() {
   const pearlFile = useWorkingFile();
   const [code, setCode] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
+  const [accountSession, setAccountSession] = useState(false);
+  const [authConfig, setAuthConfig] = useState({ individualAccounts: false, sharedCode: true });
+  useEffect(() => {
+    fetch('/api/admin?action=auth-config', { cache: 'no-store' }).then((r) => r.json()).then((c) => { if (c && c.ok) setAuthConfig(c); }).catch(() => {});
+  }, []);
   const [mode, setMode] = useState('choose');
   const [page, setPage] = useState('home');
   const [mobileNav, setMobileNav] = useState(false);
@@ -188,8 +220,8 @@ export default function PlpEnterpriseAdminApp() {
     return text.includes(filter.toLowerCase()) && (statusFilter === 'all' || statusKey(row.booking_status) === statusFilter);
   }), [rows, filter, statusFilter]);
 
-  async function load(codeToUse = code, first = false) {
-    if (!codeToUse.trim()) { setError('Enter your PLP staff access code.'); return; }
+  async function load(codeToUse = code, first = false, viaAccount = accountSession) {
+    if (!codeToUse.trim() && !viaAccount) { setError('Enter your PLP staff access code.'); return; }
     setLoading(true); setError(''); setWarning('');
     try {
       // The operations response is the authentication gate. No workspace or guest data
@@ -230,6 +262,8 @@ export default function PlpEnterpriseAdminApp() {
   function logout() {
     if (pearlFile.dirty && !window.confirm('Sign out and discard the unsaved Pearl Club working file?')) return;
     pearlFile.reset();
+    if (accountSession) fetch('/api/admin?action=staff-logout', { method: 'POST', cache: 'no-store', credentials: 'same-origin' }).catch(() => {});
+    setAccountSession(false);
     setAuthenticated(false); setShowTestRecords(false); setCode(''); setMode('choose'); setPage('home'); setSelected(null);
     setRows([]); setExceptions([]); setNotifications([]); setTasks([]); setBlocks([]); setSyncAt(null);
   }
@@ -239,6 +273,7 @@ export default function PlpEnterpriseAdminApp() {
     <label htmlFor="plp-admin-code">Staff access code</label><input id="plp-admin-code" autoComplete="off" type="password" value={code} onChange={(event) => setCode(event.target.value)} required placeholder="Enter access code" />
     {error && <p className="plp-form-error" role="alert">{error}</p>}<button className="plp-primary" disabled={loading} type="submit"><LockKeyhole size={17} /> {loading ? 'Verifying access…' : 'Open PLP Admin'}</button>
     <small>For authorized PLP staff. Access ends when this tab closes.</small>
+    {authConfig.individualAccounts && <StaffAccountSignIn onSignedIn={() => { setAccountSession(true); load('', true, true); }} />}
   </form></div>;
 
   const pageTitle = PAGES.find((item) => item.id === page)?.label || 'Home';

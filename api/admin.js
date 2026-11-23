@@ -2,7 +2,7 @@ import { staffEnquiries } from '../lib/concierge-desk.js';
 import { websiteInterestFunnel } from '../lib/owner-funnel.js';
 import { websiteBehaviorReport } from '../lib/owner-behavior.js';
 import { posthogOwnerAnalytics } from '../lib/posthog-owner-analytics.js';
-import { hasLegacyStaffAccess } from '../lib/staff-access.js';
+import { auditActor, authorizeStaffRequest, handleAccessRegister, handleStaffAuth } from '../lib/access-control.js';
 import { monthBounds, websiteBookingMonth } from '../lib/owner-month.js';
 import { cancelBlockedDate, createBlockedDate, listAvailabilityCalendar, listBlockedDates } from './_availabilityHelper.js';
 import { notifyBookingStatus } from './_notifications.js';
@@ -24,7 +24,6 @@ const PHASE_2D_BLOCK_MESSAGE = 'Phase 2D is mapping-review only. Live OTA sync, 
 const PHASE_2E_BLOCK_MESSAGE = 'Phase 2E is preflight-readiness only. Live OTA sync, credentials, booking, payment, and guest-message actions are disabled.';
 
 function json(res, status, payload) { res.statusCode = status; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(payload)); }
-function hasStaffAccess(req) { return hasLegacyStaffAccess(req); }
 function actionOf(req) { return String(req.query?.action || req.query?.route || '').trim().toLowerCase(); }
 function parseBody(req) { try { return typeof req.body === 'object' && req.body ? req.body : JSON.parse(req.body || '{}'); } catch { return {}; } }
 function cleanSection(value) { return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 80); }
@@ -35,7 +34,9 @@ function encode(value) { return encodeURIComponent(String(value || '')); }
 function containsDisabledOtaAction(value) { if (!value || typeof value !== 'object') return false; if (value.createBooking === true || value.autoConfirm === true || value.mutatePayment === true || value.sendGuestMessage === true) return true; if (String(value.mode || '').trim().toLowerCase() === 'live') return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledOtaAction(item)); }
 function containsDisabledConflictAction(value) { if (!value || typeof value !== 'object') return false; if (containsDisabledOtaAction(value)) return true; if (value.cancelDirectBooking === true || value.cancelOtaBooking === true) return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledConflictAction(item)); }
 function containsDisabledMappingAction(value) { if (!value || typeof value !== 'object') return false; if (containsDisabledConflictAction(value)) return true; if (value.syncLive === true || value.pushToOta === true || value.publishToOta === true || value.connectOta === true) return true; if (Object.prototype.hasOwnProperty.call(value, 'credentials') || Object.prototype.hasOwnProperty.call(value, 'clientSecret') || Object.prototype.hasOwnProperty.call(value, 'accessToken') || Object.prototype.hasOwnProperty.call(value, 'refreshToken') || Object.prototype.hasOwnProperty.call(value, 'apiKey') || Object.prototype.hasOwnProperty.call(value, 'password')) return true; return Object.values(value).some((item) => item && typeof item === 'object' && containsDisabledMappingAction(item)); }
-function staffName(req) { return cleanText(req.headers['x-plp-staff-name'] || 'staff', 120); }
+// Verified actor under individual accounts; legacy header only on the shared-code path.
+function staffName(req) { return cleanText(auditActor(req, req.plpAuth), 120); }
+function verifiedActor(req) { return req.plpAuth?.actor?.verified ? req.plpAuth.actor.email : null; }
 
 async function handleHealth(req, res) {
   if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' });
@@ -85,10 +86,10 @@ async function handleStaffTasks(req, res) {
   if (req.method === 'POST') {
     const reference = cleanText(body.reference || body.bookingReference, 80); const kind = cleanEnum(body.kind, STAFF_TASK_KINDS, 'task'); const category = cleanEnum(body.category, STAFF_TASK_CATEGORIES, 'admin'); const priority = cleanEnum(body.priority, STAFF_TASK_PRIORITIES, 'normal'); const title = cleanText(body.title || (kind === 'note' ? 'Internal note' : ''), 160); const note = cleanText(body.note || body.body, 1200);
     if (!reference) return json(res, 400, { ok: false, error: 'Booking reference is required.' }); if (!title && !note) return json(res, 400, { ok: false, error: 'Task title or note is required.' });
-    const saved = await insertRow('plp_staff_tasks', { booking_reference: reference, kind, category, priority, status: kind === 'note' ? 'done' : 'open', title: title || 'Internal note', note: note || null, actor: cleanText(req.headers['x-plp-staff-name'] || 'staff', 120), source: 'resort-command-admin', completed_at: kind === 'note' ? new Date().toISOString() : null });
+    const saved = await insertRow('plp_staff_tasks', { booking_reference: reference, kind, category, priority, status: kind === 'note' ? 'done' : 'open', title: title || 'Internal note', note: note || null, actor: cleanText(staffName(req), 120), source: 'resort-command-admin', completed_at: kind === 'note' ? new Date().toISOString() : null });
     return json(res, 200, { ok: true, row: saved });
   }
-  if (req.method === 'PATCH') { const id = cleanText(body.id, 80); const status = cleanEnum(body.status, STAFF_TASK_STATUSES, 'open'); if (!id) return json(res, 400, { ok: false, error: 'Task id is required.' }); const updated = await updateRows('plp_staff_tasks', `id=eq.${encode(id)}`, { status, completed_at: status === 'done' ? new Date().toISOString() : null, actor: cleanText(req.headers['x-plp-staff-name'] || 'staff', 120) }); return json(res, 200, { ok: true, row: updated?.[0] || null }); }
+  if (req.method === 'PATCH') { const id = cleanText(body.id, 80); const status = cleanEnum(body.status, STAFF_TASK_STATUSES, 'open'); if (!id) return json(res, 400, { ok: false, error: 'Task id is required.' }); const updated = await updateRows('plp_staff_tasks', `id=eq.${encode(id)}`, { status, completed_at: status === 'done' ? new Date().toISOString() : null, actor: cleanText(staffName(req), 120) }); return json(res, 200, { ok: true, row: updated?.[0] || null }); }
   return json(res, 405, { ok: false, error: 'Method not allowed' });
 }
 
@@ -97,7 +98,7 @@ async function handleDateBlocks(req, res) {
   if (req.method === 'GET') { try { const [blockedDates, calendar] = await Promise.all([listBlockedDates(200), listAvailabilityCalendar(300)]); return json(res, 200, { ok: true, blockedDates: blockedDates || [], calendar: calendar || [] }); } catch (error) { return json(res, 200, { ok: true, blockedDates: [], calendar: [], warning: error.message }); } }
   const body = parseBody(req);
   if (req.method === 'PATCH') { const row = await cancelBlockedDate(body.id); return json(res, row ? 200 : 404, { ok: Boolean(row), row }); }
-  const result = await createBlockedDate({ accommodationName: body.accommodation, startDate: body.startDate, endDate: body.endDate, reason: body.reason, createdBy: 'staff' });
+  const result = await createBlockedDate({ accommodationName: body.accommodation, startDate: body.startDate, endDate: body.endDate, reason: body.reason, createdBy: verifiedActor(req) || 'staff' });
   return json(res, result.ok ? 200 : 409, result);
 }
 
@@ -106,7 +107,7 @@ async function handleContent(req, res) {
   if (req.method !== 'POST') return json(res, 405, { error: 'Method not allowed' });
   const body = parseBody(req); const section = cleanSection(body.section);
   if (!section) return json(res, 400, { error: 'Section is required.' }); if (!body.content || typeof body.content !== 'object' || Array.isArray(body.content)) return json(res, 400, { error: 'Content must be a JSON object.' });
-  const payload = { section, content: body.content, status: cleanStatus(body.status), updated_by: String(body.updatedBy || 'staff').trim().slice(0, 120), updated_at: new Date().toISOString() };
+  const payload = { section, content: body.content, status: cleanStatus(body.status), updated_by: String(verifiedActor(req) || body.updatedBy || 'staff').trim().slice(0, 120), updated_at: new Date().toISOString() };
   const existing = await selectRows('plp_site_content', `section=eq.${encode(section)}&select=id&limit=1`);
   const saved = existing?.[0] ? (await updateRows('plp_site_content', `id=eq.${existing[0].id}`, payload))?.[0] : await insertRow('plp_site_content', payload);
   return json(res, 200, { ok: true, content: saved });
@@ -114,17 +115,17 @@ async function handleContent(req, res) {
 
 async function handleOtaReadiness(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const snapshot = await getOtaReadinessSnapshot(); return json(res, 200, snapshot); }
 async function handleOtaMappings(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const snapshot = await getOtaMappingSnapshot(); return json(res, 200, snapshot); }
-async function handleOtaSyncDryRun(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (String(body.mode || 'dry_run') === 'live') return json(res, 400, { ok: false, error: 'Live OTA sync is intentionally disabled in Phase 2A.' }); if (!body.startDate || !body.endDate) return json(res, 400, { ok: false, error: 'Missing date range.' }); try { const result = await buildOtaInventoryDryRun({ channelKey: cleanText(body.channelKey, 80) || undefined, accommodationName: cleanText(body.accommodationName, 160) || undefined, startDate: cleanText(body.startDate, 20), endDate: cleanText(body.endDate, 20), mode: body.mode || 'dry_run', createdBy: cleanText(req.headers['x-plp-staff-name'] || body.createdBy || 'staff', 120) }); return json(res, 200, result); } catch (error) { return json(res, 400, { ok: false, error: error.message, dryRunOnly: true }); } }
+async function handleOtaSyncDryRun(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (String(body.mode || 'dry_run') === 'live') return json(res, 400, { ok: false, error: 'Live OTA sync is intentionally disabled in Phase 2A.' }); if (!body.startDate || !body.endDate) return json(res, 400, { ok: false, error: 'Missing date range.' }); try { const result = await buildOtaInventoryDryRun({ channelKey: cleanText(body.channelKey, 80) || undefined, accommodationName: cleanText(body.accommodationName, 160) || undefined, startDate: cleanText(body.startDate, 20), endDate: cleanText(body.endDate, 20), mode: body.mode || 'dry_run', createdBy: cleanText(verifiedActor(req) || req.headers['x-plp-staff-name'] || body.createdBy || 'staff', 120) }); return json(res, 200, result); } catch (error) { return json(res, 400, { ok: false, error: error.message, dryRunOnly: true }); } }
 async function handleOtaConflicts(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const rows = await selectRows('plp_ota_conflicts', 'status=eq.open&select=*&order=created_at.desc&limit=500'); return json(res, 200, { ok: true, conflicts: rows || [] }); }
 
 async function handleOtaReservationImports(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const rows = await listOtaReservationImports({ reviewStatus: req.query?.reviewStatus, channelKey: req.query?.channelKey, severity: req.query?.severity, accommodationName: req.query?.accommodationName, limit: req.query?.limit }); return json(res, 200, { ok: true, rows: rows || [], reviewFirstOnly: true }); }
 async function handleOtaReservationStage(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE }); const result = await stageOtaReservationImport({ ...body, createdBy: staffName(req) }); return json(res, result.ok ? 200 : 409, result); }
-async function handleOtaReservationReview(req, res) { if (req.method !== 'PATCH') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE }); const row = await updateOtaReservationReview({ ...body, reviewedBy: body.reviewedBy || staffName(req) }); return json(res, row ? 200 : 404, { ok: Boolean(row), row, reviewFirstOnly: true, message: 'Review status updated. No booking was created.' }); }
+async function handleOtaReservationReview(req, res) { if (req.method !== 'PATCH') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledOtaAction(body)) return json(res, 400, { ok: false, error: PHASE_2B_BLOCK_MESSAGE }); const row = await updateOtaReservationReview({ ...body, reviewedBy: verifiedActor(req) || body.reviewedBy || staffName(req) }); return json(res, row ? 200 : 404, { ok: Boolean(row), row, reviewFirstOnly: true, message: 'Review status updated. No booking was created.' }); }
 async function handleOtaReservationSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const summary = await getOtaReservationReviewSummary(); return json(res, 200, { ok: true, summary, reviewFirstOnly: true }); }
 
 async function handleOtaConflictConsole(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await listOtaConflictConsole({ sourceTable: req.query?.sourceTable, channelKey: req.query?.channelKey, severity: req.query?.severity, resolutionStatus: req.query?.resolutionStatus, reviewStatus: req.query?.reviewStatus, conflictType: req.query?.conflictType, accommodationName: req.query?.accommodationName, limit: req.query?.limit }); return json(res, 200, result); }
 async function handleOtaConflictSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getOtaConflictConsoleSummary(); return json(res, 200, result); }
-async function handleOtaConflictResolution(req, res) { if (!['PATCH', 'POST'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledConflictAction(body)) return json(res, 400, { ok: false, error: PHASE_2C_BLOCK_MESSAGE }); const result = await updateOtaConflictResolution({ ...body, actor: body.actor || staffName(req) }); return json(res, 200, { ...result, message: 'Conflict resolution saved. No booking, payment, guest message, or OTA cancellation was performed.' }); }
+async function handleOtaConflictResolution(req, res) { if (!['PATCH', 'POST'].includes(req.method)) return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledConflictAction(body)) return json(res, 400, { ok: false, error: PHASE_2C_BLOCK_MESSAGE }); const result = await updateOtaConflictResolution({ ...body, actor: verifiedActor(req) || body.actor || staffName(req) }); return json(res, 200, { ...result, message: 'Conflict resolution saved. No booking, payment, guest message, or OTA cancellation was performed.' }); }
 
 async function handleOtaMappingWorkspace(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await listOtaMappingWorkspace({ channelKey: req.query?.channelKey, accommodationName: req.query?.accommodationName, mappingStatus: req.query?.mappingStatus, reviewStatus: req.query?.reviewStatus, limit: req.query?.limit }); return json(res, 200, result); }
 async function handleOtaMappingSummary(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getOtaMappingWorkspaceSummary(); return json(res, 200, result); }
@@ -134,13 +135,18 @@ async function handleOtaRateMapping(req, res) { if (!['POST', 'PATCH'].includes(
 async function handleOtaPreflightLatest(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const result = await getLatestOtaPreflightRun(); return json(res, 200, result); }
 async function handleOtaPreflightRuns(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const rows = await listOtaPreflightRuns({ goNoGo: req.query?.goNoGo, readinessGrade: req.query?.readinessGrade, limit: req.query?.limit }); return json(res, 200, { ok: true, reviewOnly: true, rows }); }
 async function handleOtaPreflightItems(req, res) { if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'Method not allowed' }); const runId = cleanText(req.query?.run_id || req.query?.runId, 80); if (!runId) return json(res, 400, { ok: false, error: 'run_id is required' }); const rows = await listOtaPreflightRunItems(runId); return json(res, 200, { ok: true, reviewOnly: true, rows }); }
-async function handleOtaPreflightRun(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledMappingAction(body)) return json(res, 400, { ok: false, error: PHASE_2E_BLOCK_MESSAGE }); const result = await runOtaPreflightChecks({ ...body, createdBy: body.createdBy || staffName(req) }); return json(res, 200, { ...result, message: 'Preflight completed. No OTA sync, booking, payment, or guest-message action was performed.' }); }
+async function handleOtaPreflightRun(req, res) { if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' }); const body = parseBody(req); if (containsDisabledMappingAction(body)) return json(res, 400, { ok: false, error: PHASE_2E_BLOCK_MESSAGE }); const result = await runOtaPreflightChecks({ ...body, createdBy: verifiedActor(req) || body.createdBy || staffName(req) }); return json(res, 200, { ...result, message: 'Preflight completed. No OTA sync, booking, payment, or guest-message action was performed.' }); }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
-  if (!hasStaffAccess(req)) return json(res, 401, { ok: false, error: 'Staff access required' });
+  const requested = actionOf(req);
+  if (['auth-config', 'staff-login', 'staff-verify', 'staff-logout'].includes(requested)) return handleStaffAuth(req, res, requested);
+  const auth = await authorizeStaffRequest(req, requested);
+  if (!auth.ok) return json(res, auth.status, { ok: false, error: auth.error });
+  req.plpAuth = auth;
   try {
-    const action = actionOf(req);
+    const action = requested;
+    if (action === 'access') return await handleAccessRegister(req, res, auth);
     if (action === 'health') return await handleHealth(req, res);
     if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });
     if (action === 'concierge-inbox') {

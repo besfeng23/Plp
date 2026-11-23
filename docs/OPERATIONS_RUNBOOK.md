@@ -46,3 +46,21 @@ No credentials in this file. Secret *names* only.
 ## Rollback
 - Vercel → Deployments → previous Ready production deployment → *Promote to Production*; or revert the PR on GitHub.
 - Never roll back to a state that restores browser-stored staff codes or fail-open authorization.
+
+## Individual staff accounts (PLP_AUTH_V2_ENABLED — off by default)
+
+Production runs with the shared staff code exactly as before. Individual accounts are built but **dormant**.
+
+Roles: **owner** (only emails in `PLP_OWNER_EMAILS`/`PLP_OWNER_EMAIL`; cannot be granted in-app), **manager**
+(operations, content, OTA, club — no finance/analytics/access), **staff** (concierge inbox, tasks, read-only
+availability). The shared code can never manage access.
+
+To enable (owner approval required for each step):
+1. Review and apply `supabase/pending/20261123060000_plp_auth_v2_staff_roles.sql` (not applied; see `supabase/pending/README.md`).
+   Until applied, only owners can sign in individually (fail closed).
+2. Set `PLP_STAFF_SESSION_SECRET` (random, ≥48 chars, distinct from the owner secret) and `PLP_AUTH_V2_ENABLED=true`, redeploy.
+3. Owners sign in at `/admin` with their email + code, then grant managers/staff via `action=access` (audited in `plp_staff_access_events`).
+4. When everyone has an account, set `PLP_LEGACY_STAFF_CODE_ENABLED=false` to retire the shared code.
+
+Rollback: remove `PLP_AUTH_V2_ENABLED` (or set anything other than `true`) and redeploy — the shared code works again immediately.
+Revoking a person takes effect on their next request (roles are re-checked every call).
