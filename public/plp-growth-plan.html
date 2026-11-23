@@ -178,6 +178,11 @@ body{font-size:13px;background:#f7f8f9}
 @media(max-width:740px){.sidebar{padding:11px 13px;display:block}.brand{margin-bottom:8px}.nav{gap:2px}.nav button{padding:9px 11px}.main{padding:0 13px 40px}.topline{gap:8px}.control-intro{align-items:flex-start;flex-direction:column}.board-grid,.visual-pipeline{grid-template-columns:1fr}.command-item{grid-template-columns:24px minmax(0,1fr);align-items:start}.command-status{grid-column:2;justify-content:flex-start;min-width:0}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.workflow{grid-template-columns:1fr}.work-phase,.work-phase:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.work-phase:last-child{border-bottom:0}}
 @media print{.sidebar,.tools,.command-item button,.pipeline-footer button,.overview-utility,.jump-btn{display:none!important}.main{padding:0}.board-grid{grid-template-columns:1fr 1fr}.visual-pipeline{grid-template-columns:repeat(3,1fr)}.workflow{grid-template-columns:repeat(4,1fr)}.work-phase{border-bottom:0!important;border-right:1px solid var(--line)!important}.command-item{grid-template-columns:25px 1fr}.control-intro{display:block}.section{break-inside:avoid}}
 
+
+.post select,.post input{border:1px solid #d7dde2;border-radius:5px;background:#fff;min-height:35px;width:100%;padding:6px 8px;color:#46525c;font-size:11px}
+.post select{margin-top:10px}.post input{margin-top:7px}
+.post-proof{display:block;font-size:11px;margin-top:7px;overflow-wrap:anywhere}
+.post small{color:#7d8790;font-size:10px}
 </style>
 </head>
 <body>
@@ -261,7 +266,7 @@ body{font-size:13px;background:#f7f8f9}
 </section>
 
 <section class="view" id="view-calendar" aria-labelledby="calendar-title">
-<div class="section"><div class="section-head"><div><h2 id="calendar-title">Content production & publishing calendar</h2><p>Proposed slots only. Nothing below is confirmed filmed, scheduled or published by this tracker.</p></div><span class="pill p-planned">Draft schedule</span></div><div class="section-body"><div class="calendar-grid" id="calendarGrid"></div></div><div class="guide">Record actual posting status in the matching task row. Publishing through Meta Business Suite or a connected scheduler is a separate action.</div></div>
+<div class="section"><div class="section-head"><div><h2 id="calendar-title">Content production & publishing calendar</h2><p>Each proposed post has its own status and optional publishing proof. Nothing is assumed published.</p></div><div class="toolbar"><span class="pill p-planned" id="calendarSummary">Proposed content</span><button type="button" class="btn" id="exportPosts">Export content CSV</button></div></div><div class="section-body"><div class="calendar-grid" id="calendarGrid"></div></div><div class="guide">Status edits are local to this browser. “Published” requires a valid link. Scheduling in Meta Business Suite or another authorized platform must be completed separately.</div></div>
 </section>
 
 <section class="view" id="view-owner" aria-labelledby="owner-title">
@@ -315,15 +320,20 @@ const TASKS=[
 ["26","Plan ongoing monthly content batch","Repurpose verified property content; exclude Pearl Club from stay campaign.","Content","Marketing team","2026-12-14","Ongoing","Planned","Next monthly queue approved and based on real guest questions."]
 ];
 const POSTS=[
-["25 NOV","Facebook · Instagram","Arrival to view","Show the actual property entrance, route and view.","Video 1","11"],
-["27 NOV","Facebook · Instagram","How to reach White Beach","Verify real transfer arrangements and night access.","Video 2","12"],
+["27 NOV","Facebook · Instagram","Arrival to view","Show the actual property entrance, route and view.","Video 1","11"],
+["28 NOV","Facebook · Instagram","How to reach White Beach","Verify real transfer arrangements and night access.","Video 2","12"],
 ["29 NOV","Facebook · Instagram","Bedrooms and space","Show exact sleeping layout and verified guest capacity.","Video 3","13"],
 ["01 DEC","Facebook · Instagram Stories","Property question and answer","Answer a genuine guest question using verified details.","Story / still","20"],
 ["03 DEC","Facebook · Instagram","Accommodation walkthrough","One authentic property feature, accurate to bookable unit.","Carousel","20"],
 ["05 DEC","Instagram Stories","Concierge enquiry walkthrough","Show how to request dates and receive confirmation.","Story","20"],
 ["08 DEC","Facebook · Instagram","Private group stay","Highlight suitable actual layout for families/groups.","Carousel / video","20"],
 ["10 DEC","Facebook · Instagram Stories","Arrival and travel tips","Respond to a recurring logistical question.","Story / short video","20"],
-["12 DEC","Facebook · Instagram","Authentic view and setting","Show real PLP footage, not unrelated Boracay B-roll.","Photo / reel","20"]
+["12 DEC","Facebook · Instagram","Authentic view and setting","Show real PLP footage, not unrelated Boracay B-roll.","Photo / reel","20"],
+["15 DEC","Facebook · Instagram","Travel planning FAQ","Answer a verified booking and transport question.","Carousel","20"],
+["17 DEC","Facebook · Instagram","Group accommodation explained","Use real occupancy and sleeping configurations.","Reel","20"],
+["19 DEC","Instagram Stories","How reservations work","Show actual concierge steps without suggesting guaranteed availability.","Stories","20"],
+["21 DEC","Facebook · Instagram","Life above the island","Genuine PLP footage focused on the hillside experience.","Reel","20"],
+["23 DEC","Instagram Stories","Seasonal dates reminder","Only mention dates after availability is reconfirmed.","Stories","20"]
 ];
 const KEY="plp_marketing_tracker_v3_local_20261123";
 const allowed=["Planned","Needs info","In progress","Blocked","Done"];
@@ -439,12 +449,37 @@ const t=TASKS.find(function(x){return x[0]===row[0];});
 return '<div class="checkrow"><div><b>'+safe(row[1])+'</b><small>'+safe(row[2])+'</small><small>Target: '+safe(t[5])+' · Responsible: '+safe(t[4])+'</small></div><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div>';
 }).join("");
 }
+const POST_STATES=["Proposed","Needs footage","Draft","Approved","Scheduled","Published","Paused"];
+function postState(i){const v=stored["post-"+i]||{};return POST_STATES.includes(v.status)?v.status:"Proposed";}
+function postProof(i){const v=stored["post-"+i]||{};return typeof v.proof==="string"?v.proof:"";}
+function validProof(url){try{const u=new URL(url);return (u.protocol==="https:"||u.protocol==="http:")&&u.hostname.includes(".");}catch(e){return false;}}
 function renderCalendar(){
-document.getElementById("calendarGrid").innerHTML=POSTS.map(function(p){
-const t=TASKS.find(function(x){return x[0]===p[5];});
-return '<article class="post"><div class="post-head"><span>'+safe(p[0])+'</span><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div><h3>'+safe(p[2])+'</h3><p>'+safe(p[3])+'</p><div class="post-foot">'+safe(p[1])+' · '+safe(p[4])+'</div></article>';
+const totalPublished=POSTS.filter(function(_,i){return postState(i)==="Published";}).length;
+document.getElementById("calendarSummary").textContent=totalPublished+" of "+POSTS.length+" posts marked Published";
+document.getElementById("calendarGrid").innerHTML=POSTS.map(function(p,i){
+const state=postState(i),proof=postProof(i);
+const options=POST_STATES.map(function(v){return '<option value="'+safe(v)+'"'+(v===state?' selected':'')+'>'+safe(v)+'</option>';}).join("");
+const link=validProof(proof)?'<a class="post-proof" href="'+safe(proof)+'" target="_blank" rel="noopener noreferrer">View proof link</a>':"";
+return '<article class="post"><div class="post-head"><span>'+safe(p[0])+'</span><span class="pill '+(state==="Published"?"p-done":state==="Scheduled"?"p-in-progress":"p-planned")+'">'+safe(state)+'</span></div><h3>'+safe(p[2])+'</h3><p>'+safe(p[3])+'</p><div class="post-foot">'+safe(p[1])+' · '+safe(p[4])+'</div><label><small>Content status</small><select aria-label="Status for '+safe(p[2])+'" data-post-index="'+i+'">'+options+'</select></label>'+link+'</article>';
 }).join("");
 }
+document.getElementById("calendarGrid").addEventListener("change",function(e){
+const el=e.target;if(!el.matches("[data-post-index]"))return;
+const i=Number(el.dataset.postIndex);if(!Number.isInteger(i)||i<0||i>=POSTS.length||!POST_STATES.includes(el.value))return;
+const rec=stored["post-"+i]||{};if(el.value==="Published"&&!validProof(rec.proof)){
+const proof=window.prompt("Paste the actual published Facebook/Instagram post URL. Do not mark Published without proof.",rec.proof||"");
+if(!proof||!validProof(proof)){renderCalendar();return;}rec.proof=proof.trim().slice(0,1000);
+}
+rec.status=el.value;stored["post-"+i]=rec;persist();renderCalendar();
+});
+function exportContentCsv(){
+const rows=[["Target","Channel","Post","Brief","Format","Status","Published proof URL"]].concat(POSTS.map(function(p,i){return [p[0],p[1],p[2],p[3],p[4],postState(i),postProof(i)];}));
+const csv="\uFEFF"+rows.map(function(r){return r.map(csvCell).join(",");}).join("\r\n");
+const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob),a=document.createElement("a");
+a.href=url;a.download="PLP-Content-Calendar-V3.csv";document.body.appendChild(a);a.click();a.remove();
+setTimeout(function(){URL.revokeObjectURL(url);},4000);
+}
+document.getElementById("exportPosts").addEventListener("click",exportContentCsv);
 function csvCell(v){const x=String(v===undefined?"":v);return '"'+x.replace(/"/g,'""').replace(/^[=+\-@]/,"'$&")+'"';}
 document.getElementById("exportCsv").addEventListener("click",function(){
 const rows=[["ID","Task","Description","Workstream","Responsible","Target date","Phase","Status","Acceptance check","Local note"]].concat(TASKS.map(function(t){return [t[0],t[1],t[2],t[3],t[4],t[5],t[6],value(t),t[8],note(t)];}));
