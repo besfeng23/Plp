@@ -191,7 +191,7 @@ These outcomes should send the guest to the cancel/review path, not success:
 
 ### PayPal configuration health
 
-A server-only health endpoint is available at `/api/paypal/health`. It returns configuration booleans, PayPal mode, and the configured-or-derived base URL. It must not return the PayPal client id, PayPal client secret, access tokens, raw environment variables, or any credential value.
+A staff-only health endpoint is available at `/api/paypal/health` (requires the `x-plp-staff-code` header; anonymous requests get 401). It returns configuration booleans, PayPal mode, and the configured-or-derived base URL. It must not return the PayPal client id, PayPal client secret, access tokens, raw environment variables, or any credential value.
 
 ## Admin Phase 1N OTA channel readiness
 

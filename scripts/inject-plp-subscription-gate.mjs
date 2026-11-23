@@ -45,3 +45,16 @@ if (subscriptionGateEnabled()) {
     }
   }
 }
+
+// While the gate is disabled the subscription offer is not approved for the
+// public: publish a neutral, non-indexed notice instead of the checkout page.
+// Enabling PLP_SUBSCRIPTION_GATE_ENABLED restores the original page on the next build.
+const SUBSCRIBE_UNAVAILABLE_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Not available · Pueblo La Perla Boracay</title><style>body{margin:0;min-height:100svh;display:grid;place-items:center;background:#080807;color:#f4f0e6;font-family:Georgia,serif;text-align:center;padding:24px}a{color:#c5b27b}</style></head><body><main><h1>This page is not available.</h1><p><a href="/">Return to Pueblo La Perla Boracay</a></p></main></body></html>`;
+if (!subscriptionGateEnabled()) {
+  const subscribePage = path.join(outputDir, 'subscribe', 'index.html');
+  try {
+    await fs.access(subscribePage);
+    await fs.writeFile(subscribePage, SUBSCRIBE_UNAVAILABLE_HTML, 'utf8');
+    console.log('subscription gate disabled: /subscribe unpublished');
+  } catch { /* no subscribe page in this output */ }
+}

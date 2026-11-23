@@ -89,7 +89,7 @@ Keep live and sandbox credentials separate: live mode needs live credentials and
 
 ## Live PayPal go-live smoke test (post-deploy)
 
-- Open `GET /api/paypal/health`; confirm `mode` is `live` and every `has*` field is `true` (values never exposed).
+- Open `GET /api/paypal/health` (staff only: send the `x-plp-staff-code` header; anonymous requests get 401); confirm `mode` is `live` and every `has*` field is `true` (values never exposed).
 - Open `/booking`, select a room, and confirm the temporary test pricing (`300 / 200 / 100`, deposits `90 / 60 / 30`).
 - Submit reservation details and continue to PayPal live checkout.
 - Pay the deposit through a real PayPal account and return to `/booking/success`.

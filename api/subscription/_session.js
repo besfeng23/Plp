@@ -7,8 +7,11 @@ const STATE_COOKIE = 'plp_subscription_state';
 const ACCESS_TTL_SECONDS = 30 * 60;
 const STATE_TTL_SECONDS = 30 * 60;
 
+// A dedicated secret only. Never fall back to the Supabase service-role key:
+// that would reuse a database credential as a cookie-signing key.
 function sessionSecret() {
-  return process.env.PLP_SUBSCRIPTION_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  const secret = process.env.PLP_SUBSCRIPTION_SESSION_SECRET || '';
+  return secret.length >= 32 ? secret : '';
 }
 
 function signature(payload) {

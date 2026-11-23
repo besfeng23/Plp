@@ -42,7 +42,7 @@ docs, logs, screenshots, or comments.
 
 ## Safe health check
 
-Use `GET /api/paypal/health` to confirm configuration presence without exposing values. The endpoint returns only:
+Use `GET /api/paypal/health` (staff only, `x-plp-staff-code` header; anonymous requests get 401) to confirm configuration presence without exposing values. The endpoint returns only:
 
 - `ok`
 - `mode`
@@ -73,7 +73,7 @@ If a real PayPal client ID, client secret, access token, Supabase service-role k
 ## Smoke test steps
 
 1. Deploy the branch or preview environment with sandbox variables.
-2. Open `/api/paypal/health` and verify it reports configured booleans without exposing values.
+2. Open `/api/paypal/health` (staff only, `x-plp-staff-code` header) and verify it reports configured booleans without exposing values.
 3. Open `/booking` and submit a reservation request with sandbox-safe guest details.
 4. Verify the reservation request is created.
 5. Verify checkout redirects only when PayPal creates an order and Supabase stores a payment row whose `provider_session_id` equals the PayPal order ID.
@@ -85,7 +85,7 @@ If a real PayPal client ID, client secret, access token, Supabase service-role k
 
 Run only after live PayPal credentials and `PAYPAL_MODE=live` are set in Vercel Production:
 
-1. Open `/api/paypal/health` and confirm `mode` is `live` and every `has*` field is `true` (no values exposed).
+1. Open `/api/paypal/health` (staff only, `x-plp-staff-code` header) and confirm `mode` is `live` and every `has*` field is `true` (no values exposed).
 2. Open `/booking` and confirm the temporary test pricing (`300 / 200 / 100`, 30% deposits `90 / 60 / 30`).
 3. Submit a reservation request and continue to PayPal live checkout.
 4. Pay the deposit with a real PayPal account and return to `/booking/success`.

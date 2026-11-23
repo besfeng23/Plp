@@ -5,6 +5,10 @@ Disallow: /admin
 Disallow: /admin-ops.html
 Disallow: /availability-ops.html
 Disallow: /content-ops.html
+Disallow: /photo-library.html
+Disallow: /owner
+Disallow: /plp-growth-plan.html
+Disallow: /subscribe
 
 User-agent: Bingbot
 Allow: /
@@ -13,6 +17,10 @@ Disallow: /admin
 Disallow: /admin-ops.html
 Disallow: /availability-ops.html
 Disallow: /content-ops.html
+Disallow: /photo-library.html
+Disallow: /owner
+Disallow: /plp-growth-plan.html
+Disallow: /subscribe
 
 User-agent: *
 Allow: /
@@ -21,5 +29,9 @@ Disallow: /admin
 Disallow: /admin-ops.html
 Disallow: /availability-ops.html
 Disallow: /content-ops.html
+Disallow: /photo-library.html
+Disallow: /owner
+Disallow: /plp-growth-plan.html
+Disallow: /subscribe
 
 Sitemap: https://plp-boracay.vercel.app/sitemap.xml
