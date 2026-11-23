@@ -310,6 +310,16 @@
       "permanent": false
     },
     {
+      "source": "/admin-ops",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/admin-ops.html",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
       "source": "/accommodation.html",
       "destination": "/accommodation",
       "permanent": true
