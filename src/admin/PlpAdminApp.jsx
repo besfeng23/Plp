@@ -8,7 +8,7 @@ import { Activity, ArrowLeft, ArrowRight, BedDouble, BookOpen, CalendarDays, Cal
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
 import { SOCIAL_ICON_PATHS } from '../../lib/social.js';
-import { SCREENS, TILES, visibleScreens, visibleTiles } from './adminNavigation.js';
+import { SCREENS, TILES, OWNER_CONFIRMATIONS, visibleScreens, visibleTiles } from './adminNavigation.js';
 import ConciergeInbox from './ConciergeInbox.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
 import OwnerFunnel from './OwnerFunnel.jsx';
@@ -333,6 +333,10 @@ export default function PlpAdminApp() {
       <p className="plp-adm-notice">{error || notice || sentence}</p>
       {!current && <div className="plp-adm-tiles">{screens.map(item => <Tile key={item.id} tile={item} screen onOpen={() => go(item.id)} />)}</div>}
       {current && <div className="plp-adm-tiles">{tiles.map(tile => <Tile key={tile.id} tile={tile} value={values[current.id]?.[tile.id]} onOpen={() => openSheet(tile.id)} />)}</div>}
+      {current?.id === 'growth' && <>
+        <p className="plp-adm-subhead">Waiting on the owners</p>
+        <SimpleRows items={OWNER_CONFIRMATIONS.map(item => ({ key: item.id, title: item.title, detail: item.detail }))} />
+      </>}
       {current && !tiles.length && <Empty>Nothing to show for your role.</Empty>}
     </main>
     <button type="button" className="plp-adm-crest" aria-label="Administration home" onClick={() => go('home')}><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="" width="26" height="36" /></button>

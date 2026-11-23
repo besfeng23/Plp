@@ -1,3 +1,11 @@
+-- ARCHIVED. This migration was never applied to production and is not needed.
+-- The standalone Growth Plan page was retired on 23 November 2026 (PHT).
+-- Official social links and the four pending owner confirmations now live on
+-- the Administration Growth & Marketing screen. Do not run this file.
+--
+-- Original location: supabase/pending/20261123070000_plp_growth_tasks.sql
+-- Original purpose: shared Growth Plan task progress + append-only history.
+--
 -- PENDING OWNER APPROVAL — NOT APPLIED TO PRODUCTION.
 -- Shared Growth Plan progress (plan PR 7). Kept outside supabase/migrations so no
 -- integration applies it automatically. Additive only: two new tables, no existing data touched.

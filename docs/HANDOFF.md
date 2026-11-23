@@ -60,6 +60,6 @@ accounts replace it), `SUPABASE_SERVICE_ROLE_KEY`, `PAYPAL_CLIENT_SECRET`, `RESE
 
 - Guest pages use clean URLs (for example `/accommodation`, not `/accommodation.html`). Legacy `.html` addresses redirect to the clean URL.
 - Unknown addresses return a real 404 page, not the homepage.
-- Internal surfaces (`/admin`, `/owner`, the Growth Plan, payment return pages, `/subscribe`, `/tg`) are marked noindex and listed in `robots.txt`.
+- Internal surfaces (`/admin`, `/owner`, payment return pages, `/subscribe`, `/tg`) are marked noindex and listed in `robots.txt`. Retired Growth Plan addresses redirect to `/admin`.
 - Public URLs are listed in `public/sitemap.xml`.
 

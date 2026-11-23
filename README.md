@@ -31,8 +31,9 @@ npm run build
 Guest pages use clean URLs such as `/accommodation` and `/booking`. Legacy `.html`
 addresses redirect to those URLs. Unknown addresses return a dedicated 404 page,
 not the homepage. Public URLs are listed in `public/sitemap.xml`. Internal pages
-(`/admin`, `/owner`, the Growth Plan, and payment return pages) are excluded from
-the sitemap and listed in `public/robots.txt`.
+(`/admin`, `/owner`, and payment return pages) are excluded from
+the sitemap and listed in `public/robots.txt`. Retired Growth Plan addresses
+redirect to `/admin`.
 
 ## Reservation pricing
 

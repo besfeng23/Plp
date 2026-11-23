@@ -59,7 +59,7 @@ test('both owner accounts are recognized independently with their own identity',
 });
 
 test('no hardcoded owner email or display identity in owner and public files',()=>{
- for(const f of ['lib/owner-handler.js','lib/owner-auth.js','src/owner/OwnerApp.jsx','src/owner/PublicPreview.jsx','src/SeniorLivingView.jsx','private/plp-growth-plan.html']){
+ for(const f of ['lib/owner-handler.js','lib/owner-auth.js','src/owner/OwnerApp.jsx','src/owner/PublicPreview.jsx','src/SeniorLivingView.jsx']){
   const s=read(f);
   assert.doesNotMatch(s,/Marichi|Fong Ramos|fongramos@/i,f);
   if(f.startsWith('lib/'))assert.doesNotMatch(s,/['"][A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}['"]/,f+' has no email literal');
