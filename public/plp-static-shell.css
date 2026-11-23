@@ -60,3 +60,20 @@ main .plp-static-rate-caption { display:block; margin-top:.35rem; font-size:.73r
   html { scroll-behavior:auto; }
   main :is(.visual,.hero-photo) img { transition:none; transform:none!important; }
 }
+
+/* Editorial footer on the static accommodation page, aligned with the React site. */
+.footer.footer-editorial { background:#1A1A1A; color:#f4efe4; border-top:0; padding:72px 0 96px; font-size:14px; }
+.footer-editorial__grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap:48px; align-items:start; }
+.footer-editorial__brand { display:grid; gap:14px; justify-items:start; max-width:28rem; }
+.footer-editorial__brand strong { font-family:'Cormorant Garamond',Georgia,serif; font-weight:500; letter-spacing:.15em; font-size:1.35rem; }
+.footer-editorial__brand p { margin:0; color:#ffffffbf; line-height:1.7; }
+.footer-editorial__nav, .footer-editorial__inquiries { display:grid; gap:10px; }
+.footer-editorial :is(.footer-editorial__nav, .footer-editorial__inquiries) p { margin:0 0 6px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#D0BE7A; font-weight:700; }
+.footer-editorial a { color:#ffffffbf; text-decoration:none; min-height:32px; display:inline-flex; align-items:center; }
+.footer-editorial a:hover, .footer-editorial a[aria-current='page'] { color:#fff; }
+.footer-editorial .plp-social { justify-content:flex-start; margin:12px 0 0; }
+.footer-editorial .plp-social a { border-color:#d0be7a80; color:#D0BE7A; }
+@media(max-width:760px){
+  .footer.footer-editorial { padding:56px 0 120px; }
+  .footer-editorial__grid { grid-template-columns:1fr; gap:32px; }
+}

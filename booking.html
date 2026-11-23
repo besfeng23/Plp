@@ -6,18 +6,18 @@
   <meta name="theme-color" content="#F4F0E8" />
   <meta name="robots" content="index,follow" />
   <title>Book Your Stay | Pueblo La Perla Boracay</title>
-  <meta name="description" content="Request a Pueblo La Perla Boracay stay with availability review, booking terms, and deposit details confirmed before final reservation." />
+  <meta name="description" content="Request a Pueblo La Perla Boracay stay. USD 1,000 per night, with a 30% deposit. The team reviews availability before confirming the reservation." />
   <link rel="canonical" href="https://plp-boracay.vercel.app/booking" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Pueblo La Perla Boracay" />
   <meta property="og:url" content="https://plp-boracay.vercel.app/booking" />
   <meta property="og:title" content="Book Your Stay | Pueblo La Perla Boracay" />
-  <meta property="og:description" content="Request a Pueblo La Perla Boracay stay with availability review, booking terms, and deposit details confirmed before final reservation." />
+  <meta property="og:description" content="Request a Pueblo La Perla Boracay stay. USD 1,000 per night, with a 30% deposit. The team reviews availability before confirming the reservation." />
   <meta property="og:image" content="https://plp-boracay.vercel.app/images/plp-hero-sunset.webp" />
   <meta property="og:image:alt" content="Sunset aerial view of Pueblo La Perla Boracay hillside villas above the sea" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Book Your Stay | Pueblo La Perla Boracay" />
-  <meta name="twitter:description" content="Request a Pueblo La Perla Boracay stay with availability review, booking terms, and deposit details confirmed before final reservation." />
+  <meta name="twitter:description" content="Request a Pueblo La Perla Boracay stay. USD 1,000 per night, with a 30% deposit. The team reviews availability before confirming the reservation." />
   <meta name="twitter:image" content="https://plp-boracay.vercel.app/images/plp-hero-sunset.webp" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=oval-only-20261121" />
   <link rel="stylesheet" href="/image-placement.css" data-plp-image-placement="true" />
@@ -59,6 +59,12 @@
     .selector-card select { padding-bottom: 6px; text-overflow: ellipsis; }
     .room-meta { display:block; padding:0 48px 20px 28px; font-size:13px; letter-spacing:.02em; color:#4a453d; }
     .plp-analytics-consent[data-inline] { margin: 24px 0 0; }
+
+    .room-choice { display:grid; grid-template-columns:112px minmax(0,1fr); align-items:stretch; }
+    .room-thumb { display:block; width:100%; height:100%; min-height:108px; object-fit:cover; background:#ebe8df; }
+    .booking-lifeline { margin:16px 28px 0; font-size:14px; color:var(--muted); line-height:1.6; }
+    .booking-lifeline a { color:inherit; text-decoration:underline; text-underline-offset:3px; }
+    @media(max-width:760px){ .room-choice{ grid-template-columns:84px minmax(0,1fr);} .booking-lifeline{ margin-inline:20px; } }
     @media(max-width:760px){ .room-meta{ padding-left:20px; } }
   </style>
 </head>
@@ -68,8 +74,9 @@
   <main class="wrap booking">
     <form id="bookingForm">
       <section class="selector-card" aria-label="Stay details">
-        <label class="select-wrap"><span class="select-label">Accommodation</span><select id="roomSelect" aria-describedby="roomMeta"></select><span class="room-meta" id="roomMeta"></span></label>
+        <div class="room-choice"><img id="roomThumb" class="room-thumb" alt="Selected accommodation at Pueblo La Perla" width="224" height="168" /><label class="select-wrap"><span class="select-label">Accommodation</span><select id="roomSelect" aria-describedby="roomMeta"></select><span class="room-meta" id="roomMeta"></span></label></div>
         <label class="select-wrap"><span class="select-label">Guests</span><input id="guests" type="number" min="1" value="2" required /></label>
+        <p class="booking-lifeline" style="grid-column:1/-1">Prefer to talk? <a id="bookingCall" href="tel:+639178872980">Call +63 917 887 2980</a> or <a id="bookingWhatsApp" href="https://wa.me/639178872980">WhatsApp the concierge</a>.</p>
       </section>
       <section class="calendar-card" id="calendar" aria-labelledby="calendarTitle" tabindex="-1">
         <h1 class="calendar-title" id="calendarTitle">Select your dates</h1>
@@ -99,14 +106,14 @@
         <button class="modify" id="retryRange" type="button" hidden>Check dates again</button>
         <a class="modify" href="/contact">Contact concierge</a>
       </div>
-      <section class="form-card" id="guestForm" tabindex="-1" hidden><p class="form-kicker">Reservation Request</p><div class="form-title"><h2>Where should we confirm?</h2><p>Leave your best contact details. PLP will review availability, deposit requirements, and final booking terms before confirmation is issued privately.</p></div><ul class="reassure" aria-label="What to expect"><li>Private villa reservation team</li><li>Availability reviewed before confirmation</li><li>Secure deposit checkout may open after submission</li><li>Final confirmation follows team review</li></ul><div class="field-grid"><label class="field"><span class="label">Full name <span class="req" aria-hidden="true">*</span></span><input id="name" required autocomplete="name" /></label><label class="field"><span class="label">Email <span class="req" aria-hidden="true">*</span></span><input id="email" type="email" required autocomplete="email" /></label><label class="field"><span class="label">Phone or WhatsApp <span class="req" aria-hidden="true">*</span></span><input id="phone" type="tel" required autocomplete="tel" /></label><label class="field full"><span class="label">Notes, requests, or arrival details</span><textarea id="message" rows="4" placeholder="Transfers, wellness, dining, family needs, privacy notes..."></textarea></label></div><p class="form-hint"><span class="req" aria-hidden="true">*</span> Required. Your details stay private and are only used to arrange this reservation.</p><div class="action-row"><button id="submitBtn" class="submit" type="submit">Send reservation request</button><a class="ghost" href="mailto:mfr@e-mango.com">Ask concierge instead</a></div><div id="status" class="status" role="status" aria-live="polite"></div><p class="fine">Submitting opens a reservation request. Final confirmation follows resort availability review and any confirmed deposit or payment verification. <a href="/reservation-policy">Review reservation policy</a>.</p></section>
+      <section class="form-card" id="guestForm" tabindex="-1" hidden><p class="form-kicker">Reservation Request</p><div class="form-title"><h2>Where should we confirm?</h2><p>Leave your best contact details. Stays are USD 1,000 per night, with a 30% deposit. The team reviews availability before confirming the reservation.</p></div><ul class="reassure" aria-label="What to expect"><li>Private villa reservation team</li><li>Availability reviewed before confirmation</li><li>Secure deposit checkout may open after submission</li><li>Final confirmation follows team review</li></ul><div class="field-grid"><label class="field"><span class="label">Full name <span class="req" aria-hidden="true">*</span></span><input id="name" required autocomplete="name" /></label><label class="field"><span class="label">Email <span class="req" aria-hidden="true">*</span></span><input id="email" type="email" required autocomplete="email" /></label><label class="field"><span class="label">Phone or WhatsApp <span class="req" aria-hidden="true">*</span></span><input id="phone" type="tel" required autocomplete="tel" /></label><label class="field full"><span class="label">Notes, requests, or arrival details</span><textarea id="message" rows="4" placeholder="Transfers, wellness, dining, family needs, privacy notes..."></textarea></label></div><p class="form-hint"><span class="req" aria-hidden="true">*</span> Required. Your details stay private and are only used to arrange this reservation.</p><div class="action-row"><button id="submitBtn" class="submit" type="submit">Send reservation request</button><a class="ghost" href="mailto:mfr@e-mango.com">Ask concierge instead</a></div><div id="status" class="status" role="status" aria-live="polite"></div><p class="fine">Submitting opens a reservation request. Final confirmation follows availability review and, when requested, payment of the 30% deposit. <a href="/reservation-policy">Review reservation policy</a>.</p></section>
     </form>
     <section class="policy-card" aria-labelledby="booking-policy-title">
       <p class="policy-kicker">Booking Clarity</p>
       <h2 id="booking-policy-title">Before your stay is confirmed</h2>
       <div class="policy-grid">
-        <article><h3>Reservation requests</h3><p>Reservation requests are subject to availability. After you submit your preferred dates and accommodation, the PLP team will confirm availability, rate details, deposit requirements, and final booking terms.</p></article>
-        <article><h3>Deposit and payment</h3><p>A deposit may be required to secure selected dates. Payment timing, accepted methods, and remaining balance details will be confirmed before the reservation is finalized.</p></article>
+        <article><h3>Reservation requests</h3><p>Reservation requests are subject to availability. The rate is USD 1,000 per night, with a 30% deposit calculated by our server. The team reviews your dates before confirming the stay.</p></article>
+        <article><h3>Deposit and payment</h3><p>A 30% deposit of the stay total is requested to hold the dates once checkout is offered. The remaining 70% is due as advised by the team. The amount charged always matches the server-calculated estimate.</p></article>
         <article><h3>Cancellations and changes</h3><p>Cancellation and date-change terms may vary by season, accommodation, and reservation arrangement. Guests should review the confirmed terms before payment.</p></article>
         <article><h3>Arrival details</h3><p>Arrival coordination, transfer support, check-in guidance, and special requests can be arranged after the reservation inquiry is received.</p></article>
       </div>

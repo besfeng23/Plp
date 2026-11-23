@@ -2,6 +2,7 @@ import { formatPeso, formatUsd, PLP_DEPOSIT_RATE, PLP_ROOMS, quoteStay } from '.
 import { nightsBetween, occupiedNights, shiftMonth, todayAtResort } from '../lib/booking-dates.js';
 
 import { requestedGuests } from '../lib/guest-journey.js';
+import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 
 const element = id => document.getElementById(id);
 const track = name => window.plpTrack?.(name);
@@ -26,6 +27,13 @@ let savedRequest = false;
 let pendingBooking = null;
 const calendarMonths = new Map();
 
+const ROOM_THUMB = {
+  grandOceanVilla: ['/images/plp-grand-ocean-villa-aerial.webp', 'Grand Ocean Villa at Pueblo La Perla'],
+  sunsetSuite: ['/images/plp-sunset-balcony.webp', 'Sunset Suite balcony at Pueblo La Perla'],
+  smartRoomPremium: ['/images/plp-smart-room-twin-view.webp', 'Smart Room Premium at Pueblo La Perla'],
+};
+
+
 function canCheckOut(date) {
   if (date <= checkIn) return false;
   for (const night of occupiedNights(checkIn, date)) {
@@ -36,11 +44,13 @@ function canCheckOut(date) {
 }
 
 function renderCalendar(focusDate) {
-  const start = new Date(month + '-01T00:00:00Z');
+  const monthStart = new Date(month + '-01T00:00:00Z');
+  const gridStart = month === firstMonth ? today : month + '-01';
+  const start = new Date(gridStart + 'T00:00:00Z');
   const end = shiftMonth(month, 1) + '-01';
   const availability = calendarMonths.get(month);
   const choosingCheckout = Boolean(checkIn && !checkOut);
-  element('monthTitle').textContent = monthName.format(start);
+  element('monthTitle').textContent = monthName.format(monthStart);
   element('prevMonth').disabled = month === firstMonth || submitting;
   element('nextMonth').disabled = month === '9999-11' || submitting;
   const days = document.createDocumentFragment();
@@ -52,7 +62,7 @@ function renderCalendar(focusDate) {
   }
 
   let focusTarget;
-  for (const date of occupiedNights(month + '-01', end)) {
+  for (const date of occupiedNights(gridStart, end)) {
     const blocked = availability?.has(date);
     const checkoutOnly = Boolean(blocked && choosingCheckout && canCheckOut(date));
     const outsideRange = choosingCheckout && date > checkIn && !canCheckOut(date);
@@ -337,12 +347,23 @@ for (const room of PLP_ROOMS) {
 element('roomSelect').value = selected.key;
 function showRoomMeta() {
   element('roomMeta').textContent = formatUsd(selected.rate) + ' per night · up to ' + selected.capacity + ' guests';
+  const thumb = element('roomThumb');
+  const [src, alt] = ROOM_THUMB[selected.key] || ROOM_THUMB.grandOceanVilla;
+  if (thumb) { thumb.src = src; thumb.alt = alt; }
 }
 showRoomMeta();
 element('guests').max = selected.capacity;
 const initialGuests = requestedGuests(new URLSearchParams(location.search).get('guests'), selected.capacity);
 if (initialGuests !== null) element('guests').value = initialGuests;
 element('depositRate').textContent = '(' + Math.round(PLP_DEPOSIT_RATE * 100) + '%)';
+const phone = String(CONCIERGE_NUMBER || '').replace(/\D/g, '');
+const call = element('bookingCall');
+const whatsapp = element('bookingWhatsApp');
+if (call && CONCIERGE_NUMBER) {
+  call.href = 'tel:' + CONCIERGE_NUMBER;
+  call.textContent = 'Call ' + CONCIERGE_NUMBER_DISPLAY;
+}
+if (whatsapp && phone) whatsapp.href = 'https://wa.me/' + phone;
 element('roomSelect').addEventListener('change', () => {
   selected = PLP_ROOMS.find(room => room.key === element('roomSelect').value);
   showRoomMeta();
