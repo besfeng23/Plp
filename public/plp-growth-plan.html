@@ -1,269 +1,300 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<meta name="theme-color" content="#f7f4ef">
-<title>PLP Marketing & Booking Growth Plan | Owner Presentation</title>
-<meta name="description" content="Owner presentation: The proposed PLP Boracay marketing and booking growth plan, 23 November 2026. Not a website redesign.">
+<meta name="theme-color" content="#f6f7f8">
+<meta name="description" content="Pueblo La Perla Boracay social media marketing execution tracker — tasks, owners, deadlines, content calendar and approvals.">
+<title>PLP Social Media Marketing — Execution Tracker</title>
 <link rel="icon" href="/favicon.svg">
 <style>
-:root{--ink:#2c221d;--brown:#421909;--sub:#655e56;--ivory:#faf7f2;--line:#ddd4c9;--paper:#fff;--tan:#b4987e;--soft:#f1ebe3}
+:root{--ink:#252627;--muted:#657079;--brand:#421909;--line:#e0e4e7;--panel:#fff;--canvas:#f6f7f8;--chip:#f2f3f5;--blue:#285d8b;--orange:#8e6326;--green:#236545;--red:#9b4141}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:#e9e5df;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-button{cursor:pointer;border:1px solid var(--brown);background:var(--brown);color:#fff;padding:12px 18px;min-height:42px;border-radius:2px;font-size:12px;font-weight:650;letter-spacing:.03em}
-button:focus-visible,a:focus-visible{outline:3px solid #ba986e;outline-offset:3px}
-h1,h2,h3,p{margin-top:0}
-h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400}
-h1{font-size:clamp(47px,6.9vw,89px);line-height:1.06;letter-spacing:-.035em}
-h2{font-size:clamp(30px,3.7vw,48px);line-height:1.14;letter-spacing:-.02em}
-h3{font-size:clamp(22px,2.2vw,28px);line-height:1.2}
-p{color:var(--sub)}
-.shell{max-width:1100px;margin:0 auto}
-.utility{background:#291810;color:#f6e8dc}
-.utility-inner{max-width:1100px;margin:auto;padding:12px 34px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.utility span{font-size:11px;font-weight:650;letter-spacing:.12em;text-transform:uppercase}
-.utility button{border-color:#d7c3b4;background:transparent;color:#f6e8dc}
-.paper{background:var(--paper);box-shadow:0 14px 65px #34261c10;max-width:1100px;margin:24px auto 40px}
-.cover{padding:58px clamp(24px,8vw,90px) 52px;min-height:665px;background:var(--ivory);position:relative;border-bottom:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}
-.cover-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:38px;border-bottom:1px solid var(--line)}
-.identity{display:flex;align-items:center;gap:13px}
-.identity img{width:31px;height:43px;object-fit:contain}
-.identity strong{font-family:Georgia,serif;font-weight:400;letter-spacing:.12em;font-size:18px;color:var(--brown)}
-.identity small{display:block;letter-spacing:.12em;text-transform:uppercase;color:#766b61;font-size:9px;margin-top:3px}
-.classify{text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--brown);font-weight:750}
-.classify small{display:block;text-transform:none;letter-spacing:.03em;font-weight:450;color:#7b7168;margin-top:5px;font-size:11px}
-.cover-main{padding:47px 0 35px}
-.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#86684e;font-weight:700;margin-bottom:21px}
-.cover h1{max-width:850px;color:var(--brown);margin:0 0 20px}
-.cover-summary{max-width:680px;font-size:19px;line-height:1.73}
-.cover-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-top:25px;border-top:1px solid var(--line)}
-.cover-meta .field{font-size:10px;font-weight:700;color:#7f6b5b;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
-.cover-meta .value{font-size:14px;line-height:1.4;color:#34251b}
-.ribbon{background:#eee6dc;border-left:4px solid var(--brown);padding:17px 22px;font-size:14px;line-height:1.6;color:var(--brown);margin-top:28px}
-.chapter{padding:64px clamp(24px,8vw,90px);border-bottom:1px solid var(--line)}
-.chapter:nth-of-type(even){background:#fdfbf8}
-.chapter-heading{display:flex;gap:18px;align-items:baseline;margin-bottom:14px}
-.num{font-family:Georgia,serif;color:#97795f;font-size:18px;min-width:36px}
-.chapter h2{margin:0}
-.lead{font-size:18px;line-height:1.78;max-width:750px;margin:10px 0 30px}
-.highlight{border-left:4px solid var(--brown);padding:12px 0 12px 24px;margin:28px 0;background:#fbf8f4}
-.highlight strong{display:block;color:var(--brown);font-size:20px;margin-bottom:5px;font-family:Georgia,serif;font-weight:400}
-.highlight p{margin:0;font-size:15px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:28px}
-.stat{padding:23px 20px;background:#f6f1eb;border:1px solid var(--line)}
-.stat b{display:block;font:400 27px Georgia,serif;color:var(--brown);margin-bottom:8px}
-.stat span{font-size:13px;color:#5f554d}
-.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:26px 0}
-.step{padding:22px 18px;background:#f8f5f0;border-top:3px solid var(--tan);min-height:166px}
-.step b{font:400 26px Georgia,serif;color:var(--brown)}
-.step h3{font-size:21px;margin:13px 0 8px}
-.step p{font-size:13px;margin:0}
-.timeline{margin:25px 0;border-top:1px solid var(--line)}
-.phase{padding:24px 0;display:grid;grid-template-columns:160px 1fr;gap:25px;border-bottom:1px solid var(--line)}
-.phase-time{font-family:Georgia,serif;font-size:22px;line-height:1.3;color:var(--brown)}
-.phase-detail h3{margin:0 0 8px;font-size:26px}
-.phase-detail p{margin:0;font-size:15px;line-height:1.75}
-.phase-detail .deliver{font-size:12px;letter-spacing:.02em;color:#805d43;margin:11px 0 0;font-weight:650}
-.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:26px 0}
-.tile{padding:25px 23px;border:1px solid var(--line);background:#fff;min-height:215px}
-.tile .mini{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:#8a6a4c;font-weight:700}
-.tile h3{margin:15px 0 11px;font-size:24px}
-.tile p{font-size:14px;line-height:1.68;margin:0}
-.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:25px 0}
-.panel{background:#f6f2ec;border:1px solid var(--line);padding:28px}
-.panel h3{font-size:27px;margin:0 0 14px}
-.panel ul{margin:0;padding:0;list-style:none}
-.panel li{font-size:15px;padding:13px 0;border-top:1px solid var(--line);line-height:1.6}
-.panel li:first-child{border-top:0}
-.panel li:before{content:"— ";color:#a17b5a}
-.panel.dark{background:var(--brown);color:#fff;border-color:var(--brown)}
-.panel.dark li{border-color:#ffffff33}
-.panel.dark li:before{color:#e7c8a6}
-.owner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:30px 0 0}
-.owner-item{border:1px solid var(--line);padding:24px;background:#fcfaf6}
-.owner-item .index{color:#96775c;font-size:12px;font-weight:750;letter-spacing:.14em}
-.owner-item h3{font-size:23px;margin:9px 0 7px}
-.owner-item p{font-size:14px;margin:0}
-.measure{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:25px 0}
-.measure div{border-top:2px solid var(--brown);padding:20px 4px 0}
-.measure strong{display:block;font:400 23px Georgia,serif;color:var(--brown);margin-bottom:8px}
-.measure p{font-size:14px;margin:0}
-.callout{padding:32px;background:#f4eee6;border-left:4px solid #9b704d;margin-top:26px}
-.callout h3{margin:0 0 9px;font-size:25px}
-.callout p{margin:0;font-size:15px}
-.conclusion{background:var(--brown);color:#fff;padding:57px clamp(24px,8vw,90px)}
-.conclusion h2{max-width:690px;margin-bottom:17px}
-.conclusion p{color:#efded2;max-width:740px;font-size:16px;line-height:1.8;margin-bottom:0}
-.footer{padding:22px clamp(24px,8vw,90px);display:flex;justify-content:space-between;gap:22px;background:#fbf7f0;color:#74675c;font-size:11px}
-.footer span:first-child{font-weight:750;color:var(--brown)}
-@media(max-width:780px){
-.paper{margin:0}.utility-inner{padding:10px 20px}
-.cover{min-height:auto;padding:34px 24px 36px}
-.cover-main{padding:65px 0 45px}.cover-top{padding-bottom:20px}.identity strong{font-size:14px}.identity img{width:26px;height:37px}
-.cover-meta{grid-template-columns:1fr;gap:13px}.cover-meta>div{padding-bottom:12px;border-bottom:1px solid var(--line)}
-.chapter{padding:45px 24px}
-.steps,.three,.measure{grid-template-columns:1fr 1fr}
-.split{grid-template-columns:1fr}
-.phase{grid-template-columns:115px 1fr;gap:12px}
-.conclusion{padding:44px 24px}
-.footer{padding:22px 24px}
-}
-@media(max-width:520px){
-h1{font-size:46px}.cover-summary{font-size:16px}
-.classify{font-size:9px}.classify small{font-size:9px}
-.cover-main{padding-top:46px}
-.chapter-heading{display:block}.num{display:block;margin-bottom:7px}
-.steps,.three,.measure,.owner-grid{grid-template-columns:1fr}
-.phase{display:block}.phase-time{font-size:20px;margin-bottom:10px}
-.stats{grid-template-columns:1fr}
-.footer{display:block}.footer span{display:block;margin-bottom:4px}
-}
-@media print{
-@page{size:A4;margin:12mm}
-html,body{background:white!important;color:#222}
-.utility{display:none}
-.paper{box-shadow:none;margin:0;max-width:100%}
-.cover{min-height:245mm;break-after:page}
-.chapter{padding:30px 5px;break-inside:auto}
-.chapter-heading{break-after:avoid}
-.phase,.tile,.owner-item,.panel,.step,.stat,.measure div{break-inside:avoid}
-.steps,.three,.split,.owner-grid,.measure{gap:8px}
-.conclusion{break-before:page;min-height:120mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.cover,.panel.dark,.step,.ribbon{print-color-adjust:exact;-webkit-print-color-adjust:exact}
-}
+body{margin:0;background:var(--canvas);color:var(--ink);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}a{color:var(--blue)}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.shell{display:grid;grid-template-columns:224px minmax(0,1fr);min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;align-self:start;height:100vh;display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;gap:11px;align-items:center;padding:0 7px 20px;border-bottom:1px solid var(--line)}
+.monogram{flex:0 0 38px;width:38px;height:38px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font:700 14px Georgia,serif;letter-spacing:-.04em}
+.brand strong{display:block;font-size:13px;line-height:1.3}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:3px;text-transform:uppercase;letter-spacing:.065em}
+.navtitle{font-size:10px;font-weight:750;color:#889098;text-transform:uppercase;letter-spacing:.11em;padding:0 10px;margin:6px 0}
+.nav button{display:flex;align-items:center;width:100%;border:0;background:transparent;color:#46525b;text-align:left;border-radius:7px;padding:11px 12px;margin:3px 0;gap:10px;font-weight:550}
+.nav button[aria-current="page"]{background:#f5eae6;color:var(--brand);font-weight:750}
+.nav button:hover{background:#f1f3f5}
+.nav .bullet{width:8px;height:8px;border-radius:50%;background:#b9c1c7;flex:0 0 8px}
+.nav button[aria-current="page"] .bullet{background:var(--brand)}
+.sidebar-foot{margin-top:auto;padding:12px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.7}
+.sidebar-foot strong{color:var(--ink)}
+.main{min-width:0;padding:0 28px 60px}
+.topline{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:16px 0;gap:14px;flex-wrap:wrap}
+.crumb{color:#667079;font-size:12px}.crumb b{color:#373f44}
+.tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.tools button,.btn{border:1px solid #ccd2d8;background:white;border-radius:6px;padding:8px 12px;color:#3f454b;font-size:12px;font-weight:650;min-height:36px}
+.tools button:hover,.btn:hover{border-color:#818e98;background:#fbfbfc}
+.tools button.primary,.btn.primary{background:var(--brand);color:white;border-color:var(--brand)}
+.masthead{padding:27px 0 17px}
+.kicker{color:#765442;text-transform:uppercase;letter-spacing:.12em;font-size:11px;font-weight:750}
+h1{font-size:clamp(23px,2.4vw,32px);line-height:1.25;margin:6px 0 8px;font-weight:750;letter-spacing:-.025em}
+h2{font-size:19px;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:15px;margin:0 0 8px}
+.masthead p{margin:0;color:var(--muted);max-width:810px}
+.notice{border:1px solid #e4d6c2;border-left:4px solid #b28a54;background:#fffaf1;padding:10px 14px;border-radius:5px;margin-bottom:18px;color:#6e5a40;font-size:12px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:19px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 17px;min-height:100px}
+.metric .metric-label{font-size:11px;color:#66727c;font-weight:650;letter-spacing:.01em}
+.metric b{display:block;font-size:27px;font-weight:750;line-height:1.2;margin:8px 0 6px}
+.metric small{color:var(--muted);font-size:11px}
+.progressbar{width:100%;height:5px;background:#e8eced;border-radius:5px;overflow:hidden;margin-top:8px}
+.progressbar>div{height:100%;background:#52856b;transition:width .25s ease}
+.section{background:white;border:1px solid var(--line);border-radius:9px;margin-top:17px;overflow:hidden}
+.section-head{padding:16px 19px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.section-head h2{font-size:16px;margin:0}.section-head p{font-size:12px;color:var(--muted);margin:4px 0 0}
+.section-body{padding:17px 19px}
+.flag{font-size:11px;background:#fff4e7;color:#855b28;border:1px solid #f1d9b8;border-radius:99px;padding:4px 9px;font-weight:700}
+.pill{border-radius:12px;font-size:11px;padding:3px 9px;font-weight:750;display:inline-block;white-space:nowrap;border:1px solid transparent}
+.p-planned{background:#eef1f4;color:#586575}.p-needs-info{background:#fff2dc;color:#83591d}.p-in-progress{background:#e4f0fc;color:#2e6193}.p-blocked{background:#ffeaea;color:#963d3d}.p-done{background:#e4f4e9;color:#236544}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.quick .section{margin-top:0}
+.checkrow{border-bottom:1px solid var(--line);padding:13px 0;display:flex;justify-content:space-between;gap:12px;align-items:start}
+.checkrow:last-child{border-bottom:0}
+.checkrow b{display:block;font-size:13px}.checkrow small{display:block;color:var(--muted);font-size:12px;line-height:1.5;margin-top:4px}
+.checkrow .pill{align-self:flex-start}
+.two-line{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.gridline{display:grid;grid-template-columns:86px 1fr;gap:13px;border-bottom:1px solid var(--line);padding:12px 0}
+.gridline:last-child{border-bottom:0}.gridline .date{font-weight:750;color:#52606b;font-size:12px}.gridline b{display:block;font-size:13px}.gridline span{color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{background:#fff;border:1px solid #d4dbe1;border-radius:6px;padding:8px 10px;min-height:38px;color:#38454b;font-size:12px}
+.toolbar input{min-width:200px;max-width:300px}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;text-align:left;min-width:810px;font-size:12px}
+th{padding:11px 13px;color:#6f7b85;font-size:10px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--line);background:#f9fafb;white-space:nowrap}
+td{padding:14px 13px;border-bottom:1px solid #edf0f2;vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fafbfc}
+.task-title{font-size:13px;font-weight:750;color:#2a343b;line-height:1.4}
+.task-desc{font-size:11px;color:#74808a;margin-top:4px;max-width:370px;line-height:1.5}
+.task-more summary{color:#56708a;cursor:pointer;font-size:11px;margin-top:5px}
+.task-more div{color:#60707c;font-size:11px;padding:7px 0 0}
+.task-more input{width:min(340px,100%);margin-top:6px;border:1px solid #d0d7db;border-radius:4px;padding:7px 9px;font-size:11px}
+.due{white-space:nowrap;font-size:12px;color:#46545e}
+.status-select{border-radius:5px;padding:7px 7px;font-size:11px;border:1px solid #d8dfe3;background:#fff;color:#35444d;max-width:124px;cursor:pointer}
+.id{font-size:11px;color:#85919a}
+.empty{padding:35px;text-align:center;color:var(--muted)}
+.calendar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.post{border:1px solid var(--line);border-radius:7px;padding:15px;min-height:180px;background:#fff}
+.post-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#6a7680;font-weight:700}
+.post h3{font-size:14px;line-height:1.45;margin:14px 0 7px}
+.post p{font-size:12px;margin:0 0 12px;color:#6b7882;line-height:1.5}
+.post-foot{font-size:11px;color:#4d667a}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.result-cell{border:1px solid var(--line);background:#fbfcfc;padding:17px;border-radius:6px}
+.result-cell strong{display:block;color:#333;font-size:22px;margin:7px 0;font-weight:700}
+.result-cell small{font-size:11px;color:var(--muted)}
+.guide{padding:12px 19px 16px;background:#fcfcfd;color:#6b7580;font-size:11px;border-top:1px solid var(--line)}
+.indicator{width:7px;height:7px;background:#a97743;border-radius:50%;display:inline-block;margin-right:4px}
+.view{display:none}.view.active{display:block}
+.footer{color:#89939b;font-size:11px;margin:25px 0;text-align:right}
+@media(max-width:1030px){.metrics{grid-template-columns:repeat(2,1fr)}.quick{grid-template-columns:1fr}.calendar-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:740px){.shell{display:block}.sidebar{position:static;height:auto;border-bottom:1px solid var(--line);border-right:0;padding:11px 15px;gap:0}.brand{border-bottom:0;padding:0}.brand small,.sidebar-foot,.navtitle{display:none}.nav{display:flex;overflow-x:auto;margin-top:10px;gap:3px}.nav button{white-space:nowrap;width:auto;padding:8px 12px;font-size:12px}.nav .bullet{display:none}.main{padding:0 13px 40px}.topline{padding:10px 0}.masthead{padding:20px 0 17px}.metrics{gap:8px}.metric{padding:12px;min-height:89px}.metric b{font-size:23px}.section-head{padding:13px}.section-body{padding:13px}.calendar-grid{grid-template-columns:1fr}.toolbar input{min-width:120px;flex:1}.result-grid{grid-template-columns:1fr}.footer{text-align:left}}
+@media print{body{background:#fff}.sidebar,.utility-actions,.tools button,.status-select{display:none}.shell{display:block}.main{padding:0}.view{display:block!important;break-before:page}.view:first-of-type{break-before:auto}.section,.metric,.post{break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9px}th,td{padding:6px}h1{font-size:25px}.masthead{padding:10px}.notice{display:none}.footer{text-align:left}@page{size:A4;margin:12mm}}
 </style>
 </head>
 <body>
-<div class="utility"><div class="utility-inner"><span>PLP · Owner briefing · Proposed plan</span><button type="button" onclick="window.print()">Print / Save as PDF</button></div></div>
-<main class="paper">
-<section class="cover" aria-labelledby="cover-title">
-<div class="cover-top">
-<div class="identity"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="PLP monogram"><div><strong>PUEBLO LA PERLA</strong><small>Boracay · Owner briefing</small></div></div>
-<div class="classify">BUSINESS PLAN<br>FOR OWNER REVIEW<small>Not a website redesign</small></div>
+<div class="shell">
+<aside class="sidebar" aria-label="Tracker navigation">
+<div class="brand"><div class="monogram">PLP</div><div><strong>Marketing Operations</strong><small>Execution tracker · V3</small></div></div>
+<div class="navtitle">TRACKER VIEWS</div>
+<nav class="nav" id="sideNav" aria-label="Tracker views">
+<button type="button" data-view="tasks" aria-current="page"><span class="bullet"></span>Task tracker</button>
+<button type="button" data-view="overview"><span class="bullet"></span>Overview</button>
+<button type="button" data-view="calendar"><span class="bullet"></span>Content calendar</button>
+<button type="button" data-view="owner"><span class="bullet"></span>Owner inputs</button>
+<button type="button" data-view="results"><span class="bullet"></span>Results</button>
+</nav>
+<div class="sidebar-foot">
+<strong>V3 — Approved direction</strong><div>Planning baseline: 23 Nov 2026</div><div>First campaign week: 23–29 Nov</div><div>Property compliance handled by owner; not a marketing task.</div>
 </div>
-<div class="cover-main">
-<div class="eyebrow">MARKETING & BOOKING GROWTH PLAN · VERSION 3</div>
-<h1 id="cover-title">A practical plan<br>to bring more guests<br>to PLP Boracay.</h1>
-<p class="cover-summary">A clear 30-day action plan to promote the property, build guest confidence, capture enquiries and help convert them into confirmed reservations.</p>
-<div class="ribbon"><strong>What this document is:</strong> A proposed business and marketing execution plan presented to the owner. <strong>What it is not:</strong> A redesign of PLP's existing website, a new membership launch or an announcement of work already completed.</div>
+</aside>
+<main class="main">
+<header class="topline">
+<div class="crumb">Pueblo La Perla Boracay <span aria-hidden="true">/</span> <b>Social media marketing</b> <span aria-hidden="true">/</span> Tracker</div>
+<div class="tools utility-actions">
+<button type="button" id="exportCsv" title="Export task statuses to a spreadsheet">Export tracker CSV</button>
+<button type="button" id="resetEdits" title="Clear only changes saved on this device">Reset local edits</button>
 </div>
-<div class="cover-meta">
-<div><div class="field">Prepared for</div><div class="value">Dr. Marichi Fong Ramos</div></div>
-<div><div class="field">Presentation date</div><div class="value">23 November 2026</div></div>
-<div><div class="field">Initial implementation window</div><div class="value">23 November – 23 December 2026</div></div>
+</header>
+<div class="masthead"><div class="kicker">IMPLEMENTATION TRACKER · NOV–DEC 2026</div><h1>PLP Social Media Marketing Tracker</h1>
+<p>Working checklist for the complete V3 launch: what needs doing, who handles it, when it is due, and what Doc needs to confirm. This is a project tracker, <strong>not a redesigned PLP website.</strong></p></div>
+<div class="notice"><strong>Tracking note:</strong> Starting statuses are planning assumptions, not verified live progress. Status edits and notes are saved <strong>on this device only</strong>; they are not shared across visitors or synced with the PLP enterprise system. Export CSV to hand off changes. Only mark tasks Done after checking evidence.</div>
+<div class="metrics" aria-label="Plan summary">
+<div class="metric"><div class="metric-label">Tasks marked done</div><b id="doneCount">0 / 0</b><small>Manual tracker status, not automatic verification</small><div class="progressbar"><div id="progressFill" style="width:0%"></div></div></div>
+<div class="metric"><div class="metric-label">Awaiting information</div><b id="needsCount">—</b><small>Confirm missing details before publishing related claims</small></div>
+<div class="metric"><div class="metric-label">First launch content</div><b>3 videos</b><small>Property arrival · Beach access · Room layouts</small></div>
+<div class="metric"><div class="metric-label">Booking results</div><b>Not linked</b><small>No live lead or reservation feed connected</small></div>
+</div>
+
+<section class="view active" id="view-tasks" aria-labelledby="tasks-title">
+<div class="section">
+<div class="section-head"><div><h2 id="tasks-title">Full execution task list</h2><p>Scope: booking path, content production, Facebook / Instagram, distribution, concierge follow-up and measurement.</p></div>
+<div class="toolbar"><input id="taskSearch" type="search" placeholder="Search tasks…" aria-label="Search tasks"><select id="phaseFilter" aria-label="Filter phase"><option value="">All phases</option><option>First 48 hours</option><option>Launch week</option><option>Week 2</option><option>Ongoing</option></select><select id="statusFilter" aria-label="Filter status"><option value="">All statuses</option><option>Planned</option><option>Needs info</option><option>In progress</option><option>Blocked</option><option>Done</option></select></div></div>
+<div class="table-wrap"><table id="taskTable"><thead><tr><th>ID</th><th style="width:39%">Task / deliverable</th><th>Workstream</th><th>Responsible</th><th>Target</th><th>Status</th></tr></thead><tbody id="taskBody"></tbody></table></div>
+<div class="guide"><span class="indicator"></span>All dates are targets, not evidence that something has happened. Expand each task for its acceptance check and a private working note. Changes on this page are not visible to Doc on another device unless exported and shared.</div>
 </div>
 </section>
 
-<section class="chapter" aria-labelledby="summary-title">
-<div class="chapter-heading"><div class="num">01</div><h2 id="summary-title">The plan in one minute</h2></div>
-<p class="lead">Pueblo La Perla already has a website and an online presence. Now we want them to do more than look attractive. We want the right travelers to find PLP, understand the stay, contact the concierge and confidently book.</p>
-<div class="highlight"><strong>Our business goal</strong><p>Generate more qualified accommodation enquiries and more confirmed stays—not merely more likes or followers.</p></div>
-<div class="stats">
-<div class="stat"><b>1 week</b><span>To prepare the essential enquiry experience and first proof videos, subject to verified details and footage.</span></div>
-<div class="stat"><b>3 videos</b><span>Real walkthroughs that answer the questions guests ask before booking.</span></div>
-<div class="stat"><b>30 days</b><span>To establish a repeatable marketing and follow-up process, then evaluate real results.</span></div>
+<section class="view" id="view-overview" aria-labelledby="overview-title">
+<div class="quick">
+<div class="section"><div class="section-head"><div><h2 id="overview-title">This week's priorities</h2><p>Work that comes before promotional spending.</p></div><span class="flag">23–29 Nov</span></div><div class="section-body">
+<div class="checkrow"><div><b>Get the guest enquiry route working</b><small>Test the current site on mobile, capture dates and guest count, and route enquiries to a real concierge.</small></div><span class="pill p-planned">Week 1</span></div>
+<div class="checkrow"><div><b>Confirm the four commercial facts</b><small>Rates/capacity, availability, transport and official payment method.</small></div><span class="pill p-needs-info">Doc / team</span></div>
+<div class="checkrow"><div><b>Publish three proof videos</b><small>Actual arrival, beach access and sleeping configurations. Real footage only.</small></div><span class="pill p-planned">Week 1</span></div>
+</div></div>
+<div class="section"><div class="section-head"><div><h2>Milestone timeline</h2><p>Small launch first, scale on verified demand.</p></div></div><div class="section-body">
+<div class="gridline"><div class="date">Nov 23–24</div><div><b>Enquiry readiness</b><span>Site check, structured form, concierge handoff, owner inputs.</span></div></div>
+<div class="gridline"><div class="date">Nov 25–29</div><div><b>Video launch</b><span>Three actual-property walkthroughs, reviewed and posted.</span></div></div>
+<div class="gridline"><div class="date">Nov 30–Dec 6</div><div><b>Trust and reach</b><span>Lookbook, suitable listings and partner review.</span></div></div>
+<div class="gridline"><div class="date">December</div><div><b>Scheduled operation</b><span>Batch approved content, log enquiries, review bookings weekly.</span></div></div>
+</div></div>
 </div>
+<div class="section"><div class="section-head"><div><h2>Simple booking journey</h2><p>Every post and campaign should contribute to this path.</p></div></div><div class="section-body" style="font-size:13px">Social media discovery <b>→</b> Genuine property proof <b>→</b> Structured enquiry <b>→</b> Concierge quotation <b>→</b> Confirmed booking.<p style="color:#6b7780;font-size:12px;margin-bottom:0">Never promise an unverified price, transport time, room capacity, payment method or availability. Pearl Club is excluded from the public stay campaign.</p></div></div>
 </section>
 
-<section class="chapter" aria-labelledby="journey-title">
-<div class="chapter-heading"><div class="num">02</div><h2 id="journey-title">How a guest becomes a booking</h2></div>
-<p class="lead">The work has one straightforward purpose: guide prospective guests from seeing the property to speaking with the right person.</p>
-<div class="steps">
-<div class="step"><b>01</b><h3>See PLP</h3><p>Discover property videos and photos on Facebook, Instagram or travel channels.</p></div>
-<div class="step"><b>02</b><h3>Trust PLP</h3><p>See real rooms, location and access information, plus official contact channels.</p></div>
-<div class="step"><b>03</b><h3>Ask about a stay</h3><p>Send preferred dates, guest count and contact details using a simple enquiry form.</p></div>
-<div class="step"><b>04</b><h3>Confirm a reservation</h3><p>Concierge checks availability, quotes approved rates and follows up.</p></div>
-</div>
-<p style="font-size:14px">We will use the existing PLP website and enterprise workspace as the foundation. A guest enquiry is never presented as an automatic confirmed booking.</p>
+<section class="view" id="view-calendar" aria-labelledby="calendar-title">
+<div class="section"><div class="section-head"><div><h2 id="calendar-title">Content production & publishing calendar</h2><p>Proposed slots only. Nothing below is confirmed filmed, scheduled or published by this tracker.</p></div><span class="pill p-planned">Draft schedule</span></div><div class="section-body"><div class="calendar-grid" id="calendarGrid"></div></div><div class="guide">Record actual posting status in the matching task row. Publishing through Meta Business Suite or a connected scheduler is a separate action.</div></div>
 </section>
 
-<section class="chapter" aria-labelledby="calendar-title">
-<div class="chapter-heading"><div class="num">03</div><h2 id="calendar-title">What we will do, and when</h2></div>
-<p class="lead">A manageable sequence that starts with the booking process before expanding paid advertising.</p>
-<div class="timeline">
-<div class="phase"><div class="phase-time">Nov 23–24<br><small style="font:12px Arial;color:#88776c">First 48 hours</small></div><div class="phase-detail"><h3>Get ready for enquiries</h3><p>Test the current website on mobile. Prepare the stay-enquiry form, route enquiries to concierge, and verify the guest information needed to give accurate quotations.</p><div class="deliver">Intended result: a clear path from visitor to concierge.</div></div></div>
-<div class="phase"><div class="phase-time">Nov 25–29<br><small style="font:12px Arial;color:#88776c">Launch week</small></div><div class="phase-detail"><h3>Show the real property</h3><p>Prepare three short authentic videos: arriving at PLP, getting to the beach, and room layout/capacity. Publish through approved social channels with one clear enquiry action.</p><div class="deliver">Intended result: useful, trustworthy guest-facing content.</div></div></div>
-<div class="phase"><div class="phase-time">Nov 30–Dec 6<br><small style="font:12px Arial;color:#88776c">Week two</small></div><div class="phase-detail"><h3>Build wider credibility</h3><p>Prepare a genuine photo lookbook, evaluate suitable accommodation listings, and explore relevant travel advisors and creator partnerships.</p><div class="deliver">Intended result: more ways for potential guests to discover and trust PLP.</div></div></div>
-<div class="phase"><div class="phase-time">December<br><small style="font:12px Arial;color:#88776c">Ongoing</small></div><div class="phase-detail"><h3>Schedule and improve</h3><p>Batch and schedule approved Facebook and Instagram content. Review real enquiries and bookings weekly, and consider advertising only once the enquiry process is working and the spending is approved.</p><div class="deliver">Intended result: a repeatable marketing operation, not daily manual posting.</div></div></div>
-</div>
+<section class="view" id="view-owner" aria-labelledby="owner-title">
+<div class="section"><div class="section-head"><div><h2 id="owner-title">Four items for Doc or the property manager</h2><p>A short sign-off conversation. No routine requests for permits as a marketing prerequisite.</p></div><span class="flag">Information needed</span></div><div class="section-body" id="ownerRows"></div></div>
+<div class="section"><div class="section-head"><div><h2>Division of responsibilities</h2><p>Keep Doc out of day-to-day social media operations.</p></div></div><div class="section-body">
+<div class="checkrow"><div><b>Implementation team</b><small>Website enquiry path, social profiles, video production coordination, content queue, lead follow-up tool and reporting.</small></div></div>
+<div class="checkrow"><div><b>PLP concierge / reservations</b><small>Answer genuine enquiries, check available dates, issue approved quotations, confirm reservations and follow up.</small></div></div>
+<div class="checkrow"><div><b>Doc / manager</b><small>Approve commercial facts, official payment method, campaign budget if proposed, and any material promotional promises.</small></div></div>
+</div></div>
 </section>
 
-<section class="chapter" aria-labelledby="videos-title">
-<div class="chapter-heading"><div class="num">04</div><h2 id="videos-title">The first three videos</h2></div>
-<p class="lead">We do not need an expensive production campaign to start. Three real videos can answer the biggest questions and establish credibility.</p>
-<div class="three">
-<div class="tile"><div class="mini">VIDEO 01</div><h3>From arrival to the view</h3><p>Show the actual entrance, route into the accommodation and the view guests will experience.</p></div>
-<div class="tile"><div class="mini">VIDEO 02</div><h3>Beach access and transport</h3><p>Show how people actually get to White Beach and return. State travel times only after they are confirmed.</p></div>
-<div class="tile"><div class="mini">VIDEO 03</div><h3>Rooms and sleeping arrangements</h3><p>Show real beds, bathrooms and common areas. Confirm guest capacity before adding numbers.</p></div>
-</div>
-<div class="callout"><h3>Why this matters</h3><p>When a new guest is deciding whether to book, practical evidence—real spaces, clear transport and prompt answers—can matter more than a beautifully edited advertisement.</p></div>
+<section class="view" id="view-results" aria-labelledby="results-title">
+<div class="section"><div class="section-head"><div><h2 id="results-title">Enquiry & booking results</h2><p>Reporting framework. No customer data or booking analytics are connected to this tracker.</p></div><span class="pill p-planned">Awaiting first verified data</span></div><div class="section-body"><div class="result-grid">
+<div class="result-cell">Qualified enquiries<strong>—</strong><small>Track dates, guest count and reply status once intake is live.</small></div>
+<div class="result-cell">Confirmed reservations<strong>—</strong><small>Only count reservations confirmed by the authorized property team.</small></div>
+<div class="result-cell">Source of bookings<strong>—</strong><small>Facebook, Instagram, search, referrals or listings when genuinely recorded.</small></div>
+</div></div><div class="guide">After the first 5–10 genuine guest conversations, review the questions, delays and abandoned quotes before adding expensive automation or advertising.</div></div>
+<div class="section"><div class="section-head"><div><h2>Paid marketing decision gate</h2></div></div><div class="section-body"><b style="font-size:13px">Not approved or launched.</b><p style="margin:7px 0 0;font-size:12px;color:#6f7b83">Advertising, creator fees and OTA commissions require a functioning enquiry process, approved availability and owner budget authorization. No ad spending is included in this tracker.</p></div></div>
 </section>
-
-<section class="chapter" aria-labelledby="guests-title">
-<div class="chapter-heading"><div class="num">05</div><h2 id="guests-title">Who we want to reach</h2></div>
-<p class="lead">We will focus on traveler groups with a clear reason to choose a private hillside accommodation, then refine the audience based on actual enquiries.</p>
-<div class="three">
-<div class="tile"><div class="mini">PRIMARY TEST</div><h3>Families and groups</h3><p>Filipino families, barkada trips, reunions and private getaways, matched to genuine room capacity.</p></div>
-<div class="tile"><div class="mini">SECONDARY TEST</div><h3>Couples and occasions</h3><p>Guests seeking a distinctive setting for holidays, milestones and quieter stays.</p></div>
-<div class="tile"><div class="mini">SECONDARY TEST</div><h3>Balikbayans and visitors</h3><p>Travelers who particularly value clear booking information, reliable communication and payment reassurance.</p></div>
-</div>
-<div class="highlight"><strong>Where we reach them</strong><p>Instagram and Facebook first, supported by the current PLP website; suitable accommodation platforms and travel partners follow when verified and commercially worthwhile.</p></div>
-</section>
-
-<section class="chapter" aria-labelledby="responsibilities-title">
-<div class="chapter-heading"><div class="num">06</div><h2 id="responsibilities-title">Who will handle what</h2></div>
-<p class="lead">Doc does not need to manage daily posts or technical setup. The property team confirms guest-facing facts; the implementation team handles the marketing system.</p>
-<div class="split">
-<div class="panel"><h3>Implementation team</h3><ul>
-<li>Prepare the website's guest-enquiry journey.</li>
-<li>Organize the social content calendar.</li>
-<li>Prepare and schedule approved posts and videos.</li>
-<li>Set up simple concierge follow-up tracking.</li>
-<li>Summarize enquiries and confirmed bookings.</li>
-</ul></div>
-<div class="panel dark"><h3>Doc and operating team</h3><ul>
-<li>Confirm accommodation rates and capacities.</li>
-<li>Provide accurate availability and reservation authority.</li>
-<li>Confirm guest arrival and transport arrangements.</li>
-<li>Approve official guest payment/deposit instructions.</li>
-<li>Approve promotional spending separately if recommended.</li>
-</ul></div>
-</div>
-</section>
-
-<section class="chapter" aria-labelledby="inputs-title">
-<div class="chapter-heading"><div class="num">07</div><h2 id="inputs-title">Only four details needed to begin</h2></div>
-<p class="lead">A short conversation with Doc or the property manager should establish the immediate facts. Nothing should be advertised as included or available unless confirmed.</p>
-<div class="owner-grid">
-<div class="owner-item"><div class="index">01 / STAY</div><h3>Rates and capacities</h3><p>What is the approved starting rate and how many people can stay in each unit?</p></div>
-<div class="owner-item"><div class="index">02 / AVAILABILITY</div><h3>Dates and confirmation</h3><p>What can guests book in December–February, and who confirms a reservation?</p></div>
-<div class="owner-item"><div class="index">03 / ACCESS</div><h3>Arrival and transport</h3><p>What transport arrangements can guests actually expect to and from the property?</p></div>
-<div class="owner-item"><div class="index">04 / PAYMENT</div><h3>Official deposit method</h3><p>Which verified business payment or deposit instructions should concierge provide?</p></div>
-</div>
-<p style="font-size:13px;margin-top:24px">Doc's role is to approve commercial information, not to prepare technical documents. Routine permit-document collection is outside the immediate marketing workflow unless separately requested by a relevant institution.</p>
-</section>
-
-<section class="chapter" aria-labelledby="results-title">
-<div class="chapter-heading"><div class="num">08</div><h2 id="results-title">How we measure results</h2></div>
-<p class="lead">We will report what leads to business, rather than judging success mainly by follower counts.</p>
-<div class="measure">
-<div><strong>Qualified enquiries</strong><p>People who provide genuine dates, guest numbers and accommodation needs.</p></div>
-<div><strong>Follow-up performance</strong><p>How promptly and reliably the team replies, provides quotations and follows up.</p></div>
-<div><strong>Confirmed stays</strong><p>Enquiries that become actual bookings—and the channel that brought them.</p></div>
-</div>
-<div class="callout"><h3>What is not part of this plan</h3><p>It is not a public resort redesign, a new standalone booking system, a commitment to an advertising budget, or a Pearl Club membership launch. No forecasted revenue, rates, amenities or transport promises are being invented.</p></div>
-</section>
-
-<section class="conclusion" aria-labelledby="decision-title">
-<div class="eyebrow" style="color:#ead4c0">OWNER REVIEW · PROPOSED NEXT STEP</div>
-<h2 id="decision-title">Approve the direction. Confirm the four facts. Start executing.</h2>
-<p>This plan is designed to use PLP's existing website and enterprise workspace to attract more suitable guests and turn genuine enquiries into confirmed stays. Any changes to rates, payment instructions or advertising spend require owner approval.</p>
-</section>
-<footer class="footer"><span>PUEBLO LA PERLA BORACAY · MARKETING & BOOKING GROWTH PLAN (V3)</span><span>Prepared for Dr. Marichi Fong Ramos · 23 November 2026 · Owner briefing only</span></footer>
-</main>
+<div class="footer">PLP · Social Media Marketing Implementation Tracker V3 · Working baseline 23 November 2026 · Unlisted / not indexed</div>
+</main></div>
+<script>
+"use strict";
+(function(){
+const TASKS=[
+["01","Check official Facebook and Instagram identity","Verify account names, website links and correct contact buttons.","Social","Implementation","2026-11-23","First 48 hours","Planned","Both pages point to the existing official PLP website and correct concierge."],
+["02","Test mobile website and enquiry journey","Check public homepage, accommodation pages and enquiry/contact navigation.","Website","Implementation","2026-11-23","First 48 hours","Planned","Real mobile journey tested without assuming Vercel READY means every page works."],
+["03","Confirm rates and room/villa capacities","Obtain owner-approved commercial rate card, inclusions and maximum guest counts.","Owner inputs","Doc / manager","2026-11-23","First 48 hours","Needs info","Approved figures are recorded with authorizing source; no invented price."],
+["04","Confirm bookable dates and reservation authority","Ask which dates are actually available for December to February.","Owner inputs","Doc / reservations","2026-11-23","First 48 hours","Needs info","Available inventory and reservation decision-maker confirmed."],
+["05","Confirm arrival and beach-access logistics","Document accurate arrival point, transport availability and after-dark arrangements.","Owner inputs","Doc / operations","2026-11-24","First 48 hours","Needs info","Only verified logistics enter marketing copy."],
+["06","Confirm official deposit and payment method","Identify authorized recipient, corporate instructions or verified payment link.","Owner inputs","Doc / finance","2026-11-24","First 48 hours","Needs info","Payment instructions verified by authorized property representative."],
+["07","Implement simple enquiry form","Capture dates, guest count, contact information and preferred accommodation.","Website","Implementation","2026-11-24","First 48 hours","Planned","Form saves a test enquiry securely and shows no false booking confirmation."],
+["08","Set up concierge follow-up status tracking","Capture and assign enquiries as New, Contacted, Quoted, Confirmed, Closed.","Enquiries","Implementation","2026-11-24","First 48 hours","Planned","A test enquiry can be routed and moved through statuses with access control."],
+["09","Agree concierge first-response and quotation text","Explain response ownership, approved price disclosure and next step.","Enquiries","Concierge + team","2026-11-25","Launch week","Planned","Concierge can send an accurate approved response and quotation."],
+["10","Collect genuine video footage from property","Gather real entrance, road, room, view and layout clips.","Content","Property team","2026-11-25","Launch week","Planned","Source footage belongs to real PLP areas, with permissions if people appear."],
+["11","Produce video 1 — arrival to view","Show authentic entrance, route into stay area and actual view.","Content","Content team","2026-11-26","Launch week","Planned","Verified property walkthrough and clear enquiry CTA."],
+["12","Produce video 2 — beach access","Explain factual transfer route and evening return logistics.","Content","Content team","2026-11-27","Launch week","Planned","Transport details verified before any captions or timings go live."],
+["13","Produce video 3 — rooms and sleeping capacity","Show bedrooms, bathrooms, shared areas and accurate occupancy.","Content","Content team","2026-11-29","Launch week","Planned","Real space matches bookable accommodation; capacity verified."],
+["14","Approve copy and calls to action","Create short captions with one official enquiry destination.","Content","Marketing / owner","2026-11-26","Launch week","No incorrect prices, services, staff roles, claims or available dates."],
+["15","Publish or schedule three launch videos","Post approved property proof to official Facebook and Instagram accounts.","Social","Marketing team","2026-11-29","Launch week","Actual links and timestamps recorded after successful publishing."],
+["16","Build genuine property photo lookbook","Use approved photographs of actual bookable spaces.","Content","Marketing + property","2026-12-02","Week 2","Planned","Proofed room images and accurate unit names; easy to share with enquiries."],
+["17","Set up useful Facebook/Instagram highlights","Include access, accommodation, enquiries and genuine FAQs.","Social","Marketing team","2026-12-02","Week 2","Published content is accurate and reaches official channels."],
+["18","Evaluate Airbnb / appropriate villa platforms","Assess eligibility, real commissions, operational readiness and inventory sync.","Distribution","Marketing + reservations","2026-12-03","Week 2","Make an informed platform choice before any new listing goes live."],
+["19","Review creator and travel-advisor partners","Shortlist relevant authentic creators and qualified travel sellers.","Distribution","Marketing team","2026-12-05","Week 2","Clear commercial rationale; no free stays or paid placements without approval."],
+["20","Prepare December social media calendar","Batch approved property posts and answer recurring guest questions.","Social","Marketing team","2026-12-06","Week 2","Next 30 days are planned; time-sensitive offers rechecked."],
+["21","Connect authorized post scheduler","Use Meta Business Suite or connected scheduler for approved content.","Social","Marketing team","2026-12-06","Week 2","Authorized accounts connected; actual scheduled items can be inspected."],
+["22","Set up basic source capture on enquiries","Record whether genuine leads originated on Facebook, Instagram or other channels.","Enquiries","Implementation","2026-12-07","Ongoing","Planned","Source retained only where known and with appropriate privacy handling."],
+["23","Review first 5–10 genuine conversations","Identify which questions delay or prevent a confirmed stay.","Enquiries","Marketing + concierge","2026-12-10","Ongoing","Blocked","Analyze only once real enquiries exist; do not invent a dataset."],
+["24","Evaluate small paid-media test","Define test budget, approved dates, channel and stop/scale rules.","Advertising","Marketing / owner","2026-12-10","Ongoing","Blocked","No ad creation or spend before owner approval and working booking path."],
+["25","Deliver weekly leads and bookings summary","Record qualified enquiries, concierge response, quote status and confirmed stays.","Reporting","Marketing + concierge","2026-11-30","Ongoing","Planned","Reports reflect real operations; unavailable values remain blank."],
+["26","Plan ongoing monthly content batch","Repurpose verified property content; exclude Pearl Club from stay campaign.","Content","Marketing team","2026-12-14","Ongoing","Planned","Next monthly queue approved and based on real guest questions."]
+];
+const POSTS=[
+["25 NOV","Facebook · Instagram","Arrival to view","Show the actual property entrance, route and view.","Video 1","11"],
+["27 NOV","Facebook · Instagram","How to reach White Beach","Verify real transfer arrangements and night access.","Video 2","12"],
+["29 NOV","Facebook · Instagram","Bedrooms and space","Show exact sleeping layout and verified guest capacity.","Video 3","13"],
+["01 DEC","Facebook · Instagram Stories","Property question and answer","Answer a genuine guest question using verified details.","Story / still","20"],
+["03 DEC","Facebook · Instagram","Accommodation walkthrough","One authentic property feature, accurate to bookable unit.","Carousel","20"],
+["05 DEC","Instagram Stories","Concierge enquiry walkthrough","Show how to request dates and receive confirmation.","Story","20"],
+["08 DEC","Facebook · Instagram","Private group stay","Highlight suitable actual layout for families/groups.","Carousel / video","20"],
+["10 DEC","Facebook · Instagram Stories","Arrival and travel tips","Respond to a recurring logistical question.","Story / short video","20"],
+["12 DEC","Facebook · Instagram","Authentic view and setting","Show real PLP footage, not unrelated Boracay B-roll.","Photo / reel","20"]
+];
+const KEY="plp_marketing_tracker_v3_local_20261123";
+const allowed=["Planned","Needs info","In progress","Blocked","Done"];
+let stored={};
+try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");if(x&&typeof x==="object"&&!Array.isArray(x)) stored=x;}catch(e){}
+function value(t){const v=stored[t[0]]||{};return allowed.includes(v.status)?v.status:t[7];}
+function note(t){const v=stored[t[0]]||{};return typeof v.note==="string"?v.note.slice(0,500):"";}
+function safe(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function slug(s){return "p-"+s.toLowerCase().replace(/ /g,"-");}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(stored));return true;}catch(e){return false;}}
+function setView(view){
+document.querySelectorAll(".view").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view)});
+document.querySelectorAll("#sideNav button").forEach(function(b){if(b.dataset.view===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+if(view==="tasks")document.getElementById("taskSearch").focus({preventScroll:true});
+}
+document.querySelectorAll("#sideNav button").forEach(function(b){b.addEventListener("click",function(){setView(b.dataset.view);});});
+function metrics(){
+let done=TASKS.filter(function(t){return value(t)==="Done";}).length;
+let needs=TASKS.filter(function(t){return value(t)==="Needs info";}).length;
+document.getElementById("doneCount").textContent=done+" / "+TASKS.length;
+document.getElementById("needsCount").textContent=String(needs);
+document.getElementById("progressFill").style.width=(100*done/TASKS.length)+"%";
+}
+function renderTasks(){
+let q=document.getElementById("taskSearch").value.trim().toLowerCase();
+let phase=document.getElementById("phaseFilter").value;
+let filter=document.getElementById("statusFilter").value;
+let list=TASKS.filter(function(t){return (!q||t.join(" ").toLowerCase().includes(q)||note(t).toLowerCase().includes(q))&&(!phase||t[6]===phase)&&(!filter||value(t)===filter);});
+document.getElementById("taskBody").innerHTML=list.length?list.map(function(t){
+return '<tr><td class="id">'+safe(t[0])+'</td><td><div class="task-title">'+safe(t[1])+'</div><div class="task-desc">'+safe(t[2])+'</div><details class="task-more"><summary>Acceptance check / working note</summary><div>'+safe(t[8])+'</div><input type="text" maxlength="500" data-note="'+safe(t[0])+'" aria-label="Local note for task '+safe(t[0])+'" placeholder="Optional note (saved on this device)"></details></td><td>'+safe(t[3])+'<span class="two-line">'+safe(t[6])+'</span></td><td>'+safe(t[4])+'</td><td class="due">'+safe(t[5])+'</td><td><select class="status-select" data-status="'+safe(t[0])+'" aria-label="Status of '+safe(t[1])+'">'+allowed.map(function(s){return '<option'+(value(t)===s?' selected':'')+'>'+safe(s)+'</option>';}).join("")+'</select><div style="margin-top:6px"><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div></td></tr>';
+}).join(""):'<tr><td colspan="6" class="empty">No tasks match these filters.</td></tr>';
+list.forEach(function(t){const i=document.querySelector('input[data-note="'+t[0]+'"]');if(i)i.value=note(t);});
+}
+document.getElementById("taskBody").addEventListener("change",function(e){
+const el=e.target;if(!el.matches("[data-status]"))return;
+const id=el.dataset.status;const t=TASKS.find(function(x){return x[0]===id;});if(!t||!allowed.includes(el.value))return;
+const state=stored[id]||{};state.status=el.value;stored[id]=state;persist();metrics();renderTasks();renderOwner();renderCalendar();
+});
+document.getElementById("taskBody").addEventListener("input",function(e){
+const el=e.target;if(!el.matches("[data-note]"))return;
+const id=el.dataset.note;const state=stored[id]||{};state.note=el.value.slice(0,500);stored[id]=state;persist();
+});
+["taskSearch","phaseFilter","statusFilter"].forEach(function(id){document.getElementById(id).addEventListener(id==="taskSearch"?"input":"change",renderTasks);});
+function renderOwner(){
+const data=[["03","Rates + capacity","Approved prices, inclusions and maximum occupancy for each bookable unit."],["04","Available dates","Current December–February inventory and who can confirm reservations."],["05","Arrival + transport","Actual address/access, beach route and available evening transport."],["06","Official payments","Approved deposit method and the authorized recipient or payment link."]];
+document.getElementById("ownerRows").innerHTML=data.map(function(row){
+const t=TASKS.find(function(x){return x[0]===row[0];});
+return '<div class="checkrow"><div><b>'+safe(row[1])+'</b><small>'+safe(row[2])+'</small><small>Target: '+safe(t[5])+' · Responsible: '+safe(t[4])+'</small></div><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div>';
+}).join("");
+}
+function renderCalendar(){
+document.getElementById("calendarGrid").innerHTML=POSTS.map(function(p){
+const t=TASKS.find(function(x){return x[0]===p[5];});
+return '<article class="post"><div class="post-head"><span>'+safe(p[0])+'</span><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div><h3>'+safe(p[2])+'</h3><p>'+safe(p[3])+'</p><div class="post-foot">'+safe(p[1])+' · '+safe(p[4])+'</div></article>';
+}).join("");
+}
+function csvCell(v){const x=String(v===undefined?"":v);return '"'+x.replace(/"/g,'""').replace(/^[=+\-@]/,"'$&")+'"';}
+document.getElementById("exportCsv").addEventListener("click",function(){
+const rows=[["ID","Task","Description","Workstream","Responsible","Target date","Phase","Status","Acceptance check","Local note"]].concat(TASKS.map(function(t){return [t[0],t[1],t[2],t[3],t[4],t[5],t[6],value(t),t[8],note(t)];}));
+const csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\r\n");
+const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="PLP-Social-Marketing-V3-Tracker.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},4000);
+});
+document.getElementById("resetEdits").addEventListener("click",function(){
+if(!confirm("Clear only the local task-status and note edits on this browser? The shared site remains unchanged."))return;
+stored={};try{localStorage.removeItem(KEY);}catch(e){}
+metrics();renderTasks();renderOwner();renderCalendar();
+});
+metrics();renderTasks();renderOwner();renderCalendar();
+})();
+</script>
 </body>
 </html>
