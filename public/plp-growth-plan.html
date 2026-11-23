@@ -1,285 +1,269 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#FAF1E0">
-  <meta name="description" content="A practical guest growth and booking plan for Pueblo La Perla Boracay. Prepared for the property owner, November 2026.">
-  <title>Bringing More Guests to PLP | Owner Presentation</title>
-  <link rel="icon" href="/favicon.svg">
-  <style>
-    :root{--ink:#32170e;--brown:#421909;--ivory:#FAF1E0;--paper:#fffcf7;--muted:#706254;--gold:#a9855c;--line:rgba(66,25,9,.16);--shadow:0 20px 70px rgba(54,29,14,.08)}
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.66 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-    a{color:inherit;text-decoration:none}
-    a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
-    img{display:block;max-width:100%}
-    .serif,h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400}
-    h1,h2,h3,p{margin-top:0}
-    .wrap{width:min(1160px,calc(100% - 56px));margin-inline:auto}
-    .eyebrow{text-transform:uppercase;letter-spacing:.23em;font-size:11px;font-weight:700;color:#916a46}
-    .rule{border-top:1px solid var(--line)}
-    .topbar{background:var(--ivory);border-bottom:1px solid var(--line);position:relative;z-index:2}
-    .topbar-inner{min-height:92px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .brand{display:flex;gap:13px;align-items:center;color:var(--brown)}
-    .brand img{width:31px;height:46px;object-fit:contain}
-    .brand-name{font-family:Georgia,serif;font-size:19px;letter-spacing:.1em;line-height:1.2}
-    .brand-sub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#8c6c59;margin-top:5px}
-    .header-actions{display:flex;align-items:center;gap:22px}
-    .header-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#735f52}
-    button,.action{appearance:none;border:1px solid var(--brown);background:var(--brown);color:white;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 20px;font:700 11px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;min-height:46px}
-    button.secondary,.action.secondary{background:transparent;color:var(--brown)}
-    .hero{background:#20140f;color:white;position:relative;isolation:isolate;overflow:hidden;min-height:640px;display:flex;align-items:center}
-    .hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 55%;z-index:-2}
-    .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(24,13,8,.88),rgba(24,13,8,.54) 48%,rgba(24,13,8,.05)),linear-gradient(0deg,rgba(19,13,11,.25),transparent 50%)}
-    .hero-content{padding-block:102px 118px;max-width:100%}
-    .hero .eyebrow{color:#f7ddba}
-    .hero h1{font-size:clamp(47px,6.6vw,88px);line-height:1.03;letter-spacing:-.025em;max-width:780px;margin:21px 0 27px}
-    .hero h1 em{font-weight:400;color:#ecd7b7}
-    .hero p{font-size:18px;line-height:1.75;max-width:590px;color:rgba(255,255,255,.91)}
-    .hero-meta{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.36);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#f9e9db;max-width:620px}
-    .intro{background:var(--ivory);border-bottom:1px solid var(--line)}
-    .intro-inner{padding:54px 0;display:grid;grid-template-columns:1.1fr 1.9fr;gap:60px;align-items:start}
-    .intro h2{font-size:clamp(30px,3.1vw,43px);line-height:1.18;margin:12px 0 0}
-    .intro p{font-size:17px;line-height:1.9;margin-bottom:0;color:#554336}
-    .section{padding:92px 0}
-    .section.alt{background:#f6f0e6}
-    .section-heading{max-width:790px;margin-bottom:40px}
-    .section-heading h2{font-size:clamp(34px,4.2vw,54px);letter-spacing:-.02em;line-height:1.14;margin:12px 0 16px}
-    .section-heading p{color:var(--muted);font-size:17px;line-height:1.8;margin:0}
-    .journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-    .journey-card{min-height:195px;background:white;border:1px solid var(--line);padding:28px 24px;position:relative}
-    .journey-num{font:400 28px Georgia,serif;color:#ad8d69}
-    .journey-card h3{font-size:25px;line-height:1.2;margin:14px 0 10px}
-    .journey-card p{font-size:14px;line-height:1.7;color:var(--muted);margin:0}
-    .journey-card:not(:last-child):after{content:"→";position:absolute;right:-17px;top:24px;z-index:1;font-size:20px;color:var(--gold);background:white;border-radius:100%;width:24px;text-align:center}
-    .small-note{font-size:13px;color:#7c6858;margin-top:23px;max-width:760px}
-    .timeline{display:grid;gap:0;border-top:1px solid var(--line)}
-    .milestone{display:grid;grid-template-columns:190px 1fr 150px;gap:30px;padding:31px 0;border-bottom:1px solid var(--line);align-items:start}
-    .when{font-size:20px;line-height:1.3;font-family:Georgia,serif}
-    .milestone h3{font-size:26px;margin:0 0 8px}
-    .milestone p{color:#69594f;margin:0;max-width:660px}
-    .tag{justify-self:end;border:1px solid #bca68b;border-radius:100px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;color:#705238;white-space:nowrap}
-    .videos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-    .video{background:white;border:1px solid var(--line)}
-    .video img{width:100%;height:250px;object-fit:cover}
-    .video-content{padding:26px}
-    .video-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.2em;color:#926f4e;font-weight:700}
-    .video h3{font-size:29px;line-height:1.18;margin:10px 0 12px}
-    .video p{font-size:15px;line-height:1.75;margin:0;color:#6a5a4e}
-    .video-note{font-size:12px;color:#766858;margin-top:17px;line-height:1.6}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch}
-    .panel{background:var(--ivory);padding:43px 42px;border:1px solid var(--line)}
-    .panel.dark{background:var(--brown);color:white;border-color:var(--brown)}
-    .panel h3{font-size:34px;line-height:1.2;margin:10px 0 22px}
-    .panel p{color:#6e594a}
-    .panel.dark p{color:#eeded0}
-    .clean-list{list-style:none;padding:0;margin:0}
-    .clean-list li{border-top:1px solid var(--line);padding:15px 0;display:flex;gap:13px;align-items:flex-start;font-size:15px;line-height:1.6}
-    .clean-list li::before{content:"✓";font-size:14px;font-weight:700;color:#907052;flex:0 0 auto}
-    .panel.dark .clean-list li{border-color:rgba(255,255,255,.22)}
-    .panel.dark .clean-list li::before{color:#e3c49c}
-    .outcomes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-    .outcome{padding:30px;border:1px solid var(--line);background:#fff}
-    .outcome h3{font-size:27px;line-height:1.18;margin:10px 0 10px}
-    .outcome p{font-size:15px;color:var(--muted);margin:0}
-    .outcome-icon{font-size:29px;color:#96764f;font-family:Georgia,serif}
-    .action-strip{background:var(--brown);color:var(--ivory);padding:72px 0}
-    .action-strip-inner{display:grid;grid-template-columns:1.2fr 1fr;gap:70px;align-items:center}
-    .action-strip h2{font-size:clamp(35px,4vw,51px);line-height:1.15;margin:12px 0 15px}
-    .action-strip p{font-size:17px;line-height:1.8;color:#ead9cb;margin:0}
-    .asks{counter-reset:asks;list-style:none;margin:0;padding:0}
-    .asks li{counter-increment:asks;padding:13px 0 13px 44px;position:relative;border-bottom:1px solid rgba(250,241,224,.26);font-size:16px;line-height:1.55}
-    .asks li:before{content:counter(asks,decimal-leading-zero);position:absolute;left:0;top:14px;font:14px Georgia,serif;color:#e8c69c}
-    .closing{padding:65px 0 70px;text-align:center;background:var(--ivory)}
-    .closing h2{font-size:clamp(34px,3.8vw,48px);line-height:1.18;margin:10px auto 16px;max-width:800px}
-    .closing p{max-width:720px;margin:0 auto 27px;color:#645143;font-size:16px;line-height:1.8}
-    .footer{background:#efe5d5;border-top:1px solid var(--line);padding:20px 0;color:#735b4d;font-size:12px}
-    .footer-inner{display:flex;justify-content:space-between;gap:22px;align-items:center}
-    .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    @media(max-width:950px){
-      .intro-inner{grid-template-columns:1fr;gap:16px}
-      .milestone{grid-template-columns:150px 1fr;gap:15px}.milestone .tag{grid-column:2;justify-self:start}
-      .journey{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .journey-card:nth-child(2):after{display:none}
-      .action-strip-inner{grid-template-columns:1fr;gap:26px}
-    }
-    @media(max-width:650px){
-      .wrap{width:min(100% - 36px,1160px)}
-      .topbar-inner{min-height:75px}.brand img{width:25px;height:37px}.brand-name{font-size:14px}.brand-sub{font-size:8px}.header-label{display:none}
-      .topbar .action{padding:8px 11px;font-size:9px;min-height:40px}
-      .hero{min-height:560px}.hero-content{padding:65px 0 82px}.hero h1{font-size:clamp(44px,11vw,66px)}.hero p{font-size:16px}
-      .hero::after{background:linear-gradient(90deg,rgba(24,13,8,.86),rgba(24,13,8,.38)),linear-gradient(0deg,rgba(24,13,8,.42),transparent)}
-      .intro-inner{padding:42px 0}
-      .section{padding:65px 0}.section-heading{margin-bottom:28px}
-      .journey{grid-template-columns:1fr}.journey-card{min-height:0;padding:25px}.journey-card:after{display:none!important}
-      .milestone{display:block;padding:25px 0}.milestone h3{margin-top:10px}.milestone .tag{display:inline-block;margin-top:15px}
-      .videos,.two-col,.outcomes{grid-template-columns:1fr}.video img{height:240px}
-      .panel{padding:30px 25px}.action-strip{padding:56px 0}.action-strip-inner{gap:28px}
-      .footer-inner{display:block;text-align:center}.footer-inner span{display:block;margin-bottom:6px}
-    }
-    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-    @media print{
-      @page{size:A4;margin:12mm}
-      html,body{background:#fff;color:#23170f;font-size:11pt}
-      .topbar{position:static}.topbar .action,.closing .action{display:none}
-      .wrap{width:100%}
-      .hero{min-height:340px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-      .hero-content{padding:45px 0}.hero h1{font-size:45px}
-      .intro-inner{padding:28px 0}.section{padding:35px 0}
-      .section-heading h2{font-size:32px}.section-heading{margin-bottom:24px}
-      .journey-card,.video,.panel,.outcome,.milestone{break-inside:avoid}
-      .journey-card h3,.video h3{font-size:23px}
-      .video img{height:135px}
-      .action-strip{-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:36px 0}
-      .closing{padding:30px 0}.footer{padding:10px 0}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="theme-color" content="#f7f4ef">
+<title>PLP Marketing & Booking Growth Plan | Owner Presentation</title>
+<meta name="description" content="Owner presentation: The proposed PLP Boracay marketing and booking growth plan, 23 November 2026. Not a website redesign.">
+<link rel="icon" href="/favicon.svg">
+<style>
+:root{--ink:#2c221d;--brown:#421909;--sub:#655e56;--ivory:#faf7f2;--line:#ddd4c9;--paper:#fff;--tan:#b4987e;--soft:#f1ebe3}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#e9e5df;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{cursor:pointer;border:1px solid var(--brown);background:var(--brown);color:#fff;padding:12px 18px;min-height:42px;border-radius:2px;font-size:12px;font-weight:650;letter-spacing:.03em}
+button:focus-visible,a:focus-visible{outline:3px solid #ba986e;outline-offset:3px}
+h1,h2,h3,p{margin-top:0}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+h1{font-size:clamp(47px,6.9vw,89px);line-height:1.06;letter-spacing:-.035em}
+h2{font-size:clamp(30px,3.7vw,48px);line-height:1.14;letter-spacing:-.02em}
+h3{font-size:clamp(22px,2.2vw,28px);line-height:1.2}
+p{color:var(--sub)}
+.shell{max-width:1100px;margin:0 auto}
+.utility{background:#291810;color:#f6e8dc}
+.utility-inner{max-width:1100px;margin:auto;padding:12px 34px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.utility span{font-size:11px;font-weight:650;letter-spacing:.12em;text-transform:uppercase}
+.utility button{border-color:#d7c3b4;background:transparent;color:#f6e8dc}
+.paper{background:var(--paper);box-shadow:0 14px 65px #34261c10;max-width:1100px;margin:24px auto 40px}
+.cover{padding:58px clamp(24px,8vw,90px) 52px;min-height:665px;background:var(--ivory);position:relative;border-bottom:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between}
+.cover-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:38px;border-bottom:1px solid var(--line)}
+.identity{display:flex;align-items:center;gap:13px}
+.identity img{width:31px;height:43px;object-fit:contain}
+.identity strong{font-family:Georgia,serif;font-weight:400;letter-spacing:.12em;font-size:18px;color:var(--brown)}
+.identity small{display:block;letter-spacing:.12em;text-transform:uppercase;color:#766b61;font-size:9px;margin-top:3px}
+.classify{text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--brown);font-weight:750}
+.classify small{display:block;text-transform:none;letter-spacing:.03em;font-weight:450;color:#7b7168;margin-top:5px;font-size:11px}
+.cover-main{padding:47px 0 35px}
+.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#86684e;font-weight:700;margin-bottom:21px}
+.cover h1{max-width:850px;color:var(--brown);margin:0 0 20px}
+.cover-summary{max-width:680px;font-size:19px;line-height:1.73}
+.cover-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-top:25px;border-top:1px solid var(--line)}
+.cover-meta .field{font-size:10px;font-weight:700;color:#7f6b5b;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.cover-meta .value{font-size:14px;line-height:1.4;color:#34251b}
+.ribbon{background:#eee6dc;border-left:4px solid var(--brown);padding:17px 22px;font-size:14px;line-height:1.6;color:var(--brown);margin-top:28px}
+.chapter{padding:64px clamp(24px,8vw,90px);border-bottom:1px solid var(--line)}
+.chapter:nth-of-type(even){background:#fdfbf8}
+.chapter-heading{display:flex;gap:18px;align-items:baseline;margin-bottom:14px}
+.num{font-family:Georgia,serif;color:#97795f;font-size:18px;min-width:36px}
+.chapter h2{margin:0}
+.lead{font-size:18px;line-height:1.78;max-width:750px;margin:10px 0 30px}
+.highlight{border-left:4px solid var(--brown);padding:12px 0 12px 24px;margin:28px 0;background:#fbf8f4}
+.highlight strong{display:block;color:var(--brown);font-size:20px;margin-bottom:5px;font-family:Georgia,serif;font-weight:400}
+.highlight p{margin:0;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:28px}
+.stat{padding:23px 20px;background:#f6f1eb;border:1px solid var(--line)}
+.stat b{display:block;font:400 27px Georgia,serif;color:var(--brown);margin-bottom:8px}
+.stat span{font-size:13px;color:#5f554d}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:26px 0}
+.step{padding:22px 18px;background:#f8f5f0;border-top:3px solid var(--tan);min-height:166px}
+.step b{font:400 26px Georgia,serif;color:var(--brown)}
+.step h3{font-size:21px;margin:13px 0 8px}
+.step p{font-size:13px;margin:0}
+.timeline{margin:25px 0;border-top:1px solid var(--line)}
+.phase{padding:24px 0;display:grid;grid-template-columns:160px 1fr;gap:25px;border-bottom:1px solid var(--line)}
+.phase-time{font-family:Georgia,serif;font-size:22px;line-height:1.3;color:var(--brown)}
+.phase-detail h3{margin:0 0 8px;font-size:26px}
+.phase-detail p{margin:0;font-size:15px;line-height:1.75}
+.phase-detail .deliver{font-size:12px;letter-spacing:.02em;color:#805d43;margin:11px 0 0;font-weight:650}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:26px 0}
+.tile{padding:25px 23px;border:1px solid var(--line);background:#fff;min-height:215px}
+.tile .mini{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:#8a6a4c;font-weight:700}
+.tile h3{margin:15px 0 11px;font-size:24px}
+.tile p{font-size:14px;line-height:1.68;margin:0}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:25px 0}
+.panel{background:#f6f2ec;border:1px solid var(--line);padding:28px}
+.panel h3{font-size:27px;margin:0 0 14px}
+.panel ul{margin:0;padding:0;list-style:none}
+.panel li{font-size:15px;padding:13px 0;border-top:1px solid var(--line);line-height:1.6}
+.panel li:first-child{border-top:0}
+.panel li:before{content:"— ";color:#a17b5a}
+.panel.dark{background:var(--brown);color:#fff;border-color:var(--brown)}
+.panel.dark li{border-color:#ffffff33}
+.panel.dark li:before{color:#e7c8a6}
+.owner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:30px 0 0}
+.owner-item{border:1px solid var(--line);padding:24px;background:#fcfaf6}
+.owner-item .index{color:#96775c;font-size:12px;font-weight:750;letter-spacing:.14em}
+.owner-item h3{font-size:23px;margin:9px 0 7px}
+.owner-item p{font-size:14px;margin:0}
+.measure{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:25px 0}
+.measure div{border-top:2px solid var(--brown);padding:20px 4px 0}
+.measure strong{display:block;font:400 23px Georgia,serif;color:var(--brown);margin-bottom:8px}
+.measure p{font-size:14px;margin:0}
+.callout{padding:32px;background:#f4eee6;border-left:4px solid #9b704d;margin-top:26px}
+.callout h3{margin:0 0 9px;font-size:25px}
+.callout p{margin:0;font-size:15px}
+.conclusion{background:var(--brown);color:#fff;padding:57px clamp(24px,8vw,90px)}
+.conclusion h2{max-width:690px;margin-bottom:17px}
+.conclusion p{color:#efded2;max-width:740px;font-size:16px;line-height:1.8;margin-bottom:0}
+.footer{padding:22px clamp(24px,8vw,90px);display:flex;justify-content:space-between;gap:22px;background:#fbf7f0;color:#74675c;font-size:11px}
+.footer span:first-child{font-weight:750;color:var(--brown)}
+@media(max-width:780px){
+.paper{margin:0}.utility-inner{padding:10px 20px}
+.cover{min-height:auto;padding:34px 24px 36px}
+.cover-main{padding:65px 0 45px}.cover-top{padding-bottom:20px}.identity strong{font-size:14px}.identity img{width:26px;height:37px}
+.cover-meta{grid-template-columns:1fr;gap:13px}.cover-meta>div{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.chapter{padding:45px 24px}
+.steps,.three,.measure{grid-template-columns:1fr 1fr}
+.split{grid-template-columns:1fr}
+.phase{grid-template-columns:115px 1fr;gap:12px}
+.conclusion{padding:44px 24px}
+.footer{padding:22px 24px}
+}
+@media(max-width:520px){
+h1{font-size:46px}.cover-summary{font-size:16px}
+.classify{font-size:9px}.classify small{font-size:9px}
+.cover-main{padding-top:46px}
+.chapter-heading{display:block}.num{display:block;margin-bottom:7px}
+.steps,.three,.measure,.owner-grid{grid-template-columns:1fr}
+.phase{display:block}.phase-time{font-size:20px;margin-bottom:10px}
+.stats{grid-template-columns:1fr}
+.footer{display:block}.footer span{display:block;margin-bottom:4px}
+}
+@media print{
+@page{size:A4;margin:12mm}
+html,body{background:white!important;color:#222}
+.utility{display:none}
+.paper{box-shadow:none;margin:0;max-width:100%}
+.cover{min-height:245mm;break-after:page}
+.chapter{padding:30px 5px;break-inside:auto}
+.chapter-heading{break-after:avoid}
+.phase,.tile,.owner-item,.panel,.step,.stat,.measure div{break-inside:avoid}
+.steps,.three,.split,.owner-grid,.measure{gap:8px}
+.conclusion{break-before:page;min-height:120mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.cover,.panel.dark,.step,.ribbon{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
 </head>
 <body>
-  <a class="visually-hidden" href="#main">Skip to the plan</a>
-  <header class="topbar">
-    <div class="wrap topbar-inner">
-      <a class="brand" href="/" aria-label="Pueblo La Perla Boracay home">
-        <img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="PLP oval monogram" width="31" height="46">
-        <span><span class="brand-name">PUEBLO LA PERLA</span><span class="brand-sub">BORACAY · PRIVATE RETREAT</span></span>
-      </a>
-      <div class="header-actions">
-        <span class="header-label">Owner presentation · 23 November 2026</span>
-        <button type="button" class="secondary" onclick="window.print()" aria-label="Print or save this presentation as PDF">Print / Save PDF</button>
-      </div>
-    </div>
-  </header>
+<div class="utility"><div class="utility-inner"><span>PLP · Owner briefing · Proposed plan</span><button type="button" onclick="window.print()">Print / Save as PDF</button></div></div>
+<main class="paper">
+<section class="cover" aria-labelledby="cover-title">
+<div class="cover-top">
+<div class="identity"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="PLP monogram"><div><strong>PUEBLO LA PERLA</strong><small>Boracay · Owner briefing</small></div></div>
+<div class="classify">BUSINESS PLAN<br>FOR OWNER REVIEW<small>Not a website redesign</small></div>
+</div>
+<div class="cover-main">
+<div class="eyebrow">MARKETING & BOOKING GROWTH PLAN · VERSION 3</div>
+<h1 id="cover-title">A practical plan<br>to bring more guests<br>to PLP Boracay.</h1>
+<p class="cover-summary">A clear 30-day action plan to promote the property, build guest confidence, capture enquiries and help convert them into confirmed reservations.</p>
+<div class="ribbon"><strong>What this document is:</strong> A proposed business and marketing execution plan presented to the owner. <strong>What it is not:</strong> A redesign of PLP's existing website, a new membership launch or an announcement of work already completed.</div>
+</div>
+<div class="cover-meta">
+<div><div class="field">Prepared for</div><div class="value">Dr. Marichi Fong Ramos</div></div>
+<div><div class="field">Presentation date</div><div class="value">23 November 2026</div></div>
+<div><div class="field">Initial implementation window</div><div class="value">23 November – 23 December 2026</div></div>
+</div>
+</section>
 
-  <main id="main">
-    <section class="hero" aria-labelledby="hero-title">
-      <img class="hero-photo" src="/images/plp-hero-sunset.webp" alt="Pueblo La Perla hillside setting at sunset">
-      <div class="wrap hero-content">
-        <div class="eyebrow">A clear, practical plan for Pueblo La Perla Boracay</div>
-        <h1 id="hero-title">Bringing more guests<br><em>to Pueblo La Perla.</em></h1>
-        <p>We will make it easier for the right guests to discover PLP, feel confident about staying here, ask about availability, and complete their reservation with our team.</p>
-        <div class="hero-meta">Presented to Dr. Marichi Fong Ramos &nbsp; · &nbsp; Proposed launch: 23–29 November 2026</div>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="summary-title">
+<div class="chapter-heading"><div class="num">01</div><h2 id="summary-title">The plan in one minute</h2></div>
+<p class="lead">Pueblo La Perla already has a website and an online presence. Now we want them to do more than look attractive. We want the right travelers to find PLP, understand the stay, contact the concierge and confidently book.</p>
+<div class="highlight"><strong>Our business goal</strong><p>Generate more qualified accommodation enquiries and more confirmed stays—not merely more likes or followers.</p></div>
+<div class="stats">
+<div class="stat"><b>1 week</b><span>To prepare the essential enquiry experience and first proof videos, subject to verified details and footage.</span></div>
+<div class="stat"><b>3 videos</b><span>Real walkthroughs that answer the questions guests ask before booking.</span></div>
+<div class="stat"><b>30 days</b><span>To establish a repeatable marketing and follow-up process, then evaluate real results.</span></div>
+</div>
+</section>
 
-    <section class="intro" aria-label="The plan in one minute">
-      <div class="wrap intro-inner">
-        <div><div class="eyebrow">In one minute</div><h2>What are we going to do?</h2></div>
-        <p>We already have PLP's website and its online identity. Our next step is to turn them into a practical guest-enquiry system. We will show the property clearly, make booking questions easy to answer, and help the concierge follow up with every serious guest. The aim is not simply more followers. <strong>It is more qualified enquiries and more confirmed stays.</strong></p>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="journey-title">
+<div class="chapter-heading"><div class="num">02</div><h2 id="journey-title">How a guest becomes a booking</h2></div>
+<p class="lead">The work has one straightforward purpose: guide prospective guests from seeing the property to speaking with the right person.</p>
+<div class="steps">
+<div class="step"><b>01</b><h3>See PLP</h3><p>Discover property videos and photos on Facebook, Instagram or travel channels.</p></div>
+<div class="step"><b>02</b><h3>Trust PLP</h3><p>See real rooms, location and access information, plus official contact channels.</p></div>
+<div class="step"><b>03</b><h3>Ask about a stay</h3><p>Send preferred dates, guest count and contact details using a simple enquiry form.</p></div>
+<div class="step"><b>04</b><h3>Confirm a reservation</h3><p>Concierge checks availability, quotes approved rates and follows up.</p></div>
+</div>
+<p style="font-size:14px">We will use the existing PLP website and enterprise workspace as the foundation. A guest enquiry is never presented as an automatic confirmed booking.</p>
+</section>
 
-    <section class="section" aria-labelledby="journey-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">The guest's experience</div><h2 id="journey-title">Four simple steps from discovery to booking.</h2><p>Every part of the marketing plan supports one of these steps.</p></div>
-        <div class="journey">
-          <div class="journey-card"><div class="journey-num">01</div><h3>Discover PLP</h3><p>Guests see real property photos and short videos through Facebook, Instagram and suitable travel channels.</p></div>
-          <div class="journey-card"><div class="journey-num">02</div><h3>Feel confident</h3><p>They understand the villa, where it is, how to get around, and how to contact the genuine PLP team.</p></div>
-          <div class="journey-card"><div class="journey-num">03</div><h3>Send an enquiry</h3><p>They provide dates, guest count and contact details through one easy mobile form or concierge channel.</p></div>
-          <div class="journey-card"><div class="journey-num">04</div><h3>Confirm a stay</h3><p>The concierge checks availability, gives accurate rates, follows up and confirms reservations through approved channels.</p></div>
-        </div>
-        <p class="small-note">Social media attracts interest. The website and concierge turn that interest into real business. A submitted enquiry is not automatically a booking.</p>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="calendar-title">
+<div class="chapter-heading"><div class="num">03</div><h2 id="calendar-title">What we will do, and when</h2></div>
+<p class="lead">A manageable sequence that starts with the booking process before expanding paid advertising.</p>
+<div class="timeline">
+<div class="phase"><div class="phase-time">Nov 23–24<br><small style="font:12px Arial;color:#88776c">First 48 hours</small></div><div class="phase-detail"><h3>Get ready for enquiries</h3><p>Test the current website on mobile. Prepare the stay-enquiry form, route enquiries to concierge, and verify the guest information needed to give accurate quotations.</p><div class="deliver">Intended result: a clear path from visitor to concierge.</div></div></div>
+<div class="phase"><div class="phase-time">Nov 25–29<br><small style="font:12px Arial;color:#88776c">Launch week</small></div><div class="phase-detail"><h3>Show the real property</h3><p>Prepare three short authentic videos: arriving at PLP, getting to the beach, and room layout/capacity. Publish through approved social channels with one clear enquiry action.</p><div class="deliver">Intended result: useful, trustworthy guest-facing content.</div></div></div>
+<div class="phase"><div class="phase-time">Nov 30–Dec 6<br><small style="font:12px Arial;color:#88776c">Week two</small></div><div class="phase-detail"><h3>Build wider credibility</h3><p>Prepare a genuine photo lookbook, evaluate suitable accommodation listings, and explore relevant travel advisors and creator partnerships.</p><div class="deliver">Intended result: more ways for potential guests to discover and trust PLP.</div></div></div>
+<div class="phase"><div class="phase-time">December<br><small style="font:12px Arial;color:#88776c">Ongoing</small></div><div class="phase-detail"><h3>Schedule and improve</h3><p>Batch and schedule approved Facebook and Instagram content. Review real enquiries and bookings weekly, and consider advertising only once the enquiry process is working and the spending is approved.</p><div class="deliver">Intended result: a repeatable marketing operation, not daily manual posting.</div></div></div>
+</div>
+</section>
 
-    <section class="section alt" id="schedule" aria-labelledby="timeline-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">What happens and when</div><h2 id="timeline-title">A focused first 30 days.</h2><p>Start with the essential booking process, then expand content and distribution. No unnecessary systems or large campaigns upfront.</p></div>
-        <div class="timeline">
-          <div class="milestone"><div class="when">23–24 Nov</div><div><h3>Make it easy to enquire</h3><p>Check the website on mobile. Prepare a simple stay-enquiry form, ensure messages reach the concierge and confirm the information guests need before booking.</p></div><span class="tag">First priority</span></div>
-          <div class="milestone"><div class="when">25–29 Nov</div><div><h3>Show the real PLP experience</h3><p>Prepare three short videos: arriving at PLP, getting to the beach, and the real space and sleeping arrangements. Publish only verified descriptions and genuine footage.</p></div><span class="tag">Launch week</span></div>
-          <div class="milestone"><div class="when">30 Nov – 6 Dec</div><div><h3>Build trust beyond our own pages</h3><p>Prepare a property lookbook, assess suitable accommodation listings, and approach selective travel partners and creators where worthwhile.</p></div><span class="tag">Build confidence</span></div>
-          <div class="milestone"><div class="when">December onward</div><div><h3>Schedule, follow up, improve</h3><p>Plan posts in advance. Track genuine guest questions, follow up on quotations, and focus time and future advertising on channels that produce confirmed stays.</p></div><span class="tag">Continuous growth</span></div>
-        </div>
-        <p class="small-note">These dates are the proposed working schedule, not a claim that the activities have already been completed. Production depends on the approved facts and genuine footage being available.</p>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="videos-title">
+<div class="chapter-heading"><div class="num">04</div><h2 id="videos-title">The first three videos</h2></div>
+<p class="lead">We do not need an expensive production campaign to start. Three real videos can answer the biggest questions and establish credibility.</p>
+<div class="three">
+<div class="tile"><div class="mini">VIDEO 01</div><h3>From arrival to the view</h3><p>Show the actual entrance, route into the accommodation and the view guests will experience.</p></div>
+<div class="tile"><div class="mini">VIDEO 02</div><h3>Beach access and transport</h3><p>Show how people actually get to White Beach and return. State travel times only after they are confirmed.</p></div>
+<div class="tile"><div class="mini">VIDEO 03</div><h3>Rooms and sleeping arrangements</h3><p>Show real beds, bathrooms and common areas. Confirm guest capacity before adding numbers.</p></div>
+</div>
+<div class="callout"><h3>Why this matters</h3><p>When a new guest is deciding whether to book, practical evidence—real spaces, clear transport and prompt answers—can matter more than a beautifully edited advertisement.</p></div>
+</section>
 
-    <section class="section" aria-labelledby="video-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">Three videos to start</div><h2 id="video-title">Show guests what they actually want to know.</h2><p>We do not need dozens of polished advertisements. Three authentic walkthroughs will answer the questions that matter most.</p></div>
-        <div class="videos">
-          <article class="video"><img loading="lazy" src="/images/plp-grand-ocean-villa-aerial.webp" alt="Pueblo La Perla villa and hillside view"><div class="video-content"><div class="video-kicker">Video 01</div><h3>Arriving at PLP</h3><p>Follow the real arrival, entrance, accommodation and view so guests can see the place is genuine.</p><div class="video-note">Purpose: Build immediate confidence.</div></div></article>
-          <article class="video"><img loading="lazy" src="/images/plp-hero-day.webp" alt="Daytime view of Pueblo La Perla hillside"><div class="video-content"><div class="video-kicker">Video 02</div><h3>Getting around</h3><p>Explain the actual route to White Beach and the transport arrangements available, including evening returns.</p><div class="video-note">Purpose: Remove uncertainty about hillside access.</div></div></article>
-          <article class="video"><img loading="lazy" src="/images/plp-master-bedroom-view.webp" alt="Bedroom view featured on Pueblo La Perla's website"><div class="video-content"><div class="video-kicker">Video 03</div><h3>Rooms and space</h3><p>Show real bedrooms, bathrooms, common spaces and the verified number of guests each unit can accommodate.</p><div class="video-note">Purpose: Help families and groups plan confidently.</div></div></article>
-        </div>
-        <p class="small-note">Images above are existing PLP website assets for presentation purposes. The videos themselves must be captured from the actual property.</p>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="guests-title">
+<div class="chapter-heading"><div class="num">05</div><h2 id="guests-title">Who we want to reach</h2></div>
+<p class="lead">We will focus on traveler groups with a clear reason to choose a private hillside accommodation, then refine the audience based on actual enquiries.</p>
+<div class="three">
+<div class="tile"><div class="mini">PRIMARY TEST</div><h3>Families and groups</h3><p>Filipino families, barkada trips, reunions and private getaways, matched to genuine room capacity.</p></div>
+<div class="tile"><div class="mini">SECONDARY TEST</div><h3>Couples and occasions</h3><p>Guests seeking a distinctive setting for holidays, milestones and quieter stays.</p></div>
+<div class="tile"><div class="mini">SECONDARY TEST</div><h3>Balikbayans and visitors</h3><p>Travelers who particularly value clear booking information, reliable communication and payment reassurance.</p></div>
+</div>
+<div class="highlight"><strong>Where we reach them</strong><p>Instagram and Facebook first, supported by the current PLP website; suitable accommodation platforms and travel partners follow when verified and commercially worthwhile.</p></div>
+</section>
 
-    <section class="section alt" aria-labelledby="audience-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">Who we want to reach</div><h2 id="audience-title">Guests most likely to value PLP.</h2><p>We will tailor messages to the stay people are planning instead of advertising to everyone in the same way.</p></div>
-        <div class="outcomes">
-          <div class="outcome"><div class="outcome-icon">01</div><h3>Families &amp; groups</h3><p>Private getaways, reunions, celebrations and friends travelling together—subject to each unit's actual capacity.</p></div>
-          <div class="outcome"><div class="outcome-icon">02</div><h3>Couples &amp; occasions</h3><p>Travelers looking for scenery, a calm setting and a distinctive stay for a special trip.</p></div>
-          <div class="outcome"><div class="outcome-icon">03</div><h3>Balikbayans &amp; visitors</h3><p>Guests who appreciate clear information, secure reservation arrangements and responsive local assistance.</p></div>
-        </div>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="responsibilities-title">
+<div class="chapter-heading"><div class="num">06</div><h2 id="responsibilities-title">Who will handle what</h2></div>
+<p class="lead">Doc does not need to manage daily posts or technical setup. The property team confirms guest-facing facts; the implementation team handles the marketing system.</p>
+<div class="split">
+<div class="panel"><h3>Implementation team</h3><ul>
+<li>Prepare the website's guest-enquiry journey.</li>
+<li>Organize the social content calendar.</li>
+<li>Prepare and schedule approved posts and videos.</li>
+<li>Set up simple concierge follow-up tracking.</li>
+<li>Summarize enquiries and confirmed bookings.</li>
+</ul></div>
+<div class="panel dark"><h3>Doc and operating team</h3><ul>
+<li>Confirm accommodation rates and capacities.</li>
+<li>Provide accurate availability and reservation authority.</li>
+<li>Confirm guest arrival and transport arrangements.</li>
+<li>Approve official guest payment/deposit instructions.</li>
+<li>Approve promotional spending separately if recommended.</li>
+</ul></div>
+</div>
+</section>
 
-    <section class="section" aria-labelledby="roles-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">Keeping responsibilities simple</div><h2 id="roles-title">We handle the marketing work. The property team confirms the facts.</h2></div>
-        <div class="two-col">
-          <div class="panel"><div class="eyebrow">Our implementation work</div><h3>What we will take care of</h3>
-            <ul class="clean-list">
-              <li>Improve the existing website enquiry journey.</li>
-              <li>Organize Facebook and Instagram content.</li>
-              <li>Prepare and schedule approved property posts and videos.</li>
-              <li>Build simple concierge follow-up tracking.</li>
-              <li>Report on real enquiries and confirmed bookings.</li>
-              <li>Evaluate travel listings and advertising only when ready.</li>
-            </ul>
-          </div>
-          <div class="panel dark" id="doc-input"><div class="eyebrow" style="color:#e3c49c">Only four commercial confirmations</div><h3>What we need from Doc or her team</h3>
-            <ul class="clean-list">
-              <li>Approved room or villa rates and how many guests each can accommodate.</li>
-              <li>Available dates and who has authority to confirm reservations.</li>
-              <li>Actual guest transport and beach-access arrangements.</li>
-              <li>Official payment and deposit instructions guests may safely use.</li>
-            </ul>
-            <p style="font-size:13px;margin-top:21px;margin-bottom:0">The relevant manager or reservations staff may supply the details. Doc only needs to confirm or approve the commercial decisions.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="inputs-title">
+<div class="chapter-heading"><div class="num">07</div><h2 id="inputs-title">Only four details needed to begin</h2></div>
+<p class="lead">A short conversation with Doc or the property manager should establish the immediate facts. Nothing should be advertised as included or available unless confirmed.</p>
+<div class="owner-grid">
+<div class="owner-item"><div class="index">01 / STAY</div><h3>Rates and capacities</h3><p>What is the approved starting rate and how many people can stay in each unit?</p></div>
+<div class="owner-item"><div class="index">02 / AVAILABILITY</div><h3>Dates and confirmation</h3><p>What can guests book in December–February, and who confirms a reservation?</p></div>
+<div class="owner-item"><div class="index">03 / ACCESS</div><h3>Arrival and transport</h3><p>What transport arrangements can guests actually expect to and from the property?</p></div>
+<div class="owner-item"><div class="index">04 / PAYMENT</div><h3>Official deposit method</h3><p>Which verified business payment or deposit instructions should concierge provide?</p></div>
+</div>
+<p style="font-size:13px;margin-top:24px">Doc's role is to approve commercial information, not to prepare technical documents. Routine permit-document collection is outside the immediate marketing workflow unless separately requested by a relevant institution.</p>
+</section>
 
-    <section class="section alt" aria-labelledby="success-title">
-      <div class="wrap">
-        <div class="section-heading"><div class="eyebrow">How we will know it is working</div><h2 id="success-title">Not likes. Real guest interest and real stays.</h2><p>We will start with a small, useful set of measures. There are no invented booking forecasts or promised revenue numbers.</p></div>
-        <div class="outcomes">
-          <div class="outcome"><div class="outcome-icon">01</div><h3>Serious enquiries</h3><p>How many people send genuine dates, guest counts and accommodation questions?</p></div>
-          <div class="outcome"><div class="outcome-icon">02</div><h3>Timely follow-up</h3><p>How quickly do we answer, quote, and follow up with prospective guests?</p></div>
-          <div class="outcome"><div class="outcome-icon">03</div><h3>Confirmed stays</h3><p>Which enquiries became real bookings, and where did those guests find PLP?</p></div>
-        </div>
-        <p class="small-note">Any advertising budget will be proposed separately and requires approval. Pearl Club remains a separate initiative and will not be mixed into this stay-booking campaign.</p>
-      </div>
-    </section>
+<section class="chapter" aria-labelledby="results-title">
+<div class="chapter-heading"><div class="num">08</div><h2 id="results-title">How we measure results</h2></div>
+<p class="lead">We will report what leads to business, rather than judging success mainly by follower counts.</p>
+<div class="measure">
+<div><strong>Qualified enquiries</strong><p>People who provide genuine dates, guest numbers and accommodation needs.</p></div>
+<div><strong>Follow-up performance</strong><p>How promptly and reliably the team replies, provides quotations and follows up.</p></div>
+<div><strong>Confirmed stays</strong><p>Enquiries that become actual bookings—and the channel that brought them.</p></div>
+</div>
+<div class="callout"><h3>What is not part of this plan</h3><p>It is not a public resort redesign, a new standalone booking system, a commitment to an advertising budget, or a Pearl Club membership launch. No forecasted revenue, rates, amenities or transport promises are being invented.</p></div>
+</section>
 
-    <section class="action-strip" aria-labelledby="decision-title">
-      <div class="wrap action-strip-inner">
-        <div><div class="eyebrow" style="color:#e3c49c">The only immediate decision</div><h2 id="decision-title">Give us the four essentials.<br>We can take it from there.</h2><p>With approved stay details and a working concierge contact, we can prepare the enquiry path and three launch videos without asking Doc to manage the daily marketing process.</p></div>
-        <ol class="asks">
-          <li>Rates and guest capacities</li>
-          <li>Available dates and booking authority</li>
-          <li>Verified arrival and transport details</li>
-          <li>Official deposit and payment method</li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="closing">
-      <div class="wrap">
-        <div class="eyebrow">Pueblo La Perla Boracay · V3 approved execution baseline</div>
-        <h2>One clear goal: turn interest in PLP into confirmed guests.</h2>
-        <p>This page presents our proposed implementation plan. The existing PLP website and enterprise workspace remain the foundation—no duplicate system, no unapproved public claims and no paid advertising without authorization.</p>
-        <a class="action" href="#schedule">Review the schedule</a>
-      </div>
-    </section>
-  </main>
-  <footer class="footer"><div class="wrap footer-inner"><span>Pueblo La Perla Boracay · Owner presentation · 23 November 2026</span><span>Unlisted planning page · Not a public accommodation offer</span></div></footer>
+<section class="conclusion" aria-labelledby="decision-title">
+<div class="eyebrow" style="color:#ead4c0">OWNER REVIEW · PROPOSED NEXT STEP</div>
+<h2 id="decision-title">Approve the direction. Confirm the four facts. Start executing.</h2>
+<p>This plan is designed to use PLP's existing website and enterprise workspace to attract more suitable guests and turn genuine enquiries into confirmed stays. Any changes to rates, payment instructions or advertising spend require owner approval.</p>
+</section>
+<footer class="footer"><span>PUEBLO LA PERLA BORACAY · MARKETING & BOOKING GROWTH PLAN (V3)</span><span>Prepared for Dr. Marichi Fong Ramos · 23 November 2026 · Owner briefing only</span></footer>
+</main>
 </body>
 </html>
