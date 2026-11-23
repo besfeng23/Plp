@@ -159,7 +159,7 @@ export async function recordPayPalCapture({ bookingReference, orderId, captureId
       await updateRows('plp_payments', `id=eq.${payment.id}`, {
         provider_payment_id: captureId || orderId || null,
         amount_php: amount ? Number(amount) : payment.amount_php,
-        currency: currency || 'PHP',
+        currency: String(currency || PLP_CURRENCY).toUpperCase(),
         status: paymentStatus,
         verification_status: 'VERIFIED',
         verification_error: null,

@@ -1,4 +1,4 @@
-import { formatPeso, PLP_DEPOSIT_RATE, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
+import { formatPeso, formatUsd, PLP_DEPOSIT_RATE, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, occupiedNights, shiftMonth, todayAtResort } from '../lib/booking-dates.js';
 
 import { requestedGuests } from '../lib/guest-journey.js';
@@ -157,11 +157,11 @@ function updateSummary() {
     selected.name,
     shortDate.format(new Date(checkIn)) + ' to ' + shortDate.format(new Date(checkOut)),
     nights + (nights === 1 ? ' night' : ' nights'),
-    formatPeso(amount),
+    formatUsd(amount),
   ].join(' · ');
-  element('estStay').textContent = formatPeso(amount);
-  element('estDeposit').textContent = formatPeso(deposit);
-  element('estBalance').textContent = formatPeso(balance);
+  element('estStay').textContent = formatUsd(amount);
+  element('estDeposit').textContent = formatUsd(deposit);
+  element('estBalance').textContent = formatUsd(balance);
 }
 
 function resetRange(focusDate) {
@@ -332,7 +332,7 @@ async function submitReservation(event) {
 }
 
 for (const room of PLP_ROOMS) {
-  element('roomSelect').add(new Option(room.name + ' · ' + formatPeso(room.rate) + ' / night', room.key));
+  element('roomSelect').add(new Option(room.name + ' · ' + formatUsd(room.rate) + ' / night', room.key));
 }
 element('roomSelect').value = selected.key;
 element('guests').max = selected.capacity;
