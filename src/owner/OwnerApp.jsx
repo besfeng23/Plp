@@ -33,7 +33,7 @@ async function ownerRequest(action, options={}) {
  return result;
 }
 function LogIn({onAuthenticated}) {
- const [state,setState]=useState('checking'),[message,setMessage]=useState(''),[code,setCode]=useState('');
+ const [state,setState]=useState('checking'),[message,setMessage]=useState(''),[code,setCode]=useState(''),[email,setEmail]=useState('');
  useEffect(()=>{
    let alive=true;
    const fragment=new URLSearchParams(window.location.hash.replace(/^#/,''));
@@ -51,19 +51,19 @@ function LogIn({onAuthenticated}) {
  },[onAuthenticated]);
  async function send(e) {
    e.preventDefault();setState('sending');setMessage('');
-   try{await ownerRequest('login',{method:'POST',body:{}});setState('sent');setMessage('A private sign-in email has been requested for the registered owner. Open it on this device.');}
+   try{await ownerRequest('login',{method:'POST',body:email.trim()?{email:email.trim()}:{}});setState('sent');setMessage('If this is a registered owner email, a private sign-in link has been sent. Open it on this device.');}
    catch(err){setState('ready');setMessage(err.message);}
  }
  async function verify(e){
    e.preventDefault();setState('sending');setMessage('');
-   try{await ownerRequest('verify',{method:'POST',body:{code}});setCode('');onAuthenticated();}
+   try{await ownerRequest('verify',{method:'POST',body:email.trim()?{code,email:email.trim()}:{code}});setCode('');onAuthenticated();}
    catch(err){setState('ready');setMessage(err.message);}
  }
  return <main className="owner-login">
    <div className="owner-login-aside"><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="Pueblo La Perla oval crest"/><span>PUEBLO LA PERLA · PRIVATE OFFICE</span><h1>A more considered view of your business.</h1><p>Resort performance, membership, decisions and expansion, together in one secure executive workspace.</p></div>
    <div className="owner-login-main"><div className="owner-login-card"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" className="owner-login-crest"/><span className="owner-eyebrow">PRIVATE OWNER ACCESS</span>
-     <h2>Welcome.</h2><p>This workspace is restricted to the verified PLP owner. A staff access code cannot open it.</p>
-     <form onSubmit={send}><button className="owner-primary" disabled={state==='checking'||state==='sending'} type="submit"><LockKeyhole size={17}/> {state==='sending'?'Verifying…':state==='checking'?'Checking access…':'Send my private sign-in link'}</button></form>
+     <h2>Welcome.</h2><p>This workspace is restricted to the verified PLP owners. A staff access code cannot open it.</p>
+     <form onSubmit={send}><label htmlFor="owner-email" className="owner-login-email-label">Owner email address</label><input id="owner-email" type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Your owner email" className="owner-login-email" maxLength={180}/><button className="owner-primary" disabled={state==='checking'||state==='sending'} type="submit"><LockKeyhole size={17}/> {state==='sending'?'Verifying…':state==='checking'?'Checking access…':'Send my private sign-in link'}</button></form>
      {message&&<p className="owner-login-notice" role="status">{message}</p>}
      {state!=='checking'&&<form onSubmit={verify} className="owner-login-otp"><label htmlFor="owner-otp">If your email contains a one-time code, enter it here</label><div><input id="owner-otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,8}" maxLength={8} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,''))} placeholder="6–8 digit code"/><button className="owner-secondary" disabled={state==='sending'||!/^[0-9]{6,8}$/.test(code)} type="submit">Verify code</button></div></form>}
      <small>Owner identity is checked against the approved email account. No access is granted from the public website or the staff login.</small>
@@ -281,7 +281,7 @@ function PrivateOffice({onSignOut}) {
  return <div className="owner-app">
   <aside className={'owner-sidebar'+(mobile?' is-open':'')} aria-label="PLP private owner navigation">
     <div className="owner-sidebar-brand"><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="Pueblo La Perla crest"/><div><span>PUEBLO LA PERLA</span><strong>Private Office</strong></div></div>
-    <div className="owner-sidebar-person"><small>OWNER ACCOUNT</small><strong>Dr. Marichi Fong Ramos</strong><span>Executive oversight</span></div>
+    <div className="owner-sidebar-person"><small>OWNER ACCOUNT</small><strong>{owner?.name||'Owner'}</strong><span>Executive oversight</span></div>
     <nav aria-label="Private Office sections">{nav.map(([key,Icon,label])=><button type="button" key={key} aria-current={tab===key?'page':undefined} className={'owner-nav-link'+(tab===key?' active':'')} onClick={()=>navigate(key)}><Icon size={18} strokeWidth={1.65}/>{label}</button>)}</nav>
     <div className="owner-sidebar-footer"><ShieldCheck size={15}/> Private, verified owner session</div>
   </aside>
