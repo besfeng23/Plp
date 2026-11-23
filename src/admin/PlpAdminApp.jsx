@@ -3,6 +3,7 @@
 // Every screen follows the PLP page pattern: serif uppercase title, one muted
 // sentence in a thin notice, a two-column grid of square tiles; details open on tap.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { safeNextPath } from '../../lib/safe-next-path.js';
 import { Activity, ArrowLeft, ArrowRight, BedDouble, BookOpen, CalendarDays, CalendarX, ClipboardList, ConciergeBell, CreditCard, FileText, FolderLock, Gem, History, KeyRound, LineChart, ListChecks, LockKeyhole, LogOut, Megaphone, Menu, RefreshCw, Search, Server, ShieldCheck, Sun, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
@@ -119,6 +120,8 @@ export default function PlpAdminApp() {
   const [session, setSession] = useState(null);
   const [accountSession, setAccountSession] = useState(false);
   const [authConfig, setAuthConfig] = useState({ individualAccounts: false, sharedCode: true });
+  const [authReady, setAuthReady] = useState(false);
+  const [useSharedCode, setUseSharedCode] = useState(false);
   const [screen, setScreen] = useState('home');
   const [sheet, setSheet] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -137,7 +140,7 @@ export default function PlpAdminApp() {
   const [grantForm, setGrantForm] = useState({ email: '', display_name: '', role: 'staff' });
   const [health, setHealth] = useState(null);
 
-  useEffect(() => { fetch('/api/admin?action=auth-config', { cache: 'no-store' }).then(r => r.json()).then(c => { if (c && c.ok) setAuthConfig(c); }).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/admin?action=auth-config', { cache: 'no-store' }).then(r => r.json()).then(c => { if (c && c.ok) setAuthConfig(c); }).catch(() => {}).finally(() => setAuthReady(true)); }, []);
 
   const permissions = session?.permissions || [];
   const allowed = useCallback(perm => permissions.includes(perm), [permissions]);
@@ -148,7 +151,7 @@ export default function PlpAdminApp() {
   const testCount = data.rows.filter(isTestRecord).length;
 
   async function load(codeToUse = code, viaAccount = accountSession) {
-    if (!codeToUse.trim() && !viaAccount) { setError('Enter your PLP staff access code.'); return; }
+    if (!codeToUse.trim() && !viaAccount) { setError('Enter your PLP staff access code.'); return false; }
     setLoading(true); setError(''); setNotice('');
     try {
       // The session response is the authentication gate: nothing renders until the server verifies access.
@@ -170,11 +173,20 @@ export default function PlpAdminApp() {
         newRequests: got.requests ? (got.requests.hasMore ? got.requests.rows.length + '+' : got.requests.rows.length) : null,
       });
       if (results.some(result => result.status === 'rejected')) setNotice('Some records could not be loaded. Refresh to retry.');
-      setCode(codeToUse); setSession(who); setSyncAt(new Date());
+      setCode(codeToUse); setSession(who); setSyncAt(new Date()); return true;
     } catch (err) {
       setError(err.message || 'Staff access could not be verified.');
       if (!session || err.status === 401 || err.status === 403) { pearlFile.reset(); setSession(null); }
+      return false;
     } finally { setLoading(false); }
+  }
+
+  async function enterAdmin(codeToUse, viaAccount) {
+    if (viaAccount) setAccountSession(true);
+    const ok = await load(codeToUse, viaAccount);
+    if (!ok) return;
+    const next = safeNextPath(new URLSearchParams(window.location.search).get('next'));
+    if (next) window.location.replace(next);
   }
 
   function logout() {
@@ -200,14 +212,24 @@ export default function PlpAdminApp() {
   const closeSheet = useCallback(() => setSheet(null), []);
   const closeSelected = useCallback(() => setSelected(null), []);
 
-  if (!session) return <div className="plp-admin-login"><div className="plp-admin-login__mark"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" width="54" height="76" className="plp-admin-login__crest" /><div>PLP <span>·</span> ADMINISTRATION</div></div><form onSubmit={(event) => { event.preventDefault(); load(code, false); }} className="plp-admin-login__card">
+  if (!session) return <div className="plp-admin-login"><div className="plp-admin-login__mark"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" width="54" height="76" className="plp-admin-login__crest" /><div>PLP <span>·</span> ADMINISTRATION</div></div><div className="plp-admin-login__card">
     <span className="plp-eyebrow">Pueblo La Perla Boracay</span><h1>Private resort administration.</h1>
-    {authConfig.sharedCode !== false && <><label htmlFor="plp-admin-code">Staff access code</label><input id="plp-admin-code" autoComplete="off" type="password" value={code} onChange={(event) => setCode(event.target.value)} placeholder="Enter access code" />
-    <button className="plp-primary" disabled={loading} type="submit"><LockKeyhole size={17} /> {loading ? 'Verifying access…' : 'Open PLP Admin'}</button></>}
+    {!authReady && <p>Checking sign-in options…</p>}
+    {authReady && authConfig.individualAccounts && <StaffAccountSignIn onSignedIn={() => enterAdmin('', true)} />}
+    {authReady && authConfig.sharedCode !== false && authConfig.individualAccounts && !useSharedCode && <>
+      <p className="plp-admin-login__or" role="separator">or</p>
+      <button type="button" className="plp-admin-login__secondary" onClick={() => { setUseSharedCode(true); setError(''); }}>Use staff code</button>
+    </>}
+    {authReady && authConfig.sharedCode !== false && (!authConfig.individualAccounts || useSharedCode) && <form onSubmit={(event) => { event.preventDefault(); enterAdmin(code, false); }}>
+      {authConfig.individualAccounts && <p className="plp-admin-login__or" role="separator">or</p>}
+      <label htmlFor="plp-admin-code">Staff access code</label>
+      <input id="plp-admin-code" autoComplete="off" type="password" value={code} onChange={(event) => setCode(event.target.value)} placeholder="Enter access code" />
+      <button className="plp-primary" disabled={loading} type="submit"><LockKeyhole size={17} /> {loading ? 'Verifying access…' : 'Open PLP Admin'}</button>
+      {authConfig.individualAccounts && <button type="button" className="plp-admin-login__secondary" onClick={() => setUseSharedCode(false)}>Use work email</button>}
+    </form>}
     {error && <p className="plp-form-error" role="alert">{error}</p>}
-    {authConfig.individualAccounts && <StaffAccountSignIn onSignedIn={() => { setAccountSession(true); load('', true); }} />}
     <small>For authorized PLP staff. Access ends when this tab closes.</small>
-  </form></div>;
+  </div></div>;
 
   const screens = visibleScreens(permissions);
   const current = SCREENS.find(item => item.id === screen);
