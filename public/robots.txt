@@ -8,6 +8,12 @@ Disallow: /content-ops.html
 Disallow: /photo-library.html
 Disallow: /owner
 Disallow: /plp-growth-plan.html
+Disallow: /plp-growth-plan
+Disallow: /growth-plan
+Disallow: /tg
+Disallow: /telegram
+Disallow: /booking/success
+Disallow: /booking/cancel
 Disallow: /subscribe
 
 User-agent: Bingbot
@@ -20,6 +26,12 @@ Disallow: /content-ops.html
 Disallow: /photo-library.html
 Disallow: /owner
 Disallow: /plp-growth-plan.html
+Disallow: /plp-growth-plan
+Disallow: /growth-plan
+Disallow: /tg
+Disallow: /telegram
+Disallow: /booking/success
+Disallow: /booking/cancel
 Disallow: /subscribe
 
 User-agent: *
@@ -32,6 +44,12 @@ Disallow: /content-ops.html
 Disallow: /photo-library.html
 Disallow: /owner
 Disallow: /plp-growth-plan.html
+Disallow: /plp-growth-plan
+Disallow: /growth-plan
+Disallow: /tg
+Disallow: /telegram
+Disallow: /booking/success
+Disallow: /booking/cancel
 Disallow: /subscribe
 
 Sitemap: https://plp-boracay.vercel.app/sitemap.xml

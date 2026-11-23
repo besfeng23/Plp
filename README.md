@@ -26,6 +26,14 @@ npm run dev
 npm run build
 ```
 
+## Public site
+
+Guest pages use clean URLs such as `/accommodation` and `/booking`. Legacy `.html`
+addresses redirect to those URLs. Unknown addresses return a dedicated 404 page,
+not the homepage. Public URLs are listed in `public/sitemap.xml`. Internal pages
+(`/admin`, `/owner`, the Growth Plan, and payment return pages) are excluded from
+the sitemap and listed in `public/robots.txt`.
+
 ## Reservation pricing
 
 The public rate catalog in `lib/pricing.js` supplies the accommodation pages,
@@ -93,8 +101,8 @@ can enable the separate site subscription feature by setting
 ## Optional guest analytics
 
 Set `PLP_POSTHOG_PROJECT_TOKEN`, `PLP_POSTHOG_HOST` and
-`PLP_GA4_MEASUREMENT_ID` in the intended Vercel environment. Set each provider
-in its own project or property. Use a separate destination for preview tests.
+`NEXT_PUBLIC_GA_MEASUREMENT_ID` (read by `api/plp.js?action=analytics-config`)
+in the intended Vercel environment. Set each provider in its own project or property. Use a separate destination for preview tests.
 Disable enhanced measurement in the GA4 stream so the site sends each page
 view once. The public tracker waits for consent and tracks only allowed pages
 and actions. It excludes guest fields, dates and payment routes.

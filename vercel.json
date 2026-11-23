@@ -63,6 +63,10 @@
         {
           "key": "Cache-Control",
           "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
         }
       ]
     },
@@ -72,6 +76,10 @@
         {
           "key": "Cache-Control",
           "value": "no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
         }
       ]
     },
@@ -140,6 +148,114 @@
           "value": "noindex, nofollow, noarchive"
         }
       ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/admin/",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/admin.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/admin-ops.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/subscribe",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/subscribe/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/tg",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/tg/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/telegram",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/plp-growth-plan",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/plp-growth-plan.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/growth-plan",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
     }
   ],
   "redirects": [
@@ -192,6 +308,161 @@
       "source": "/photo-library.html",
       "destination": "/admin",
       "permanent": false
+    },
+    {
+      "source": "/accommodation.html",
+      "destination": "/accommodation",
+      "permanent": true
+    },
+    {
+      "source": "/accommodation/grand-ocean-villa.html",
+      "destination": "/accommodation/grand-ocean-villa",
+      "permanent": true
+    },
+    {
+      "source": "/accommodation/smart-room-premium.html",
+      "destination": "/accommodation/smart-room-premium",
+      "permanent": true
+    },
+    {
+      "source": "/accommodation/sunset-suite.html",
+      "destination": "/accommodation/sunset-suite",
+      "permanent": true
+    },
+    {
+      "source": "/booking.html",
+      "destination": "/booking",
+      "permanent": true
+    },
+    {
+      "source": "/booking/cancel.html",
+      "destination": "/booking/cancel",
+      "permanent": true
+    },
+    {
+      "source": "/booking/success.html",
+      "destination": "/booking/success",
+      "permanent": true
+    },
+    {
+      "source": "/boracay-family-villa/index.html",
+      "destination": "/boracay-family-villa",
+      "permanent": true
+    },
+    {
+      "source": "/boracay-villa-with-private-pool/index.html",
+      "destination": "/boracay-villa-with-private-pool",
+      "permanent": true
+    },
+    {
+      "source": "/boracay-wellness-stay/index.html",
+      "destination": "/boracay-wellness-stay",
+      "permanent": true
+    },
+    {
+      "source": "/club.html",
+      "destination": "/club",
+      "permanent": true
+    },
+    {
+      "source": "/contact.html",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/exclusive-offer.html",
+      "destination": "/exclusive-offer",
+      "permanent": true
+    },
+    {
+      "source": "/experiences.html",
+      "destination": "/experiences",
+      "permanent": true
+    },
+    {
+      "source": "/gallery.html",
+      "destination": "/gallery",
+      "permanent": true
+    },
+    {
+      "source": "/getting-here.html",
+      "destination": "/getting-here",
+      "permanent": true
+    },
+    {
+      "source": "/high-boracay-location/index.html",
+      "destination": "/high-boracay-location",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy.html",
+      "destination": "/privacy-policy",
+      "permanent": true
+    },
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy-policy",
+      "permanent": true
+    },
+    {
+      "source": "/privacy/index.html",
+      "destination": "/privacy-policy",
+      "permanent": true
+    },
+    {
+      "source": "/private-villas-boracay/index.html",
+      "destination": "/private-villas-boracay",
+      "permanent": true
+    },
+    {
+      "source": "/reservation-policy.html",
+      "destination": "/reservation-policy",
+      "permanent": true
+    },
+    {
+      "source": "/reservation-policy/index.html",
+      "destination": "/reservation-policy",
+      "permanent": true
+    },
+    {
+      "source": "/senior-living.html",
+      "destination": "/senior-living",
+      "permanent": true
+    },
+    {
+      "source": "/terms-of-service.html",
+      "destination": "/terms-of-service",
+      "permanent": true
+    },
+    {
+      "source": "/terms.html",
+      "destination": "/terms-of-service",
+      "permanent": true
+    },
+    {
+      "source": "/terms/index.html",
+      "destination": "/terms-of-service",
+      "permanent": true
+    },
+    {
+      "source": "/vip-package",
+      "destination": "/exclusive-offer",
+      "permanent": true
+    },
+    {
+      "source": "/vip-package/",
+      "destination": "/exclusive-offer",
+      "permanent": true
+    },
+    {
+      "source": "/vip-package.html",
+      "destination": "/exclusive-offer",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -442,10 +713,6 @@
     {
       "source": "/accommodation/smart-room-premium/",
       "destination": "/accommodation/smart-room-premium.html"
-    },
-    {
-      "source": "/((?!api/|tg/|telegram/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
-      "destination": "/index.html"
     }
   ],
   "functions": {

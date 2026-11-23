@@ -55,3 +55,11 @@ accounts replace it), `SUPABASE_SERVICE_ROLE_KEY`, `PAYPAL_CLIENT_SECRET`, `RESE
 - Database history, the reconstructed booking baseline, the "Supabase Preview" check and recovery: `docs/database/plp-database-reproducibility.md`.
 - Dependencies are pinned to exact versions and `package-lock.json` is committed. CI installs with `npm ci`, so a build uses exactly the versions that were tested.
   To upgrade: `npm install <pkg>@<version>`, run `npm test && npm run build`, then commit both files.
+
+## 6. Public site and search
+
+- Guest pages use clean URLs (for example `/accommodation`, not `/accommodation.html`). Legacy `.html` addresses redirect to the clean URL.
+- Unknown addresses return a real 404 page, not the homepage.
+- Internal surfaces (`/admin`, `/owner`, the Growth Plan, payment return pages, `/subscribe`, `/tg`) are marked noindex and listed in `robots.txt`.
+- Public URLs are listed in `public/sitemap.xml`.
+
