@@ -130,6 +130,10 @@ html[data-admin-experience="plp-enterprise-admin"] body { margin: 0; background:
 .plp-admin-login__card input { display: block; width: 100%; border: 1px solid #dad7ca; background: #fff; padding: 14px; margin-bottom: 16px; }
 .plp-admin-login__card .plp-primary { width: 100%; }
 .plp-admin-login__card small { display: block; text-align: center; margin-top: 20px; font-size: 10px; line-height: 1.5; color: var(--plp-muted); }
+.plp-admin-login__or { display: flex; align-items: center; gap: 12px; margin: 28px 0 4px; color: var(--plp-muted); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+.plp-admin-login__or::before, .plp-admin-login__or::after { content: ""; flex: 1; height: 1px; background: var(--plp-line); }
+.plp-admin-login__secondary { display: block; width: 100%; margin-top: 4px; border: 0; background: none; color: var(--plp-muted); min-height: 44px; font-size: 12px; letter-spacing: .04em; text-decoration: underline; text-underline-offset: 3px; }
+.plp-admin-login__secondary:hover { color: var(--plp-ink); }
 .plp-dialog-backdrop { position: fixed; inset: 0; z-index: 100; background: #10110fa8; display: grid; justify-items: end; }
 .plp-dialog { width: min(100%,530px); height: 100dvh; overflow-y: auto; padding: clamp(20px,3vw,34px); background: var(--plp-paper); box-shadow: -20px 0 60px #0002; }
 .plp-dialog header { display: flex; justify-content: space-between; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid var(--plp-line); }
