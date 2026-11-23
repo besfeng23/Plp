@@ -29,11 +29,16 @@ Each area shows a few tiles; tap a tile for its details. The round PLP crest (bo
 3. **Calendar** — room availability, blocked dates (block or reopen dates) and housekeeping.
 4. **Guests & Requests** — concierge requests, the guest directory and staff tasks.
 5. **Pearl Club** — the Boracay club register and the club workbook.
-6. **Growth & Marketing** — the marketing plan and its progress.
+6. **Growth & Marketing** — the growth plan and the official Facebook, Instagram and TikTok accounts.
 7. **Reports & Documents** — month in review, website interest and analytics, and a link to your Private Office.
 8. **People & Access** — owners and staff accounts, roles, removals and access history (owners only, once individual accounts are switched on).
 
 Channel sync (OTA) and the camera view are not shown: they are not verified as live and stay hidden until they are.
+
+## Growth Plan
+Open **https://plp-boracay.vercel.app/plp-growth-plan** (or *Growth plan* in the Private Office menu) after signing in to the Private Office. Only owners can open it.
+Until shared tracking is switched on, the plan shows **"Saved on this device"**: progress is kept in that browser only — use *Export tracker CSV* to share it.
+Once switched on, both owners see the same progress, with who changed each task and when; progress saved on a device can be added with one click.
 
 ## Understanding payments
 - Every room is **USD 1,000 per night**. Guests pay a **30% deposit** online through PayPal.

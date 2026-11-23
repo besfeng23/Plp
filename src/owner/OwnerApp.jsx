@@ -284,6 +284,7 @@ function PrivateOffice({onSignOut}) {
     <div className="owner-sidebar-person"><small>OWNER ACCOUNT</small><strong>{owner?.name||'Owner'}</strong><span>Executive oversight</span></div>
     <nav aria-label="Private Office sections">{nav.map(([key,Icon,label])=><button type="button" key={key} aria-current={tab===key?'page':undefined} className={'owner-nav-link'+(tab===key?' active':'')} onClick={()=>navigate(key)}><Icon size={18} strokeWidth={1.65}/>{label}</button>)}</nav>
     <a className="owner-nav-link owner-admin-link" href="/admin">PLP Administration</a>
+    <a className="owner-nav-link owner-admin-link" href="/plp-growth-plan">Growth plan</a>
     <div className="owner-sidebar-footer"><ShieldCheck size={15}/> Private, verified owner session</div>
   </aside>
   {mobile&&<button className="owner-overlay" aria-label="Close navigation" onClick={()=>setMobile(false)}/>}

@@ -183,12 +183,39 @@ body{font-size:13px;background:#f7f8f9}
 .post select{margin-top:10px}.post input{margin-top:7px}
 .post-proof{display:block;font-size:11px;margin-top:7px;overflow-wrap:anywhere}
 .post small{color:#7d8790;font-size:10px}
+
+/* PLP design language: warm ivory, thin warm borders, bronze accents, serif titles, square corners. */
+:root{--ink:#20211e;--muted:#615f57;--brand:#2a2219;--line:#e6dccb;--panel:#fffdf8;--canvas:#faf8f3;--chip:#f4efe5;--blue:#86683a}
+body{font-family:"DM Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3,.kicker,.brand strong{font-family:"Libre Baskerville",Georgia,serif;font-weight:400}
+h1{letter-spacing:.06em;text-transform:uppercase}
+h2{letter-spacing:.04em}
+.section,.metric,.notice,.guide,.post,.pipeline-card,.work-phase,.command-item,.checkrow,.result-cell,.table-wrap,.flag,.jump-btn,.tools button,.toolbar input,.toolbar select,.status-select,.post select,.post input,.task-more input,.quick,.owner-capsule,.readonly-callout,.command-section,.overview-utility button,button{border-radius:2px!important;box-shadow:none!important}
+.sidebar{background:var(--canvas);border-right:0}
+.brand{border-bottom:0}.brand .crest{flex:0 0 30px}
+.nav button[aria-current="page"]{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)!important}
+.nav button[aria-current="page"] .bullet{background:var(--blue)}
+.sidebar-foot{border-top:0}
+.sidebar-links{display:grid;gap:4px;padding:0 10px}.sidebar-links a{color:var(--ink);font-weight:700;text-decoration:none;padding:6px 0}.sidebar-links a::after{content:" \2192";color:var(--blue)}
+.social-title{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sidebar-foot .plp-social{justify-content:flex-start!important;margin:0 0 14px!important}
+.topline{border-bottom:0!important;background:linear-gradient(var(--canvas),rgba(250,248,243,0))}
+.notice{background:rgba(255,253,248,.7);border:1px solid var(--line);color:var(--muted)}
+.notice.is-shared{border-color:#cfc19f}.notice.is-device{border-color:#d8b98a;background:#fff8ec;color:#5e4a2a}.notice.is-warning{border-color:#c98e7d;color:#7b3b2e}
+.import-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:-6px 0 18px;padding:12px 14px;border:1px solid var(--line);background:var(--panel);font-size:13px}
+.import-row[hidden]{display:none!important}
+.import-row button{border:1px solid var(--ink);background:var(--ink);color:var(--panel);padding:8px 12px;font-weight:700}
+.task-edit{display:grid;grid-template-columns:1fr 150px;gap:8px;margin-top:8px}.task-edit label{display:grid;gap:3px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.task-edit input{border:1px solid var(--line);min-height:34px;padding:5px 8px;font-size:12px;text-transform:none;letter-spacing:0}
+.changed{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+a{color:var(--blue)}
+@media (max-width:600px){.task-edit{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="shell">
 <aside class="sidebar" aria-label="Tracker navigation">
-<div class="brand"><div class="monogram">PLP</div><div><strong>Social Media Marketing</strong><small>30-day execution tracker · V3</small></div></div>
+<div class="brand"><img class="crest" src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" width="30" height="42"><div><strong>Growth Plan</strong><small>Marketing · V3</small></div></div>
 <div class="navtitle">TRACKER VIEWS</div>
 <nav class="nav" id="sideNav" aria-label="Tracker views">
 <button type="button" data-view="overview" aria-current="page"><span class="bullet"></span>Owner overview</button>
@@ -197,8 +224,9 @@ body{font-size:13px;background:#f7f8f9}
 <button type="button" data-view="owner"><span class="bullet"></span>Owner inputs</button>
 <button type="button" data-view="results"><span class="bullet"></span>Results</button>
 </nav>
+<div class="sidebar-links"><a href="/admin">PLP Administration</a><a href="/owner">Owner Office</a></div>
 <div class="sidebar-foot">
-<strong>V3 — Approved direction</strong><div>Planning baseline: 23 Nov 2026</div><div>First campaign week: 23–29 Nov</div><div>Property compliance handled by owner; not a marketing task.</div>
+<div class="social-title">Official accounts</div><!--PLP_SOCIAL--><strong>V3 — Approved direction</strong><div>Planning baseline: 23 Nov 2026</div><div>First campaign week: 23–29 Nov</div><div>Property compliance handled by owner; not a marketing task.</div>
 </div>
 </aside>
 <main class="main">
@@ -206,12 +234,12 @@ body{font-size:13px;background:#f7f8f9}
 <div class="crumb">Pueblo La Perla Boracay <span aria-hidden="true">/</span> <b>Social media marketing</b> <span aria-hidden="true">/</span> Tracker</div>
 <div class="tools utility-actions">
 <button type="button" id="exportCsv" title="Export task statuses to a spreadsheet">Export tracker CSV</button>
-<button type="button" id="resetEdits" title="Clear only changes saved on this device">Reset local edits</button>
+<button type="button" id="resetEdits" title="Clear progress saved on this device" hidden>Clear this device</button>
 </div>
 </header>
 <div class="masthead"><div class="kicker">PROJECT TRACKER · 23 NOV–23 DEC 2026 · V3 LOCKED</div><h1>Social Media & Booking Growth Plan</h1>
 <p><strong>Prepared for the PLP owners.</strong> A working tracker of the PLP marketing launch, showing owner decisions, the team's immediate priorities, content production, deadlines and results. <strong>Not the PLP website.</strong></p></div>
-<div class="notice"><strong>Tracking note:</strong> Starting statuses are planning assumptions, not verified live progress. Status edits and notes are saved <strong>on this device only</strong>; they are not shared across visitors or synced with the PLP enterprise system. Export CSV to hand off changes. Only mark tasks Done after checking evidence.</div>
+<div class="notice" id="syncState" role="status">Loading progress…</div><div class="import-row" id="importRow" hidden></div>
 <div class="metrics" aria-label="Plan summary">
 <div class="metric"><div class="metric-label">Tasks marked done</div><b id="doneCount">0 / 0</b><small>Manual tracker status, not automatic verification</small><div class="progressbar"><div id="progressFill" style="width:0%"></div></div></div>
 <div class="metric"><div class="metric-label">Awaiting information</div><b id="needsCount">—</b><small>Confirm missing details before publishing related claims</small></div>
@@ -224,7 +252,7 @@ body{font-size:13px;background:#f7f8f9}
 <div class="section-head"><div><h2 id="tasks-title">Full execution task list</h2><p>Scope: booking path, content production, Facebook / Instagram, distribution, concierge follow-up and measurement.</p></div>
 <div class="toolbar"><input id="taskSearch" type="search" placeholder="Search tasks…" aria-label="Search tasks"><select id="phaseFilter" aria-label="Filter phase"><option value="">All phases</option><option>First 48 hours</option><option>Launch week</option><option>Week 2</option><option>Ongoing</option></select><select id="statusFilter" aria-label="Filter status"><option value="">All statuses</option><option>Planned</option><option>Needs info</option><option>In progress</option><option>Blocked</option><option>Done</option></select></div></div>
 <div class="table-wrap"><table id="taskTable"><thead><tr><th>ID</th><th style="width:39%">Task / deliverable</th><th>Workstream</th><th>Responsible</th><th>Target</th><th>Status</th></tr></thead><tbody id="taskBody"></tbody></table></div>
-<div class="guide"><span class="indicator"></span>All dates are targets, not evidence that something has happened. Expand each task for its acceptance check and a private working note. Changes on this page are not visible to Doc on another device unless exported and shared.</div>
+<div class="guide"><span class="indicator"></span>All dates are targets, not evidence that something has happened. Expand each task for its acceptance check and a private working note. <span id="guideSync"></span></div>
 </div>
 </section>
 
@@ -305,14 +333,14 @@ const TASKS=[
 ["11","Produce video 1 — arrival to view","Show authentic entrance, route into stay area and actual view.","Content","Content team","2026-11-26","Launch week","Planned","Verified property walkthrough and clear enquiry CTA."],
 ["12","Produce video 2 — beach access","Explain factual transfer route and evening return logistics.","Content","Content team","2026-11-27","Launch week","Planned","Transport details verified before any captions or timings go live."],
 ["13","Produce video 3 — rooms and sleeping capacity","Show bedrooms, bathrooms, shared areas and accurate occupancy.","Content","Content team","2026-11-29","Launch week","Planned","Real space matches bookable accommodation; capacity verified."],
-["14","Approve copy and calls to action","Create short captions with one official enquiry destination.","Content","Marketing / owner","2026-11-26","Launch week","No incorrect prices, services, staff roles, claims or available dates."],
-["15","Publish or schedule three launch videos","Post approved property proof to official Facebook and Instagram accounts.","Social","Marketing team","2026-11-29","Launch week","Actual links and timestamps recorded after successful publishing."],
+["14","Approve copy and calls to action","Create short captions with one official enquiry destination.","Content","Marketing / owner","2026-11-26","Launch week","Planned","No incorrect prices, services, staff roles, claims or available dates."],
+["15","Publish or schedule three launch videos","Post approved property proof to official Facebook and Instagram accounts.","Social","Marketing team","2026-11-29","Launch week","Planned","Actual links and timestamps recorded after successful publishing."],
 ["16","Build genuine property photo lookbook","Use approved photographs of actual bookable spaces.","Content","Marketing + property","2026-12-02","Week 2","Planned","Proofed room images and accurate unit names; easy to share with enquiries."],
-["17","Set up useful Facebook/Instagram highlights","Include access, accommodation, enquiries and genuine FAQs.","Social","Marketing team","2026-12-02","Week 2","Published content is accurate and reaches official channels."],
-["18","Evaluate Airbnb / appropriate villa platforms","Assess eligibility, real commissions, operational readiness and inventory sync.","Distribution","Marketing + reservations","2026-12-03","Week 2","Make an informed platform choice before any new listing goes live."],
-["19","Review creator and travel-advisor partners","Shortlist relevant authentic creators and qualified travel sellers.","Distribution","Marketing team","2026-12-05","Week 2","Clear commercial rationale; no free stays or paid placements without approval."],
-["20","Prepare December social media calendar","Batch approved property posts and answer recurring guest questions.","Social","Marketing team","2026-12-06","Week 2","Next 30 days are planned; time-sensitive offers rechecked."],
-["21","Connect authorized post scheduler","Use Meta Business Suite or connected scheduler for approved content.","Social","Marketing team","2026-12-06","Week 2","Authorized accounts connected; actual scheduled items can be inspected."],
+["17","Set up useful Facebook/Instagram highlights","Include access, accommodation, enquiries and genuine FAQs.","Social","Marketing team","2026-12-02","Week 2","Planned","Published content is accurate and reaches official channels."],
+["18","Evaluate Airbnb / appropriate villa platforms","Assess eligibility, real commissions, operational readiness and inventory sync.","Distribution","Marketing + reservations","2026-12-03","Week 2","Planned","Make an informed platform choice before any new listing goes live."],
+["19","Review creator and travel-advisor partners","Shortlist relevant authentic creators and qualified travel sellers.","Distribution","Marketing team","2026-12-05","Week 2","Planned","Clear commercial rationale; no free stays or paid placements without approval."],
+["20","Prepare December social media calendar","Batch approved property posts and answer recurring guest questions.","Social","Marketing team","2026-12-06","Week 2","Planned","Next 30 days are planned; time-sensitive offers rechecked."],
+["21","Connect authorized post scheduler","Use Meta Business Suite or connected scheduler for approved content.","Social","Marketing team","2026-12-06","Week 2","Planned","Authorized accounts connected; actual scheduled items can be inspected."],
 ["22","Set up basic source capture on enquiries","Record whether genuine leads originated on Facebook, Instagram or other channels.","Enquiries","Implementation","2026-12-07","Ongoing","Planned","Source retained only where known and with appropriate privacy handling."],
 ["23","Review first 5–10 genuine conversations","Identify which questions delay or prevent a confirmed stay.","Enquiries","Marketing + concierge","2026-12-10","Ongoing","Blocked","Analyze only once real enquiries exist; do not invent a dataset."],
 ["24","Evaluate small paid-media test","Define test budget, approved dates, channel and stop/scale rules.","Advertising","Marketing / owner","2026-12-10","Ongoing","Blocked","No ad creation or spend before owner approval and working booking path."],
@@ -337,13 +365,65 @@ const POSTS=[
 ];
 const KEY="plp_marketing_tracker_v3_local_20261123";
 const allowed=["Planned","Needs info","In progress","Blocked","Done"];
-let stored={};
-try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");if(x&&typeof x==="object"&&!Array.isArray(x)) stored=x;}catch(e){}
+/* Progress storage. "central": shared with every owner through /api/plp?action=growth
+   (plp_growth_tasks). "device": the shared table is not switched on yet, so progress
+   stays in this browser and is clearly labelled "saved on this device". */
+const API="/api/plp?action=growth&operation=tasks";
+let mode="loading";
+function readDevice(){try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");if(x&&typeof x==="object"&&!Array.isArray(x))return x;}catch(e){}return {};}
+let stored=readDevice();
+const TASK_IDS=TASKS.map(function(t){return t[0];});
+function resp(t){const v=stored[t[0]]||{};return v.owner?String(v.owner).slice(0,80):t[4];}
+function due(t){const v=stored[t[0]]||{};return /^\d{4}-\d{2}-\d{2}$/.test(v.due||"")?v.due:t[5];}
 function value(t){const v=stored[t[0]]||{};return allowed.includes(v.status)?v.status:t[7];}
 function note(t){const v=stored[t[0]]||{};return typeof v.note==="string"?v.note.slice(0,500):"";}
 function safe(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 function slug(s){return "p-"+s.toLowerCase().replace(/ /g,"-");}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(stored));return true;}catch(e){return false;}}
+function saveDevice(){try{localStorage.setItem(KEY,JSON.stringify(stored));return true;}catch(e){return false;}}
+const timers={};
+function sendItem(id){
+const rec=stored[id]||{};const isPost=id.indexOf("post-")===0;
+const t=isPost?null:TASKS.find(function(x){return x[0]===id;});
+const status=isPost?(POST_STATES.includes(rec.status)?rec.status:"Proposed"):(allowed.includes(rec.status)?rec.status:t[7]);
+return fetch(API,{method:"PATCH",credentials:"same-origin",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({item:id,status:status,note:rec.note||"",proof:rec.proof||"",owner:rec.owner||"",due:rec.due||""})})
+.then(function(r){return r.json().catch(function(){return {};}).then(function(d){if(!r.ok||d.ok===false)throw new Error(d.error||"Not saved");if(d.item){rec.by=d.item.by;rec.at=d.item.at;stored[id]=rec;}setSync();return true;});});
+}
+function persist(id,immediate){
+if(mode!=="central"){saveDevice();return Promise.resolve(true);}
+if(!id)return Promise.resolve(true);
+clearTimeout(timers[id]);
+return new Promise(function(resolve){timers[id]=setTimeout(function(){sendItem(id).then(resolve).catch(function(err){flash(err.message+" — reloading shared progress.");loadShared().then(function(){resolve(false);});});},immediate?0:700);});
+}
+function flash(text){const el=document.getElementById("syncState");el.textContent=text;el.className="notice is-warning";setTimeout(setSync,5000);}
+function setSync(){
+const el=document.getElementById("syncState"),g=document.getElementById("guideSync"),reset=document.getElementById("resetEdits");
+if(mode==="central"){const latest=Object.keys(stored).map(function(k){return stored[k];}).filter(function(v){return v&&v.at;}).sort(function(a,b){return String(b.at).localeCompare(String(a.at));})[0];
+el.className="notice is-shared";el.textContent="Shared progress — every owner sees the same tracker."+(latest?" Last change "+String(latest.at).slice(0,16).replace("T"," ")+" UTC by "+latest.by+".":"");g.textContent="Changes are shared with every owner.";reset.hidden=true;}
+else{el.className="notice is-device";el.textContent="Saved on this device — shared progress starts once the database update is approved. Export CSV to share.";g.textContent="Progress is saved on this device only.";reset.hidden=false;}
+}
+function offerImport(device){
+const row=document.getElementById("importRow");
+const keys=Object.keys(device).filter(function(k){return (TASK_IDS.includes(k)||/^post-\d+$/.test(k))&&device[k]&&(device[k].status||device[k].note)&&!stored[k];});
+if(!keys.length){row.hidden=true;return;}
+row.hidden=false;row.innerHTML='<span>'+keys.length+' item'+(keys.length===1?'':'s')+' saved on this device are not in the shared tracker yet.</span><button type="button" id="importBtn">Add them to the shared tracker</button>';
+document.getElementById("importBtn").addEventListener("click",function(){
+const btn=this;btn.disabled=true;let chain=Promise.resolve(),failed=0;
+keys.forEach(function(k){chain=chain.then(function(){stored[k]=Object.assign({},device[k]);return sendItem(k).catch(function(){failed++;delete stored[k];});});});
+chain.then(function(){row.innerHTML='<span>'+(keys.length-failed)+' added'+(failed?', '+failed+' need attention (for example a Done task without an evidence note)':'')+'. Your device copy is kept.</span>';rerender();});
+});
+}
+function loadShared(){
+return fetch(API,{credentials:"same-origin",cache:"no-store"}).then(function(r){
+if(r.status===401){location.href="/plp-growth-plan.html";return null;}
+return r.json();
+}).then(function(d){
+if(!d)return;
+if(d.ok&&d.storage==="central"){const device=readDevice();mode="central";stored=d.items||{};offerImport(device);}
+else{mode="device";stored=readDevice();}
+setSync();rerender();
+}).catch(function(){mode="device";stored=readDevice();setSync();rerender();});
+}
+function rerender(){metrics();renderTasks();renderOwner();renderCalendar();}
 function setView(view){
 document.querySelectorAll(".view").forEach(function(el){el.classList.toggle("active",el.id==="view-"+view)});
 document.querySelectorAll("#sideNav button").forEach(function(b){if(b.dataset.view===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
@@ -365,7 +445,7 @@ return '<div class="command-item"><div class="command-index">'+String(index+1).p
 }
 function renderBrief(){
 const completed=TASKS.filter(function(t){return value(t)==="Done";}).length;
-document.getElementById("launchState").textContent="Tracker progress: "+completed+" of "+TASKS.length+" tasks marked done locally.";
+document.getElementById("launchState").textContent="Tracker progress: "+completed+" of "+TASKS.length+" tasks marked done.";
 const videoCompleted=VIDEO_ITEMS.filter(function(x){return value(itemById(x[0]))==="Done";}).length;
 document.getElementById("videoLaunchStatus").textContent=videoCompleted+" of 3 video tasks marked done";
 document.getElementById("decisionBoard").innerHTML=commandRows(COMMAND_OWNER);
@@ -401,7 +481,7 @@ COMMAND_OWNER.forEach(function(x){lines.push("• "+x[1]+": "+value(itemById(x[0
 lines.push("","LAUNCH ITEMS");
 COMMAND_LAUNCH.forEach(function(x){lines.push("• "+x[1]+": "+value(itemById(x[0])));});
 lines.push("","Videos: "+VIDEO_ITEMS.map(function(x){return x[1]+" ("+value(itemById(x[0]))+")";}).join("; "));
-lines.push("Plan link: https://plp-boracay.vercel.app/plp-growth-plan.html");
+lines.push("Plan link: https://plp-boracay.vercel.app/plp-growth-plan (owners only)");
 const output=lines.join("\n");
 try{await navigator.clipboard.writeText(output);document.getElementById("shareMessage").textContent="Copied";}catch(e){
 window.prompt("Copy this owner status update:",output);
@@ -423,7 +503,7 @@ let phase=document.getElementById("phaseFilter").value;
 let filter=document.getElementById("statusFilter").value;
 let list=TASKS.filter(function(t){return (!q||t.join(" ").toLowerCase().includes(q)||note(t).toLowerCase().includes(q))&&(!phase||t[6]===phase)&&(!filter||value(t)===filter);});
 document.getElementById("taskBody").innerHTML=list.length?list.map(function(t){
-return '<tr><td class="id">'+safe(t[0])+'</td><td><div class="task-title">'+safe(t[1])+'</div><div class="task-desc">'+safe(t[2])+'</div><details class="task-more"><summary>Acceptance check / working note</summary><div>'+safe(t[8])+'</div><input type="text" maxlength="500" data-note="'+safe(t[0])+'" aria-label="Local note for task '+safe(t[0])+'" placeholder="Optional note (saved on this device)"></details></td><td>'+safe(t[3])+'<span class="two-line">'+safe(t[6])+'</span></td><td>'+safe(t[4])+'</td><td class="due">'+safe(t[5])+'</td><td><select class="status-select" data-status="'+safe(t[0])+'" aria-label="Status of '+safe(t[1])+'">'+allowed.map(function(s){return '<option'+(value(t)===s?' selected':'')+'>'+safe(s)+'</option>';}).join("")+'</select><div style="margin-top:6px"><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div></td></tr>';
+return '<tr><td class="id">'+safe(t[0])+'</td><td><div class="task-title">'+safe(t[1])+'</div><div class="task-desc">'+safe(t[2])+'</div><details class="task-more"><summary>Acceptance check / working note</summary><div>'+safe(t[8])+'</div><input type="text" maxlength="500" data-note="'+safe(t[0])+'" aria-label="Note for task '+safe(t[0])+'" placeholder="Evidence or working note"><div class="task-edit"><label>Responsible<input type="text" maxlength="80" data-owner="'+safe(t[0])+'" value="'+safe(resp(t))+'"></label><label>Target<input type="date" data-due="'+safe(t[0])+'" value="'+safe(due(t))+'"></label></div>'+((stored[t[0]]||{}).by?'<small class="changed">Last change by '+safe(stored[t[0]].by)+'</small>':'')+'</details></td><td>'+safe(t[3])+'<span class="two-line">'+safe(t[6])+'</span></td><td>'+safe(resp(t))+'</td><td class="due">'+safe(due(t))+'</td><td><select class="status-select" data-status="'+safe(t[0])+'" aria-label="Status of '+safe(t[1])+'">'+allowed.map(function(s){return '<option'+(value(t)===s?' selected':'')+'>'+safe(s)+'</option>';}).join("")+'</select><div style="margin-top:6px"><span class="pill '+slug(value(t))+'">'+safe(value(t))+'</span></div></td></tr>';
 }).join(""):'<tr><td colspan="6" class="empty">No tasks match these filters.</td></tr>';
 list.forEach(function(t){const i=document.querySelector('input[data-note="'+t[0]+'"]');if(i)i.value=note(t);});
 }
@@ -435,11 +515,16 @@ if(el.value==="Done" && (!state.note || state.note.trim().length<8)){
 const evidence=window.prompt("What did you verify before marking this task Done? Enter a short evidence note (at least 8 characters).",state.note||"");
 if(!evidence || evidence.trim().length<8){el.value=value(t);return;}state.note=evidence.trim().slice(0,500);
 }
-state.status=el.value;stored[id]=state;persist();metrics();renderTasks();renderOwner();renderCalendar();
+state.status=el.value;stored[id]=state;persist(id,true);metrics();renderTasks();renderOwner();renderCalendar();
 });
 document.getElementById("taskBody").addEventListener("input",function(e){
 const el=e.target;if(!el.matches("[data-note]"))return;
-const id=el.dataset.note;const state=stored[id]||{};state.note=el.value.slice(0,500);stored[id]=state;persist();
+const id=el.dataset.note;const state=stored[id]||{};state.note=el.value.slice(0,500);stored[id]=state;persist(id);
+});
+document.getElementById("taskBody").addEventListener("change",function(e){
+const el=e.target;const id=el.dataset.owner||el.dataset.due;if(!id)return;
+const state=stored[id]||{};if(el.dataset.owner)state.owner=el.value.slice(0,80);else state.due=/^\d{4}-\d{2}-\d{2}$/.test(el.value)?el.value:"";
+stored[id]=state;persist(id,true);metrics();renderOwner();
 });
 ["taskSearch","phaseFilter","statusFilter"].forEach(function(id){document.getElementById(id).addEventListener(id==="taskSearch"?"input":"change",renderTasks);});
 function renderOwner(){
@@ -470,7 +555,7 @@ const rec=stored["post-"+i]||{};if(el.value==="Published"&&!validProof(rec.proof
 const proof=window.prompt("Paste the actual published Facebook/Instagram post URL. Do not mark Published without proof.",rec.proof||"");
 if(!proof||!validProof(proof)){renderCalendar();return;}rec.proof=proof.trim().slice(0,1000);
 }
-rec.status=el.value;stored["post-"+i]=rec;persist();renderCalendar();
+rec.status=el.value;stored["post-"+i]=rec;persist("post-"+i,true);renderCalendar();
 });
 function exportContentCsv(){
 const rows=[["Target","Channel","Post","Brief","Format","Status","Published proof URL"]].concat(POSTS.map(function(p,i){return [p[0],p[1],p[2],p[3],p[4],postState(i),postProof(i)];}));
@@ -482,16 +567,17 @@ setTimeout(function(){URL.revokeObjectURL(url);},4000);
 document.getElementById("exportPosts").addEventListener("click",exportContentCsv);
 function csvCell(v){const x=String(v===undefined?"":v);return '"'+x.replace(/"/g,'""').replace(/^[=+\-@]/,"'$&")+'"';}
 document.getElementById("exportCsv").addEventListener("click",function(){
-const rows=[["ID","Task","Description","Workstream","Responsible","Target date","Phase","Status","Acceptance check","Local note"]].concat(TASKS.map(function(t){return [t[0],t[1],t[2],t[3],t[4],t[5],t[6],value(t),t[8],note(t)];}));
+const rows=[["ID","Task","Description","Workstream","Responsible","Target date","Phase","Status","Acceptance check","Note","Last changed by","Last changed (UTC)","Saved"]].concat(TASKS.map(function(t){const v=stored[t[0]]||{};return [t[0],t[1],t[2],t[3],resp(t),due(t),t[6],value(t),t[8],note(t),v.by||"",v.at?String(v.at).slice(0,16).replace("T"," "):"",mode==="central"?"Shared":"This device"];}));
 const csv="\uFEFF"+rows.map(function(row){return row.map(csvCell).join(",");}).join("\r\n");
 const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="PLP-Social-Marketing-V3-Tracker.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},4000);
 });
 document.getElementById("resetEdits").addEventListener("click",function(){
-if(!confirm("Clear only the local task-status and note edits on this browser? The shared site remains unchanged."))return;
+if(mode==="central")return;
+if(!confirm("Clear the progress saved on this device? Export CSV first if you need it."))return;
 stored={};try{localStorage.removeItem(KEY);}catch(e){}
 metrics();renderTasks();renderOwner();renderCalendar();
 });
-metrics();renderTasks();renderOwner();renderCalendar();setView("overview");
+rerender();setView("overview");loadShared();
 })();
 </script>
 </body>

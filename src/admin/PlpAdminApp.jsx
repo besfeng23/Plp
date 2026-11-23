@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ArrowLeft, ArrowRight, BedDouble, BookOpen, CalendarDays, CalendarX, ClipboardList, ConciergeBell, CreditCard, FileText, FolderLock, Gem, History, KeyRound, LineChart, ListChecks, LockKeyhole, LogOut, Megaphone, Menu, RefreshCw, Search, Server, ShieldCheck, Sun, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
+import { SOCIAL_ICON_PATHS } from '../../lib/social.js';
 import { SCREENS, TILES, visibleScreens, visibleTiles } from './adminNavigation.js';
 import ConciergeInbox from './ConciergeInbox.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
@@ -17,12 +18,14 @@ import useWorkingFile from './pearl/useWorkingFile.js';
 import './plp-enterprise-admin.css';
 import './plp-admin.css';
 
+const socialIcon = key => function SocialIcon({ size = 28, strokeWidth = 1.25 }) { return <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" dangerouslySetInnerHTML={{ __html: SOCIAL_ICON_PATHS[key] }} />; };
 const SCREEN_ICONS = { today: Sun, reservations: BookOpen, calendar: CalendarDays, guests: ConciergeBell, club: Gem, growth: Megaphone, reports: FileText, people: ShieldCheck };
 const ICONS = {
   arrivals: ArrowRight, 'in-house': BedDouble, departures: ArrowLeft, attention: ListChecks, requests: ConciergeBell, tasks: ClipboardList, activity: Activity,
   all: BookOpen, upcoming: CalendarDays, payments: CreditCard, revenue: Wallet, availability: CalendarDays, blocks: CalendarX, 'block-new': LockKeyhole, housekeeping: BedDouble,
   inbox: ConciergeBell, directory: Users, register: Users, workbook: Gem, plan: Megaphone, month: Wallet, interest: LineChart, analytics: Activity, history: History, office: FolderLock,
   people: Users, grant: UserPlus, 'access-history': History, owners: KeyRound, system: Server,
+  facebook: socialIcon('facebook'), instagram: socialIcon('instagram'), tiktok: socialIcon('tiktok'),
 };
 
 async function adminRequest(action, code, { method = 'GET', body, query } = {}) {
@@ -74,7 +77,7 @@ function StaffAccountSignIn({ onSignedIn }) {
 function Tile({ tile, value, onOpen, screen = false }) {
   const Icon = (screen ? SCREEN_ICONS[tile.id] : ICONS[tile.id]) || ArrowRight;
   const inner = <><span className="plp-adm-tile__top"><Icon size={28} strokeWidth={1.25} aria-hidden="true" />{value !== undefined && value !== null && <b>{value}</b>}</span><span className="plp-adm-tile__label">{tile.label}<ArrowRight size={16} strokeWidth={1.6} aria-hidden="true" /></span></>;
-  if (tile.href) return <a className="plp-adm-tile" href={tile.href} target={tile.href.startsWith('/owner') ? undefined : '_blank'} rel="noopener">{inner}</a>;
+  if (tile.href) return <a className="plp-adm-tile" href={tile.href} target={tile.href.startsWith('https://') ? '_blank' : undefined} rel="noopener noreferrer">{inner}</a>;
   return <button type="button" className="plp-adm-tile" onClick={onOpen}>{inner}</button>;
 }
 

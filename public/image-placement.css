@@ -325,3 +325,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Official social accounts (injected by scripts/prepare-plp-static-pages.mjs) */
+.plp-social{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:14px 0 4px}
+.plp-social a{display:inline-grid;place-items:center;width:44px;height:44px;border:1px solid rgba(138,109,59,.55);border-radius:50%;color:#8a6d3b;text-decoration:none}
+.plp-social a:hover{background:rgba(138,109,59,.08)}
+.plp-social-footer{padding:22px 16px calc(96px + env(safe-area-inset-bottom));text-align:center}

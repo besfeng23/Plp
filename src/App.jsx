@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import SocialLinks from './SocialLinks.jsx';
 import { Anchor, CheckCircle2, ChevronLeft, ChevronRight, MapPin, Menu, Plane, Users, X } from 'lucide-react';
 import HomeView from './HomeView.jsx';
 import ConciergeView from './ConciergeView.jsx';
@@ -140,6 +141,7 @@ function PublicFooter({ navigate }) {
       <div><p className='mb-5 text-xs uppercase tracking-[0.2em] text-[#D0BE7A]'>Inquiries</p>
         <a href={'mailto:' + CONCIERGE_EMAIL} className='block text-sm text-white/90 hover:underline'>{CONCIERGE_EMAIL}</a>
         <a href={'tel:' + CONCIERGE_NUMBER} className='mt-2 block text-sm text-white/90 hover:underline'>{CONCIERGE_NUMBER_DISPLAY}</a>
+        <SocialLinks className='plp-social--footer mt-5' />
         <PageLink target='booking' navigate={navigate} className='mt-6 inline-flex min-h-11 items-center border-b border-white text-xs uppercase tracking-[0.2em] hover:border-[#D0BE7A] hover:text-[#D0BE7A]'>Reserve</PageLink>
         <PageLink target='contact' navigate={navigate} className='mt-3 block text-sm text-white/70 hover:text-white'>General inquiry</PageLink>
         <div className='mt-6 flex flex-col gap-3 text-sm text-white/70'><PageLink target='privacy-policy' navigate={navigate} className='hover:text-white'>Privacy Policy</PageLink><PageLink target='terms-of-service' navigate={navigate} className='hover:text-white'>Terms of Service</PageLink></div>

@@ -6,3 +6,4 @@ so no integration picks them up. Production database changes require Mark's expl
 | File | Purpose | Needed for |
 |---|---|---|
 | `20261123060000_plp_auth_v2_staff_roles.sql` | Individual staff roles + append-only access audit | Manager/staff accounts under `PLP_AUTH_V2_ENABLED`. Without it, only owners (allow-list) can use individual sign-in; the shared code keeps working. |
+| `20261123070000_plp_growth_tasks.sql` | Shared Growth Plan task progress + append-only change history | Owners seeing the same tracker progress. Without it, `/plp-growth-plan` keeps progress per browser, labelled "saved on this device". |
