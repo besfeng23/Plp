@@ -10,7 +10,7 @@ const publicDir = path.join(root, 'public');
 
 const accommodationRates = new Map(PLP_ROOMS.map(room => [room.key, room.rate]));
 // Internal pages never receive guest-site post-processing (trust strip, reserve bar, analytics).
-const excludePatterns = [/photo-library/i, /admin/i, /ops/i, /growth-plan/i];
+const excludePatterns = [/photo-library/i, /admin/i, /ops/i, /growth-plan/i, /^404\.html$/];
 
 const trustStrip = `<section class="plp-trust-strip" data-plp-trust-strip="true" aria-label="Reservation trust details"><div class="plp-trust-strip__inner"><div><span>Location</span><strong>High Boracay</strong></div><div><span>Booking</span><strong>Room + dates first</strong></div><div><span>Arrival</span><strong>Port transfer support</strong></div><div><span>Concierge</span><strong>${conciergeEmail}</strong></div></div></section>`;
 const mobileAction = `<nav class="plp-mobile-action" data-plp-mobile-action="true" aria-label="Quick site navigation"><a href="/booking">Book</a><a href="/accommodation">Rooms</a><a href="/contact">Help</a></nav>`;
@@ -39,6 +39,34 @@ function ensureViewportFit(html) {
     const separator = content.trim() ? ', ' : '';
     return tag.replace(content, `${content}${separator}viewport-fit=cover`);
   });
+}
+
+const DEFAULT_OG_IMAGE = `${SITE.url || 'https://plp-boracay.vercel.app'}/images/plp-hero-sunset.webp`;
+const attr = value => String(value).replace(/&(?!amp;|lt;|gt;|quot;|#)/g, '&amp;').replace(/"/g, '&quot;');
+
+// Every guest page gets Open Graph / Twitter tags built from its own title, description and canonical URL.
+export function ensureOpenGraph(html) {
+  if (html.includes('property="og:title"')) return html;
+  const title = html.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim();
+  const description = html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1];
+  const url = html.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i)?.[1];
+  if (!title || !url) return html;
+  const tags = [
+    ['property', 'og:type', 'website'], ['property', 'og:site_name', 'Pueblo La Perla Boracay'],
+    ['property', 'og:url', url], ['property', 'og:title', title],
+    ...(description ? [['property', 'og:description', description]] : []),
+    ['property', 'og:image', DEFAULT_OG_IMAGE],
+    ['property', 'og:image:alt', 'Sunset aerial view of Pueblo La Perla Boracay hillside villas above the sea'],
+    ['name', 'twitter:card', 'summary_large_image'], ['name', 'twitter:title', title],
+    ...(description ? [['name', 'twitter:description', description]] : []),
+    ['name', 'twitter:image', DEFAULT_OG_IMAGE],
+  ].map(([kind, key, value]) => `  <meta ${kind}="${key}" content="${attr(value)}" />`).join('\n');
+  return html.replace('</head>', `${tags}\n</head>`);
+}
+
+export function ensureRobots(html) {
+  if (/<meta\s+name=["']robots["']/i.test(html)) return html;
+  return html.replace('</head>', '  <meta name="robots" content="index,follow" />\n</head>');
 }
 
 function ensureTopReserve(html) {
@@ -106,7 +134,8 @@ async function main() {
   for (const route of ['boracay-villa-with-private-pool', 'private-villas-boracay', 'boracay-family-villa', 'boracay-wellness-stay', 'high-boracay-location', 'privacy', 'terms', 'reservation-policy']) {
     const file = path.join(publicDir, route, 'index.html');
     const original = await fs.readFile(file, 'utf8');
-    const rendered = ensureSocialLinks(renderRates(original), route + '/index.html');
+    let rendered = ensureSocialLinks(renderRates(original), route + '/index.html');
+    rendered = ensureRobots(ensureOpenGraph(rendered));
     if (rendered !== original) await fs.writeFile(file, rendered, 'utf8');
   }
 
@@ -122,6 +151,8 @@ async function main() {
     html = ensureMobileAction(html, page.name);
     html = ensureRoomSpecificBookingLinks(html, page.name);
     html = ensureSocialLinks(html, page.name);
+    html = ensureOpenGraph(html);
+    html = ensureRobots(html);
     html = renderRates(html);
     html = syncContactDetails(html);
 

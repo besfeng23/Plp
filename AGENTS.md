@@ -37,12 +37,13 @@ For public guest-facing work involving UX, navigation, copy, images, routes, gal
 
 ## Admin-system rules
 
-Admin work lives primarily around the Resort Command surfaces.
+Admin work lives in the single PLP Administration shell.
 
 Known admin files may include:
 
-- `src/admin/OpsAdminApp.jsx`
-- `public/admin-ops.html`
+- `src/admin/PlpAdminApp.jsx`
+- `src/admin/adminNavigation.js`
+- `public/admin-ops.html` (legacy Resort Command tools, not linked from the main shell)
 - `/api/admin` routes and related server files
 
 Admin priorities:

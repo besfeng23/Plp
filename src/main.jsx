@@ -12,6 +12,10 @@ function RevealMountedApp() {
     // its footer. The error boundary uses a standalone main instead.
     if (document.getElementById('root')?.querySelector('main, footer')) {
       document.documentElement.classList.add('plp-app-ready');
+      // The static shell carries its own <h1> for no-JS visitors and crawlers. Once the app is
+      // visible, remove it after the fade so the rendered page has exactly one <h1>.
+      const shell = document.querySelector('.initial-shell');
+      if (shell) window.setTimeout(() => shell.remove(), 260);
     }
   }, []);
   return null;
