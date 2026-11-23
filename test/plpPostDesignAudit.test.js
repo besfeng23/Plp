@@ -62,7 +62,7 @@ test('Club remains a proposed Boracay pilot with higher-reading-size copy and se
 
 test('admin dashboard derives signals only through staff-authenticated endpoints',()=>{
   const app=file('src/admin/PlpEnterpriseAdminApp.jsx'),css=file('src/admin/plp-enterprise-admin.css');
-  assert.ok(app.includes("headers = { 'X-PLP-Staff-Code': code }"));
+  assert.ok(app.includes("headers = code ? { 'X-PLP-Staff-Code': code } : {}"));
   assert.ok(app.includes("action: 'concierge-inbox', status: 'NEW', scope"));
   assert.ok(app.includes("item.status === 'PUBLISHED'"));
   assert.ok(app.includes("refreshedAt={syncAt}"));

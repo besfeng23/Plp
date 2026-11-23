@@ -39,7 +39,7 @@ test('Club enquiries and server dispatcher restored without opening public membe
   const leads = source('api/leads.js');
   assert.doesNotMatch(leads, /body\.topic === 'club' \|\| body\.topic === 'club-activity'/);
   const club = source('lib/club-handler.js');
-  assert.match(club, /if \(!staff\(req\)\) return reply\(res, 403/);
+  assert.match(club, /if \(!\(await staff\(req\)\)\) return reply\(res, 403/);
   assert.match(club, /operation === 'apply'/);
   assert.match(club, /status: 'PENDING'/);
   assert.match(source('src/ClubView.jsx'), /Applications can be reviewed now/i);
