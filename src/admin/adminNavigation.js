@@ -9,7 +9,7 @@ export const SCREENS = [
   { id: 'calendar', label: 'Calendar', note: 'Room availability, blocked dates and housekeeping.' },
   { id: 'guests', label: 'Guests & Requests', note: 'Guest records, concierge requests and follow-up.' },
   { id: 'club', label: 'Pearl Club', note: 'Boracay membership applications and activities.' },
-  { id: 'growth', label: 'Growth & Marketing', note: 'The growth plan and the official social accounts.' },
+  { id: 'growth', label: 'Growth & Marketing', note: 'Official social accounts and items still waiting on the owners.' },
   { id: 'reports', label: 'Reports & Documents', note: 'Results, website analytics and owner documents.' },
   { id: 'people', label: 'People & Access', note: 'Who can sign in, and what each person can do.' },
 ];
@@ -47,7 +47,6 @@ export const TILES = {
     { id: 'workbook', label: 'Club workbook', perm: 'club' },
   ],
   growth: [
-    { id: 'plan', label: 'Growth plan', perm: 'growth', href: '/plp-growth-plan' },
     // Official social accounts, from lib/site-config.js only.
     ...socialProfiles().map(p => ({ id: p.key, label: p.label, perm: 'growth', href: p.url })),
   ],
@@ -65,6 +64,15 @@ export const TILES = {
     { id: 'system', label: 'System status', perm: 'system' },
   ],
 };
+
+// The four commercial inputs from the retired Growth Plan. Shown on this
+// screen only; they are not a checklist and are not stored in the database.
+export const OWNER_CONFIRMATIONS = [
+  { id: 'rates', title: 'Rates + capacity', detail: 'Approved prices, inclusions and maximum occupancy for each bookable unit.' },
+  { id: 'dates', title: 'Available dates', detail: 'Current December–February inventory and who can confirm reservations.' },
+  { id: 'transport', title: 'Arrival + transport', detail: 'Actual address/access, beach route and available evening transport.' },
+  { id: 'payments', title: 'Official payments', detail: 'Approved deposit method and the authorized recipient or payment link.' },
+];
 
 export function visibleTiles(screen, permissions = []) {
   return (TILES[screen] || []).filter(tile => permissions.includes(tile.perm));
