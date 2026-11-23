@@ -9,22 +9,23 @@
     "preview": "vite preview",
     "check:routes": "node scripts/audit-plp-routes.mjs",
     "check:viewport": "node scripts/check-viewport-fit.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "verify:db": "bash scripts/verify-db-migrations.sh"
   },
   "dependencies": {
-    "@vercel/analytics": "latest",
-    "@vercel/functions": "latest",
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "lucide-react": "latest",
+    "@vercel/analytics": "2.0.1",
+    "@vercel/functions": "3.11.3",
+    "@vitejs/plugin-react": "6.3.0",
+    "vite": "8.3.8",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "lucide-react": "1.77.0",
     "posthog-js": "1.450.0"
   },
   "devDependencies": {
-    "sharp": "latest",
-    "tailwindcss": "^3.4.17",
-    "postcss": "latest",
-    "autoprefixer": "latest"
+    "sharp": "0.35.5",
+    "tailwindcss": "3.4.19",
+    "postcss": "8.5.33",
+    "autoprefixer": "10.7.0"
   }
 }

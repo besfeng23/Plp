@@ -4,9 +4,6 @@ node_modules/
 # Build output
 dist/
 
-# Lockfile (project pins deps with "latest"; no lockfile is committed)
-package-lock.json
-
 # Build-generated images (regenerated from tracked PNG sources by
 # scripts/optimize-plp-images.mjs during `npm run build`)
 public/images/plp-hero-sunset.webp
