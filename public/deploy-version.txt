@@ -1,3 +1,0 @@
-PLP deployment trigger
-Timestamp: 2026-06-26
-Includes build-time WebP optimization and image map update.
