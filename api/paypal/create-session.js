@@ -6,6 +6,7 @@
 // that delegates here, because the public booking form still POSTs to that path.
 import { createPayPalPaymentRecord } from './_db.js';
 import { isCheckoutAllowed } from '../../lib/paypal-checkout-policy.js';
+import { PLP_CURRENCY, bookingAmounts } from '../../lib/pricing.js';
 import { SafePayPalError, createPayPalOrder, getBaseUrlSource, getPayPalMode } from './_paypal.js';
 import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured, selectRows } from '../_supabase.js';
 
@@ -113,9 +114,25 @@ export default async function handler(req, res) {
       }, req, booking.reference);
     }
 
-    // Never trust a client-supplied deposit amount: the checkout order is always created
-    // for the deposit already computed and persisted server-side by /api/bookings.
-    const authoritativeBooking = { ...booking, deposit: persistedBooking.deposit_amount_php, paymentDue: persistedBooking.deposit_amount_php };
+    // Never trust a client-supplied amount. The deposit is recomputed from the
+    // server catalog (USD 1,000/night, 30%) and must equal the persisted record;
+    // any disagreement stops checkout before PayPal is contacted.
+    const amounts = bookingAmounts(persistedBooking);
+    if (!amounts.matchesCatalog || !amounts.expected) {
+      return safeCheckoutStartupError(res, 409, {
+        code: 'PRICE_MISMATCH',
+        detail: 'The reservation amount does not match the current rate. Please contact concierge.',
+      }, req, booking.reference);
+    }
+    const authoritativeBooking = {
+      ...booking,
+      accommodation: persistedBooking.accommodation_name,
+      checkIn: persistedBooking.check_in,
+      checkOut: persistedBooking.check_out,
+      deposit: amounts.expected.deposit,
+      paymentDue: amounts.expected.deposit,
+      currency: PLP_CURRENCY,
+    };
 
     const order = await createPayPalOrder({ booking: authoritativeBooking, req });
     const session = {

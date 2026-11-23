@@ -77,12 +77,13 @@ test('audit contrast colors exceed WCAG AA 4.5:1 for normal text',()=>{
   assert.ok(contrast('#6b5a35','#faf9f5')>=4.5);
 });
 
-test('unapproved tariffs are labelled provisional without altering pricing or checkout contracts',()=>{
+test('owner-approved USD 1,000 tariff is labelled in USD without altering pricing or checkout contracts',()=>{
   const rate=file('lib/pricing.js'),rooms=file('public/accommodation.html'),booking=file('booking.html');
   for(const tier of ['premium: 1000','mid: 1000','entry: 1000'])assert.ok(rate.includes(tier));
-  assert.ok(rooms.includes('Provisional website estimate / night'));
-  assert.ok(rooms.includes('Pending approved tariff'));
-  assert.ok(booking.includes('Provisional website estimate:'));
+  assert.ok(rooms.includes('Nightly rate (USD)'));
+  assert.ok(rooms.includes('USD per night · 30% deposit'));
+  assert.doesNotMatch(rooms+booking,/Pending approved tariff|awaiting an approved resort tariff/);
+  assert.ok(booking.includes('Rates in USD:'));
   assert.match(file('index.html'),/<title>Pueblo La Perla Boracay \| Private Hillside Villas<\/title>/);
 });
 

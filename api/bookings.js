@@ -1,7 +1,7 @@
 import { requireAvailability } from './_availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
-import { createBookingRecord, getSupabaseConfigError, isSupabaseConfigured } from './_supabase.js';
-import { PLP_ROOMS, quoteStay } from '../lib/pricing.js';
+import { createBookingRecord, isSupabaseConfigured } from './_supabase.js';
+import { PLP_CURRENCY, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, todayAtResort } from '../lib/booking-dates.js';
 import { createBookingReference } from '../lib/booking-reference.js';
 
@@ -68,7 +68,6 @@ export default async function handler(req, res) {
     };
 
     let databaseRecord = null;
-    let databaseWarning = null;
     let availability = null;
     if (isSupabaseConfigured()) {
       availability = await requireAvailability({ accommodationName: booking.accommodation, checkIn: booking.checkIn, checkOut: booking.checkOut });
@@ -79,7 +78,9 @@ export default async function handler(req, res) {
       booking.databaseId = databaseRecord.id;
       booking.persisted = true;
     } else {
-      databaseWarning = getSupabaseConfigError();
+      // An unsaved request must never look accepted: no hold, no checkout.
+      console.error('[plp-booking] reservation storage is not configured');
+      return res.status(503).json({ ok: false, error: 'Your request could not be saved. Please contact concierge.' });
     }
 
     let notifications = null;
@@ -93,14 +94,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      booking,
+      currency: PLP_CURRENCY,
+      booking: { ...booking, currency: PLP_CURRENCY },
       availabilityChecked: Boolean(availability),
       databaseRecord,
-      databaseWarning,
+      databaseWarning: null,
       notifications,
-      note: booking.persisted
-        ? 'Booking request accepted, availability-held, and persisted. Continue to the secure deposit checkout.'
-        : 'Booking request accepted but not persisted. Add Supabase environment variables in Vercel.',
+      note: 'Booking request accepted, availability-held, and persisted. Continue to the secure deposit checkout.',
     });
   } catch (error) {
     if (error.code === '23P01' || /overlaps active inventory|not available for those dates/i.test(error.message)) {
