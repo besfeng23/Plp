@@ -216,7 +216,6 @@ function PrivateOffice({onSignOut}) {
     try{const r=await ownerRequest('staff-directory');setStaff(r.staff||[]);setStaffStatus('ready');}
     catch(err){setStaffStatus('error');if(err.status===401)onSignOut(true);}
   }
-  async function decideItem(itemId,payload){
   async function loadDocuments(){
     setDocumentsStatus('loading');setDocumentsError('');
     try{const r=await ownerRequest('documents',{op:'list'});setDocuments(r.documents||[]);setDocumentsStatus('ready');}
@@ -228,7 +227,7 @@ function PrivateOffice({onSignOut}) {
     try{
       const intent=await ownerRequest('documents',{method:'POST',body:{op:'upload-intent',name:file.name,mime:file.type,size:file.size,chapter:meta.chapter,item_id:meta.item_id||null}});
       documentId=intent.document_id;
-      const response=await fetch(intent.upload_url,{method:'POST',headers:{'Content-Type':file.type,'x-upsert':'false'},body:file,cache:'no-store'});
+      const response=await fetch(intent.upload_url,{method:'PUT',headers:{'Content-Type':file.type,'x-upsert':'false'},body:file,cache:'no-store'});
       if(!response.ok)throw new Error('The signed upload did not complete.');
       await ownerRequest('documents',{method:'POST',body:{op:'complete',document_id:documentId}});
       await loadDocuments();
@@ -246,6 +245,7 @@ function PrivateOffice({onSignOut}) {
     try{await ownerRequest('documents',{method:'PATCH',body:{op:'archive',document_id:documentId}});await loadDocuments();}
     catch(e){setDocumentsError(e.message);throw e;}finally{setDocumentsBusy(false);}
   }
+  async function decideItem(itemId,payload){
     setItemsBusy(true);setItemsError('');
     try{await ownerRequest('decide',{method:'POST',body:{id:itemId,...payload}});await loadItems();await loadApprovals();}
     catch(e){setItemsError(e.message);throw e;}finally{setItemsBusy(false);}
