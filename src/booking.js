@@ -324,7 +324,7 @@ async function submitReservation(event) {
   } catch (error) {
     status.className = 'status error';
     status.textContent = booking
-      ? 'Your reservation request was saved. You may retry secure deposit checkout using the same request, or contact concierge. The stay is not confirmed.'
+      ? 'Your reservation request was saved' + (booking.reference ? ' (reference ' + booking.reference + ')' : '') + ', but deposit checkout did not open. No payment was taken and the stay is not confirmed. You may retry checkout with the same request, or contact concierge.'
       : error.message;
   } finally {
     setSubmitting(false);
@@ -332,15 +332,20 @@ async function submitReservation(event) {
 }
 
 for (const room of PLP_ROOMS) {
-  element('roomSelect').add(new Option(room.name + ' · ' + formatUsd(room.rate) + ' / night', room.key));
+  element('roomSelect').add(new Option(room.name, room.key));
 }
 element('roomSelect').value = selected.key;
+function showRoomMeta() {
+  element('roomMeta').textContent = formatUsd(selected.rate) + ' per night · up to ' + selected.capacity + ' guests';
+}
+showRoomMeta();
 element('guests').max = selected.capacity;
 const initialGuests = requestedGuests(new URLSearchParams(location.search).get('guests'), selected.capacity);
 if (initialGuests !== null) element('guests').value = initialGuests;
 element('depositRate').textContent = '(' + Math.round(PLP_DEPOSIT_RATE * 100) + '%)';
 element('roomSelect').addEventListener('change', () => {
   selected = PLP_ROOMS.find(room => room.key === element('roomSelect').value);
+  showRoomMeta();
   const guests = element('guests');
   guests.max = selected.capacity;
   if (Number(guests.value) > selected.capacity) guests.value = selected.capacity;

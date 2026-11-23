@@ -1,4 +1,7 @@
 (() => {
+  // One analytics setup per page, even if the script tag is included twice.
+  if (window.__plpAnalyticsLoaded) return;
+  window.__plpAnalyticsLoaded = true;
   const consentKey = 'plp_analytics_consent_v2';
   const events = new Set(['click_reserve', 'booking_interest', 'click_email', 'click_phone', 'select_room', 'start_booking', 'submit_booking', 'booking_created', 'submit_enquiry', 'submit_club_enquiry', 'submit_residential_interest']);
   const pages = new Set([
@@ -115,6 +118,7 @@
     consent = value;
     if (!analyticsPanel) return;
     analyticsPanel.hidden = value === 'allow' || value === 'decline';
+    reserveSpace();
     if (value === 'allow') {
       if (googleTag) googleTag('consent', 'update', { ...noAds, analytics_storage: 'granted' });
       postHog?.opt_in_capturing({ captureEventName: false });
@@ -138,6 +142,30 @@
     applyConsent(value);
   }
 
+  // The floating notice must never sit on top of page content or the mobile action bar:
+  // it is lifted above any visible bar and the page gets matching bottom space while it shows.
+  // Pages that opt in with <body data-plp-consent="inline"> (the booking calendar) show it in the
+  // page flow instead, so it can never cover the calendar.
+  function bottomBarHeight() {
+    const bar = document.querySelector('.plp-mobile-action');
+    if (!bar) return 0;
+    const box = bar.getBoundingClientRect();
+    return box.height > 0 && getComputedStyle(bar).display !== 'none' ? box.height : 0;
+  }
+
+  function reserveSpace() {
+    if (!analyticsPanel || analyticsPanel.dataset.inline !== undefined) return;
+    const root = document.documentElement;
+    if (analyticsPanel.hidden) {
+      root.style.removeProperty('--plp-consent-offset');
+      document.body.style.removeProperty('padding-bottom');
+      return;
+    }
+    const offset = bottomBarHeight();
+    root.style.setProperty('--plp-consent-offset', offset + 'px');
+    document.body.style.paddingBottom = Math.ceil(analyticsPanel.offsetHeight + offset + 16) + 'px';
+  }
+
   function addSettings() {
     if (analyticsPanel) return;
     const css = document.createElement('link');
@@ -154,7 +182,16 @@
       const choice = event.target.dataset.choice;
       if (choice) setConsent(choice);
     });
-    document.body.append(analyticsPanel);
+    const inline = document.body.dataset.plpConsent === 'inline';
+    if (inline) {
+      analyticsPanel.dataset.inline = '';
+      const anchor = document.querySelector('.policy-card') || document.querySelector('main') || document.body;
+      if (anchor === document.body) document.body.append(analyticsPanel); else anchor.before(analyticsPanel);
+    } else {
+      document.body.append(analyticsPanel);
+      window.addEventListener('resize', reserveSpace, { passive: true });
+      requestAnimationFrame(reserveSpace);
+    }
 
     const settings = document.createElement('button');
     settings.type = 'button';
@@ -162,6 +199,7 @@
     settings.textContent = 'Analytics settings';
     settings.addEventListener('click', () => {
       analyticsPanel.hidden = false;
+      reserveSpace();
       analyticsPanel.querySelector('button').focus();
     });
     (document.querySelector('.policy-card') || document.querySelector('footer') || document.body).append(settings);
