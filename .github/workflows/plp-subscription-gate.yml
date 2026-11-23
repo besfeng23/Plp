@@ -20,11 +20,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
+          cache: npm
+      - name: Install dependencies (clean, from lockfile)
+        run: npm ci --no-audit --no-fund
       - name: Test
         run: npm test
       - name: Check viewport fit
         run: npm run check:viewport
       - name: Build
         run: npm run build
+
+  database:
+    # Rebuilds the PLP schema from migrations in a throwaway Postgres and runs booking/payment checks.
+    # No production credentials are used or available here.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: plp_verify
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Rebuild database from migrations and run checks
+        env:
+          PLP_VERIFY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/plp_verify
+        run: bash scripts/verify-db-migrations.sh

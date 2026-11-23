@@ -50,3 +50,8 @@ accounts replace it), `SUPABASE_SERVICE_ROLE_KEY`, `PAYPAL_CLIENT_SECRET`, `RESE
 - [ ] Individual staff accounts provisioned (see OPERATIONS_RUNBOOK.md › Access).
 - [ ] Account-by-account transfer per section 1, each followed by the section 3 rotation.
 - [ ] Billing responsibility recorded for Vercel, Supabase, PayPal fees and Resend.
+
+## 5. Database and builds
+- Database history, the reconstructed booking baseline, the "Supabase Preview" check and recovery: `docs/database/plp-database-reproducibility.md`.
+- Dependencies are pinned to exact versions and `package-lock.json` is committed. CI installs with `npm ci`, so a build uses exactly the versions that were tested.
+  To upgrade: `npm install <pkg>@<version>`, run `npm test && npm run build`, then commit both files.
