@@ -44,16 +44,20 @@
     .estimate-note strong { color:#353126; }
     :is(button,a,input,select,textarea):focus-visible { outline:2px solid #6b5a35; outline-offset:3px; }
     @media(max-width:480px){ .top .brand img{height:26px;width:26px} }
+    /* PR 9: room name and price both readable at 390px; consent kept out of the calendar */
+    .selector-card select { padding-bottom: 6px; text-overflow: ellipsis; }
+    .room-meta { display:block; padding:0 48px 20px 28px; font-size:13px; letter-spacing:.02em; color:#4a453d; }
+    .plp-analytics-consent[data-inline] { margin: 24px 0 0; }
+    @media(max-width:760px){ .room-meta{ padding-left:20px; } }
   </style>
-  <script src="/analytics.js" defer></script>
 </head>
-<body>
+<body data-plp-consent="inline">
   <header class="top"><div class="wrap top-inner"><a class="rooms-link" href="/accommodation">Rooms</a><a class="brand" href="/" aria-label="Pueblo La Perla Boracay home"><img src="/favicon.svg" alt="" width="36" height="36" /><strong>PLP</strong><span>Boracay</span></a><a class="close" href="/" aria-label="Close booking">×</a></div></header>
   <div class="bar"><div class="wrap bar-inner">Calendar</div></div>
   <main class="wrap booking">
     <form id="bookingForm">
       <section class="selector-card" aria-label="Stay details">
-        <label class="select-wrap"><span class="select-label">Accommodation</span><select id="roomSelect"></select></label>
+        <label class="select-wrap"><span class="select-label">Accommodation</span><select id="roomSelect" aria-describedby="roomMeta"></select><span class="room-meta" id="roomMeta"></span></label>
         <label class="select-wrap"><span class="select-label">Guests</span><input id="guests" type="number" min="1" value="2" required /></label>
       </section>
       <section class="calendar-card" id="calendar" aria-labelledby="calendarTitle" tabindex="-1">
