@@ -60,3 +60,5 @@ button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus
 @media(prefers-reduced-motion:reduce){.owner-sidebar{transition:none}}
 
 .owner-panel code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#f0eee7;padding:2px 5px;overflow-wrap:anywhere}
+
+.owner-admin-link{text-decoration:none;margin-top:14px}

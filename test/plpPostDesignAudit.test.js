@@ -14,7 +14,7 @@ const contrast = (a,b) => {
 };
 
 test('PLP brand mark uses official editorial crest in the React shell, with a favicon on static pages',()=>{
-  for (const path of ['src/App.jsx','src/admin/PlpEnterpriseAdminApp.jsx']) {
+  for (const path of ['src/App.jsx','src/admin/PlpAdminApp.jsx']) {
     const source = file(path);
     assert.ok(source.includes('/brand/PLP_Editorial_Vector_Logo.svg'), path);
     assert.ok(source.includes('/brand/PLP_Editorial_Reversed_Ivory.svg'), path);
@@ -61,13 +61,11 @@ test('Club remains a proposed Boracay pilot with higher-reading-size copy and se
 });
 
 test('admin dashboard derives signals only through staff-authenticated endpoints',()=>{
-  const app=file('src/admin/PlpEnterpriseAdminApp.jsx'),css=file('src/admin/plp-enterprise-admin.css');
-  assert.ok(app.includes("headers = code ? { 'X-PLP-Staff-Code': code } : {}"));
-  assert.ok(app.includes("action: 'concierge-inbox', status: 'NEW', scope"));
-  assert.ok(app.includes("item.status === 'PUBLISHED'"));
+  const app=file('src/admin/PlpAdminApp.jsx');
+  assert.ok(app.includes("headers: code ? { 'Content-Type': 'application/json', 'X-PLP-Staff-Code': code }"));
+  assert.ok(app.includes("adminRequest('concierge-inbox', codeToUse, { query: { status: 'NEW', scope: 'all' } })"));
   assert.ok(app.includes("refreshedAt={syncAt}"));
-  assert.ok(app.includes("data temporarily unavailable".replace(/^d/, 'D')));
-  assert.ok(css.includes('.plp-day-quicklinks__grid'));
+  assert.ok(app.includes("Some records could not be loaded"));
 });
 
 test('audit contrast colors exceed WCAG AA 4.5:1 for normal text',()=>{
