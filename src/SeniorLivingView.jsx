@@ -24,7 +24,7 @@ export default function SeniorLivingView() {
     <section className="mx-auto grid max-w-[1200px] gap-12 px-6 py-20 md:grid-cols-2 md:gap-20 md:px-12 md:py-28" aria-labelledby="senior-living-how">
       <div><p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-[#746130]">How the pathway works</p><h2 id="senior-living-how" className="font-serif text-4xl leading-tight md:text-6xl">Membership first. Admission separately.</h2></div>
       <div className="space-y-7 text-base leading-8 text-[#45413A]">
-        <p>Dr. Marichi Fong Ramos’s Pearl Club pathway begins with membership. Her team reviews membership applications individually. Residential admission is a separate decision: club membership does not guarantee a residential place.</p>
+        <p>The Pearl Club pathway begins with membership. The PLP team reviews membership applications individually. Residential admission is a separate decision: club membership does not guarantee a residential place.</p>
         <ol className="space-y-5 border-l border-[#746130]/40 pl-6">
           <li><strong>01 · Apply for Pearl Club membership.</strong> Submit an online application with your 60+ declaration and contact consent. Staff review each application; there is no payment at this stage.</li>
           <li><strong>02 · Explore membership activities.</strong> Check the published activity calendar and ask the team about attendance and community experiences.</li>

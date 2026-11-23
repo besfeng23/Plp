@@ -50,6 +50,7 @@ button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus
 .owner-login-card>.owner-login-notice{background:#f0ecdf;border-left:3px solid #897751;padding:11px;margin-top:18px}
 .owner-login-card form:not(.owner-login-otp) .owner-primary{width:100%;margin-top:20px}.owner-login-otp{margin:25px 0;display:grid;gap:10px}
 .owner-login-otp label{font-size:11px;color:#625d4f}.owner-login-otp div{display:flex;gap:8px}.owner-login-otp input{min-width:0;flex:1;border:1px solid #aba496;background:#fff;padding:10px;max-width:200px}
+.owner-login-email-label{display:block;font-size:11px;color:#625d4f;margin-top:18px}.owner-login-email{display:block;width:100%;box-sizing:border-box;border:1px solid #aba496;background:#fff;padding:11px;margin-top:6px;font:inherit}
 .owner-login-card small{display:block;color:#77746b;font-size:11px;line-height:1.65;margin-top:24px}
 .owner-overlay{display:none}
 @media(max-width:1200px){.owner-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-chapter-strip{grid-template-columns:1fr}}

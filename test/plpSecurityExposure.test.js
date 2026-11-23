@@ -72,10 +72,13 @@ test('unauthorized email addresses cannot trigger owner login and OTP is rate li
  const sent=[];const realFetch=globalThis.fetch;
  globalThis.fetch=async(url,opts={})=>{sent.push({url:String(url),body:opts.body?JSON.parse(opts.body):null});return {ok:true,status:200,json:async()=>({})};};
  try{
-  const first=res();await ownerHandler({method:'POST',query:{operation:'login'},headers:origin,body:{email:'attacker@evil.test'}},first);
+  const attacker=res();await ownerHandler({method:'POST',query:{operation:'login'},headers:origin,body:{email:'attacker@evil.test'}},attacker);
+  assert.equal(attacker.statusCode,202,'same reply as a real owner: no enumeration');
+  assert.equal(sent.length,0,'a non-owner address never receives a link');
+  resetOwnerThrottles();
+  const first=res();await ownerHandler({method:'POST',query:{operation:'login'},headers:origin,body:{}},first);
   assert.equal(first.statusCode,202);
   assert.equal(sent.length,1);assert.equal(sent[0].body.email,OWNER);
-  assert.doesNotMatch(JSON.stringify(sent),/attacker@evil\.test/);
   const second=res();await ownerHandler({method:'POST',query:{operation:'login'},headers:origin,body:{}},second);
   assert.equal(second.statusCode,429);assert.equal(sent.length,1,'throttled request never reaches Supabase');
   const cross=res();await ownerHandler({method:'POST',query:{operation:'login'},headers:{...origin,origin:'https://evil.test'},body:{}},cross);

@@ -20,8 +20,8 @@ test('future senior living has a real deep link and route-specific metadata', ()
 test('senior living is a concept with separate residential admission and no payment promises', () => {
   const page = source('src/SeniorLivingView.jsx');
   assert.match(page, /Membership first\. Admission separately\./);
-  assert.match(page, /Dr\. Marichi Fong Ramos’s Pearl Club pathway begins with membership/);
-  assert.match(page, /Her team reviews membership applications individually/);
+  assert.match(page, /The Pearl Club pathway begins with membership/);
+  assert.match(page, /The PLP team reviews membership applications individually/);
   assert.match(page, /club membership does not guarantee a residential place/);
   assert.match(page, /Residential accommodation and medical care are not yet available/);
   assert.match(page, /Residential accommodation, healthcare services and residential prices require separate authorization/);
