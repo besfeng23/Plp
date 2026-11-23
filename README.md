@@ -229,7 +229,7 @@ Payment verification reminders:
 Run after deploying with `PAYPAL_MODE=live` and live PayPal credentials set in
 Vercel Production:
 
-1. Open `GET /api/paypal/health` and confirm `mode` is `live` and every `has*`
+1. Open `GET /api/paypal/health` (staff only: send the `x-plp-staff-code` header; anonymous requests get 401) and confirm `mode` is `live` and every `has*`
    field is `true`. It must never expose secret values.
 2. Open `/booking`, select a room, and compare the calendar, dropdown, stay
    total and deposit against the reservation pricing table above.

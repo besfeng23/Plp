@@ -27,9 +27,8 @@
     const $ = id => document.getElementById(id);
     let rows = [];
     let selected = null;
-    $('staffCode').value = localStorage.getItem('plp_staff_code') || '';
     function setStatus(text, ok) { $('statusText').className = 'status ' + (ok ? 'ok' : 'bad'); $('statusText').textContent = text; }
-    function headers() { const code = $('staffCode').value.trim(); if (code) localStorage.setItem('plp_staff_code', code); return { 'Content-Type': 'application/json', 'x-plp-staff-code': code }; }
+    function headers() { const code = $('staffCode').value.trim(); return { 'Content-Type': 'application/json', 'x-plp-staff-code': code }; }
     function renderList() { $('sectionList').innerHTML = rows.map(row => `<button class="item ${selected && selected.section === row.section ? 'active' : ''}" data-section="${row.section}"><strong>${row.section}</strong><span>${row.status || 'DRAFT'} · ${row.updated_at || 'not saved'}</span></button>`).join('') || '<p class="help">No content sections loaded.</p>'; document.querySelectorAll('.item').forEach(button => button.onclick = () => { selected = rows.find(row => row.section === button.dataset.section); loadIntoEditor(selected); renderList(); }); }
     function loadIntoEditor(row) { $('sectionName').value = row?.section || ''; $('status').value = row?.status || 'DRAFT'; $('updatedBy').value = row?.updated_by || ''; $('contentJson').value = JSON.stringify(row?.content || {}, null, 2); }
     async function loadContent() { setStatus('Loading content...', true); const response = await fetch(endpoint, { headers: headers() }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || 'Unable to load content.'); rows = data.content || []; selected = rows[0] || null; renderList(); if (selected) loadIntoEditor(selected); setStatus('Content loaded.', true); }

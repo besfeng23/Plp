@@ -162,6 +162,36 @@
       "source": "/terms/",
       "destination": "/terms-of-service",
       "permanent": true
+    },
+    {
+      "source": "/content-ops",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/content-ops.html",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/availability-ops",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/availability-ops.html",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/photo-library",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/photo-library.html",
+      "destination": "/admin",
+      "permanent": false
     }
   ],
   "rewrites": [

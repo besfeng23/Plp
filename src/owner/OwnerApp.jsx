@@ -62,7 +62,7 @@ function LogIn({onAuthenticated}) {
  return <main className="owner-login">
    <div className="owner-login-aside"><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="Pueblo La Perla oval crest"/><span>PUEBLO LA PERLA · PRIVATE OFFICE</span><h1>A more considered view of your business.</h1><p>Resort performance, membership, decisions and expansion, together in one secure executive workspace.</p></div>
    <div className="owner-login-main"><div className="owner-login-card"><img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="" className="owner-login-crest"/><span className="owner-eyebrow">PRIVATE OWNER ACCESS</span>
-     <h2>Welcome, Doctora.</h2><p>This workspace is restricted to the verified PLP owner. A staff access code cannot open it.</p>
+     <h2>Welcome.</h2><p>This workspace is restricted to the verified PLP owner. A staff access code cannot open it.</p>
      <form onSubmit={send}><button className="owner-primary" disabled={state==='checking'||state==='sending'} type="submit"><LockKeyhole size={17}/> {state==='sending'?'Verifying…':state==='checking'?'Checking access…':'Send my private sign-in link'}</button></form>
      {message&&<p className="owner-login-notice" role="status">{message}</p>}
      {state!=='checking'&&<form onSubmit={verify} className="owner-login-otp"><label htmlFor="owner-otp">If your email contains a one-time code, enter it here</label><div><input id="owner-otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,8}" maxLength={8} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,''))} placeholder="6–8 digit code"/><button className="owner-secondary" disabled={state==='sending'||!/^[0-9]{6,8}$/.test(code)} type="submit">Verify code</button></div></form>}

@@ -20,7 +20,6 @@ const routeHtmlFiles = [
   { route: '/boracay-family-villa', file: 'public/boracay-family-villa/index.html' },
   { route: '/boracay-wellness-stay', file: 'public/boracay-wellness-stay/index.html' },
   { route: '/high-boracay-location', file: 'public/high-boracay-location/index.html' },
-  { route: '/photo-library', file: 'public/photo-library.html' },
 ];
 
 const viewportMetaPattern = /<meta\s+name=["']viewport["']\s+content=["']([^"']*)["']\s*\/?>/gi;

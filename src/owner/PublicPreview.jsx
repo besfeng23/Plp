@@ -76,7 +76,7 @@ export default function PublicPreview({onConnectPrivateData}) {
   return <div className="owner-app owner-preview">
     <aside className={'owner-sidebar'+(menuOpen?' is-open':'')} aria-label="Private Office preview navigation">
       <div className="owner-sidebar-brand"><img src="/brand/PLP_Editorial_Reversed_Ivory.svg" alt="Pueblo La Perla oval crest"/><div><span>PUEBLO LA PERLA</span><strong>Private Office</strong></div></div>
-      <div className="owner-sidebar-person"><small>OWNER OFFICE · PREVIEW</small><strong>Dr. Marichi Fong Ramos</strong><span>No passcode required to preview</span></div>
+      <div className="owner-sidebar-person"><small>OWNER OFFICE · PREVIEW</small><strong>Private Office</strong><span>No passcode required to preview</span></div>
       <nav aria-label="Office preview sections">{pages.map(({id,label,icon:Icon})=>
         <button type="button" key={id} className={'owner-nav-link'+(active===id?' active':'')} aria-current={active===id?'page':undefined} onClick={()=>navigate(id)}><Icon size={18} strokeWidth={1.65}/>{label}</button>
       )}</nav>
