@@ -16,8 +16,8 @@ test('booking page loads analytics exactly once and the script refuses a second 
 test('consent notice never covers the booking calendar or the mobile action bar', () => {
   assert.match(read('booking.html'), /<body data-plp-consent="inline">/);
   const js = read('public/analytics.js');
-  assert.match(js, /dataset\.plpConsent === 'inline'/);
-  assert.match(js, /anchor\.before\(analyticsPanel\)/, 'inline notice sits in the page flow, after the booking form');
+  assert.match(js, /dataset\.plpConsent !== 'float'/);
+  assert.match(js, /policy\.before\(analyticsPanel\)/, 'inline notice sits in the page flow, after the booking form');
   assert.match(js, /--plp-consent-offset/, 'floating notice is lifted above the mobile action bar');
   assert.match(js, /document\.body\.style\.paddingBottom/, 'page reserves space while the notice shows');
   const css = read('public/analytics-consent.css');

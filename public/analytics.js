@@ -144,8 +144,8 @@
 
   // The floating notice must never sit on top of page content or the mobile action bar:
   // it is lifted above any visible bar and the page gets matching bottom space while it shows.
-  // Pages that opt in with <body data-plp-consent="inline"> (the booking calendar) show it in the
-  // page flow instead, so it can never cover the calendar.
+  // Pages use the in-flow layout by default (the booking calendar pattern). A page may opt back
+  // into a floating bar with <body data-plp-consent="float">.
   function bottomBarHeight() {
     const bar = document.querySelector('.plp-mobile-action');
     if (!bar) return 0;
@@ -182,11 +182,27 @@
       const choice = event.target.dataset.choice;
       if (choice) setConsent(choice);
     });
-    const inline = document.body.dataset.plpConsent === 'inline';
+    // Use the booking in-flow layout on every page unless a page opts back into a floating bar.
+    // That keeps the notice from covering the hero, accommodation header, or the mobile action bar.
+    const inline = document.body.dataset.plpConsent !== 'float';
     if (inline) {
       analyticsPanel.dataset.inline = '';
-      const anchor = document.querySelector('.policy-card') || document.querySelector('main') || document.body;
-      if (anchor === document.body) document.body.append(analyticsPanel); else anchor.before(analyticsPanel);
+      const place = () => {
+        const slot = document.getElementById('plp-consent-slot');
+        if (slot) { slot.replaceChildren(analyticsPanel); return true; }
+        const policy = document.querySelector('.policy-card');
+        if (policy) { policy.before(analyticsPanel); return true; }
+        const footer = document.querySelector('footer');
+        if (footer) { footer.before(analyticsPanel); return true; }
+        const main = document.querySelector('main');
+        if (main) { main.append(analyticsPanel); return true; }
+        return false;
+      };
+      if (!place()) {
+        document.body.append(analyticsPanel);
+        const observer = new MutationObserver(() => { if (place()) observer.disconnect(); });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
     } else {
       document.body.append(analyticsPanel);
       window.addEventListener('resize', reserveSpace, { passive: true });
