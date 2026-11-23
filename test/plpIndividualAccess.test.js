@@ -166,7 +166,12 @@ test('admin UI shows individual sign-in only when the server enables it', async 
   const fs = await import('node:fs');
   const ui = fs.readFileSync(new URL('../src/admin/PlpAdminApp.jsx', import.meta.url), 'utf8');
   assert.match(ui, /auth-config/); assert.match(ui, /individualAccounts/); assert.match(ui, /staff-verify/);
-  const sql = fs.readFileSync(new URL('../supabase/pending/20261123060000_plp_auth_v2_staff_roles.sql', import.meta.url), 'utf8');
-  assert.match(sql, /PENDING OWNER APPROVAL/); assert.match(sql, /role in \('manager','staff'\)/);
-  assert.ok(!fs.existsSync(new URL('../supabase/migrations/20261123060000_plp_auth_v2_staff_roles.sql', import.meta.url)));
+  const sql = fs.readFileSync(new URL('../supabase/migrations/20261123060000_plp_auth_v2_staff_roles.sql', import.meta.url), 'utf8');
+  assert.match(sql, /APPLIED TO PRODUCTION/); assert.match(sql, /role in \('manager','staff'\)/);
+  assert.match(sql, /enable row level security/); assert.doesNotMatch(sql, /grant [^;]* to (anon|authenticated|public)/i);
+  const tighten = fs.readFileSync(new URL('../supabase/migrations/20261123060100_plp_auth_v2_staff_roles_tighten_grants.sql', import.meta.url), 'utf8');
+  assert.match(tighten, /revoke update, delete, truncate on plp_runtime\.plp_staff_access_events from service_role/);
+  const rollback = fs.readFileSync(new URL('../supabase/pending/20261123060000_plp_auth_v2_staff_roles_rollback.sql', import.meta.url), 'utf8');
+  assert.match(rollback, /drop table if exists plp_runtime\.plp_staff_roles/);
+  assert.ok(!fs.existsSync(new URL('../supabase/pending/20261123060000_plp_auth_v2_staff_roles.sql', import.meta.url)));
 });
