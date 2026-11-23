@@ -104,6 +104,10 @@ test('internal tools cannot be accessed anonymously',()=>{
    assert.ok(r,src);assert.equal(r.destination,'/admin');assert.equal(r.permanent,false);
   }
  }
+ for(const src of ['/admin-ops','/admin-ops.html']){
+  const r=config.redirects.find(x=>x.source===src);
+  assert.ok(r,src);assert.equal(r.destination,'/admin');assert.equal(r.permanent,false);
+ }
  const robots=read('public/robots.txt');
  for(const p of ['/owner','/plp-growth-plan.html','/photo-library.html','/subscribe','/admin','/content-ops.html','/availability-ops.html'])assert.match(robots,new RegExp('Disallow: '+p.replace('.','\\.')));
 });
@@ -126,4 +130,15 @@ test('public owner preview and sign-in screen show neutral Private Office identi
  const app=read('src/owner/OwnerApp.jsx');
  const login=app.slice(app.indexOf('function LogIn('),app.indexOf('function Panel('));
  assert.doesNotMatch(login,/Marichi|Fong Ramos|Doctora/);
+});
+
+test('telegram webhook is disabled and never processes a request', async () => {
+ const { default: webhook } = await import('../api/telegram/webhook.js');
+ for (const method of ['GET', 'POST', 'PUT']) {
+  const r = res();
+  await webhook({ method, headers: {}, body: { message: { chat: { id: 1 }, from: { id: 1 }, text: '/start' } } }, r);
+  assert.equal(r.statusCode, 404, method);
+  assert.equal(r.body.ok, false);
+ }
+ assert.doesNotMatch(read('api/telegram/webhook.js'), /routePlpAgent|isAuthorized|verifySecret/);
 });
