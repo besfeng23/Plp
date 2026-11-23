@@ -228,7 +228,7 @@ body{font-size:13px;background:#f7f8f9}
 <div><h2 id="overview-title">The plan at a glance</h2><p>Owner view. See precisely what is awaiting confirmation, what the team must finish, and what evidence will show that the marketing plan is working.</p></div>
 <div class="overview-utility"><button type="button" class="jump-btn" id="copyBrief">Copy status update</button><button type="button" class="jump-btn" data-view-target="tasks">Open all 26 tasks</button><span id="shareMessage" role="status"></span></div>
 </div>
-<div class="readonly-callout"><strong>Plan status: preparation.</strong> This tracker does not automatically prove a task is complete. A task must be marked Done against its acceptance check. Campaign posts, available rooms, paid ads and booking results are <strong>not being claimed as live</strong>.</div>
+<div class="readonly-callout"><strong id="launchState">Plan status: preparation.</strong> This tracker does not automatically prove a task is complete. A task must be marked Done against its acceptance check. Campaign posts, available rooms, paid ads and booking results are <strong>not being claimed as live</strong>.</div>
 <div class="board-grid">
 <section class="section command-section" aria-label="Owner approvals">
 <div class="section-head"><div><h2>01 · Four confirmations from Doc</h2><p>These are the only immediate commercial inputs needed from the owner or property manager.</p></div><span class="flag">Needs owner/team input</span></div>
@@ -242,7 +242,7 @@ body{font-size:13px;background:#f7f8f9}
 </section>
 </div>
 <section class="section command-section" aria-label="Content production">
-<div class="section-head"><div><h2>03 · Video production pipeline</h2><p>Three authentic videos answer the real guest questions. Select any item to open its tracked task.</p></div><span class="pill p-planned">No videos verified live</span></div>
+<div class="section-head"><div><h2>03 · Video production pipeline</h2><p>Three authentic videos answer the real guest questions. Select any item to open its tracked task.</p></div><span class="pill p-planned" id="videoLaunchStatus">3 video tasks pending</span></div>
 <div class="visual-pipeline" id="videoPipeline"></div>
 </section>
 <section class="section command-section" aria-label="Marketing rollout phases">
@@ -354,6 +354,10 @@ return '<div class="command-item"><div class="command-index">'+String(index+1).p
 }).join("");
 }
 function renderBrief(){
+const completed=TASKS.filter(function(t){return value(t)==="Done";}).length;
+document.getElementById("launchState").textContent="Tracker progress: "+completed+" of "+TASKS.length+" tasks marked done locally.";
+const videoCompleted=VIDEO_ITEMS.filter(function(x){return value(itemById(x[0]))==="Done";}).length;
+document.getElementById("videoLaunchStatus").textContent=videoCompleted+" of 3 video tasks marked done";
 document.getElementById("decisionBoard").innerHTML=commandRows(COMMAND_OWNER);
 document.getElementById("launchBoard").innerHTML=commandRows(COMMAND_LAUNCH);
 document.getElementById("videoPipeline").innerHTML=VIDEO_ITEMS.map(function(item){
