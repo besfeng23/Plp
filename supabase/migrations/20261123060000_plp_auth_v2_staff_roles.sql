@@ -1,9 +1,7 @@
--- PENDING OWNER APPROVAL — NOT APPLIED TO PRODUCTION.
--- Kept outside supabase/migrations so no integration applies it automatically.
--- To apply (only after explicit owner approval): review, take a backup, move
--- this file into supabase/migrations/ and apply it to the PLP project.
+-- APPLIED TO PRODUCTION 2026-11-23 13:55 PHT with explicit owner approval (Mark Johnson)
+-- (recorded in supabase_migrations.schema_migrations as 20261123055513 plp_auth_v2_staff_roles).
 -- Additive only: creates two new tables; touches no existing data.
--- Rollback: drop table plp_runtime.plp_staff_access_events; drop table plp_runtime.plp_staff_roles;
+-- Rollback: supabase/pending/20261123060000_plp_auth_v2_staff_roles_rollback.sql
 
 create table if not exists plp_runtime.plp_staff_roles (
   email text primary key check (email = lower(btrim(email)) and email ~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' and length(email) <= 180),
