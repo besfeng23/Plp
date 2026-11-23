@@ -196,6 +196,18 @@
   ],
   "rewrites": [
     {
+      "source": "/plp-growth-plan.html",
+      "destination": "/api/plp?action=growth&operation=page"
+    },
+    {
+      "source": "/plp-growth-plan",
+      "destination": "/api/plp?action=growth&operation=page"
+    },
+    {
+      "source": "/growth-plan",
+      "destination": "/api/plp?action=growth&operation=page"
+    },
+    {
       "source": "/ingest/static/:path*",
       "destination": "https://us-assets.i.posthog.com/static/:path*"
     },
@@ -435,5 +447,10 @@
       "source": "/((?!api/|tg/|telegram/|admin.html|admin-ops.html|booking.html|accommodation.html|experiences.html|terms.html|privacy.html|reservation-policy.html|robots.txt|sitemap.xml|favicon.svg|og-image.svg|site.webmanifest).*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/plp.js": {
+      "includeFiles": "private/plp-growth-plan.html"
+    }
+  }
 }

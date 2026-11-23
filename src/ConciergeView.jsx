@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import SocialLinks from './SocialLinks.jsx';
 import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 import { CLUB_PROGRAMS, INQUIRY_TOPICS, inquiryContext } from '../lib/guest-journey.js';
 import { PLP_ROOMS } from '../lib/pricing.js';
@@ -71,7 +72,7 @@ export default function ConciergeView() {
     <div className="journey-wrap concierge-wrap">
       <div><p className="journey-kicker">Pueblo La Perla Boracay</p><h1>Speak with the concierge.</h1>
         <p className="mt-5 max-w-md leading-7">Ask about a stay, plan your arrival, or get in touch with the Pearl Club team.</p>
-        <div className="concierge-direct"><a href={'tel:' + CONCIERGE_NUMBER}>Call {CONCIERGE_NUMBER_DISPLAY}</a><a href={'mailto:' + CONCIERGE_EMAIL}>{CONCIERGE_EMAIL}</a></div>
+        <div className="concierge-direct"><a href={'tel:' + CONCIERGE_NUMBER}>Call {CONCIERGE_NUMBER_DISPLAY}</a><a href={'mailto:' + CONCIERGE_EMAIL}>{CONCIERGE_EMAIL}</a></div><SocialLinks className="plp-social--contact" />
         <a className="journey-link" href="/booking">Check room availability</a>
       </div>
       {state === 'sent' ? <section className="concierge-form" ref={resultRef} tabIndex={-1} role="status">

@@ -3,12 +3,14 @@ import path from 'node:path';
 import { CONCIERGE_EMAIL as conciergeEmail } from '../lib/contact.js';
 import { SITE } from '../lib/site-config.js';
 import { formatPeso, PLP_ROOMS } from '../lib/pricing.js';
+import { socialLinksHtml } from '../lib/social.js';
 
 const root = process.cwd();
 const publicDir = path.join(root, 'public');
 
 const accommodationRates = new Map(PLP_ROOMS.map(room => [room.key, room.rate]));
-const excludePatterns = [/photo-library/i, /admin/i, /ops/i];
+// Internal pages never receive guest-site post-processing (trust strip, reserve bar, analytics).
+const excludePatterns = [/photo-library/i, /admin/i, /ops/i, /growth-plan/i];
 
 const trustStrip = `<section class="plp-trust-strip" data-plp-trust-strip="true" aria-label="Reservation trust details"><div class="plp-trust-strip__inner"><div><span>Location</span><strong>High Boracay</strong></div><div><span>Booking</span><strong>Room + dates first</strong></div><div><span>Arrival</span><strong>Port transfer support</strong></div><div><span>Concierge</span><strong>${conciergeEmail}</strong></div></div></section>`;
 const mobileAction = `<nav class="plp-mobile-action" data-plp-mobile-action="true" aria-label="Quick site navigation"><a href="/booking">Book</a><a href="/accommodation">Rooms</a><a href="/contact">Help</a></nav>`;
@@ -58,6 +60,15 @@ function ensureMobileAction(html, fileName) {
   return html.replace('</body>', `  ${mobileAction}\n</body>`);
 }
 
+// Official social accounts in every public static footer (from lib/site-config.js).
+export function ensureSocialLinks(html, fileName) {
+  if (isBookingPage(fileName) || html.includes('data-plp-social="true"')) return html;
+  const links = socialLinksHtml();
+  if (!links) return html;
+  if (html.includes('</footer>')) return html.replace('</footer>', `${links}</footer>`);
+  return html.replace(/(\s*<nav class="plp-mobile-action"|\s*<\/body>)/, `\n  <footer class="plp-social-footer">${links}</footer>$1`);
+}
+
 function ensureRoomSpecificBookingLinks(html, fileName) {
   if (fileName !== 'accommodation.html') return html;
   return html
@@ -92,10 +103,10 @@ async function main() {
   const entries = await fs.readdir(publicDir, { withFileTypes: true });
   const pages = entries.filter(entry => entry.isFile() && shouldProcess(entry.name));
 
-  for (const route of ['boracay-villa-with-private-pool', 'private-villas-boracay']) {
+  for (const route of ['boracay-villa-with-private-pool', 'private-villas-boracay', 'boracay-family-villa', 'boracay-wellness-stay', 'high-boracay-location', 'privacy', 'terms', 'reservation-policy']) {
     const file = path.join(publicDir, route, 'index.html');
     const original = await fs.readFile(file, 'utf8');
-    const rendered = renderRates(original);
+    const rendered = ensureSocialLinks(renderRates(original), route + '/index.html');
     if (rendered !== original) await fs.writeFile(file, rendered, 'utf8');
   }
 
@@ -110,6 +121,7 @@ async function main() {
     html = ensureTrustStrip(html, page.name);
     html = ensureMobileAction(html, page.name);
     html = ensureRoomSpecificBookingLinks(html, page.name);
+    html = ensureSocialLinks(html, page.name);
     html = renderRates(html);
     html = syncContactDetails(html);
 
@@ -120,4 +132,4 @@ async function main() {
   }
 }
 
-await main();
+if (import.meta.url === `file://${process.argv[1]}`) await main();

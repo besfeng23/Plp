@@ -59,7 +59,7 @@ test('both owner accounts are recognized independently with their own identity',
 });
 
 test('no hardcoded owner email or display identity in owner and public files',()=>{
- for(const f of ['lib/owner-handler.js','lib/owner-auth.js','src/owner/OwnerApp.jsx','src/owner/PublicPreview.jsx','src/SeniorLivingView.jsx','public/plp-growth-plan.html']){
+ for(const f of ['lib/owner-handler.js','lib/owner-auth.js','src/owner/OwnerApp.jsx','src/owner/PublicPreview.jsx','src/SeniorLivingView.jsx','private/plp-growth-plan.html']){
   const s=read(f);
   assert.doesNotMatch(s,/Marichi|Fong Ramos|fongramos@/i,f);
   if(f.startsWith('lib/'))assert.doesNotMatch(s,/['"][A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[a-z]{2,}['"]/,f+' has no email literal');
@@ -72,7 +72,7 @@ test('contact details come from one source and are unchanged',()=>{
  assert.equal(SITE.conciergeEmail,CONCIERGE_EMAIL);
  assert.equal(SITE.social.facebook,'https://www.facebook.com/PuebloLaPerlaBoracay');
  assert.equal(SITE.social.instagram,'https://www.instagram.com/pueblolaperlaboracay/');
- assert.equal(SITE.social.tiktok,null,'TikTok added only once confirmed');
+ assert.equal(SITE.social.tiktok,'https://www.tiktok.com/@pueblolaperlaboracay','TikTok confirmed by the owners 23 Nov 2026');
  const ld=JSON.parse(read('index.html').match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
  assert.equal(ld.email,SITE.conciergeEmail);assert.equal(ld.telephone,SITE.conciergePhone);
  assert.doesNotMatch(read('src/main.jsx'),/mailto:mfr@/);

@@ -1,13 +1,15 @@
 // One administration, eight business screens (plan section 4). Each tile is
 // gated by exactly one permission from lib/access-control.js; a screen shows
 // when the signed-in person can use at least one of its tiles.
+import { socialProfiles } from '../../lib/social.js';
+
 export const SCREENS = [
   { id: 'today', label: 'Today', note: 'What needs attention at the resort today.' },
   { id: 'reservations', label: 'Reservations', note: 'Bookings and payments. Open a booking for its details.' },
   { id: 'calendar', label: 'Calendar', note: 'Room availability, blocked dates and housekeeping.' },
   { id: 'guests', label: 'Guests & Requests', note: 'Guest records, concierge requests and follow-up.' },
   { id: 'club', label: 'Pearl Club', note: 'Boracay membership applications and activities.' },
-  { id: 'growth', label: 'Growth & Marketing', note: 'The marketing plan and its progress.' },
+  { id: 'growth', label: 'Growth & Marketing', note: 'The growth plan and the official social accounts.' },
   { id: 'reports', label: 'Reports & Documents', note: 'Results, website analytics and owner documents.' },
   { id: 'people', label: 'People & Access', note: 'Who can sign in, and what each person can do.' },
 ];
@@ -45,7 +47,9 @@ export const TILES = {
     { id: 'workbook', label: 'Club workbook', perm: 'club' },
   ],
   growth: [
-    { id: 'plan', label: 'Marketing plan', perm: 'growth', href: '/plp-growth-plan.html' },
+    { id: 'plan', label: 'Growth plan', perm: 'growth', href: '/plp-growth-plan' },
+    // Official social accounts, from lib/site-config.js only.
+    ...socialProfiles().map(p => ({ id: p.key, label: p.label, perm: 'growth', href: p.url })),
   ],
   reports: [
     { id: 'month', label: 'Month in review', perm: 'finance.read' },
