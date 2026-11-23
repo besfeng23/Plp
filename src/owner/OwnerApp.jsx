@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { safeNextPath } from '../../lib/safe-next-path.js';
 import PublicPreview from './PublicPreview.jsx';
 import OwnerWorkItems from './OwnerWorkItems.jsx';
 import OwnerReports from './OwnerReports.jsx';
@@ -331,14 +332,19 @@ export default function OwnerApp(){
    let alive=true;
    // A previously verified owner opens the full dashboard automatically,
    // without re-entering a code or re-visiting the sign-in screen.
-   ownerRequest('me').then(result=>{if(alive&&result.role==='owner')setMode('secure')}).catch(()=>{});
+   ownerRequest('me').then(result=>{if(alive&&result.role==='owner'){const next=safeNextPath(new URLSearchParams(window.location.search).get('next'));if(next){window.location.replace(next);return;}setMode('secure');}}).catch(()=>{});
    return()=>{alive=false};
  },[mode]);
  async function signOut(expired=false){
    if(!expired){try{await ownerRequest('logout',{method:'POST',body:{}});}catch{ /* A failed sign-out cannot keep sensitive data visible. */ }}
    setMode('preview');
  }
+ function enterSecure(){
+  const next=safeNextPath(new URLSearchParams(window.location.search).get('next'));
+  if(next){window.location.replace(next);return;}
+  setMode('secure');
+ }
  if(mode==='secure')return <PrivateOffice onSignOut={signOut}/>;
- if(mode==='login')return <LogIn onAuthenticated={()=>setMode('secure')}/>;
+ if(mode==='login')return <LogIn onAuthenticated={enterSecure}/>;
  return <PublicPreview onConnectPrivateData={()=>setMode('login')}/>;
 }

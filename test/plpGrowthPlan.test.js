@@ -38,7 +38,7 @@ async function call(operation, { method = 'GET', headers = {}, body } = {}) {
 test('guests and staff cannot open the tracker or its progress', async () => {
   const page = await call('page');
   assert.equal(page.statusCode, 401); assert.match(page.headers['Content-Type'], /text\/html/);
-  assert.doesNotMatch(page.raw, /TASKS|Full execution task list/); assert.match(page.raw, /href="\/owner"/);
+  assert.doesNotMatch(page.raw, /TASKS|Full execution task list/); assert.match(page.raw, /href="\/owner\?next=\/plp-growth-plan"/);
   assert.equal(page.headers['X-Robots-Tag'], 'noindex, nofollow, noarchive');
   assert.equal((await call('tasks')).statusCode, 401);
   assert.equal((await call('tasks', { method: 'PATCH', headers: origin, body: { item: '01', status: 'In progress' } })).statusCode, 401);
