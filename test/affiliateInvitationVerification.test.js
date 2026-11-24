@@ -11,6 +11,7 @@ test('invitation needs verified recipient email before consumption or session cr
   const partnerId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
   const invite={id:inviteId,email:'invited@example.invalid',name:'Fixture partner',tier:'referral',expires_at:new Date(Date.now()+3600000).toISOString(),accepted_at:null};
   let partner=null,verifiedEmail='wrong@example.invalid',accepted=0,otp=0;
+  const bookings=Array.from({length:51},(_,i)=>({id:'00000000-0000-4000-8000-'+String(i+1).padStart(12,'0'),created_at:'2026-11-24T12:00:00Z',booking_reference:'QA-'+i,status:'COMPLETED',currency:'USD',guest_name:'Private fixture'}));
   const response=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json'}});
   const {handleAffiliatePortal,hashInviteToken,verifyAffiliateSession}=await import('../lib/affiliate.js');
   const token='a'.repeat(32);
@@ -30,6 +31,13 @@ test('invitation needs verified recipient email before consumption or session cr
       if(method==='POST'){partner={...body,id:partnerId};return response([partner]);}
       return response(partner?[partner]:[]);
     }
+    if(u.pathname.endsWith('/plp_bookings')){
+      assert.equal(u.searchParams.get('affiliate_id'),'eq.'+partnerId);
+      assert.equal(u.searchParams.get('order'),'created_at.desc,id.desc');
+      assert.equal(u.searchParams.get('limit'),'51');
+      return response(u.searchParams.has('or')?bookings.slice(50):bookings);
+    }
+    if(u.pathname.endsWith('/plp_concierge_enquiries')||u.pathname.endsWith('/plp_payouts')){assert.equal(u.searchParams.get('affiliate_id'),'eq.'+partnerId);return response([]);}
     throw Error('Unexpected fixture request '+u.pathname);
   };
   const request=(action,body={},cookie='')=>handleAffiliatePortal({method:'POST',headers:{cookie,'x-forwarded-for':'fixture'}},{action,...body});
@@ -48,6 +56,17 @@ test('invitation needs verified recipient email before consumption or session cr
     assert.equal(partner.rate_approval_status,'pending_owner_approval');assert.equal(accepted,1);
     assert.match(verified[2][0],/^__Host-plp_affiliate=/);
     assert.equal((await request('accept',{invite:token}))[0],400);
+    const session=verified[2][0].split(';')[0];
+    const read=(action,body={})=>handleAffiliatePortal({method:'GET',headers:{cookie:session}},{action,...body});
+    const dashboard=await read('me');
+    assert.equal(dashboard[0],200);
+    assert.equal(dashboard[1].referrals.length,50);
+    assert.ok(dashboard[1].ledgerNext.referrals);
+    assert.doesNotMatch(JSON.stringify(dashboard[1].referrals),/guest_name|Private fixture/);
+    const page=await read('ledger',{kind:'referrals',cursor:dashboard[1].ledgerNext.referrals});
+    assert.equal(page[0],200);assert.equal(page[1].rows.length,1);assert.equal(page[1].next,null);
+    assert.equal((await read('ledger',{kind:'unknown',cursor:dashboard[1].ledgerNext.referrals}))[0],400);
+    assert.equal((await read('ledger',{kind:'referrals',cursor:'invalid'}))[0],400);
     const now=Math.floor(Date.now()/1000);
     const payload=Buffer.from(JSON.stringify({v:1,typ:'affiliate',uid:partnerId,iat:now,exp:now+3600})).toString('base64url');
     assert.equal(verifyAffiliateSession(payload+'.'+createHmac('sha256',secret).update(payload).digest('base64url'),secret),null);
