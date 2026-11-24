@@ -56,7 +56,7 @@ export default function ConciergeView() {
       }
       const response = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...fields, requestId: submission.current.id }) });
       const data = await response.json();
-      if (!response.ok || !data.ok || (channel === 'desk' ? data.received !== true : data.emailDelivered !== true)) throw new Error('unconfirmed');
+      if (!response.ok || !data.ok || (data.received !== true && data.emailDelivered !== true)) throw new Error('unconfirmed');
       setState('sent');
       window.plpTrack?.('submit_enquiry');
       if (topic === 'club') {
