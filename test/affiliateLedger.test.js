@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { affiliateCommissionsActive, PROPOSED_AFFILIATE_RATES, signAffiliateSession, verifyAffiliateSession } from '../lib/affiliate.js';
+import { affiliateCommissionsActive, affiliatePublicEnrollment, PROPOSED_AFFILIATE_RATES, signAffiliateSession, verifyAffiliateSession } from '../lib/affiliate.js';
 import { captureReferralCode, normalizeReferralCode } from '../lib/referral-capture.js';
 
 const read = (file) => readFileSync(new URL('../' + file, import.meta.url), 'utf8');
@@ -76,4 +76,19 @@ test('booking and enquiry forms expose an editable referral field and the portal
   assert.match(read('api/admin.js'), /action === 'affiliates'/);
   assert.match(read('api/plp.js'), /action === 'affiliate'/);
   assert.doesNotMatch(read('src/admin/AffiliateAdmin.jsx'), /bank account|\\bTIN\\b|tax id/i);
+});
+
+
+test('public enrollment is available with explicit off switch and requires verified email', () => {
+  assert.equal(affiliatePublicEnrollment({}), true);
+  assert.equal(affiliatePublicEnrollment({ PLP_AFFILIATE_PUBLIC_ENROLLMENT: 'false' }), false);
+  const backend = read('lib/affiliate.js');
+  assert.match(backend, /email_confirmed_at/);
+  assert.match(backend, /plp_reserve_preview_attempt/);
+  assert.match(backend, /status: 'active'/);
+  assert.match(backend, /rate_approval_status: 'pending_owner_approval'/);
+  const portal = read('src/affiliate.js');
+  assert.match(portal, /TEST DASHBOARD/);
+  assert.match(portal, /No live referrals, payments or accounts/);
+  assert.match(portal, /enroll-verify/);
 });

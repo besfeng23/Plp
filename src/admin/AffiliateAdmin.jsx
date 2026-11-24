@@ -68,7 +68,7 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
   }
 
   return <section className="plp-panel" aria-label={heading}>
-    <div className="plp-panel__head"><div><h3>{heading}</h3><p>Invite-only. Proposed rates stay at pending owner approval until Doc signs off. Commission posting is {data.commissionsActive ? 'active' : 'off'}.</p></div></div>
+    <div className="plp-panel__head"><div><h3>{heading}</h3><p>Public enrollment uses email verification; existing invitations are still supported. Proposed rates stay at pending owner approval until Doc signs off. Commission posting is {data.commissionsActive ? 'active' : 'off'}.</p></div></div>
     {error && <p className="plp-form-error" role="alert">{error}</p>}
     {note && <p role="status">{note}</p>}
     <form className="plp-task-form" onSubmit={(event) => { event.preventDefault(); post({ action: 'invite', ...form }, (result) => 'Invitation ready: ' + result.invite.path); }}>
