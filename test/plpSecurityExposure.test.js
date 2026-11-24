@@ -37,7 +37,7 @@ test('staff credentials are never persisted in browser storage',()=>{
 });
 
 test('unauthenticated internal API calls return 401/403',async()=>{
- for(const action of ['health','operations','content','date-blocks','staff-tasks','concierge-inbox','owner-month']){
+ for(const action of ['health','operations','content','date-blocks','staff-tasks','concierge-inbox','affiliates','owner-month']){
   for(const method of ['GET','POST','PATCH']){
    const r=res();await adminHandler({method,query:{action},headers:{}},r);
    assert.equal(r.statusCode,401,action+' '+method);

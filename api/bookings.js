@@ -1,5 +1,7 @@
 import { requireAvailability } from './_availabilityHelper.js';
 import { notifyBookingCreated } from './_notifications.js';
+import { attachReferral } from '../lib/affiliate.js';
+import { normalizeReferralCode } from '../lib/referral-capture.js';
 import { createBookingRecord, isSupabaseConfigured } from './_supabase.js';
 import { PLP_CURRENCY, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, todayAtResort } from '../lib/booking-dates.js';
@@ -80,6 +82,15 @@ export default async function handler(req, res) {
       databaseRecord = await createBookingRecord(booking);
       booking.databaseId = databaseRecord.id;
       booking.persisted = true;
+      const referralCode = normalizeReferralCode(body.referralCode || body.referral_code);
+      if (referralCode && databaseRecord.id) {
+        try {
+          const attached = await attachReferral({ table: 'plp_bookings', id: databaseRecord.id, referralCode, actor: 'guest' });
+          booking.referralCode = attached.code || null;
+        } catch {
+          booking.referralCode = referralCode;
+        }
+      }
     } else {
       // An unsaved request must never look accepted: no hold, no checkout.
       console.error('[plp-booking] reservation storage is not configured');

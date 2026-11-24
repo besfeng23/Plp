@@ -150,6 +150,17 @@ export default async function handler(req, res) {
     if (action === 'access') return await handleAccessRegister(req, res, auth);
     if (action === 'health') return await handleHealth(req, res);
     if (!isSupabaseConfigured()) return json(res, 503, { ok: false, error: getSupabaseConfigError() });
+    if (action === 'affiliates') {
+      res.setHeader('Cache-Control', 'private, no-store');
+      try {
+        const { handleAffiliateAdmin } = await import('../lib/affiliate.js');
+        const input = req.method === 'GET' ? req.query : parseBody(req);
+        const [status, result] = await handleAffiliateAdmin(req.method, input, req.staffEmail || '');
+        return json(res, status, result);
+      } catch {
+        return json(res, 503, { ok: false, error: 'The partner directory is unavailable.' });
+      }
+    }
     if (action === 'concierge-inbox') {
       res.setHeader('Cache-Control', 'private, no-store');
       try {

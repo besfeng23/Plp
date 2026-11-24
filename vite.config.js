@@ -15,6 +15,7 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin.html'),
         owner: resolve(__dirname, 'owner.html'),
         booking: resolve(__dirname, 'booking.html'),
+        affiliate: resolve(__dirname, 'affiliate.html'),
         'plp-posthog': resolve(__dirname, 'src/plp-posthog.js'),
       },
       output: {

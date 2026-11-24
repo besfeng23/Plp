@@ -76,6 +76,8 @@ export default function ConciergeInbox({ code, clubOnly = false, refreshedAt }) 
               onBlur={e => { const value = e.target.value; if (value !== (row.follow_up_on || '')) patch(row, { follow_up_on: value }); }} />
               {overdue && <span className="plp-enquiry__due">Follow up is due</span>}
             </label>
+            <label>Referral code<input defaultValue={row.referral_code || ''} disabled={busy} maxLength={32} autoComplete="off" spellCheck="false"
+              onBlur={e => { const value = e.target.value.trim().toLowerCase(); if (value !== (row.referral_code || '')) patch(row, { referral_code: value }); }} /></label>
           </div>
           <div className="plp-club-actions">
             {next && <button disabled={busy} type="button" className="plp-primary" onClick={() => patch(row, { status: next[0] })}>{next[1]}</button>}
