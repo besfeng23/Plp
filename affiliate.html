@@ -19,6 +19,14 @@
     nav button { background: transparent; color: var(--ink); }
     nav button[aria-current="page"] { background: var(--ink); color: #fff; }
     article { padding: 1rem 0; border-top: 1px solid var(--line); }
+    .enroll { display:grid; gap:1rem; margin:1.5rem 0; }
+    .enroll label { display:grid; gap:.35rem; font:600 13px/1.4 Inter,sans-serif; }
+    .enroll input,.enroll select { min-height:46px; min-width:0; width:100%; background:white; border:1px solid var(--line); padding:.7rem; font:inherit; }
+    .metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+    .metrics span { font:600 11px/1.4 Inter,sans-serif; color:var(--muted); }
+    .metrics h2 { margin:.35rem 0; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    #status { padding:.75rem 0; }
     .error { color: #8a3a2a; }
   </style>
 </head>
@@ -26,7 +34,7 @@
   <main>
     <p style="letter-spacing:.18em;text-transform:uppercase;font:700 11px Inter,sans-serif;color:var(--brass)">Pueblo La Perla</p>
     <h1>Partner portal</h1>
-    <p id="status">Checking your invitation…</p>
+    <p id="status" role="status" aria-live="polite">Loading partner portal…</p>
     <div id="app" hidden></div>
   </main>
   <script type="module" src="/src/affiliate.js"></script>
