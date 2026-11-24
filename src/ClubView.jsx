@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight, CalendarDays, HeartHandshake, Users } from 'lucide-react';
 import { calendarFile } from '../lib/club-calendar.js';
 import ClubApplyForm from './ClubApplyForm.jsx';
-import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
+import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 
 const IDEAS = [
   { key: 'connection', title: 'Connection', description: 'Coffee mornings, conversation circles, and gatherings designed around friendship.', image: '/images/plp-private-breakfast-pool.webp', imageAlt: 'Breakfast table overlooking the pool at Pueblo La Perla' },
@@ -11,7 +11,7 @@ const IDEAS = [
   { key: 'island', title: 'Island experiences', description: 'Thoughtfully paced Boracay outings, subject to venue, transport, and safety arrangements.', image: '/images/plp-day-balcony-sea-view.webp', imageAlt: 'View of the sea from a Pueblo La Perla hillside balcony' },
 ];
 
-const inquiryHref = (activity) => `mailto:${CONCIERGE_EMAIL}?subject=${encodeURIComponent(activity ? `Pearl Club Boracay — ${activity}` : 'Pearl Club Boracay — Membership Interest')}`;
+const inquiryHref = (activity) => `/contact?topic=club${activity ? `&activity=${encodeURIComponent(activity)}` : ''}`;
 
 function formatSchedule(date) {
   return new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(date));

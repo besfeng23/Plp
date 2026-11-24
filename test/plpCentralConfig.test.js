@@ -67,15 +67,21 @@ test('no hardcoded owner email or display identity in owner and public files',()
  assert.match(read('src/owner/PublicPreview.jsx'),/<strong>Private Office<\/strong>/);
 });
 
-test('contact details come from one source and are unchanged',()=>{
- assert.equal(CONCIERGE_EMAIL,'mfr@e-mango.com');assert.equal(CONCIERGE_NUMBER,'+639178872980');assert.equal(CONCIERGE_NUMBER_DISPLAY,'+63 917 887 2980');
+test('contact details come from one source and list Argie as the public sales contact',()=>{
+ assert.equal(CONCIERGE_EMAIL,'');
+ assert.equal(CONCIERGE_NUMBER,'+639604792247');
+ assert.equal(CONCIERGE_NUMBER_DISPLAY,'+63 960 479 2247');
  assert.equal(SITE.conciergeEmail,CONCIERGE_EMAIL);
+ assert.deepEqual([...SITE.previousConciergeEmails],['mfr@e-mango.com']);
+ assert.deepEqual([...SITE.previousConciergePhones],['+639178872980']);
  assert.equal(SITE.social.facebook,'https://www.facebook.com/PuebloLaPerlaBoracay');
  assert.equal(SITE.social.instagram,'https://www.instagram.com/pueblolaperlaboracay/');
  assert.equal(SITE.social.tiktok,'https://www.tiktok.com/@pueblolaperlaboracay','TikTok confirmed by the owners 23 Nov 2026');
  const ld=JSON.parse(read('index.html').match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
- assert.equal(ld.email,SITE.conciergeEmail);assert.equal(ld.telephone,SITE.conciergePhone);
- assert.doesNotMatch(read('src/main.jsx'),/mailto:mfr@/);
+ assert.ok(!ld.email,'JSON-LD has no public email until a PLP-owned address is issued');
+ assert.equal(ld.telephone,SITE.conciergePhone);
+ assert.doesNotMatch(read('src/main.jsx'),/mailto:mfr@|e-mango/i);
+ assert.doesNotMatch([read('src/App.jsx'),read('src/ConciergeView.jsx'),read('src/ClubView.jsx'),read('booking.html')].join('\n'),/mfr@e-mango|639178872980|917 887 2980/);
  assert.match(read('scripts/prepare-plp-static-pages.mjs'),/syncContactDetails\(html\)/);
 });
 

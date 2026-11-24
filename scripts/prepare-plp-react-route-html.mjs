@@ -43,7 +43,7 @@ export function renderPlpRouteHtml(template, view) {
   const schema = JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url });
   html = html.replace('</head>', `    <script type="application/ld+json">${schema.replace(/</g, '\\u003c')}</script>\n  </head>`);
   html = html.replace(/<link rel="preload" as="image" href="\/images\/plp-hero-sunset\.webp" fetchpriority="high" \/>/, '');
-  const fallback = `<div class="initial-shell" aria-label="${escapeHtml(heading)} loading"><div class="initial-shell__content"><p class="initial-shell__kicker">Pueblo La Perla Boracay</p><h1 class="initial-shell__title">${escapeHtml(heading)}</h1><p class="initial-shell__copy">${escapeHtml(summary)}</p><p class="initial-shell__loading">Preparing this page</p><nav class="initial-shell__links" aria-label="Fallback navigation"><a href="/accommodation">Explore accommodation</a><a href="mailto:mfr@e-mango.com">Contact concierge</a></nav></div></div>`;
+  const fallback = `<div class="initial-shell" aria-label="${escapeHtml(heading)} loading"><div class="initial-shell__content"><p class="initial-shell__kicker">Pueblo La Perla Boracay</p><h1 class="initial-shell__title">${escapeHtml(heading)}</h1><p class="initial-shell__copy">${escapeHtml(summary)}</p><p class="initial-shell__loading">Preparing this page</p><nav class="initial-shell__links" aria-label="Fallback navigation"><a href="/accommodation">Explore accommodation</a><a href="/contact">Contact the team</a></nav></div></div>`;
   html = replaceRequired(html, /<div class="initial-shell"[^>]*><div class="initial-shell__content">[\s\S]*?<\/div><\/div>/, fallback, 'fallback shell');
   return html;
 }

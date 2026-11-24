@@ -81,7 +81,7 @@ test('attendance read and write are staff-only', async () => {
   }
 });
 
-test('concierge enquiry offers email draft mode when both the desk and email sender are unavailable', async t => {
+test('concierge enquiry is unavailable when both the desk and email sender are missing', async t => {
   t.mock.method(globalThis, 'fetch', async () => { throw new Error('Offline test desk'); });
   const original = process.env.LEADS_FROM_EMAIL;
   t.after(() => { if (original !== undefined) process.env.LEADS_FROM_EMAIL=original; else delete process.env.LEADS_FROM_EMAIL; });
@@ -94,16 +94,20 @@ test('concierge enquiry offers email draft mode when both the desk and email sen
 });
 
 test('concierge accepts a real send only on provider acceptance and reuses the submission identity', async t => {
-  const before = { RESEND_API_KEY:process.env.RESEND_API_KEY, LEADS_FROM_EMAIL:process.env.LEADS_FROM_EMAIL };
+  const keys = ['RESEND_API_KEY','LEADS_FROM_EMAIL','LEADS_TO_EMAIL','BOOKINGS_TO_EMAIL','PLP_ADMIN_EMAIL'];
+  const before = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
   t.after(() => { for (const [key,value] of Object.entries(before)) { if (value === undefined) delete process.env[key]; else process.env[key]=value; } });
-  process.env.RESEND_API_KEY='test'; process.env.LEADS_FROM_EMAIL='sender@example.invalid';
+  process.env.RESEND_API_KEY='test'; process.env.LEADS_FROM_EMAIL='sender@example.invalid'; process.env.LEADS_TO_EMAIL='sales@example.invalid';
+  delete process.env.BOOKINGS_TO_EMAIL; delete process.env.PLP_ADMIN_EMAIL;
   let captured;
   const outgoing = t.mock.method(globalThis,'fetch',async (_,options) => { captured=options; return {ok:true}; });
   const request = {method:'POST',body:{name:'Guest',email:'guest@example.invalid',interest:'PLP Club',requestId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}};
   const res = response(); await leads(request,res);
   assert.equal(res.body.emailDelivered,true);
   assert.equal(captured.headers['Idempotency-Key'],'plp-enquiry/' + request.body.requestId);
-  assert.equal(JSON.parse(captured.body).reply_to,request.body.email);
+  const sent = JSON.parse(captured.body);
+  assert.deepEqual(sent.to,['sales@example.invalid']);
+  assert.equal(sent.reply_to,request.body.email);
   outgoing.mock.mockImplementation(async () => ({ok:false}));
   const failed=response(); await leads(request,failed);
   assert.equal(failed.statusCode,503); assert.equal(failed.body.ok,false);

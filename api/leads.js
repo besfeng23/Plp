@@ -1,5 +1,5 @@
 import { deskAvailable, receiveEnquiry } from '../lib/concierge-desk.js';
-import { CONCIERGE_EMAIL } from '../lib/contact.js';
+import { CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
 
 const required = ['name', 'email', 'interest'];
@@ -8,12 +8,17 @@ function isValidEmail(email) {
   return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function inquiryRecipient() {
+  const value = process.env.LEADS_TO_EMAIL || process.env.BOOKINGS_TO_EMAIL || process.env.PLP_ADMIN_EMAIL || '';
+  return isValidEmail(value) ? value : '';
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (await refuseUnlessAuthorized(req, res)) return;
   if (req.method === 'GET') {
     if (await deskAvailable()) return res.status(200).json({ available: true, channel: 'desk' });
-    const email = Boolean(process.env.RESEND_API_KEY && process.env.LEADS_FROM_EMAIL);
+    const email = Boolean(process.env.RESEND_API_KEY && process.env.LEADS_FROM_EMAIL && inquiryRecipient());
     return res.status(200).json(email ? { available: true, channel: 'email' } : { available: false });
   }
   if (req.method !== 'POST') {
@@ -50,8 +55,9 @@ export default async function handler(req, res) {
 
     let emailDelivered = false;
     const from = process.env.LEADS_FROM_EMAIL;
+    const recipient = inquiryRecipient();
 
-    if (process.env.RESEND_API_KEY && from) {
+    if (process.env.RESEND_API_KEY && from && recipient) {
       const requestId = typeof body.requestId === 'string' && /^[0-9a-f-]{36}$/i.test(body.requestId) ? body.requestId : null;
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -62,7 +68,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           from,
-          to: [CONCIERGE_EMAIL],
+          to: [recipient],
           reply_to: lead.email,
           subject: `New Pueblo La Perla inquiry: ${lead.interest}`,
           text: [
@@ -84,7 +90,7 @@ export default async function handler(req, res) {
       return res.status(503).json({
         ok: false,
         emailDelivered,
-        error: `Online inquiry delivery is temporarily unavailable. Email ${CONCIERGE_EMAIL}.`,
+        error: `Online inquiry delivery is temporarily unavailable. Please use the contact form or call ${CONCIERGE_NUMBER_DISPLAY}.`,
       });
     }
 

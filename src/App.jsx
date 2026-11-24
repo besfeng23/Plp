@@ -7,7 +7,7 @@ import ConciergeView from './ConciergeView.jsx';
 import ClubView from './ClubView.jsx';
 import SeniorLivingView from './SeniorLivingView.jsx';
 import { formatPeso as formatMoney, PLP_ROOMS } from '../lib/pricing.js';
-import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
+import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 import { PAGE_META, ROUTES, SITE_URL } from '../lib/public-routes.js';
 
 const PATH_TO_VIEW = Object.fromEntries(Object.entries(ROUTES).map(([key, value]) => [value, key]));
@@ -140,8 +140,8 @@ function PublicFooter({ navigate }) {
       <div className='md:col-span-2'><img src='/brand/PLP_Editorial_Reversed_Ivory.svg' alt='' width='45' height='63' className='mb-5 h-[63px] w-[45px] object-contain' /><h3 className='mb-4 font-serif text-2xl tracking-[0.15em]'>PUEBLO LA PERLA</h3><p className='max-w-md text-sm leading-relaxed text-white/75'>A private hillside retreat in Boracay, designed for villa living, wellness, and quiet island experiences.</p></div>
       <div><p className='mb-5 text-xs uppercase tracking-[0.2em] text-[#D0BE7A]'>Explore</p><div className='space-y-3 text-sm text-white/75'>{explore.map(([id, label]) => <PageLink key={id} target={id} navigate={navigate} className='block min-h-8 hover:text-white'>{label}</PageLink>)}</div></div>
       <div><p className='mb-5 text-xs uppercase tracking-[0.2em] text-[#D0BE7A]'>Inquiries</p>
-        <a href={'mailto:' + CONCIERGE_EMAIL} className='block text-sm text-white/90 hover:underline'>{CONCIERGE_EMAIL}</a>
-        <a href={'tel:' + CONCIERGE_NUMBER} className='mt-2 block text-sm text-white/90 hover:underline'>{CONCIERGE_NUMBER_DISPLAY}</a>
+        <a href={'tel:' + CONCIERGE_NUMBER} className='block text-sm text-white/90 hover:underline'>{CONCIERGE_NUMBER_DISPLAY}</a>
+        <a href={'https://wa.me/' + CONCIERGE_NUMBER.replace(/\D/g, '')} className='mt-2 block text-sm text-white/90 hover:underline'>WhatsApp</a>
         <SocialLinks className='plp-social--footer mt-5' />
         <PageLink target='booking' navigate={navigate} className='mt-6 inline-flex min-h-11 items-center border-b border-white text-xs uppercase tracking-[0.2em] hover:border-[#D0BE7A] hover:text-[#D0BE7A]'>Reserve</PageLink>
         <PageLink target='contact' navigate={navigate} className='mt-3 block text-sm text-white/70 hover:text-white'>General inquiry</PageLink>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SocialLinks from './SocialLinks.jsx';
-import { CONCIERGE_EMAIL, CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
+import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 import { CLUB_PROGRAMS, INQUIRY_TOPICS, inquiryContext } from '../lib/guest-journey.js';
 import { PLP_ROOMS } from '../lib/pricing.js';
 
@@ -40,11 +40,11 @@ export default function ConciergeView() {
   const roomName = ['stay', 'group'].includes(topic) ? PLP_ROOMS.find(item => item.slug === room)?.name : '';
   const interest = INQUIRY_TOPICS[topic] + (roomName ? ' · ' + roomName : '') + (topic.startsWith('club') && program ? ' · ' + CLUB_PROGRAMS[program] : '') + (residentialInterest && topic === 'club' ? ' · Senior living interest (concept only)' : '');
   const body = [message.trim(), name.trim(), email.trim()].filter(Boolean).join('\n\n');
-  const draft = 'mailto:' + CONCIERGE_EMAIL + '?subject=' + encodeURIComponent('PLP enquiry · ' + interest) + '&body=' + encodeURIComponent(body);
+  const whatsappHref = 'https://wa.me/' + CONCIERGE_NUMBER.replace(/\D/g, '') + '?text=' + encodeURIComponent(body);
 
   async function send(event) {
     event.preventDefault();
-    if (!online) { window.location.href = draft; return; }
+    if (!online) { window.location.href = whatsappHref; return; }
     if (sendLock.current) return;
     sendLock.current = true;
     setState('sending');
@@ -72,7 +72,7 @@ export default function ConciergeView() {
     <div className="journey-wrap concierge-wrap">
       <div><p className="journey-kicker">Pueblo La Perla Boracay</p><h1>Speak with the concierge.</h1>
         <p className="mt-5 max-w-md leading-7">Ask about a stay, plan your arrival, or get in touch with the Pearl Club team.</p>
-        <div className="concierge-direct"><a href={'tel:' + CONCIERGE_NUMBER}>Call {CONCIERGE_NUMBER_DISPLAY}</a><a href={'mailto:' + CONCIERGE_EMAIL}>{CONCIERGE_EMAIL}</a></div><SocialLinks className="plp-social--contact" />
+        <div className="concierge-direct"><a href={'tel:' + CONCIERGE_NUMBER}>Call {CONCIERGE_NUMBER_DISPLAY}</a><a href={'https://wa.me/' + CONCIERGE_NUMBER.replace(/\D/g, '')}>WhatsApp</a></div><SocialLinks className="plp-social--contact" />
         <a className="journey-link" href="/booking">Check room availability</a>
       </div>
       {state === 'sent' ? <section className="concierge-form" ref={resultRef} tabIndex={-1} role="status">
@@ -85,9 +85,9 @@ export default function ConciergeView() {
         <p id="enquiry-hint" className="text-sm leading-6 text-stone-600">{residentialInterest && topic === 'club' ? 'This is a nonbinding enquiry about future residential options, not a reservation. Please do not include medical records, diagnoses or sensitive health information.' : TOPIC_HINT[topic] || 'Share the dates or arrangements you have in mind.'}</p>
         {online && <div className="concierge-identity"><label className="journey-field">Your name<input required autoComplete="name" maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label><label className="journey-field">Reply email<input required type="email" autoComplete="email" maxLength={180} value={email} onChange={e => setEmail(e.target.value)} /></label></div>}
         </fieldset>
-        {state === 'error' && <div role="alert" ref={resultRef} tabIndex={-1}>We couldn’t confirm delivery. <a className="underline" href={draft}>Open an email draft with your details</a> or call the concierge.</div>}
-        <button className="journey-primary" type="submit" disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : online ? 'Send enquiry' : 'Open email draft'}</button>
-        <p className="text-sm leading-6 text-stone-600">{online ? 'Your details go to the PLP concierge team.' : 'Your email app will open with your message ready to send.'} <a href="/privacy-policy" className="underline">Privacy policy</a></p>
+        {state === 'error' && <div role="alert" ref={resultRef} tabIndex={-1}>We couldn’t confirm delivery. <a className="underline" href={whatsappHref}>Message on WhatsApp</a> or call {CONCIERGE_NUMBER_DISPLAY}.</div>}
+        <button className="journey-primary" type="submit" disabled={state === 'sending'}>{state === 'sending' ? 'Sending…' : online ? 'Send enquiry' : 'Message on WhatsApp'}</button>
+        <p className="text-sm leading-6 text-stone-600">{online ? 'Your details go to the PLP sales team.' : 'WhatsApp will open with your message ready to send.'} <a href="/privacy-policy" className="underline">Privacy policy</a></p>
       </form>}
     </div>
   </main>;

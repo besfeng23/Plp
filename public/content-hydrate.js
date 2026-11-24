@@ -1,5 +1,7 @@
 (function () {
-  var SITE_EMAIL = 'mfr@e-mango.com';
+  var SITE_EMAIL = '';
+  var SITE_PHONE = '+63 960 479 2247';
+  var SITE_PHONE_E164 = '+639604792247';
 
   function ensureImagePlacementStylesheet() {
     if (document.querySelector('link[data-plp-image-placement]')) return;
@@ -50,7 +52,7 @@
     addTrustItem(inner, 'Location', 'High Boracay');
     addTrustItem(inner, 'Booking', 'Room + dates first');
     addTrustItem(inner, 'Arrival', 'Port transfer support');
-    addTrustItem(inner, 'Concierge', SITE_EMAIL);
+    addTrustItem(inner, 'Sales', SITE_PHONE);
     strip.appendChild(inner);
     var nav = document.querySelector('nav.nav, header');
     if (nav && nav.parentNode) nav.parentNode.insertBefore(strip, nav.nextSibling);
@@ -88,7 +90,7 @@
     var title = document.createElement('strong');
     title.textContent = 'Before you continue';
     var list = document.createElement('ul');
-    ['Pick a room and dates first. The summary updates before you send the request.', 'Availability is reviewed by the PLP team before the stay is treated as final.', 'For urgent dates or special arrangements, email ' + SITE_EMAIL + '.'].forEach(function (text) {
+    ['Pick a room and dates first. The summary updates before you send the request.', 'Availability is reviewed by the PLP team before the stay is treated as final.', 'For urgent dates or special arrangements, call ' + SITE_PHONE + ' or use the enquiry form.'].forEach(function (text) {
       var li = document.createElement('li');
       li.textContent = text;
       list.appendChild(li);

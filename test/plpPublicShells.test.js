@@ -29,7 +29,7 @@ test('all React landing routes provide page-specific first-response metadata and
 
 test('a failed React script cannot dismiss the no-JavaScript guest fallback on load', () => {
   assert.ok(!template.includes("window.addEventListener('load'"));
-  assert.ok(template.includes('Contact concierge'));
+  assert.ok(template.includes('Contact the team'));
   const main = readFileSync(path.join(root, 'src/main.jsx'), 'utf8');
   assert.match(main, /useLayoutEffect/);
   assert.match(main, /plp-app-ready/);
