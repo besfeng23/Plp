@@ -150,6 +150,11 @@ test('affiliate reporting uses UTC date windows, preserves missing enquiries, an
   assert.match(nodes.app.innerHTML,/Referred enquiries/);
   assert.match(nodes.app.innerHTML,/id="reportPeriod"/);
   assert.match(nodes.app.innerHTML,/TEST DASHBOARD/);
+  assert.match(nodes.app.innerHTML,/aria-label="Financial position and partner details"/);
+  assert.match(nodes.app.innerHTML,/View chart data/);
+  assert.match(nodes.app.innerHTML,/data-label="Enquiries"/);
+  assert.match(nodes.app.innerHTML,/data-label="Bookings"/);
+  assert.match(nodes.app.innerHTML,/Illustrative · Not payable/);
   vm.runInContext('demo=false; render({partner:{name:"Verified partner",status:"active"},enquiries:null,referrals:[],commissions:[],payouts:[],commissionsActive:false})',ctx);
   assert.match(nodes.app.innerHTML,/Enquiry activity unavailable/);
   assert.doesNotMatch(nodes.app.innerHTML,/DEMO-1003/);
