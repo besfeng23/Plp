@@ -33,8 +33,9 @@
       · <a href="https://wa.me/639604792247">WhatsApp</a></p>
     <form id="preview-form" method="post" action="/api/plp?action=preview-verify">
       <label>Access code
-        <input id="code" name="code" type="text" required autocomplete="off" spellcheck="false" autocapitalize="off" />
+        <input id="code" name="code" type="password" required maxlength="120" autocomplete="off" spellcheck="false" autocapitalize="off" />
       </label>
+      <input type="hidden" name="next" id="next" value="/" />
       <button type="submit" id="submit">Enter</button>
       <p class="error" id="status" role="status" aria-live="polite"></p>
     </form>
@@ -44,25 +45,24 @@
       var form = document.getElementById('preview-form');
       var status = document.getElementById('status');
       var submit = document.getElementById('submit');
-      var next = new URLSearchParams(location.search).get('next') || '/';
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-        status.textContent = '';
+      var params = new URLSearchParams(location.search);
+      document.getElementById('next').value = params.get('next') || '/';
+      var messages = {
+        invalid: 'That code was not accepted.',
+        locked: 'Too many attempts. Please try again in 15 minutes.',
+        unavailable: 'Sign-in is temporarily unavailable. Please try again.',
+        origin: 'Please open this page directly and try again.'
+      };
+      var error = params.get('access_error');
+      if (Object.prototype.hasOwnProperty.call(messages, error)) status.textContent = messages[error];
+      form.addEventListener('submit', function () {
+        status.textContent = 'Signing in…';
+        submit.textContent = 'Signing in…';
         submit.disabled = true;
-        fetch('/api/plp?action=preview-verify', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ code: document.getElementById('code').value, next: next })
-        }).then(function (response) {
-          return response.json().then(function (data) {
-            if (!response.ok || !data.ok) throw new Error(data.error || 'That code was not accepted.');
-            location.replace(data.next || '/');
-          });
-        }).catch(function (error) {
-          status.textContent = error.message || 'That code was not accepted.';
-          submit.disabled = false;
-        });
+      });
+      window.addEventListener('pageshow', function () {
+        submit.disabled = false;
+        submit.textContent = 'Enter';
       });
     })();
   </script>

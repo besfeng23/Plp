@@ -168,3 +168,30 @@ test('committed sources keep the god-code helper and migration, and do not use N
   assert.doesNotMatch(read('lib/preview-gate.js'), /node:crypto|createHmac|handlePreviewVerify/);
   assert.doesNotMatch(read('middleware.js'), /node:crypto|createHmac|PLP_OWNER_GOD_CODE_HASH/);
 });
+
+
+test('native browser form receives a 303 directly to owner and both cookies', async () => {
+  const hash = await sha256Hex(canonicalPreviewCode(FIXTURE_CODE));
+  const env = { ...ownerEnv, PLP_OWNER_GOD_CODE_HASH: hash };
+  const store = createMemoryGateStore();
+  const response = { statusCode:0, headers:{}, body:null, setHeader(k,v){this.headers[k]=v;}, end(s){this.body=s;} };
+  await handlePreviewVerify(req({ headers:{'content-type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({code:FIXTURE_CODE,next:'/'}).toString() }), response, env, {attemptStore:store,lookupOwnerUser:async()=>({id:UID,email:OWNER_EMAIL})});
+  assert.equal(response.statusCode,303);
+  assert.equal(response.headers.Location,'/owner');
+  assert.equal(response.headers['Set-Cookie'].length,2);
+  assert.equal(response.body,'');
+  assert.doesNotMatch(response.headers.Location,new RegExp(FIXTURE_CODE));
+  const failure = {...response,headers:{}};
+  await handlePreviewVerify(req({headers:{'content-type':'application/x-www-form-urlencoded'},body:'code=invalid&next=%2F%2Fevil.example'}),failure,env,{attemptStore:store});
+  assert.equal(failure.statusCode,303);
+  assert.match(failure.headers.Location,/^\/private-preview\?access_error=invalid&next=%2F$/);
+  assert.equal(failure.headers['Set-Cookie'],undefined);
+});
+
+test('code-only JSON default route is owner rather than the private guest gate', async () => {
+  const hash=await sha256Hex(canonicalPreviewCode(FIXTURE_CODE));
+  const r=res();
+  await handlePreviewVerify(req({body:{code:FIXTURE_CODE,next:'/'}}),r,{...ownerEnv,PLP_OWNER_GOD_CODE_HASH:hash},{attemptStore:createMemoryGateStore(),lookupOwnerUser:async()=>({id:UID,email:OWNER_EMAIL})});
+  assert.equal(r.statusCode,200);
+  assert.equal(r.body.next,'/owner');
+});
