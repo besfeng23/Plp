@@ -7,7 +7,6 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', tier: 'referral' });
-  const [payout, setPayout] = useState({ affiliate_id: '', amount: '', currency: 'USD', payout_reference: '' });
   const heading = view === 'payouts' ? 'Payouts' : 'Partners';
 
   async function load() {
@@ -49,16 +48,7 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
       <div className="plp-panel__head"><div><h3>{heading}</h3><p>Manual payout records only. No money is moved from this screen.{data.commissionsActive ? '' : ' Commission calculation is off until the owner approves rates.'}</p></div></div>
       {error && <p className="plp-form-error" role="alert">{error}</p>}
       {note && <p role="status">{note}</p>}
-      <form className="plp-task-form" onSubmit={(event) => { event.preventDefault(); post({ action: 'payout', ...payout, amount: Number(payout.amount) }, () => 'Payout recorded.'); }}>
-        <label>Partner<select required value={payout.affiliate_id} onChange={(e) => setPayout((v) => ({ ...v, affiliate_id: e.target.value }))}>
-          <option value="">Choose a partner</option>
-          {(data.partners || []).map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}
-        </select></label>
-        <label>Amount<input required type="number" min="0" step="0.01" value={payout.amount} onChange={(e) => setPayout((v) => ({ ...v, amount: e.target.value }))} /></label>
-        <label>Currency<input value={payout.currency} onChange={(e) => setPayout((v) => ({ ...v, currency: e.target.value }))} /></label>
-        <label>Payout reference<input value={payout.payout_reference} onChange={(e) => setPayout((v) => ({ ...v, payout_reference: e.target.value }))} placeholder="Transfer or ledger reference" /></label>
-        <button className="plp-primary" type="submit" disabled={busy}>Record payout</button>
-      </form>
+      <p className="plp-disclosure">New payout recording is locked pending owner-approved commission reconciliation. Historical settlement records remain available.</p>
       <div className="plp-task-list">{(data.rows || []).length === 0 ? <p className="plp-disclosure">No payouts recorded.</p>
         : data.rows.map((row) => <article className="plp-enquiry" key={row.id}>
           <header><h4>{row.currency} {row.amount}</h4><time>{String(row.created_at || '').slice(0, 10)}</time></header>

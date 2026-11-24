@@ -2,8 +2,34 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { affiliateCommissionsActive, affiliatePublicEnrollment, PROPOSED_AFFILIATE_RATES, signAffiliateSession, verifyAffiliateSession } from '../lib/affiliate.js';
+import { affiliateCommissionsActive, affiliatePublicEnrollment, PROPOSED_AFFILIATE_RATES, signAffiliateSession, verifyAffiliateSession, parseAffiliateVerificationLink, handleAffiliateAdmin, attachReferral } from '../lib/affiliate.js';
 import { captureReferralCode, normalizeReferralCode } from '../lib/referral-capture.js';
+
+import { safePreviewNextPath } from '../lib/preview-gate.js';
+
+test('email proof is accepted only from the configured provider verification endpoint', () => {
+  const env = {PLP_DATABASE_TARGET:'legacy',SUPABASE_URL:'https://plp-test.supabase.co'};
+  const token = 'a'.repeat(64);
+  const good = 'https://plp-test.supabase.co/auth/v1/verify?token='+token+'&type=signup&redirect_to=http%3A%2F%2Flocalhost%3A3000';
+  assert.deepEqual(parseAffiliateVerificationLink(good,env), {token_hash:token,type:'signup'});
+  assert.equal(parseAffiliateVerificationLink(good.replace('plp-test.supabase.co','other.supabase.co'),env),null);
+  assert.equal(parseAffiliateVerificationLink(good.replace('type=signup','type=recovery'),env),null);
+  assert.equal(parseAffiliateVerificationLink(good.replace('/auth/v1/verify','/other'),env),null);
+  assert.equal(parseAffiliateVerificationLink('http://plp-test.supabase.co/auth/v1/verify?token='+token+'&type=signup',env),null);
+});
+test('private preview retains only valid guest referral codes', () => {
+  assert.equal(safePreviewNextPath('/?ref=Travel-Argie&utm_source=external'),'/?ref=travel-argie');
+  assert.equal(safePreviewNextPath('/booking?ref=plp-test'),'/booking?ref=plp-test');
+  assert.equal(safePreviewNextPath('/?ref=bad!'),'/');
+  assert.equal(safePreviewNextPath('//evil.example/?ref=plp-test'),'/');
+  assert.equal(safePreviewNextPath('/admin?ref=plp-test'),'/');
+});
+test('unreconciled payouts are rejected before any database mutation',async()=>{
+  const [status,result]=await handleAffiliateAdmin('POST',{action:'payout',affiliate_id:'test',amount:500},'staff');
+  assert.equal(status,409);
+  assert.equal(result.ok,false);
+  await assert.rejects(attachReferral({table:'plp_payouts',id:'test',referralCode:'plp-test'}),/Invalid referral target/);
+});
 
 const read = (file) => readFileSync(new URL('../' + file, import.meta.url), 'utf8');
 
@@ -161,4 +187,26 @@ test('affiliate reporting uses UTC date windows, preserves missing enquiries, an
   const source=read('lib/affiliate.js');
   assert.match(source,/selectRows\('plp_concierge_enquiries', 'affiliate_id=eq\.' \+ partner\.id \+ '&select=status,created_at&order=created_at\.desc&limit=50'\)/);
   assert.match(source,/enquiries: enquiries === null \? null : enquiries\.map\(row => \(\{ status: row\.status, created_at: row\.created_at \}\)\)/);
+});
+
+
+test('mobile partner workspace has four destinations, short home and isolated financial records',()=>{
+ const fakeNode=()=>({hidden:false,innerHTML:'',textContent:'',addEventListener(){},querySelector(){return fakeNode()},querySelectorAll(){return []}});
+ const nodes=Object.fromEntries(['status','app','loading'].map(k=>[k,fakeNode()]));
+ const ctx=vm.createContext({document:{getElementById:k=>nodes[k]},location:{origin:'https://plp.example',search:'',hash:''},URL,URLSearchParams,Intl,window:{matchMedia(){return {matches:true,addEventListener(){}}},scrollTo(){}},fetch(){throw Error('No network allowed')}});
+ vm.runInContext(read('src/affiliate.js').replace(/start\(\);\s*$/,''),ctx);
+ vm.runInContext('demoDashboard()',ctx);
+ const markup=nodes.app.innerHTML;
+ assert.match(markup,/Welcome, Demo/);
+ assert.match(markup,/Sample data only. No real earnings/);
+ assert.match(markup,/m-nav/);
+ assert.doesNotMatch(markup,/reportPeriod|performance-grid/);
+ assert.equal((markup.match(/<nav class="m-nav"[\s\S]*?<\/nav>/)[0].match(/<button/g)||[]).length,4);
+ assert.match(markup,/<span>Earnings<\/span>/);
+ vm.runInContext('demo=false; render({partner:{name:"Live partner",status:"active",referral_code:"live-test"},enquiries:null,referrals:[],commissions:[],payouts:[],commissionsActive:false},"overview")',ctx);
+ assert.match(nodes.app.innerHTML,/Not active/);
+ assert.doesNotMatch(nodes.app.innerHTML,/Sample data only|DEMO-1003/);
+ vm.runInContext('render(activeData,"commissions")',ctx);
+ assert.match(nodes.app.innerHTML,/Commission history/);
+ assert.match(nodes.app.innerHTML,/data-segment="payouts"/);
 });

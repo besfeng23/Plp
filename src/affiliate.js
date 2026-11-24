@@ -58,6 +58,7 @@ function total(rows,key) {
   return values.length===0?'—':values.length===1?values[0]:'Multiple currencies';
 }
 function demoDashboard() {
+  mobileReferrals='bookings'; mobileEarnings='commissions';
   demo = true;
   period = 30;
   render({
@@ -72,10 +73,11 @@ function authShell(content) {
   return '<div class="auth"><section class="auth-brand">'+brand()+'<div><p class="eyebrow">PLP Boracay</p><h1>Exceptional stays.<br>Meaningful partnerships.</h1><p>A dedicated workspace for our travel, creator and referral partners.</p></div><footer>Pueblo La Perla · Partner relations</footer></section><main class="auth-main"><div class="auth-form">'+content+'</div></main></div>';
 }
 function signup(message = '') {
+  activeData=null; mobileReferrals='bookings'; mobileEarnings='commissions';
   demo = false;
   period = 30;
   show(message, Boolean(message));
-  app.innerHTML = authShell('<p class="eyebrow">Partner access</p><h2>Welcome to PLP.</h2><p class="muted">Create your account or sign in with your email. No invitation required.</p><form id="enroll"><label>Name <input name="name" autocomplete="name" maxlength="120" placeholder="Your name (new partners)"></label><label>Email address <input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label><label>Partner type <select name="tier"><option value="referral">Referral partner</option><option value="travel_agent">Travel agent</option><option value="influencer">Creator / influencer</option></select></label><button class="button" type="submit">Send verification code</button></form><div class="auth-divider"><button class="button secondary" type="button" id="demo">Explore test dashboard</button><small>Demo data is illustrative only. Real rates are pending approval and the resort website remains private.</small></div>');
+  app.innerHTML = authShell('<p class="eyebrow">Partner access</p><h2>Welcome to PLP.</h2><p class="muted">Create your account or sign in with your email. No invitation required.</p><form id="enroll"><label>Name <input name="name" autocomplete="name" maxlength="120" placeholder="Your name (new partners)"></label><label>Email address <input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label><label>Partner type <select name="tier"><option value="referral">Referral partner</option><option value="travel_agent">Travel agent</option><option value="influencer">Creator / influencer</option></select></label><button class="button" type="submit">Send sign-in email</button></form><div class="auth-divider"><button class="button secondary" type="button" id="demo">Explore test dashboard</button><small>Demo data is illustrative only. Real rates are pending approval and the resort website remains private.</small></div>');
   app.querySelector('#demo').addEventListener('click', demoDashboard);
   app.querySelector('#enroll').addEventListener('submit', async event => {
     event.preventDefault();
@@ -89,8 +91,8 @@ function signup(message = '') {
   });
 }
 function verifyForm() {
-  show('Check your email for the verification code.');
-  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">Enter the code sent to '+escape(enrollment.email)+'.</p><form id="verify"><label>Verification code <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
+  show('Check your email for the secure sign-in link or verification code.');
+  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">We sent a sign-in email to '+escape(enrollment.email)+'. Copy its secure confirmation link into the field below, or enter your verification code if the email includes one. Keep this page open.</p><form id="verify"><label>Verification link or code <input name="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
   app.querySelector('#back').addEventListener('click', () => signup());
   app.querySelector('#verify').addEventListener('submit', async event => {
     event.preventDefault();
@@ -180,7 +182,69 @@ function enquirySummary(enquiries) {
 function rateLabel(partner) {
   return partner.rate_approval_status==='approved'&&Number.isFinite(Number(partner.rate))?String(Number(partner.rate)*100)+'% approved':'Pending approval';
 }
+
+const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(max-width: 760px)') : null;
+let activeData = null, activeView = 'overview', mobileReferrals = 'bookings', mobileEarnings = 'commissions';
+const mobileViews = {overview:'Home',referrals:'Referrals',commissions:'Earnings',account:'Account'};
+function mobileView(view) { return view==='payouts'?'commissions':view==='resources'?'account':Object.hasOwn(mobileViews,view)?view:'overview'; }
+function mobileAmount(rows,key){return rows.length?total(rows,key):'—'}
+function mobileRecord(title,sub,end) {
+  return '<article class="m-record"><div><strong>'+escape(title)+'</strong><small>'+escape(sub)+'</small></div><div class="m-record-end">'+end+'</div></article>';
+}
+function mobileSection(title,content,action=''){
+  return '<section class="m-section"><div class="m-section-head"><h2>'+escape(title)+'</h2>'+action+'</div>'+content+'</section>';
+}
+function mobileSegments(options,current,group){
+  return '<div class="m-segments" role="group" aria-label="'+escape(group)+'">'+Object.entries(options).map(([key,name])=>'<button type="button" data-segment="'+key+'" aria-pressed="'+String(current===key)+'">'+escape(name)+'</button>').join('')+'</div>';
+}
+function mobileBookings(rows) {
+  return rows.length?rows.map(r=>mobileRecord(r.reference||'Booking',r.check_in?String(r.check_in).slice(0,10)+' – '+String(r.check_out||'').slice(0,10):String(r.created_at||'').slice(0,10),pill(r.status))).join(''):empty('No bookings yet','Your referred bookings will appear here.','referrals');
+}
+function mobileRender(data, requested) {
+  const view=mobileView(requested), partner=data.partner||{}, bookings=list(data.referrals), commissions=list(data.commissions), payouts=list(data.payouts);
+  const enquiries=Array.isArray(data.enquiries)?data.enquiries:null;
+  const available=demo||data.commissionsActive;
+  const due=commissions.filter(r=>['approved','payable'].includes(r.status));
+  const pending=commissions.filter(r=>r.status==='pending');
+  const paid=payouts.filter(r=>r.status==='recorded');
+  const link=new URL('/?ref='+encodeURIComponent(partner.referral_code||''),location.origin).href;
+  const first=String(partner.name||'Partner').trim().split(/\s+/)[0]||'Partner';
+  const capped=[bookings,enquiries||[],commissions,payouts].some(r=>r.length>=50);
+  const linkTools='<div class="m-link"><div><small>Your referral code</small><strong class="code">'+escape(partner.referral_code||'—')+'</strong></div><button class="button" id="mobileCopy" type="button" '+(demo?'disabled':'')+'>'+ (demo?'Sample link':'Copy referral link')+'</button></div><input id="mobileLink" class="m-link-value" aria-label="Referral link" value="'+escape(link)+'" readonly><small>'+ (demo?'Demo link · not for sharing':'Share after the resort is cleared to launch.')+'</small>';
+  let body='';
+  if(view==='overview'){
+    body='<section class="m-welcome"><div><p class="eyebrow">Partner workspace</p><h1>Welcome, '+escape(first)+'.</h1></div>'+pill(partner.status)+'</section>'
+      +'<section class="m-share">'+linkTools+'</section>'
+      +'<section class="m-stats" aria-label="Partner activity"><button type="button" data-view="referrals" data-ref="enquiries"><small>Enquiries</small><strong>'+escape(enquiries===null?'—':enquiries.length)+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Bookings</small><strong>'+bookings.length+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Completed stays</small><strong>'+bookings.filter(r=>String(r.status).toLowerCase()==='completed').length+'</strong></button></section>'
+      +'<button type="button" class="m-earn" data-view="commissions"><div><small>Approved / payable</small><strong>'+escape(available?mobileAmount(due,'commission_amount'):'Not active')+'</strong><span>'+escape(demo?'Sample earnings · not payable':available?'See your earnings':'Rates pending approval')+'</span></div><span aria-hidden="true">›</span></button>'
+      +mobileSection('Recent bookings',mobileBookings(bookings.slice(0,2)),'<button class="text-button" type="button" data-view="referrals" data-ref="bookings">View all</button>')
+      +'<details class="m-disclosure"><summary>Program details</summary><p>Pre-launch · Resort website private.</p><p>Rates: '+escape(demo?'Sample only':rateLabel(partner))+'</p><p>Payouts: Recorded settlements only.</p></details>';
+  }else if(view==='referrals'){
+    body='<header class="m-title"><h1>Referrals</h1></header>'+mobileSegments({bookings:'Bookings',enquiries:'Enquiries'},mobileReferrals,'Referral type');
+    if(mobileReferrals==='enquiries'){
+      body+=mobileSection(enquiries===null?'Enquiries unavailable':enquiries.length+' enquiries',enquiries===null?empty('Unavailable','Try again later.','referrals'):enquiries.length?enquiries.map(r=>mobileRecord('Enquiry',String(r.created_at||'').slice(0,10),pill(r.status))).join(''):empty('No enquiries yet','Your referred enquiries will appear here.','referrals'));
+    }else body+=mobileSection(bookings.length+' bookings',mobileBookings(bookings))+'<button type="button" id="mExport" class="button secondary">Export bookings</button>';
+  }else if(view==='commissions'){
+    body='<header class="m-title"><h1>Earnings</h1></header><section class="m-finance"><small>Approved / payable</small><strong>'+escape(available?mobileAmount(due,'commission_amount'):'Not active')+'</strong><small>'+escape(demo?'Sample figures · not payable':available?'Approved commission records':'Rates pending approval')+'</small><div class="m-finance-grid"><div><small>Pending review</small><b>'+escape(available?mobileAmount(pending,'commission_amount'):'—')+'</b></div><div><small>Recorded payouts</small><b>'+escape(mobileAmount(paid,'amount'))+'</b></div></div></section>'
+      +mobileSegments({commissions:'Commissions',payouts:'Payouts'},mobileEarnings,'Earnings history');
+    const rows=mobileEarnings==='commissions'?commissions:payouts;
+    body+=mobileSection(mobileEarnings==='commissions'?'Commission history':'Payout history',rows.length?rows.map(r=>mobileRecord(mobileEarnings==='commissions'?label(r.commission_type):r.payout_reference||'Settlement',String(r.created_at||'').slice(0,10),'<strong>'+escape(cash(mobileEarnings==='commissions'?r.commission_amount:r.amount,r.currency))+'</strong>'+pill(r.status))).join(''):empty('No records yet',mobileEarnings==='commissions'?'Commission records will appear here.':'Recorded payouts will appear here.','payouts'))+'<button type="button" id="mExport" class="button secondary">Export '+escape(mobileEarnings)+'</button>';
+  }else{
+    body='<header class="m-title"><h1>Account</h1></header><section class="m-section"><dl class="detail-list"><div><dt>Name</dt><dd>'+escape(partner.name||'Partner')+'</dd></div><div><dt>Partner type</dt><dd>'+escape(label(partner.tier))+'</dd></div><div><dt>Status</dt><dd>'+pill(partner.status)+'</dd></div><div><dt>Rate</dt><dd>'+escape(demo?'Sample only':rateLabel(partner))+'</dd></div></dl></section>'+mobileSection('Referral link',linkTools)+'<button class="button secondary" id="mobileLogout" type="button">'+(demo?'Exit demo':'Sign out')+'</button>';
+  }
+  show('');
+  app.innerHTML='<div class="m-workspace"><header class="m-top">'+brand()+(demo?'<span class="m-demo-tag">Test mode</span>':'<span class="m-live-tag">Pre-launch</span>')+'</header><main id="main-content" tabindex="-1" class="m-page">'+(demo?'<p class="m-demo-note">Sample data only. No real earnings.</p>':'')+body+(capped?'<small>Latest 50 records per ledger; totals may be incomplete.</small>':'<small class="m-data-note">Based on latest available records (up to 50 per ledger).</small>')+'</main><nav class="m-nav" aria-label="Partner navigation">'+Object.entries(mobileViews).map(([key,name])=>'<button type="button" data-view="'+key+'" '+(key===view?'aria-current="page"':'')+'>'+icon(key==='commissions'?'payouts':key)+'<span>'+escape(name)+'</span></button>').join('')+'</nav></div>';
+  app.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.ref)mobileReferrals=button.dataset.ref;render(data,button.dataset.view);window.scrollTo(0,0);app.querySelector('#main-content').focus({preventScroll:true})}));
+  app.querySelectorAll('[data-segment]').forEach(button=>button.addEventListener('click',()=>{if(view==='referrals')mobileReferrals=button.dataset.segment;else mobileEarnings=button.dataset.segment;render(data,view);app.querySelector('[data-segment="'+button.dataset.segment+'"]')?.focus({preventScroll:true})}));
+  app.querySelector('#mobileCopy')?.addEventListener('click',async()=>{if(demo)return;try{await navigator.clipboard.writeText(link);show('Referral link copied.')}catch{const input=app.querySelector('#mobileLink');input.style.display='block';input.focus();input.select();show('Select and copy the referral link.')}});
+  app.querySelector('#mobileLogout')?.addEventListener('click',async()=>{if(demo)return signup();try{await request('logout',{});signup()}catch(error){show(error.message,true)}});
+  app.querySelector('#mExport')?.addEventListener('click',()=>{const kind=view==='referrals'?'referrals':mobileEarnings;downloadRecords({referrals:bookings,commissions,payouts}[kind],kind)});
+}
+mobileQuery?.addEventListener('change',()=>{if(activeData)render(activeData,activeView)});
+
 function render(data, view = 'overview') {
+  activeData=data; activeView=view;
+  if(mobileQuery?.matches)return mobileRender(data,view);
   if(!Object.hasOwn(views,view))view='overview';
   const partner = data.partner || {};
   const referrals = list(data.referrals), payouts = list(data.payouts), commissions = list(data.commissions);
@@ -231,6 +295,21 @@ function render(data, view = 'overview') {
 }
 // Referrals &amp; Payouts are represented as separate ledger views for better navigation.
 async function start() {
+  // A provider email link may return a one-time authenticated browser session.
+  // Remove credentials from the address bar before doing anything else.
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  const accessToken = fragment.get('access_token');
+  if (accessToken || fragment.has('refresh_token') || fragment.has('error_description')) {
+    history.replaceState(null, '', location.pathname);
+    if (!accessToken) return signup('That sign-in link expired. Request another email.');
+    try {
+      await request('enroll-link', {accessToken});
+      render(await request('me'));
+    } catch (error) {
+      signup(error.message);
+    }
+    return;
+  }
   const invite = new URLSearchParams(location.search).get('invite');
   try {
     if (invite) {
