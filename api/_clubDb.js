@@ -1,15 +1,18 @@
+import { plpSupabaseEnv } from '../lib/plp-supabase-env.js';
 // Dedicated PLP Club data access. This intentionally does not modify the
 // booking/payment Supabase client or its plp_runtime schema selection.
 const TABLES = new Set(['plp_club_chapters', 'plp_club_members', 'plp_club_activities', 'plp_club_attendance']);
 
 export function clubDbConfigured() {
-  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const env = plpSupabaseEnv();
+  return Boolean(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 async function clubRequest(resource, { method = 'GET', query = '', body } = {}) {
   if (!clubDbConfigured()) throw new Error('Club database is not configured');
-  const base = process.env.SUPABASE_URL.replace(/\/$/, '');
-  const token = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const env = plpSupabaseEnv();
+  const base = env.SUPABASE_URL.replace(/\/$/, '');
+  const token = env.SUPABASE_SERVICE_ROLE_KEY;
   const response = await fetch(`${base}/rest/v1/${resource}${query ? `?${query}` : ''}`, {
     method,
     headers: {

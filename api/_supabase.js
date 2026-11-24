@@ -1,6 +1,8 @@
 import { PLP_CURRENCY } from '../lib/pricing.js';
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { plpSupabaseEnv } from '../lib/plp-supabase-env.js';
+const dbEnv = plpSupabaseEnv();
+const SUPABASE_URL = dbEnv.SUPABASE_URL || dbEnv.VITE_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = dbEnv.SUPABASE_SERVICE_ROLE_KEY;
 const BOOKING_SCHEMA = process.env.PLP_SUPABASE_SCHEMA || 'plp_runtime';
 const PUBLIC_TABLES = new Set(['plp_site_subscriptions', 'plp_site_subscription_config']);
 
