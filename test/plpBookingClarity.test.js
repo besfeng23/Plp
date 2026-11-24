@@ -33,7 +33,7 @@ test('booking shows a room thumbnail, starts the current month at today, and use
   assert.match(html, new RegExp('wa\\.me/' + CONCIERGE_NUMBER.replace(/\D/g, '')));
   assert.match(js, /CONCIERGE_NUMBER/);
   assert.match(js, /wa\.me\/' \+ phone/);
-  assert.equal(CONCIERGE_NUMBER_DISPLAY, '+63 917 887 2980');
+  assert.equal(CONCIERGE_NUMBER_DISPLAY, '+63 960 479 2247');
 });
 
 test('consent uses the booking in-flow layout on every page unless a page opts into a floating bar', () => {

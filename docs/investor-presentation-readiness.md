@@ -10,7 +10,7 @@
 - **Public browser:** premium homepage, Accommodation and Experiences visuals inspected; no broken images or horizontal overflow observed on desktop; one skip link on the homepage. Exact physical-device mobile acceptance is not proven.
 - **Booking browser:** Grand Ocean Villa, 18–19 November 2026, one night: USD 1,000 estimated stay, USD 300 expected deposit, USD 700 balance; availability returned open for request, and the guest contact form opened. **No request or payment was submitted.** The booking walkthrough was performed before PR #70, which changed only Telegram content and its test.
 - **Admin:** staff-code gate present; previous authorized inspection at commit `63c9c8a` showed Manage Client and ten Resort Command status modules loaded, with three clearly marked QA reservations excluded from default business totals. Staff authentication is tab-scoped and a reload requires re-entry. No guest or financial state was changed. Admin was not re-authenticated on the latest documentation-only audit.
-- **Approved concierge contact:** `mfr@e-mango.com`, `+63 917 887 2980` on the public website and, after PR #70, the Telegram mini-app Directions screen. Its map is labelled as a Boracay overview, not an exact property pin.
+- **Approved sales contact:** Argie Concepcion, `+63 960 479 2247` (WhatsApp https://wa.me/639604792247) on the public website and the Telegram mini-app Directions screen. There is no public email until a PLP-owned address is issued; inquiries go through the contact form, phone and WhatsApp. The mini-app map is labelled as a Boracay overview, not an exact property pin.
 
 ### Demonstration boundary
 
