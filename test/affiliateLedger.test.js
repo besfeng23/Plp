@@ -210,3 +210,13 @@ test('mobile partner workspace has four destinations, short home and isolated fi
  assert.match(nodes.app.innerHTML,/Commission history/);
  assert.match(nodes.app.innerHTML,/data-segment="payouts"/);
 });
+
+
+test('referral landing capture and concierge state are wired before guest navigation', () => {
+  assert.match(read('src/main.jsx'), /import \{ captureReferralCode \} from '\.\.\/lib\/referral-capture\.js'/);
+  assert.match(read('src/main.jsx'), /\ncaptureReferralCode\(\);[\s\S]*createRoot/);
+  const source = read('src/ConciergeView.jsx');
+  assert.match(source, /const \[referralCode, setReferralCode\] = useState\(\(\) => captureReferralCode\(\)\)/);
+  assert.match(source, /referralCode: referralCode\.trim\(\)/);
+  assert.match(source, /'Referral code: ' \+ referralCode\.trim\(\)/);
+});

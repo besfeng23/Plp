@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';
 import App from './App.jsx';
 import './index.css';
+import { captureReferralCode } from '../lib/referral-capture.js';
+
+// Capture a partner landing link before navigation changes the URL.
+captureReferralCode();
 import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
 
 // The static loading/fallback shell remains usable until React actually mounts.

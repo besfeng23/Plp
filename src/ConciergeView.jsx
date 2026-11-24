@@ -18,6 +18,7 @@ export default function ConciergeView() {
   const [topic, setTopic] = useState(initial.topic);
   const [program, setProgram] = useState(initial.program);
   const [room, setRoom] = useState(initial.room);
+  const [referralCode, setReferralCode] = useState(() => captureReferralCode());
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState(() => residentialInterest ? 'I am interested in future senior-living opportunities connected to Pearl Club. Please contact me about the separate residential process. I understand this is an enquiry, not a residential application, reservation or membership approval.' : '');
@@ -40,7 +41,7 @@ export default function ConciergeView() {
 
   const roomName = ['stay', 'group'].includes(topic) ? PLP_ROOMS.find(item => item.slug === room)?.name : '';
   const interest = INQUIRY_TOPICS[topic] + (roomName ? ' · ' + roomName : '') + (topic.startsWith('club') && program ? ' · ' + CLUB_PROGRAMS[program] : '') + (residentialInterest && topic === 'club' ? ' · Senior living interest (concept only)' : '');
-  const body = [message.trim(), name.trim(), email.trim()].filter(Boolean).join('\n\n');
+  const body = [message.trim(), name.trim(), email.trim(), referralCode.trim() ? 'Referral code: ' + referralCode.trim() : ''].filter(Boolean).join('\n\n');
   const whatsappHref = 'https://wa.me/' + CONCIERGE_NUMBER.replace(/\D/g, '') + '?text=' + encodeURIComponent(body);
 
   async function send(event) {
