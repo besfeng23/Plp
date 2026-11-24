@@ -188,3 +188,25 @@ test('affiliate reporting uses UTC date windows, preserves missing enquiries, an
   assert.match(source,/selectRows\('plp_concierge_enquiries', 'affiliate_id=eq\.' \+ partner\.id \+ '&select=status,created_at&order=created_at\.desc&limit=50'\)/);
   assert.match(source,/enquiries: enquiries === null \? null : enquiries\.map\(row => \(\{ status: row\.status, created_at: row\.created_at \}\)\)/);
 });
+
+
+test('mobile partner workspace has four destinations, short home and isolated financial records',()=>{
+ const fakeNode=()=>({hidden:false,innerHTML:'',textContent:'',addEventListener(){},querySelector(){return fakeNode()},querySelectorAll(){return []}});
+ const nodes=Object.fromEntries(['status','app','loading'].map(k=>[k,fakeNode()]));
+ const ctx=vm.createContext({document:{getElementById:k=>nodes[k]},location:{origin:'https://plp.example',search:'',hash:''},URL,URLSearchParams,Intl,window:{matchMedia(){return {matches:true,addEventListener(){}}},scrollTo(){}},fetch(){throw Error('No network allowed')}});
+ vm.runInContext(read('src/affiliate.js').replace(/start\(\);\s*$/,''),ctx);
+ vm.runInContext('demoDashboard()',ctx);
+ const markup=nodes.app.innerHTML;
+ assert.match(markup,/Welcome, Demo/);
+ assert.match(markup,/Sample data only. No real earnings/);
+ assert.match(markup,/m-nav/);
+ assert.doesNotMatch(markup,/reportPeriod|performance-grid/);
+ assert.equal((markup.match(/<nav class="m-nav"[\s\S]*?<\/nav>/)[0].match(/<button/g)||[]).length,4);
+ assert.match(markup,/<span>Earnings<\/span>/);
+ vm.runInContext('demo=false; render({partner:{name:"Live partner",status:"active",referral_code:"live-test"},enquiries:null,referrals:[],commissions:[],payouts:[],commissionsActive:false},"overview")',ctx);
+ assert.match(nodes.app.innerHTML,/Not active/);
+ assert.doesNotMatch(nodes.app.innerHTML,/Sample data only|DEMO-1003/);
+ vm.runInContext('render(activeData,"commissions")',ctx);
+ assert.match(nodes.app.innerHTML,/Commission history/);
+ assert.match(nodes.app.innerHTML,/data-segment="payouts"/);
+});
