@@ -239,3 +239,8 @@ html[data-admin-experience="plp-enterprise-admin"] body { margin: 0; background:
 .plp-admin-login__crest{display:block;width:54px;height:76px;object-fit:contain;margin:0 auto 15px}
 .plp-admin-root .plp-sidebar-logo{width:36px;height:50px;border:0;border-radius:0;overflow:visible;background:transparent;flex:none}
 .plp-admin-root .plp-sidebar-logo img{width:36px;height:50px;object-fit:contain;display:block}
+
+.plp-enquiry__meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .75rem 1rem; margin: .85rem 0 1rem; }
+.plp-enquiry__meta label { display: grid; gap: .35rem; font-size: 11px; color: #625c4e; }
+.plp-enquiry__meta input { min-height: 42px; border: 1px solid #d9d8d0; background: #fffefa; padding: .45rem .65rem; color: inherit; font: inherit; }
+.plp-enquiry__due { font-size: 11px; font-weight: 600; color: #8d7750; }
