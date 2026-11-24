@@ -6,8 +6,9 @@ let enrollment = {};
 let demo = false;
 let period = 30;
 
-async function request(view, body) {
-  const response = await fetch('/api/plp?action=affiliate&view=' + encodeURIComponent(view), {
+async function request(view, body, params = {}) {
+  const query = new URLSearchParams({action:'affiliate',view,...params});
+  const response = await fetch('/api/plp?' + query.toString(), {
     method: body ? 'POST' : 'GET',
     credentials: 'same-origin',
     cache: 'no-store',
@@ -187,6 +188,30 @@ const mobileQuery = typeof window.matchMedia === 'function' ? window.matchMedia(
 let activeData = null, activeView = 'overview', mobileReferrals = 'bookings', mobileEarnings = 'commissions';
 const mobileViews = {overview:'Home',referrals:'Referrals',commissions:'Earnings',account:'Account'};
 function mobileView(view) { return view==='payouts'?'commissions':view==='resources'?'account':Object.hasOwn(mobileViews,view)?view:'overview'; }
+function hasMore(data){return !demo&&Object.values(data.ledgerNext||{}).some(Boolean)}
+function moreRecords(data){
+  if(!hasMore(data))return '';
+  return '<div class="m-more"><small class="muted">Totals and exports include loaded records only.</small><button type="button" class="button secondary" id="loadMoreLedger">Load older records</button></div>';
+}
+function bindMoreRecords(data,view){
+  app.querySelector('#loadMoreLedger')?.addEventListener('click',async event=>{
+    const button=event.currentTarget;
+    button.disabled=true;
+    try{
+      const pages=await Promise.all(Object.entries(data.ledgerNext||{}).filter(([,cursor])=>Boolean(cursor)).map(async([kind,cursor])=>{
+        const result=await request('ledger',null,{kind,cursor});
+        if(result.kind!==kind||!Array.isArray(result.rows)||result.next===cursor)throw Error('Invalid ledger page.');
+        return result;
+      }));
+      if(activeData!==data)return;
+      const merged={...data,ledgerNext:{...data.ledgerNext}};
+      for(const page of pages){merged[page.kind]=[...(Array.isArray(data[page.kind])?data[page.kind]:[]),...page.rows];merged.ledgerNext[page.kind]=page.next||null;}
+      render(merged,activeView||view);
+      app.querySelector('#loadMoreLedger')?.focus({preventScroll:true});
+    }catch(error){if(activeData===data)show(error.message,true)}
+    finally{button.disabled=false;}
+  });
+}
 function mobileAmount(rows,key){return rows.length?total(rows,key):'—'}
 function mobileRecord(title,sub,end) {
   return '<article class="m-record"><div><strong>'+escape(title)+'</strong><small>'+escape(sub)+'</small></div><div class="m-record-end">'+end+'</div></article>';
@@ -209,7 +234,7 @@ function mobileRender(data, requested) {
   const paid=payouts.filter(r=>r.status==='recorded');
   const link=new URL('/?ref='+encodeURIComponent(partner.referral_code||''),location.origin).href;
   const first=String(partner.name||'Partner').trim().split(/\s+/)[0]||'Partner';
-  const capped=[bookings,enquiries||[],commissions,payouts].some(r=>r.length>=50);
+  const capped=hasMore(data);
   const linkTools='<div class="m-link"><div><small>Your referral code</small><strong class="code">'+escape(partner.referral_code||'—')+'</strong></div><button class="button" id="mobileCopy" type="button" '+(demo?'disabled':'')+'>'+ (demo?'Sample link':'Copy referral link')+'</button></div><input id="mobileLink" class="m-link-value" aria-label="Referral link" value="'+escape(link)+'" readonly><small>'+ (demo?'Demo link · not for sharing':'Share after the resort is cleared to launch.')+'</small>';
   let body='';
   if(view==='overview'){
@@ -233,11 +258,12 @@ function mobileRender(data, requested) {
     body='<header class="m-title"><h1>Account</h1></header><section class="m-section"><dl class="detail-list"><div><dt>Name</dt><dd>'+escape(partner.name||'Partner')+'</dd></div><div><dt>Partner type</dt><dd>'+escape(label(partner.tier))+'</dd></div><div><dt>Status</dt><dd>'+pill(partner.status)+'</dd></div><div><dt>Rate</dt><dd>'+escape(demo?'Sample only':rateLabel(partner))+'</dd></div></dl></section>'+mobileSection('Referral link',linkTools)+'<button class="button secondary" id="mobileLogout" type="button">'+(demo?'Exit demo':'Sign out')+'</button>';
   }
   show('');
-  app.innerHTML='<div class="m-workspace"><header class="m-top">'+brand()+(demo?'<span class="m-demo-tag">Test mode</span>':'<span class="m-live-tag">Pre-launch</span>')+'</header><main id="main-content" tabindex="-1" class="m-page">'+(demo?'<p class="m-demo-note">Sample data only. No real earnings.</p>':'')+body+(capped?'<small>Latest 50 records per ledger; totals may be incomplete.</small>':'<small class="m-data-note">Based on latest available records (up to 50 per ledger).</small>')+'</main><nav class="m-nav" aria-label="Partner navigation">'+Object.entries(mobileViews).map(([key,name])=>'<button type="button" data-view="'+key+'" '+(key===view?'aria-current="page"':'')+'>'+icon(key==='commissions'?'payouts':key)+'<span>'+escape(name)+'</span></button>').join('')+'</nav></div>';
+  app.innerHTML='<div class="m-workspace"><header class="m-top">'+brand()+(demo?'<span class="m-demo-tag">Test mode</span>':'<span class="m-live-tag">Pre-launch</span>')+'</header><main id="main-content" tabindex="-1" class="m-page">'+(demo?'<p class="m-demo-note">Sample data only. No real earnings.</p>':'')+body+(capped?moreRecords(data):'')+'</main><nav class="m-nav" aria-label="Partner navigation">'+Object.entries(mobileViews).map(([key,name])=>'<button type="button" data-view="'+key+'" '+(key===view?'aria-current="page"':'')+'>'+icon(key==='commissions'?'payouts':key)+'<span>'+escape(name)+'</span></button>').join('')+'</nav></div>';
   app.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.ref)mobileReferrals=button.dataset.ref;render(data,button.dataset.view);window.scrollTo(0,0);app.querySelector('#main-content').focus({preventScroll:true})}));
   app.querySelectorAll('[data-segment]').forEach(button=>button.addEventListener('click',()=>{if(view==='referrals')mobileReferrals=button.dataset.segment;else mobileEarnings=button.dataset.segment;render(data,view);app.querySelector('[data-segment="'+button.dataset.segment+'"]')?.focus({preventScroll:true})}));
   app.querySelector('#mobileCopy')?.addEventListener('click',async()=>{if(demo)return;try{await navigator.clipboard.writeText(link);show('Referral link copied.')}catch{const input=app.querySelector('#mobileLink');input.style.display='block';input.focus();input.select();show('Select and copy the referral link.')}});
   app.querySelector('#mobileLogout')?.addEventListener('click',async()=>{if(demo)return signup();try{await request('logout',{});signup()}catch(error){show(error.message,true)}});
+  bindMoreRecords(data,view);
   app.querySelector('#mExport')?.addEventListener('click',()=>{const kind=view==='referrals'?'referrals':mobileEarnings;downloadRecords({referrals:bookings,commissions,payouts}[kind],kind)});
 }
 mobileQuery?.addEventListener('change',()=>{if(activeData)render(activeData,activeView)});
@@ -262,7 +288,7 @@ function render(data, view = 'overview') {
     const earnings = available?total(due,'commission_amount'):'—';
     const windowComplete=periodReferrals.filter(r=>String(r.status).toLowerCase()==='completed').length;
     const filter='<div class="report-control"><label for="reportPeriod">Reporting period</label><select id="reportPeriod">'+[7,30,90].map(n=>'<option value="'+n+'" '+(period===n?'selected':'')+'>Last '+n+' days</option>').join('')+'</select></div>';
-    const capNote=[referrals,enquiries||[],commissions,payouts].some(rows=>rows.length>=50)?'Results may be incomplete: latest 50 records per ledger.':'Based on latest available records (up to 50 per ledger).';
+    const capNote=hasMore(data)?'Totals reflect loaded records only. Load older records below.':'Based on available records.';
     body='<section class="partner-brief" aria-label="Financial position and partner details"><div class="brief-financial"><p class="eyebrow">Approved / payable</p><strong class="brief-amount">'+escape(earnings)+'</strong><p>'+escape(demo?'Illustrative · Not payable':available?'Latest approved and payable entries':'Commission posting not active')+'</p><button class="text-button" type="button" data-view="commissions">Commission ledger</button></div><div class="brief-financial"><p class="eyebrow">Recorded payouts</p><strong class="brief-amount">'+escape(total(paid,'amount'))+'</strong><p>'+escape(demo?'Illustrative settlements':'Latest recorded settlements')+'</p><button class="text-button" type="button" data-view="payouts">Payout history</button></div><div class="brief-account"><p class="eyebrow">Partner account</p><strong>'+escape(partner.name||'Partner')+'</strong><small>'+escape(label(partner.tier))+' · '+escape(demo?'Demo account':label(partner.status))+'</small><div class="brief-details"><span>Referral code <strong class="code">'+escape(partner.referral_code||'—')+'</strong></span><span>Rate <strong>'+escape(demo?'Simulation only':rateLabel(partner))+'</strong></span></div></div></section>'
       +'<div class="report-heading"><div><h2>Partner performance</h2><p class="muted">'+escape(reportBounds(period,now))+'</p></div>'+filter+'</div>'
       +'<div class="metric-grid performance-metrics">'+metric('Referred enquiries',periodEnquiries===null?'—':String(periodEnquiries.length),'Enquiries created in period','referrals')+metric('Referred bookings',String(periodReferrals.length),'Bookings created in period','overview')+metric('Completed bookings',String(windowComplete),'Current status of period bookings','commissions')+metric('Recorded payouts',total(reportWindow(paid,period,now),'amount'),'Settlements recorded in period','payouts')+'</div>'
@@ -276,7 +302,7 @@ function render(data, view = 'overview') {
   if(view==='resources')body=referralTools(partner,link)+panel('How referrals work','Your three-step partner workflow.','<dl class="detail-list"><div><dt>01 · Share</dt><dd>Use your unique link after launch.</dd></div><div><dt>02 · Track</dt><dd>Attributed bookings appear in Referrals.</dd></div><div><dt>03 · Settle</dt><dd>Eligible commissions follow approved terms.</dd></div></dl>');
   if(view==='account')body=panel('Partner profile','Your verified account information.','<dl class="detail-list"><div><dt>Name</dt><dd>'+escape(partner.name)+'</dd></div><div><dt>Partner type</dt><dd>'+escape(label(partner.tier))+'</dd></div><div><dt>Account status</dt><dd>'+pill(partner.status)+'</dd></div><div><dt>Referral code</dt><dd class="code">'+escape(partner.referral_code)+'</dd></div><div><dt>Commission rate</dt><dd>'+(!demo&&partner.rate_approval_status==='approved'&&Number.isFinite(Number(partner.rate))?escape(String(Number(partner.rate)*100)+'%'):'Pending approval')+'</dd></div></dl>');
   show('');
-  app.innerHTML='<div class="workspace"><button type="button" class="overlay" aria-label="Close navigation"></button><aside class="sidebar" id="sidebar">'+brand()+'<div><p class="eyebrow navlabel">Workspace</p><nav class="nav" aria-label="Partner navigation">'+Object.entries(views).map(([k,v])=>'<button type="button" data-view="'+k+'" '+(view===k?'aria-current="page"':'')+'>'+icon(k)+escape(v)+'</button>').join('')+'</nav></div><div class="sidebar-foot"><p>'+ (demo?'Test environment · No live records':'Partner workspace · Private pre-launch')+'</p><button class="button secondary" id="logout" type="button">'+icon('logout')+(demo?'Exit demo':'Sign out')+'</button></div></aside><div class="content"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" id="menu" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">'+icon('menu')+'</button><span>Partner workspace</span></div><div class="topbar-actions">'+(demo?'<span class="pill">Demo mode</span>':pill(partner.status))+'<div class="profile"><span class="avatar" aria-hidden="true">'+escape(String(partner.name||'P').slice(0,1).toUpperCase())+'</span><div><strong>'+escape(partner.name||'Partner')+'</strong><small>'+escape(label(partner.tier))+'</small></div></div></div></header><main class="page" id="main-content" tabindex="-1"><header class="page-head"><div><h1>'+escape(views[view])+'</h1><p class="muted">'+escape(descriptions[view])+'</p></div>'+(view==='overview'?'<button class="button secondary" type="button" data-view="resources">Referral tools</button>':'')+'</header>'+notice+body+'</main></div></div>';
+  app.innerHTML='<div class="workspace"><button type="button" class="overlay" aria-label="Close navigation"></button><aside class="sidebar" id="sidebar">'+brand()+'<div><p class="eyebrow navlabel">Workspace</p><nav class="nav" aria-label="Partner navigation">'+Object.entries(views).map(([k,v])=>'<button type="button" data-view="'+k+'" '+(view===k?'aria-current="page"':'')+'>'+icon(k)+escape(v)+'</button>').join('')+'</nav></div><div class="sidebar-foot"><p>'+ (demo?'Test environment · No live records':'Partner workspace · Private pre-launch')+'</p><button class="button secondary" id="logout" type="button">'+icon('logout')+(demo?'Exit demo':'Sign out')+'</button></div></aside><div class="content"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" id="menu" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">'+icon('menu')+'</button><span>Partner workspace</span></div><div class="topbar-actions">'+(demo?'<span class="pill">Demo mode</span>':pill(partner.status))+'<div class="profile"><span class="avatar" aria-hidden="true">'+escape(String(partner.name||'P').slice(0,1).toUpperCase())+'</span><div><strong>'+escape(partner.name||'Partner')+'</strong><small>'+escape(label(partner.tier))+'</small></div></div></div></header><main class="page" id="main-content" tabindex="-1"><header class="page-head"><div><h1>'+escape(views[view])+'</h1><p class="muted">'+escape(descriptions[view])+'</p></div>'+(view==='overview'?'<button class="button secondary" type="button" data-view="resources">Referral tools</button>':'')+'</header>'+notice+body+moreRecords(data)+'</main></div></div>';
   const workspace=app.querySelector('.workspace'), menu=app.querySelector('#menu');
   function closeMenu(){workspace.classList.remove('menu-open');menu.setAttribute('aria-expanded','false')}
   menu.addEventListener('click',()=>{const open=workspace.classList.toggle('menu-open');menu.setAttribute('aria-expanded',String(open));if(open)app.querySelector('.nav button[aria-current]')?.focus();else menu.focus()});
@@ -284,6 +310,7 @@ function render(data, view = 'overview') {
   workspace.addEventListener('keydown',e=>{if(e.key==='Escape'&&workspace.classList.contains('menu-open')){closeMenu();menu.focus()}if(e.key==='Tab'&&workspace.classList.contains('menu-open')){const buttons=[...app.querySelectorAll('.sidebar button:not(:disabled)')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
   app.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{render(data,button.dataset.view);window.scrollTo(0,0);app.querySelector('#main-content').focus({preventScroll:true})}));
   app.querySelector('#reportPeriod')?.addEventListener('change',e=>{const days=Number(e.target.value);if([7,30,90].includes(days)){period=days;render(data,'overview');app.querySelector('#reportPeriod')?.focus({preventScroll:true})}});
+  bindMoreRecords(data,view);
   const ledgerRows={referrals,commissions,payouts}[view];
   if(ledgerRows){
     const filtered=()=>{const value=app.querySelector('#recordStatus').value;return ledgerRows.filter(r=>!value||r.status===value)};
