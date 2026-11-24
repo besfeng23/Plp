@@ -114,3 +114,24 @@ test('professional dashboard renders six views, separates demo from live and esc
   assert.match(nodes.app.innerHTML,/Private pre-launch/);
   assert.match(nodes.app.innerHTML,/Earnings are not currently accruing/);
 });
+
+
+test('affiliate record tables include mobile labels and exports guard spreadsheet formulas', () => {
+  const fakeNode = () => ({hidden:false,innerHTML:'',textContent:'',classList:{add(){},remove(){},toggle(){return true}},addEventListener(){},setAttribute(){},focus(){},querySelector(){return fakeNode()},querySelectorAll(){return []}});
+  const nodes = Object.fromEntries(['status','app','loading'].map(k=>[k,fakeNode()]));
+  const ctx = vm.createContext({document:{getElementById:k=>nodes[k]},location:{origin:'https://plp.example',search:''},URL,URLSearchParams,Intl,window:{scrollTo(){}},fetch(){throw Error('No network allowed in rendering test')}});
+  vm.runInContext(read('src/affiliate.js').replace(/start\(\);\s*$/,''),ctx);
+  const markup=vm.runInContext('referralTable([{reference:"DEMO-1001",status:"COMPLETED",check_in:"2026-11-10"}])',ctx);
+  assert.match(markup,/data-label="Booking reference"/);
+  assert.match(markup,/data-label="Status"/);
+  assert.match(markup,/DEMO-1001/);
+  for (const value of ['=1+1','+1','-1','@SUM(1)','\t123','  =1+1']) {
+    assert.ok(vm.runInContext('csvCell('+JSON.stringify(value)+')',ctx).startsWith("\"'"));
+  }
+  assert.equal(vm.runInContext('csvCell("Normal, value")',ctx),'"Normal, value"');
+  assert.equal(vm.runInContext('csvCell(\'a"b\')',ctx),'"a""b"');
+  vm.runInContext('demoDashboard(); render({partner:{name:"Partner",referral_code:"sample",status:"active"},referrals:[],commissions:[],payouts:[],commissionsActive:false},"commissions")',ctx);
+  assert.match(nodes.app.innerHTML,/id="recordStatus"/);
+  assert.match(nodes.app.innerHTML,/id="exportRecords"/);
+  assert.match(nodes.app.innerHTML,/No commission records/);
+});
