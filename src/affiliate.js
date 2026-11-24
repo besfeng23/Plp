@@ -92,7 +92,7 @@ function signup(message = '') {
 }
 function verifyForm() {
   show('Check your email for the secure sign-in link or verification code.');
-  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">We sent a sign-in email to '+escape(enrollment.email)+'. Copy its secure confirmation link into the field below, or enter your verification code if the email includes one. Keep this page open.</p><form id="verify"><label>Verification link or code <input name="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
+  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">'+(enrollment.email?'We sent a sign-in email to '+escape(enrollment.email)+'.':'We sent a sign-in email to your invited address.')+' Copy its confirmation link here, or enter the code if provided. Keep this page open.</p><form id="verify"><label>Verification link or code <input name="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
   app.querySelector('#back').addEventListener('click', () => signup());
   app.querySelector('#verify').addEventListener('submit', async event => {
     event.preventDefault();
@@ -314,7 +314,10 @@ async function start() {
   try {
     if (invite) {
       history.replaceState(null, '', location.pathname);
-      await request('accept', { invite, action:'accept' });
+      await request('accept', { invite });
+      enrollment = {};
+      verifyForm();
+      return;
     }
     render(await request('me'));
   } catch (error) {
