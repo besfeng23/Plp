@@ -185,8 +185,10 @@ test('affiliate reporting uses UTC date windows, preserves missing enquiries, an
   assert.match(nodes.app.innerHTML,/Enquiry activity unavailable/);
   assert.doesNotMatch(nodes.app.innerHTML,/DEMO-1003/);
   const source=read('lib/affiliate.js');
-  assert.match(source,/selectRows\('plp_concierge_enquiries', 'affiliate_id=eq\.' \+ partner\.id \+ '&select=status,created_at&order=created_at\.desc&limit=50'\)/);
-  assert.match(source,/enquiries: enquiries === null \? null : enquiries\.map\(row => \(\{ status: row\.status, created_at: row\.created_at \}\)\)/);
+  assert.match(source, /enquiries: \{table:'plp_concierge_enquiries',fields:'status,created_at'/);
+  assert.match(source, /affiliate_id:'eq\.'\+partnerId/);
+  assert.match(source, /rows:visible\.map\(definition\.map\)/);
+  assert.match(source, /created_at\.desc,id\.desc/);
 });
 
 
