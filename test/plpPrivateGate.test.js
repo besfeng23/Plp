@@ -8,8 +8,9 @@ import {
   previewCodeMatches, previewCodeEntryEnabled, signPreviewCookieValue, previewSetCookie,
   verifyTicket, previewSigningSecret, hasValidPreviewCookie, hasValidStaffOrOwnerSession,
   publicApiAllowed, refuseUnlessAuthorized, safePreviewNextPath, gateDecision,
-  isAllowlistedAuthApi, handlePreviewVerify, requestUrl,
+  isAllowlistedAuthApi, requestUrl,
 } from '../lib/preview-gate.js';
+import { handlePreviewVerify } from '../lib/preview-verify-handler.js';
 import { authorizeStaffRequest, resetStaffSignInThrottle } from '../lib/access-control.js';
 
 const read = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
@@ -223,10 +224,12 @@ test('preview-verify issues a guest cookie only when the hash is configured, and
     assert.equal(r.statusCode, 200);
     assert.equal(r.body.ok, true);
     assert.equal(r.body.next, '/booking');
-    assert.match(r.headers['Set-Cookie'], new RegExp('^' + PREVIEW_COOKIE + '='));
-    assert.match(r.headers['Set-Cookie'], /HttpOnly/);
-    assert.match(r.headers['Set-Cookie'], /Secure/);
-    assert.match(r.headers['Set-Cookie'], /SameSite=Lax/);
+    const cookie = [].concat(r.headers['Set-Cookie'] || []).join('\n');
+    assert.match(cookie, new RegExp('^' + PREVIEW_COOKIE + '='));
+    assert.match(cookie, /HttpOnly/);
+    assert.match(cookie, /Secure/);
+    assert.match(cookie, /SameSite=Lax/);
+    assert.doesNotMatch(cookie, new RegExp(OWNER_COOKIE + '='));
     const wrong = res();
     await handlePreviewVerify(req({ path: '/api/plp?action=preview-verify', method: 'POST', body: { code: 'nope' } }), wrong);
     assert.equal(wrong.statusCode, 401);
