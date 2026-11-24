@@ -3,7 +3,8 @@ import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 import clubHandler from '../lib/club-handler.js';
 import ownerHandler from '../lib/owner-handler.js';
 import { safeAnalyticsEvent } from '../lib/analytics-policy.js';
-import { handlePreviewVerify, refuseUnlessAuthorized } from '../lib/preview-gate.js';
+import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
+import { handlePreviewVerify } from '../lib/preview-verify-handler.js';
 
 const DEFAULT_CONTENT = {
   homepage: {
