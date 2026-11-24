@@ -4,6 +4,7 @@ import { createBookingRecord, isSupabaseConfigured } from './_supabase.js';
 import { PLP_CURRENCY, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
 import { nightsBetween, todayAtResort } from '../lib/booking-dates.js';
 import { createBookingReference } from '../lib/booking-reference.js';
+import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
 
 const required = ['name', 'email', 'phone', 'accommodation', 'checkIn', 'checkOut', 'guests'];
 
@@ -16,6 +17,8 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
+
+  if (await refuseUnlessAuthorized(req, res)) return;
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};

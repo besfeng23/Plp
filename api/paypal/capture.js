@@ -4,6 +4,7 @@ import { recordPayPalCapture } from './_db.js';
 import { findBookingByReference, selectRows } from '../_supabase.js';
 import { evaluatePayPalCapture } from '../../lib/paypal-capture-guard.js';
 import { capturePayPalOrder, getBaseUrl } from './_paypal.js';
+import { publicApiAllowed, safePreviewNextPath } from '../../lib/preview-gate.js';
 
 function redirect(res, location) {
   res.statusCode = 302;
@@ -40,6 +41,10 @@ export default async function handler(req, res) {
     return res.end();
   }
 
+  if (!(await publicApiAllowed(req))) {
+    const next = safePreviewNextPath('/booking');
+    return redirect(res, `${baseUrl}/private-preview?next=${encodeURIComponent(next)}`);
+  }
 
   if (!orderToken) {
     return redirect(res, `${baseUrl}/booking/cancel?${bookingQuery}provider=paypal&reason=missing-paypal-token`);

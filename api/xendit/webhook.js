@@ -1,7 +1,9 @@
 import { notifyPaymentException, notifyPaymentVerified } from '../_notifications.js';
 import { getSupabaseConfigError, isSupabaseConfigured, recordXenditWebhook } from '../_supabase.js';
+import { refuseUnlessAuthorized } from '../../lib/preview-gate.js';
 
 export default async function handler(req, res) {
+  if (await refuseUnlessAuthorized(req, res)) return;
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });

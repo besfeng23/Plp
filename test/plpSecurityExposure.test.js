@@ -125,7 +125,7 @@ test('unapproved /subscribe page is unpublished while the gate is disabled',asyn
 
 test('public owner preview and sign-in screen show neutral Private Office identity',()=>{
  const preview=read('src/owner/PublicPreview.jsx');
- assert.doesNotMatch(preview,/Marichi|Fong Ramos|Doctora|e-mango/);
+ assert.doesNotMatch(preview,/Marichi|Fong Ramos|Doctora|e-mango/i);
  assert.match(preview,/<strong>Private Office<\/strong>/);
  const app=read('src/owner/OwnerApp.jsx');
  const login=app.slice(app.indexOf('function LogIn('),app.indexOf('function Panel('));

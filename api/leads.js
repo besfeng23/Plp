@@ -1,5 +1,6 @@
 import { deskAvailable, receiveEnquiry } from '../lib/concierge-desk.js';
 import { CONCIERGE_EMAIL } from '../lib/contact.js';
+import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
 
 const required = ['name', 'email', 'interest'];
 
@@ -9,6 +10,7 @@ function isValidEmail(email) {
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
+  if (await refuseUnlessAuthorized(req, res)) return;
   if (req.method === 'GET') {
     if (await deskAvailable()) return res.status(200).json({ available: true, channel: 'desk' });
     const email = Boolean(process.env.RESEND_API_KEY && process.env.LEADS_FROM_EMAIL);

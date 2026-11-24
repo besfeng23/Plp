@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import ownerHandler from '../lib/owner-handler.js';
 const source=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-test('owner office loads no-passcode public preview by default',()=>{
+test('owner office keeps the no-passcode preview for a public site, but not while the site is private',()=>{
  const app=source('src/owner/OwnerApp.jsx');
  const preview=source('src/owner/PublicPreview.jsx');
- assert.match(app,/useState\(\(\)=>window\.location\.hash\.includes\('access_token='\)\?'login':'preview'\)/);
+ assert.match(app,/useState\(\(\)=>window\.location\.hash\.includes\('access_token='\)\?'login':'checking'\)/);
+ assert.match(app,/isPrivateSiteBlock\(error\)\?'login':'preview'/);
  assert.match(app,/return <PublicPreview onConnectPrivateData=/);
+ assert.match(app,/Opening the private office/);
  assert.match(preview,/Preview mode · No passcode/);
  assert.match(preview,/No live records disclosed/);
  assert.match(preview,/Private data not shown in preview/);
