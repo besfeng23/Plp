@@ -26,7 +26,7 @@ test('wrong URL, incomplete bundle, missing dedicated config or unknown mode fai
     assert.equal(authV2Enabled(broken), false);
   }
 });
-test('God Mode uses only the dedicated Auth URL and exact allow-listed verified identity', async () => {
+test('God Mode uses only the dedicated Auth URL and exact allow-listed active identity', async () => {
   const calls = [];
   const user = {id:uid,email:'owner@example.test',email_confirmed_at:'2026-01-01T00:00:00Z',is_anonymous:false};
   const result = await lookupOwnerUser(env, async (url, options) => {
@@ -37,9 +37,9 @@ test('God Mode uses only the dedicated Auth URL and exact allow-listed verified 
   assert.equal(result.id, uid); assert.equal(calls.length, 2);
   assert.match(calls[0], /page=1&per_page=100/);
 });
-test('God Mode refuses missing, unconfirmed or banned users and mixed credentials', async () => {
+test('God Mode refuses missing, banned or anonymous users and mixed credentials', async () => {
   const baseUser = {id:uid,email:'owner@example.test',email_confirmed_at:'2026-01-01T00:00:00Z'};
-  for(const user of [{...baseUser,email_confirmed_at:null},{...baseUser,banned_until:'2099-01-01T00:00:00Z'},{...baseUser,is_anonymous:true}]) {
+  for(const user of [{...baseUser,deleted_at:'2026-01-01T00:00:00Z'},{...baseUser,banned_until:'2099-01-01T00:00:00Z'},{...baseUser,is_anonymous:true}]) {
     assert.equal(await lookupOwnerUser(env, async url => ({ok:true,json:async()=>url.includes('?')?{users:[user]}:user})), null);
   }
   assert.equal(await lookupOwnerUser(env,async()=>({ok:true,json:async()=>({users:[]})})),null);
