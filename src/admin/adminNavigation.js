@@ -75,6 +75,22 @@ export const EXPANSION_TEASERS = [
   { id: 'indonesia', title: 'Indonesia', detail: 'Internal expansion teaser only. Not an operating PLP location. No booking, pricing or public opening is offered. Subject to owner approval.' },
 ];
 
+// Internal 90-day marketing preparation and promo brief. Content only;
+// shown on Growth & Marketing. Completing them does not open the public site.
+export const MARKETING_PHASES = [
+  { id: 'days-1-30', title: 'Days 1–30 — Internal systems', detail: 'Private website, branding, sales contact, photo and video inventory, invite-only affiliate architecture and the inquiry workflow. Exit: internal systems operational. Still private.' },
+  { id: 'days-31-60', title: 'Days 31–60 — Assets and workflows', detail: 'Produce the promo and social drafts, build the content calendar, and test referrals with internal staff and owners only. No public posts, ads or external affiliate recruitment. Exit: assets approved. Still private.' },
+  { id: 'days-61-90', title: 'Days 61–90 — Launch-ready, still private', detail: 'Rehearse inquiries, verify tracking and train staff. Public release still depends on licenses and owner approval, not the calendar. Exit: launch-ready, but still private until cleared.' },
+];
+
+export const PROMO_VIDEO_BEATS = [
+  { id: 'setting', title: '00–10 sec — The setting', detail: 'Authorized aerial footage of the hillside, ocean and villas. Introduce Pueblo La Perla Boracay.' },
+  { id: 'accommodations', title: '10–25 sec — The accommodations', detail: 'Actual footage of Grand Ocean Villa, Sunset Suite and Smart Room Premium.' },
+  { id: 'experience', title: '25–40 sec — The experience', detail: 'Genuine pool, terrace and privacy-focused property scenes.' },
+  { id: 'atmosphere', title: '40–53 sec — Boracay atmosphere', detail: 'Real island footage, sunset and approved guest-experience scenes.' },
+  { id: 'finish', title: '53–60 sec — Brand finish', detail: 'PLP logo, understated tagline and the approved official domain or inquiry channel. Internal previews use a private-preview designation, not a public booking CTA.' },
+];
+
 // The four commercial inputs from the retired Growth Plan. Shown on this
 // screen only; they are not a checklist and are not stored in the database.
 export const OWNER_CONFIRMATIONS = [

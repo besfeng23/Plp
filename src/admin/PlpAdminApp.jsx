@@ -8,7 +8,7 @@ import { Activity, ArrowLeft, ArrowRight, BedDouble, BookOpen, CalendarDays, Cal
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
 import { SOCIAL_ICON_PATHS } from '../../lib/social.js';
-import { SCREENS, TILES, OWNER_CONFIRMATIONS, EXPANSION_TEASERS, visibleScreens, visibleTiles } from './adminNavigation.js';
+import { SCREENS, TILES, OWNER_CONFIRMATIONS, EXPANSION_TEASERS, MARKETING_PHASES, PROMO_VIDEO_BEATS, visibleScreens, visibleTiles } from './adminNavigation.js';
 import ConciergeInbox from './ConciergeInbox.jsx';
 import AffiliateAdmin from './AffiliateAdmin.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
@@ -341,6 +341,10 @@ export default function PlpAdminApp() {
         <SimpleRows items={OWNER_CONFIRMATIONS.map(item => ({ key: item.id, title: item.title, detail: item.detail }))} />
         <p className="plp-adm-subhead">Internal expansion planning</p>
         <SimpleRows items={EXPANSION_TEASERS.map(item => ({ key: item.id, title: item.title, detail: item.detail, state: 'Teaser' }))} />
+        <p className="plp-adm-subhead">90-day marketing preparation</p>
+        <SimpleRows items={MARKETING_PHASES.map(item => ({ key: item.id, title: item.title, detail: item.detail }))} />
+        <p className="plp-adm-subhead">Promo video brief</p>
+        <SimpleRows items={PROMO_VIDEO_BEATS.map(item => ({ key: item.id, title: item.title, detail: item.detail }))} />
       </>}
       {current && !tiles.length && <Empty>Nothing to show for your role.</Empty>}
     </main>
