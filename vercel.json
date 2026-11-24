@@ -531,6 +531,10 @@
   ],
   "rewrites": [
     {
+      "source": "/affiliate",
+      "destination": "/affiliate.html"
+    },
+    {
       "source": "/ingest/static/:path*",
       "destination": "https://us-assets.i.posthog.com/static/:path*"
     },

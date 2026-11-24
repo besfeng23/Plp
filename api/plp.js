@@ -153,6 +153,18 @@ export default async function handler(req, res) {
   const action = actionOf(req);
   if (action === 'preview-verify') return handlePreviewVerify(req, res);
   if (action === 'owner') return ownerHandler(req, res);
+  if (action === 'affiliate') {
+    res.setHeader('Cache-Control', 'private, no-store');
+    try {
+      const { handleAffiliatePortal } = await import('../lib/affiliate.js');
+      const input = req.method === 'GET' ? { ...req.query, action: req.query?.view || 'me' } : { ...(typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}), action: req.query?.view || req.body?.action || 'me' };
+      const [status, result, cookie] = await handleAffiliatePortal(req, input);
+      if (cookie) res.setHeader('Set-Cookie', cookie);
+      return res.status(status).json(result);
+    } catch {
+      return res.status(503).json({ ok: false, error: 'The partner portal is unavailable.' });
+    }
+  }
   if (['content', 'analytics-config', 'analytics', 'club', ''].includes(action)) {
     if (await refuseUnlessAuthorized(req, res)) return;
   }

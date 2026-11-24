@@ -62,7 +62,7 @@ test('all operational functions of the former Resort Command remain reachable th
   assert.match(app, /'date-blocks', code, \{ method: 'POST'/);
   // Confirmation stays locked until the deposit is verified and captured, with no exception.
   assert.match(app, /pState\.verify === 'VERIFIED' && !pState\.exception && \['SUCCEEDED', 'CAPTURED'\]\.includes\(pState\.pay\)/);
-  for (const component of ['ConciergeInbox', 'OwnerMonth', 'OwnerFunnel', 'WebsiteAnalytics', 'ClubAdminView', 'OwnerWorkspace']) assert.match(app, new RegExp('<' + component + ' '));
+  for (const component of ['ConciergeInbox', 'OwnerMonth', 'OwnerFunnel', 'WebsiteAnalytics', 'ClubAdminView', 'OwnerWorkspace', 'AffiliateAdmin']) assert.match(app, new RegExp('<' + component + ' '));
   assert.match(read('src/owner/OwnerApp.jsx'), /href="\/admin"/);
 });
 

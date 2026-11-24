@@ -31,11 +31,16 @@ test('growth-plan URLs permanently redirect to /admin and the page is gone', () 
 });
 
 test('Growth & Marketing shows official social links and the four owner confirmations', () => {
-  assert.deepEqual(TILES.growth.map(t => t.id), socialProfiles().map(p => p.key));
+  const socialTiles = TILES.growth.filter((tile) => tile.href);
+  const programTiles = TILES.growth.filter((tile) => !tile.href);
+  assert.deepEqual(socialTiles.map(t => t.id), socialProfiles().map(p => p.key));
+  assert.deepEqual(programTiles.map(t => t.id), ['partners', 'payouts']);
   for (const tile of TILES.growth) {
     assert.equal(tile.perm, 'growth');
-    assert.match(tile.href, /^https:\/\//);
-    assert.ok(!tile.href.includes('plp-growth-plan'));
+    if (tile.href) {
+      assert.match(tile.href, /^https:\/\//);
+      assert.ok(!tile.href.includes('plp-growth-plan'));
+    }
   }
   assert.deepEqual(OWNER_CONFIRMATIONS.map(i => i.id), ['rates', 'dates', 'transport', 'payments']);
   assert.equal(OWNER_CONFIRMATIONS.length, 4);

@@ -10,6 +10,7 @@ import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
 import { SOCIAL_ICON_PATHS } from '../../lib/social.js';
 import { SCREENS, TILES, OWNER_CONFIRMATIONS, visibleScreens, visibleTiles } from './adminNavigation.js';
 import ConciergeInbox from './ConciergeInbox.jsx';
+import AffiliateAdmin from './AffiliateAdmin.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
 import OwnerFunnel from './OwnerFunnel.jsx';
 import WebsiteAnalytics from './WebsiteAnalytics.jsx';
@@ -262,6 +263,8 @@ export default function PlpAdminApp() {
       case 'attention': case 'payments': return <><BookingRows rows={summary.review} onOpen={setSelected} empty="No bookings need review." />
         {data.exceptions.filter(r => !isTestRecord(r)).length > 0 && <SimpleRows items={data.exceptions.filter(r => !isTestRecord(r)).slice(0, 30).map((item, i) => ({ key: i, title: item.booking_reference || item.provider_reference_id || 'Payment', detail: item.verification_notes || item.event_type, state: item.verification_status || 'Review' }))} />}</>;
       case 'requests': case 'inbox': return <ConciergeInbox code={code} refreshedAt={syncAt} />;
+      case 'partners': return <AffiliateAdmin code={code} view="partners" refreshedAt={syncAt} />;
+      case 'payouts': return <AffiliateAdmin code={code} view="payouts" refreshedAt={syncAt} />;
       case 'tasks': return <>{taskList(summary.openTasks)}{allowed('tasks') && taskFormView()}</>;
       case 'activity': return <SimpleRows empty="No messages recorded." items={data.notifications.filter(n => !isTestRecord(n)).slice(0, 40).map((n, i) => ({ key: n.id || i, title: n.subject || n.notification_key || 'Message', detail: [n.booking_reference, String(n.sent_at || n.created_at || '').slice(0, 16).replace('T', ' ')].filter(Boolean).join(' · '), state: n.status }))} />;
       case 'all': {

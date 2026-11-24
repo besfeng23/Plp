@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SocialLinks from './SocialLinks.jsx';
 import { CONCIERGE_NUMBER, CONCIERGE_NUMBER_DISPLAY } from '../lib/contact.js';
+import { captureReferralCode } from '../lib/referral-capture.js';
 import { CLUB_PROGRAMS, INQUIRY_TOPICS, inquiryContext } from '../lib/guest-journey.js';
 import { PLP_ROOMS } from '../lib/pricing.js';
 
@@ -48,7 +49,7 @@ export default function ConciergeView() {
     if (sendLock.current) return;
     sendLock.current = true;
     setState('sending');
-    const fields = { name: name.trim(), email: email.trim(), interest, channel, topic, program, room, purpose: residentialInterest && topic === 'club' ? 'residential-interest' : null, message: message.trim() };
+    const fields = { name: name.trim(), email: email.trim(), interest, channel, topic, program, room, purpose: residentialInterest && topic === 'club' ? 'residential-interest' : null, message: message.trim(), referralCode: referralCode.trim() };
     const fingerprint = JSON.stringify(fields);
     try {
       if (submission.current?.fingerprint !== fingerprint) {
@@ -82,6 +83,7 @@ export default function ConciergeView() {
         {['stay','group'].includes(topic) && <label className="journey-field">Accommodation<select value={room} onChange={e => setRoom(e.target.value)}><option value="">Help me choose</option>{PLP_ROOMS.map(r => <option value={r.slug} key={r.slug}>{r.name}</option>)}</select></label>}
         {topic.startsWith('club') && <label className="journey-field">Activity interest<select value={program} onChange={e => setProgram(e.target.value)}><option value="">General enquiry</option>{Object.entries(CLUB_PROGRAMS).map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select></label>}
         <label className="journey-field">Your message<textarea required rows={4} maxLength={1200} value={message} onChange={e => setMessage(e.target.value)} aria-describedby="enquiry-hint" /></label>
+        <label className="journey-field">Referral code <span className="text-sm font-normal text-stone-500">(optional)</span><input maxLength={32} autoComplete="off" spellCheck="false" value={referralCode} onChange={e => setReferralCode(e.target.value)} /></label>
         <p id="enquiry-hint" className="text-sm leading-6 text-stone-600">{residentialInterest && topic === 'club' ? 'This is a nonbinding enquiry about future residential options, not a reservation. Please do not include medical records, diagnoses or sensitive health information.' : TOPIC_HINT[topic] || 'Share the dates or arrangements you have in mind.'}</p>
         {online && <div className="concierge-identity"><label className="journey-field">Your name<input required autoComplete="name" maxLength={120} value={name} onChange={e => setName(e.target.value)} /></label><label className="journey-field">Reply email<input required type="email" autoComplete="email" maxLength={180} value={email} onChange={e => setEmail(e.target.value)} /></label></div>}
         </fieldset>

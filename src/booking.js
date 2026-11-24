@@ -1,4 +1,5 @@
 import { formatPeso, formatUsd, PLP_DEPOSIT_RATE, PLP_ROOMS, quoteStay } from '../lib/pricing.js';
+import { captureReferralCode, normalizeReferralCode } from '../lib/referral-capture.js';
 import { nightsBetween, occupiedNights, shiftMonth, todayAtResort } from '../lib/booking-dates.js';
 
 import { requestedGuests } from '../lib/guest-journey.js';
@@ -289,6 +290,7 @@ async function submitReservation(event) {
     checkOut,
     guests: Number(element('guests').value),
     message: element('message').value,
+    referralCode: normalizeReferralCode(element('referralCode')?.value),
     quote: { amount, deposit },
   };
   let booking = pendingBooking;
@@ -408,3 +410,7 @@ document.addEventListener('visibilitychange', () => {
 });
 updateSummary();
 void loadMonth();
+
+const storedReferral = captureReferralCode();
+const referralInput = element('referralCode');
+if (referralInput && storedReferral && !referralInput.value) referralInput.value = storedReferral;
