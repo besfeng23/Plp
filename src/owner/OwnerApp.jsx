@@ -30,7 +30,7 @@ async function ownerRequest(action, options={}) {
  const response = await fetch(url,{ method:options.method||'GET',cache:'no-store',
    credentials:'same-origin',headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,signal:options.signal });
  const result = await response.json().catch(()=>({}));
- if(!response.ok||result.ok===false)throw Object.assign(new Error(result.error||'Private office unavailable'),{status:response.status});
+ if(!response.ok||result.ok===false)throw Object.assign(new Error(result.error||'Private office unavailable'),{status:response.status,sitePrivate:result.sitePrivate===true});
  return result;
 }
 function LogIn({onAuthenticated}) {
@@ -320,23 +320,23 @@ function PrivateOffice({onSignOut}) {
    </div></main>
  </div>;
 }
+function isPrivateSiteBlock(error) {
+ return Boolean(error && (error.sitePrivate===true || /Private preview access required/i.test(error.message||'')));
+}
 export default function OwnerApp(){
- // A temporary, passcode-free preview never requests protected owner data.
- // Supabase magic-link callbacks still enter the authenticated flow.
- const [mode,setMode]=useState(()=>window.location.hash.includes('access_token=')?'login':'preview');
- const checkOnce=React.useRef(false);
+ // While the public site is private, anonymous visitors see only the existing
+ // owner sign-in, not the passcode-free preview dashboard. A verified owner
+ // session still opens the office. Magic-link callbacks enter the login flow.
+ const [mode,setMode]=useState(()=>window.location.hash.includes('access_token=')?'login':'checking');
  useEffect(()=>{
-   if(mode!=='preview'||checkOnce.current)return;
-   checkOnce.current=true;
+   if(mode!=='checking')return;
    let alive=true;
-   // A previously verified owner opens the full dashboard automatically,
-   // without re-entering a code or re-visiting the sign-in screen.
-   ownerRequest('me').then(result=>{if(alive&&result.role==='owner'){const next=safeNextPath(new URLSearchParams(window.location.search).get('next'));if(next){window.location.replace(next);return;}setMode('secure');}}).catch(()=>{});
+   ownerRequest('me').then(result=>{if(alive&&result.role==='owner'){const next=safeNextPath(new URLSearchParams(window.location.search).get('next'));if(next){window.location.replace(next);return;}setMode('secure');}else if(alive)setMode('preview');}).catch(error=>{if(alive)setMode(isPrivateSiteBlock(error)?'login':'preview');});
    return()=>{alive=false};
  },[mode]);
  async function signOut(expired=false){
    if(!expired){try{await ownerRequest('logout',{method:'POST',body:{}});}catch{ /* A failed sign-out cannot keep sensitive data visible. */ }}
-   setMode('preview');
+   setMode('checking');
  }
  function enterSecure(){
   const next=safeNextPath(new URLSearchParams(window.location.search).get('next'));
@@ -345,5 +345,6 @@ export default function OwnerApp(){
  }
  if(mode==='secure')return <PrivateOffice onSignOut={signOut}/>;
  if(mode==='login')return <LogIn onAuthenticated={enterSecure}/>;
+ if(mode==='checking')return <main style={{minHeight:'100vh',display:'grid',placeItems:'center',background:'#faf9f5',color:'#25271f',fontFamily:'Georgia,serif'}}><p>Opening the private office…</p></main>;
  return <PublicPreview onConnectPrivateData={()=>setMode('login')}/>;
 }
