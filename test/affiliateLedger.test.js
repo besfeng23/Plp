@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
 import { affiliateCommissionsActive, affiliatePublicEnrollment, PROPOSED_AFFILIATE_RATES, signAffiliateSession, verifyAffiliateSession } from '../lib/affiliate.js';
 import { captureReferralCode, normalizeReferralCode } from '../lib/referral-capture.js';
 
@@ -91,4 +92,25 @@ test('public enrollment is available with explicit off switch and requires verif
   assert.match(portal, /TEST DASHBOARD/);
   assert.match(portal, /No live referrals, payments or accounts/);
   assert.match(portal, /enroll-verify/);
+});
+
+test('professional dashboard renders six views, separates demo from live and escapes records', () => {
+  const fakeNode = () => ({hidden:false,innerHTML:'',textContent:'',classList:{add(){},remove(){},toggle(){return true}},addEventListener(){},setAttribute(){},focus(){},querySelector(){return fakeNode()},querySelectorAll(){return []}});
+  const nodes = Object.fromEntries(['status','app','loading'].map(k=>[k,fakeNode()]));
+  const ctx = vm.createContext({document:{getElementById:k=>nodes[k]},location:{origin:'https://plp.example',search:''},URL,URLSearchParams,Intl,window:{scrollTo(){}},fetch(){throw Error('No network allowed in rendering test')}});
+  // Strip only the final automatic startup call; render real functions with a DOM stub.
+  vm.runInContext(read('src/affiliate.js').replace(/start\(\);\s*$/,''),ctx);
+  vm.runInContext('demoDashboard()',ctx);
+  assert.match(nodes.app.innerHTML,/TEST DASHBOARD/);
+  assert.match(nodes.app.innerHTML,/DEMO-1003/);
+  assert.match(nodes.app.innerHTML,/USD\s*200/);
+  for (const view of ['referrals','commissions','payouts','resources','account']) {
+    vm.runInContext('render({partner:{name:"<script>unsafe</script>",referral_code:"demo-preview",status:"active"},referrals:[],payouts:[],commissions:[],commissionsActive:false},'+JSON.stringify(view)+')',ctx);
+    assert.match(nodes.app.innerHTML,new RegExp('data-view="'+view+'" aria-current="page"'));
+    assert.doesNotMatch(nodes.app.innerHTML,/<script>unsafe/);
+  }
+  vm.runInContext('demo=false; render({partner:{name:"Live Partner",referral_code:"live-code",status:"active"},referrals:[],payouts:[],commissions:[],commissionsActive:false})',ctx);
+  assert.doesNotMatch(nodes.app.innerHTML,/DEMO-1003|TEST DASHBOARD/);
+  assert.match(nodes.app.innerHTML,/Private pre-launch/);
+  assert.match(nodes.app.innerHTML,/Earnings are not currently accruing/);
 });
