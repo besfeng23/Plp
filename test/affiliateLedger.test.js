@@ -135,3 +135,25 @@ test('affiliate record tables include mobile labels and exports guard spreadshee
   assert.match(nodes.app.innerHTML,/id="exportRecords"/);
   assert.match(nodes.app.innerHTML,/No commission records/);
 });
+
+
+test('affiliate reporting uses UTC date windows, preserves missing enquiries, and reads only scoped safe fields', () => {
+  const fakeNode = () => ({hidden:false,innerHTML:'',textContent:'',classList:{add(){},remove(){},toggle(){return true}},addEventListener(){},setAttribute(){},focus(){},querySelector(){return fakeNode()},querySelectorAll(){return []}});
+  const nodes=Object.fromEntries(['status','app','loading'].map(k=>[k,fakeNode()]));
+  const ctx=vm.createContext({document:{getElementById:k=>nodes[k]},location:{origin:'https://plp.example',search:''},URL,URLSearchParams,Intl,window:{scrollTo(){}},fetch(){throw Error('No network allowed')}});
+  vm.runInContext(read('src/affiliate.js').replace(/start\(\);\s*$/,''),ctx);
+  assert.equal(vm.runInContext('reportWindow([{created_at:"2026-11-19T00:00:00Z"},{created_at:"2026-11-18T23:59:59Z"},{created_at:"2026-11-26T00:00:00Z"},{created_at:"bad"}],7,new Date("2026-11-25T12:00:00Z")).length',ctx),1);
+  assert.equal(vm.runInContext('activitySeries([{created_at:"2026-11-24"}],null,7,new Date("2026-11-25")).reduce((n,r)=>n+r.bookings,0)',ctx),1);
+  assert.equal(vm.runInContext('activitySeries([],null,7,new Date("2026-11-25"))[0].enquiries',ctx),null);
+  vm.runInContext('demoDashboard()',ctx);
+  assert.match(nodes.app.innerHTML,/Partner performance/);
+  assert.match(nodes.app.innerHTML,/Referred enquiries/);
+  assert.match(nodes.app.innerHTML,/id="reportPeriod"/);
+  assert.match(nodes.app.innerHTML,/TEST DASHBOARD/);
+  vm.runInContext('demo=false; render({partner:{name:"Verified partner",status:"active"},enquiries:null,referrals:[],commissions:[],payouts:[],commissionsActive:false})',ctx);
+  assert.match(nodes.app.innerHTML,/Enquiry activity unavailable/);
+  assert.doesNotMatch(nodes.app.innerHTML,/DEMO-1003/);
+  const source=read('lib/affiliate.js');
+  assert.match(source,/selectRows\('plp_concierge_enquiries', 'affiliate_id=eq\.' \+ partner\.id \+ '&select=status,created_at&order=created_at\.desc&limit=50'\)/);
+  assert.match(source,/enquiries: enquiries === null \? null : enquiries\.map\(row => \(\{ status: row\.status, created_at: row\.created_at \}\)\)/);
+});

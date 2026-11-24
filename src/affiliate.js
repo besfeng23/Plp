@@ -4,6 +4,7 @@ const loading = document.getElementById('loading');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 let enrollment = {};
 let demo = false;
+let period = 30;
 
 async function request(view, body) {
   const response = await fetch('/api/plp?action=affiliate&view=' + encodeURIComponent(view), {
@@ -58,9 +59,11 @@ function total(rows,key) {
 }
 function demoDashboard() {
   demo = true;
+  period = 30;
   render({
     partner:{name:'Demo Partner',referral_code:'demo-preview',status:'active',tier:'referral',rate:0.10,rate_approval_status:'pending_owner_approval'},
     referrals:[{reference:'DEMO-1003',status:'PENDING',check_in:'2027-01-15',check_out:'2027-01-17',created_at:'2026-11-24'},{reference:'DEMO-1002',status:'COMPLETED',check_in:'2026-11-17',check_out:'2026-11-19',created_at:'2026-11-10'},{reference:'DEMO-1001',status:'COMPLETED',check_in:'2026-11-10',check_out:'2026-11-12',created_at:'2026-11-01'}],
+    enquiries:[{status:'NEW',created_at:'2026-11-24'},{status:'CONTACTED',created_at:'2026-11-22'},{status:'QUOTED',created_at:'2026-11-19'},{status:'BOOKED',created_at:'2026-11-10'},{status:'BOOKED',created_at:'2026-11-01'},{status:'LOST',created_at:'2026-11-04'}],
     commissions:[{commission_type:'referral',commission_amount:200,currency:'USD',status:'approved',created_at:'2026-11-20'},{commission_type:'referral',commission_amount:200,currency:'USD',status:'paid',created_at:'2026-11-13'}],
     payouts:[{amount:200,currency:'USD',payout_reference:'DEMO-PAYOUT-001',status:'recorded',created_at:'2026-11-14'}],commissionsActive:false
   });
@@ -70,6 +73,7 @@ function authShell(content) {
 }
 function signup(message = '') {
   demo = false;
+  period = 30;
   show(message, Boolean(message));
   app.innerHTML = authShell('<p class="eyebrow">Partner access</p><h2>Welcome to PLP.</h2><p class="muted">Create your account or sign in with your email. No invitation required.</p><form id="enroll"><label>Name <input name="name" autocomplete="name" maxlength="120" placeholder="Your name (new partners)"></label><label>Email address <input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label><label>Partner type <select name="tier"><option value="referral">Referral partner</option><option value="travel_agent">Travel agent</option><option value="influencer">Creator / influencer</option></select></label><button class="button" type="submit">Send verification code</button></form><div class="auth-divider"><button class="button secondary" type="button" id="demo">Explore test dashboard</button><small>Demo data is illustrative only. Real rates are pending approval and the resort website remains private.</small></div>');
   app.querySelector('#demo').addEventListener('click', demoDashboard);
@@ -135,10 +139,53 @@ function downloadRecords(rows,kind){
   const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));
   const a=document.createElement('a');a.href=url;a.download='plp-'+(demo?'DEMO-':'')+kind+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function reportWindow(rows, days, now) {
+  const end = new Date(now); end.setUTCHours(0,0,0,0); end.setUTCDate(end.getUTCDate()+1);
+  const start = new Date(end); start.setUTCDate(start.getUTCDate()-days);
+  return rows.filter(row=>{const t=Date.parse(row.created_at);return Number.isFinite(t)&&t>=start.getTime()&&t<end.getTime()});
+}
+function reportBounds(days, now) {
+  const end=new Date(now);end.setUTCHours(0,0,0,0);
+  const start=new Date(end);start.setUTCDate(start.getUTCDate()-days+1);
+  const fmt=d=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(d);
+  return fmt(start)+' – '+fmt(end)+' · UTC';
+}
+function activitySeries(referrals,enquiries,days,now) {
+  const end=new Date(now);end.setUTCHours(0,0,0,0);end.setUTCDate(end.getUTCDate()+1);
+  const start=end.getTime()-days*86400000;
+  const bucketCount=Math.min(6,days);
+  const buckets=Array.from({length:bucketCount},(_,i)=>{
+    const a=start+Math.floor(i*days/bucketCount)*86400000;
+    const b=start+Math.floor((i+1)*days/bucketCount)*86400000;
+    const count=rows=>rows.filter(r=>{const t=Date.parse(r.created_at);return t>=a&&t<b}).length;
+    const fmt=t=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).format(t);
+    return {label:fmt(a),range:fmt(a)+' – '+fmt(b-86400000),bookings:count(referrals),enquiries:enquiries===null?null:count(enquiries)};
+  });
+  return buckets;
+}
+function activityChart(referrals,enquiries,days,now) {
+  const buckets=activitySeries(referrals,enquiries,days,now);
+  const peak=Math.max(1,...buckets.flatMap(b=>[b.bookings,b.enquiries||0]));
+  const ceiling=Math.max(4,Math.ceil(peak/4)*4);
+  const columns=buckets.map(b=>'<div class="activity-column" aria-label="'+escape(b.range+': '+b.bookings+' bookings'+(b.enquiries===null?'':', '+b.enquiries+' enquiries'))+'"><div class="activity-bars"><span class="activity-bar enquiries" title="'+escape(b.range+': '+(b.enquiries??'Unavailable')+' enquiries')+'" style="height:'+((b.enquiries||0)/ceiling*100)+'%"></span><span class="activity-bar bookings" title="'+escape(b.range+': '+b.bookings+' bookings')+'" style="height:'+(b.bookings/ceiling*100)+'%"></span></div><span class="axis-label">'+escape(b.label)+'</span></div>').join('');
+  const ticks=[ceiling,ceiling*3/4,ceiling/2,ceiling/4,0].map(v=>'<span>'+v+'</span>').join('');
+  return '<div class="chart-legend"><span><i class="legend-swatch enquiries"></i>Enquiries'+(enquiries===null?' (unavailable)':'')+'</span><span><i class="legend-swatch bookings"></i>Bookings</span></div><div class="activity-plot"><div class="chart-axis" aria-hidden="true">'+ticks+'</div><div class="activity-grid">'+columns+'</div></div><p class="chart-foot">Records grouped by creation date. Enquiries and bookings are separate records, not a conversion funnel.</p>';
+}
+function enquirySummary(enquiries) {
+  if(enquiries===null)return empty('Enquiry activity unavailable','Booking records are still available. Try refreshing later.','referrals');
+  const statuses=['NEW','CONTACTED','QUOTED','BOOKED','LOST'];
+  return '<div class="pipeline">'+statuses.map(s=>{const n=enquiries.filter(r=>String(r.status).toUpperCase()===s).length;return '<div><span>'+escape(label(s))+'</span><strong>'+n+'</strong></div>'}).join('')+'</div><small>Current status of the selected enquiry records. Guest details are private.</small>';
+}
+function rateLabel(partner) {
+  return partner.rate_approval_status==='approved'&&Number.isFinite(Number(partner.rate))?String(Number(partner.rate)*100)+'% approved':'Pending approval';
+}
 function render(data, view = 'overview') {
   if(!Object.hasOwn(views,view))view='overview';
   const partner = data.partner || {};
   const referrals = list(data.referrals), payouts = list(data.payouts), commissions = list(data.commissions);
+  const enquiries = Array.isArray(data.enquiries) ? data.enquiries : null;
+  const now = demo ? new Date('2026-11-25T12:00:00Z') : new Date();
+  const periodReferrals=reportWindow(referrals,period,now), periodEnquiries=enquiries===null?null:reportWindow(enquiries,period,now);
   const link = new URL('/?ref=' + encodeURIComponent(partner.referral_code || ''), location.origin).href;
   const paid=payouts.filter(r=>r.status==='recorded');
   const due=commissions.filter(r=>['approved','payable'].includes(r.status));
@@ -149,8 +196,20 @@ function render(data, view = 'overview') {
   const descriptions={overview:'Your partnership performance and account activity.',referrals:'Monitor the bookings attributed to your referral code.',commissions:'Review eligible commission records and their approval status.',payouts:'Track recorded settlement activity.',resources:'Manage your personal referral link and learn how attribution works.',account:'Your partner profile and program status.'};
   const metrics='<div class="metric-grid">'+metric('Referred stays',String(referrals.length),'Latest records (up to 50)','referrals')+metric('Completed stays',String(completed),'Completed among latest records','overview')+metric('Approved / payable',demo||data.commissionsActive?total(due,'commission_amount'):'—',demo?'Simulated commission':'Latest eligible ledger entries','commissions')+metric('Recorded payouts',total(paid,'amount'),demo?'Simulated settlement':'Latest recorded settlements','payouts')+'</div>';
   let body='';
-  if(view==='overview')body=metrics+'<div class="grid-two">'+referralTools(partner,link)+panel('Referral breakdown','Status distribution of latest referrals.',breakdown||empty('No referral activity','Your booking statuses will appear here.','referrals'))+'</div>'+panel('Recent referrals','Latest attributed booking records.',referralTable(referrals.slice(0,5)),'<button type="button" class="text-button" data-view="referrals">View all</button>')+panel('Settlement overview',demo?'Illustrative financial records.':'Latest available ledger records.','<div class="ledger-summary"><div><small>Approved / payable</small><strong>'+escape(demo||data.commissionsActive?total(due,'commission_amount'):'—')+'</strong></div><div><small>Paid commission records</small><strong>'+escape(demo||data.commissionsActive?total(commissions.filter(r=>r.status==='paid'),'commission_amount'):'—')+'</strong></div><div><small>Recorded payouts</small><strong>'+escape(total(paid,'amount'))+'</strong></div></div><div class="action-row"><button class="button secondary" type="button" data-view="commissions">Commission ledger</button><button class="button secondary" type="button" data-view="payouts">Payout history</button></div>');
-  if(view==='referrals')body=panel('Referral records','Up to 50 most recent bookings.',ledgerFilters(referrals,'referrals'));
+  if(view==='overview') {
+    const available = demo||data.commissionsActive;
+    const earnings = available?total(due,'commission_amount'):'—';
+    const windowComplete=periodReferrals.filter(r=>String(r.status).toLowerCase()==='completed').length;
+    const filter='<div class="report-control"><label for="reportPeriod">Reporting period</label><select id="reportPeriod">'+[7,30,90].map(n=>'<option value="'+n+'" '+(period===n?'selected':'')+'>Last '+n+' days</option>').join('')+'</select></div>';
+    const capNote=[referrals,enquiries||[],commissions,payouts].some(rows=>rows.length>=50)?'Results may be incomplete: latest 50 records per ledger.':'Based on latest available records (up to 50 per ledger).';
+    body='<section class="partner-brief"><div class="brief-primary"><p class="eyebrow">PARTNER ACCOUNT</p><h2>'+escape(partner.name||'Partner')+'</h2><p>'+escape(label(partner.tier))+' · '+escape(demo?'Demo account':label(partner.status))+'</p><div class="brief-details"><span>Referral code <strong>'+escape(partner.referral_code||'—')+'</strong></span><span>Commission rate <strong>'+escape(demo?'Simulation only':rateLabel(partner))+'</strong></span></div></div><div class="brief-financial"><p class="eyebrow">APPROVED / PAYABLE</p><strong class="brief-amount">'+escape(earnings)+'</strong><p>'+escape(demo?'Illustrative amount · Not payable':available?'Latest approved and payable ledger entries':'Commission posting not active')+'</p><button class="button brief-button" type="button" data-view="commissions">View commission ledger</button></div></section>'
+      +'<div class="report-heading"><div><h2>Partner performance</h2><p class="muted">'+escape(reportBounds(period,now))+'</p></div>'+filter+'</div>'
+      +'<div class="metric-grid performance-metrics">'+metric('Referred enquiries',periodEnquiries===null?'—':String(periodEnquiries.length),'Enquiries created in period','referrals')+metric('Referred bookings',String(periodReferrals.length),'Bookings created in period','overview')+metric('Completed bookings',String(windowComplete),'Current status of period bookings','commissions')+metric('Recorded payouts',total(reportWindow(paid,period,now),'amount'),'Settlements recorded in period','payouts')+'</div>'
+      +'<div class="grid-two performance-grid">'+panel('Referral activity','New records during the selected period.',activityChart(periodReferrals,periodEnquiries,period,now))+panel('Enquiry pipeline','Current status of enquiries created in the period.',enquirySummary(periodEnquiries),'<button class="text-button" type="button" data-view="referrals">Referral records</button>')+'</div>'
+      +'<p class="report-caveat">'+escape(capNote)+' Financial account balance above is not period-filtered.</p>'
+      +'<div class="grid-two overview-bottom">'+panel('Recent bookings','Latest bookings within this period.',referralTable(periodReferrals.slice(0,5)),'<button class="text-button" type="button" data-view="referrals">View all</button>')+referralTools(partner,link)+'</div>';
+  }
+  if(view==='referrals')body=panel('Enquiry activity','Latest referred enquiries (up to 50).',enquirySummary(enquiries))+panel('Referral records','Up to 50 most recent bookings.',ledgerFilters(referrals,'referrals'));
   if(view==='commissions')body='<div class="metric-grid">'+metric('Approved / payable',demo||data.commissionsActive?total(due,'commission_amount'):'—','Latest ledger entries','commissions')+metric('Paid commissions',demo||data.commissionsActive?total(commissions.filter(r=>r.status==='paid'),'commission_amount'):'—','Latest paid entries','payouts')+metric('Program status',demo?'Simulation':data.commissionsActive?'Enabled':'Not active',demo?'Not payable':'Owner-controlled posting','info')+'</div>'+panel('Commission ledger','Latest commission records. No payment is initiated here.',ledgerFilters(commissions,'commissions'));
   if(view==='payouts')body='<div class="metric-grid">'+metric('Recorded payouts',total(paid,'amount'),'Latest recorded settlements','payouts')+metric('Settlement records',String(payouts.length),'Latest payout records','overview')+'</div>'+panel('Payout history','Manual settlement records. This page does not initiate payments.',ledgerFilters(payouts,'payouts'));
   if(view==='resources')body=referralTools(partner,link)+panel('How referrals work','Your three-step partner workflow.','<dl class="detail-list"><div><dt>01 · Share</dt><dd>Use your unique link after launch.</dd></div><div><dt>02 · Track</dt><dd>Attributed bookings appear in Referrals.</dd></div><div><dt>03 · Settle</dt><dd>Eligible commissions follow approved terms.</dd></div></dl>');
@@ -163,6 +222,7 @@ function render(data, view = 'overview') {
   app.querySelector('.overlay').addEventListener('click',()=>{closeMenu();menu.focus()});
   workspace.addEventListener('keydown',e=>{if(e.key==='Escape'&&workspace.classList.contains('menu-open')){closeMenu();menu.focus()}if(e.key==='Tab'&&workspace.classList.contains('menu-open')){const buttons=[...app.querySelectorAll('.sidebar button:not(:disabled)')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
   app.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{render(data,button.dataset.view);window.scrollTo(0,0);app.querySelector('#main-content').focus({preventScroll:true})}));
+  app.querySelector('#reportPeriod')?.addEventListener('change',e=>{const days=Number(e.target.value);if([7,30,90].includes(days)){period=days;render(data,'overview');app.querySelector('#reportPeriod')?.focus({preventScroll:true})}});
   const ledgerRows={referrals,commissions,payouts}[view];
   if(ledgerRows){
     const filtered=()=>{const value=app.querySelector('#recordStatus').value;return ledgerRows.filter(r=>!value||r.status===value)};
