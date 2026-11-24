@@ -3,6 +3,7 @@ import { PLP_TIER_BY_ACCOMMODATION } from '../lib/pricing.js';
 import clubHandler from '../lib/club-handler.js';
 import ownerHandler from '../lib/owner-handler.js';
 import { safeAnalyticsEvent } from '../lib/analytics-policy.js';
+import { handlePreviewVerify, refuseUnlessAuthorized } from '../lib/preview-gate.js';
 
 const DEFAULT_CONTENT = {
   homepage: {
@@ -150,10 +151,14 @@ async function handleAnalytics(req, res) {
 
 export default async function handler(req, res) {
   const action = actionOf(req);
+  if (action === 'preview-verify') return handlePreviewVerify(req, res);
+  if (action === 'owner') return ownerHandler(req, res);
+  if (['content', 'analytics-config', 'analytics', 'club', ''].includes(action)) {
+    if (await refuseUnlessAuthorized(req, res)) return;
+  }
   if (action === 'content' || (!action && req.method === 'GET')) return handleContent(req, res);
   if (action === 'analytics-config') return handleAnalyticsConfig(req, res);
   if (action === 'analytics') return handleAnalytics(req, res);
   if (action === 'club') return clubHandler(req, res);
-  if (action === 'owner') return ownerHandler(req, res);
   return json(res, 404, { ok: false, error: 'Unknown PLP action' });
 }

@@ -1,3 +1,4 @@
+import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
 import activateSubscription from './subscription/_activate.js';
 import cancelSubscription from './subscription/_cancel.js';
 import createSubscription from './subscription/_create.js';
@@ -10,7 +11,8 @@ const handlers = new Map([
   ['status', subscriptionStatus],
 ]);
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
+  if (await refuseUnlessAuthorized(req, res)) return;
   const run = handlers.get(req.query?.operation);
   if (run) return run(req, res);
 

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#FAFAF7" />
+  <title>Private preview · Pueblo La Perla Boracay</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=oval-only-20261121" />
+  <style>
+    :root { color-scheme: light; }
+    html, body { margin: 0; min-height: 100%; background: #FAFAF7; color: #1A1A1A; }
+    body { min-height: 100svh; display: grid; place-items: center; font-family: Georgia, "Times New Roman", serif; padding: 24px; }
+    main { width: min(100%, 22rem); text-align: center; }
+    img { width: 72px; height: auto; margin: 0 auto 1.25rem; display: block; }
+    p { margin: 0 0 1.5rem; font-size: 1.05rem; line-height: 1.55; color: #2a2a24; }
+    form { display: grid; gap: 12px; }
+    label { display: grid; gap: 8px; text-align: left; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: #5c584f; }
+    input { width: 100%; box-sizing: border-box; min-height: 3rem; padding: 0.7rem 0.85rem; border: 1px solid #c9c2b2; background: #fff; color: #1A1A1A; font: 1rem/1.4 Georgia, serif; border-radius: 0; }
+    input:focus { outline: 2px solid #8a6d3b; outline-offset: 1px; }
+    button { min-height: 3rem; border: 0; background: #1A1A1A; color: #FAFAF7; font: 0.8rem/1.2 Georgia, serif; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+    button:hover { background: #746130; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .error { margin: 0; min-height: 1.4em; font-size: 0.92rem; color: #7a2e24; }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/brand/PLP_Editorial_Vector_Logo.svg" alt="Pueblo La Perla" width="72" height="100" />
+    <p>This website is in private preview.</p>
+    <form id="preview-form" method="post" action="/api/plp?action=preview-verify">
+      <label>Access code
+        <input id="code" name="code" type="text" required autocomplete="off" spellcheck="false" autocapitalize="off" />
+      </label>
+      <button type="submit" id="submit">Enter</button>
+      <p class="error" id="status" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <script>
+    (function () {
+      var form = document.getElementById('preview-form');
+      var status = document.getElementById('status');
+      var submit = document.getElementById('submit');
+      var next = new URLSearchParams(location.search).get('next') || '/';
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        status.textContent = '';
+        submit.disabled = true;
+        fetch('/api/plp?action=preview-verify', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ code: document.getElementById('code').value, next: next })
+        }).then(function (response) {
+          return response.json().then(function (data) {
+            if (!response.ok || !data.ok) throw new Error(data.error || 'That code was not accepted.');
+            location.replace(data.next || '/');
+          });
+        }).catch(function (error) {
+          status.textContent = error.message || 'That code was not accepted.';
+          submit.disabled = false;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

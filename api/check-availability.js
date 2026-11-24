@@ -2,9 +2,11 @@ import { getAvailabilityConflicts, getUnavailableNights } from './_availabilityH
 import { isSupabaseConfigured } from './_supabase.js';
 import { shiftMonth, todayAtResort, validDate } from '../lib/booking-dates.js';
 import { PLP_ROOMS } from '../lib/pricing.js';
+import { refuseUnlessAuthorized } from '../lib/preview-gate.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
+  if (await refuseUnlessAuthorized(req, res)) return;
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });

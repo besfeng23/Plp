@@ -91,7 +91,7 @@ export default function PublicPreview({onConnectPrivateData}) {
       </header>
       <div className="owner-content">
         <div className="owner-preview-notice" role="status"><ShieldCheck size={18}/><div><strong>Preview mode · No passcode</strong><p>The office opens directly. Private records, financial figures, member information and analytics remain hidden.</p></div></div>
-        <div className="owner-heading"><span className="owner-eyebrow">DOCTORA'S DIGITAL PRIVATE OFFICE</span>
+        <div className="owner-heading"><span className="owner-eyebrow">DIGITAL PRIVATE OFFICE</span>
           <h1>{active==='overview'?'Your business, in one place.':topic.title}</h1>
           <div><p>{active==='overview'?'A central executive workspace for PLP Boracay and the future Pearl Club chapters.':topic.description}</p></div>
         </div>

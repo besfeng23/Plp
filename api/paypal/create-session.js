@@ -9,6 +9,7 @@ import { isCheckoutAllowed } from '../../lib/paypal-checkout-policy.js';
 import { PLP_CURRENCY, bookingAmounts } from '../../lib/pricing.js';
 import { SafePayPalError, createPayPalOrder, getBaseUrlSource, getPayPalMode } from './_paypal.js';
 import { findBookingByReference, getSupabaseConfigError, isSupabaseConfigured, selectRows } from '../_supabase.js';
+import { refuseUnlessAuthorized } from '../../lib/preview-gate.js';
 
 // Emit a redaction-safe diagnostic line to the Vercel runtime logs so a failed
 // checkout can be diagnosed from production logs without exposing any secret.
@@ -70,6 +71,8 @@ export default async function handler(req, res) {
   }
 
   let bookingReference = null;
+  if (await refuseUnlessAuthorized(req, res)) return;
+
   try {
     let body;
     try {
