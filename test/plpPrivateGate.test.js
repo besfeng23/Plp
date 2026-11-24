@@ -240,7 +240,11 @@ test('robots.txt still allows recrawl (no site-wide Disallow: /) and the preview
   const page = read('public/private-preview.html');
   assert.match(page, /name="robots" content="noindex,nofollow,noarchive"/);
   assert.match(page, /This website is in private preview/);
-  assert.doesNotMatch(page, /facebook|instagram|tiktok|mailto:|wa\.me|e-mango|917 887/i);
+  assert.match(page, /href="tel:\+639604792247"/);
+  assert.match(page, /\+63 960 479 2247/);
+  assert.match(page, /href="https:\/\/wa\.me\/639604792247"/);
+  assert.doesNotMatch(page, /facebook|instagram|tiktok|mailto:|e-mango|917 887|\/contact/i);
+  assert.match(read('scripts/prepare-plp-static-pages.mjs'), /private-preview/i);
   assert.doesNotMatch(read('middleware.js'), /node:crypto|createHmac/);
   assert.doesNotMatch(read('lib/preview-gate.js'), /node:crypto|createHmac/);
   assert.match(read('lib/preview-gate.js'), /crypto\.subtle/);

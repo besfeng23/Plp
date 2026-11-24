@@ -10,7 +10,7 @@ const publicDir = path.join(root, 'public');
 
 const accommodationRates = new Map(PLP_ROOMS.map(room => [room.key, room.rate]));
 // Internal pages never receive guest-site post-processing (trust strip, reserve bar, analytics).
-const excludePatterns = [/photo-library/i, /admin/i, /ops/i, /growth-plan/i, /^404\.html$/];
+const excludePatterns = [/photo-library/i, /admin/i, /ops/i, /growth-plan/i, /private-preview/i, /^404\.html$/];
 
 const trustStrip = `<section class="plp-trust-strip" data-plp-trust-strip="true" aria-label="Reservation trust details"><div class="plp-trust-strip__inner"><div><span>Location</span><strong>High Boracay</strong></div><div><span>Booking</span><strong>Room + dates first</strong></div><div><span>Arrival</span><strong>Port transfer support</strong></div><div><span>Sales</span><strong>${conciergePhoneDisplay}</strong></div></div></section>`;
 const mobileAction = `<nav class="plp-mobile-action" data-plp-mobile-action="true" aria-label="Quick site navigation"><a href="/booking">Book</a><a href="/accommodation">Rooms</a><a href="/contact">Help</a></nav>`;
