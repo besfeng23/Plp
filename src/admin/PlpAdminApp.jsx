@@ -8,7 +8,7 @@ import { Activity, ArrowLeft, ArrowRight, BedDouble, BookOpen, CalendarDays, Cal
 import { bookingStatus, buildGuestRoster, checkIn, checkOut, guestName, manilaToday, reservationReference, rowField, statusKey, summarizeRecords } from './plpAdminModel.js';
 import { isTestRecord, recordMoney } from '../../lib/admin-records.js';
 import { SOCIAL_ICON_PATHS } from '../../lib/social.js';
-import { SCREENS, TILES, OWNER_CONFIRMATIONS, visibleScreens, visibleTiles } from './adminNavigation.js';
+import { SCREENS, TILES, OWNER_CONFIRMATIONS, EXPANSION_TEASERS, visibleScreens, visibleTiles } from './adminNavigation.js';
 import ConciergeInbox from './ConciergeInbox.jsx';
 import AffiliateAdmin from './AffiliateAdmin.jsx';
 import OwnerMonth from './OwnerMonth.jsx';
@@ -339,6 +339,8 @@ export default function PlpAdminApp() {
       {current?.id === 'growth' && <>
         <p className="plp-adm-subhead">Waiting on the owners</p>
         <SimpleRows items={OWNER_CONFIRMATIONS.map(item => ({ key: item.id, title: item.title, detail: item.detail }))} />
+        <p className="plp-adm-subhead">Internal expansion planning</p>
+        <SimpleRows items={EXPANSION_TEASERS.map(item => ({ key: item.id, title: item.title, detail: item.detail, state: 'Teaser' }))} />
       </>}
       {current && !tiles.length && <Empty>Nothing to show for your role.</Empty>}
     </main>

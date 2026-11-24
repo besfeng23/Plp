@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
-import { TILES, OWNER_CONFIRMATIONS } from '../src/admin/adminNavigation.js';
+import { TILES, OWNER_CONFIRMATIONS, EXPANSION_TEASERS } from '../src/admin/adminNavigation.js';
 import { socialProfiles, socialLinksHtml } from '../lib/social.js';
 import { ensureSocialLinks } from '../scripts/prepare-plp-static-pages.mjs';
 
@@ -83,4 +83,26 @@ test('official social links: site config, footer, contact, structured data and s
   assert.match(read('scripts/prepare-plp-static-pages.mjs'), /\/growth-plan\/i/);
   for (const page of ['public/accommodation.html', 'public/experiences.html', 'public/privacy/index.html', 'public/boracay-family-villa/index.html'])
     assert.match(read(page), /data-plp-social="true"/, page);
+});
+
+test('Growth & Marketing lists Spain, Malaysia and Indonesia as internal teasers only', () => {
+  assert.deepEqual(EXPANSION_TEASERS.map(item => item.id), ['spain', 'malaysia', 'indonesia']);
+  assert.deepEqual(EXPANSION_TEASERS.map(item => item.title), ['Spain', 'Malaysia', 'Indonesia']);
+  for (const item of EXPANSION_TEASERS) {
+    assert.match(item.detail, /Internal expansion teaser only/i);
+    assert.match(item.detail, /Not an operating PLP location/i);
+    assert.match(item.detail, /No booking, pricing or public opening is offered/i);
+    assert.match(item.detail, /Subject to owner approval/i);
+    assert.doesNotMatch(item.detail, /now open|book now|from \$|USD|price|rates start|accepting reservations/i);
+  }
+  const app = read('src/admin/PlpAdminApp.jsx');
+  assert.match(app, /EXPANSION_TEASERS/);
+  assert.match(app, /Internal expansion planning/);
+  assert.match(app, /state: 'Teaser'/);
+  // Teasers stay on the existing admin Growth list. They are not guest-facing.
+  for (const page of ['index.html', 'booking.html', 'public/accommodation.html', 'affiliate.html', 'public/private-preview.html']) {
+    const html = read(page);
+    assert.doesNotMatch(html, /Internal expansion teaser only/);
+    assert.doesNotMatch(html, /Spain, Malaysia and Indonesia/);
+  }
 });

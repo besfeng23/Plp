@@ -67,6 +67,14 @@ export const TILES = {
   ],
 };
 
+// Clearly labeled internal expansion teasers only. Not operating locations.
+// No booking, pricing or public opening is offered. Subject to owner approval.
+export const EXPANSION_TEASERS = [
+  { id: 'spain', title: 'Spain', detail: 'Internal expansion teaser only. Not an operating PLP location. No booking, pricing or public opening is offered. Subject to owner approval.' },
+  { id: 'malaysia', title: 'Malaysia', detail: 'Internal expansion teaser only. Not an operating PLP location. No booking, pricing or public opening is offered. Subject to owner approval.' },
+  { id: 'indonesia', title: 'Indonesia', detail: 'Internal expansion teaser only. Not an operating PLP location. No booking, pricing or public opening is offered. Subject to owner approval.' },
+];
+
 // The four commercial inputs from the retired Growth Plan. Shown on this
 // screen only; they are not a checklist and are not stored in the database.
 export const OWNER_CONFIRMATIONS = [
