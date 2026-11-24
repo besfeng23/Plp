@@ -75,7 +75,7 @@ function signup(message = '') {
   demo = false;
   period = 30;
   show(message, Boolean(message));
-  app.innerHTML = authShell('<p class="eyebrow">Partner access</p><h2>Welcome to PLP.</h2><p class="muted">Create your account or sign in with your email. No invitation required.</p><form id="enroll"><label>Name <input name="name" autocomplete="name" maxlength="120" placeholder="Your name (new partners)"></label><label>Email address <input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label><label>Partner type <select name="tier"><option value="referral">Referral partner</option><option value="travel_agent">Travel agent</option><option value="influencer">Creator / influencer</option></select></label><button class="button" type="submit">Send verification code</button></form><div class="auth-divider"><button class="button secondary" type="button" id="demo">Explore test dashboard</button><small>Demo data is illustrative only. Real rates are pending approval and the resort website remains private.</small></div>');
+  app.innerHTML = authShell('<p class="eyebrow">Partner access</p><h2>Welcome to PLP.</h2><p class="muted">Create your account or sign in with your email. No invitation required.</p><form id="enroll"><label>Name <input name="name" autocomplete="name" maxlength="120" placeholder="Your name (new partners)"></label><label>Email address <input name="email" type="email" autocomplete="email" maxlength="180" placeholder="you@example.com" required></label><label>Partner type <select name="tier"><option value="referral">Referral partner</option><option value="travel_agent">Travel agent</option><option value="influencer">Creator / influencer</option></select></label><button class="button" type="submit">Send sign-in email</button></form><div class="auth-divider"><button class="button secondary" type="button" id="demo">Explore test dashboard</button><small>Demo data is illustrative only. Real rates are pending approval and the resort website remains private.</small></div>');
   app.querySelector('#demo').addEventListener('click', demoDashboard);
   app.querySelector('#enroll').addEventListener('submit', async event => {
     event.preventDefault();
@@ -89,8 +89,8 @@ function signup(message = '') {
   });
 }
 function verifyForm() {
-  show('Check your email for the verification code.');
-  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">Enter the code sent to '+escape(enrollment.email)+'.</p><form id="verify"><label>Verification code <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
+  show('Check your email for the secure sign-in link or verification code.');
+  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">We sent a sign-in email to '+escape(enrollment.email)+'. Copy its secure confirmation link into the field below, or enter your verification code if the email includes one. Keep this page open.</p><form id="verify"><label>Verification link or code <input name="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
   app.querySelector('#back').addEventListener('click', () => signup());
   app.querySelector('#verify').addEventListener('submit', async event => {
     event.preventDefault();
@@ -231,6 +231,21 @@ function render(data, view = 'overview') {
 }
 // Referrals &amp; Payouts are represented as separate ledger views for better navigation.
 async function start() {
+  // A provider email link may return a one-time authenticated browser session.
+  // Remove credentials from the address bar before doing anything else.
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  const accessToken = fragment.get('access_token');
+  if (accessToken || fragment.has('refresh_token') || fragment.has('error_description')) {
+    history.replaceState(null, '', location.pathname);
+    if (!accessToken) return signup('That sign-in link expired. Request another email.');
+    try {
+      await request('enroll-link', {accessToken});
+      render(await request('me'));
+    } catch (error) {
+      signup(error.message);
+    }
+    return;
+  }
   const invite = new URLSearchParams(location.search).get('invite');
   try {
     if (invite) {
