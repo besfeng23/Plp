@@ -6,6 +6,9 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
+  const [review, setReview] = useState(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewError, setReviewError] = useState('');
   const [form, setForm] = useState({ name: '', email: '', tier: 'referral' });
   const heading = view === 'payouts' ? 'Payouts' : 'Partners';
 
@@ -24,6 +27,17 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
     load().catch((err) => { if (!cancelled) setError(err.message); });
     return () => { cancelled = true; };
   }, [code, view, refreshedAt]);
+
+  async function loadReview() {
+    setReviewBusy(true);setReviewError('');setReview(null);
+    try {
+      const response=await fetch('/api/admin?action=affiliates&view=commission-review',{cache:'no-store',headers:{'X-PLP-Staff-Code':code}});
+      const result=await response.json();
+      if(!response.ok||!result.ok||!result.readOnly||!Array.isArray(result.review))throw Error(result.error||'Review unavailable.');
+      setReview(result);
+    } catch(error){setReviewError(error.message);}
+    finally{setReviewBusy(false);}
+  }
 
   async function post(body, success) {
     setBusy(true); setNote(''); setError('');
@@ -49,6 +63,13 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
       {error && <p className="plp-form-error" role="alert">{error}</p>}
       {note && <p role="status">{note}</p>}
       <p className="plp-disclosure">New payout recording is locked pending owner-approved commission reconciliation. Historical settlement records remain available.</p>
+      <div className="plp-panel__head"><div><h3>Commission review</h3><p>Review real referred bookings before posting any commission.</p></div></div>
+      <button className="plp-primary" type="button" disabled={reviewBusy} onClick={loadReview}>{reviewBusy?'Checking…':'Review referred bookings'}</button>
+      {reviewError && <p role="alert">{reviewError}</p>}
+      {review && <div className="plp-task-list" aria-live="polite">
+        <p className="plp-disclosure">Read-only estimates. Nothing is posted or paid. Verify receipts, refunds and approved commercial terms before settlement.{review.hasMore?' Latest 50 bookings only.':''}</p>
+        {review.review.length===0?<p>No referred bookings to review.</p>:review.review.map(row=><article className="plp-enquiry" key={row.bookingId}><header><h4>{row.reference}</h4><time>{row.status}</time></header><p>{row.partnerName}</p>{row.reasons.length?<ul>{row.reasons.map(reason=><li key={reason}>{reason}</li>)}</ul>:<p>Draft commission: {row.currency} {row.proposedAmount} · reconciliation required</p>}</article>)}
+      </div>}
       <div className="plp-task-list">{(data.rows || []).length === 0 ? <p className="plp-disclosure">No payouts recorded.</p>
         : data.rows.map((row) => <article className="plp-enquiry" key={row.id}>
           <header><h4>{row.currency} {row.amount}</h4><time>{String(row.created_at || '').slice(0, 10)}</time></header>
