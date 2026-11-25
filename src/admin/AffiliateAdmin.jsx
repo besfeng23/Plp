@@ -7,7 +7,20 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', tier: 'referral' });
+  const [review, setReview] = useState(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
   const heading = view === 'payouts' ? 'Payouts' : 'Partners';
+
+  async function loadReview() {
+    setReviewBusy(true); setError(''); setReview(null);
+    try {
+      const response = await fetch('/api/admin?action=affiliates&view=financial-review', {cache:'no-store',headers:{'X-PLP-Staff-Code':code}});
+      const result = await response.json();
+      if(!response.ok || !result.ok || result.previewOnly !== true || result.postingAllowed !== false) throw new Error(result.error || 'Financial review unavailable.');
+      setReview(result);
+    } catch(err) { setError(err.message); }
+    finally {setReviewBusy(false);}
+  }
 
   async function load() {
     setError('');
@@ -49,6 +62,22 @@ export default function AffiliateAdmin({ code, view = 'partners', refreshedAt })
       {error && <p className="plp-form-error" role="alert">{error}</p>}
       {note && <p role="status">{note}</p>}
       <p className="plp-disclosure">New payout recording is locked pending owner-approved commission reconciliation. Historical settlement records remain available.</p>
+      <button type="button" className="plp-primary" disabled={reviewBusy} onClick={loadReview}>{reviewBusy ? 'Reviewing…' : 'Review commissions and settlements'}</button>
+      {review && <section className="plp-task-list" aria-label="Financial review">
+        <h4>Planning review — no financial posting</h4>
+        <p className="plp-disclosure">{review.proposedBasis}</p>
+        {!review.reviews.length && <p>No attributed bookings to review.</p>}
+        {review.reviews.map((row,index)=><article className="plp-enquiry" key={index}>
+          <header><h4>{row.reference} · {row.partner}</h4></header>
+          <p>{row.illustrativeAmount !== null ? 'Illustrative commission: '+row.currency+' '+row.illustrativeAmount : 'No calculable amount'}</p>
+          {row.reasons.length ? <p>{row.reasons.join(' · ')}</p> : <p>Candidate for approval only. No commission created.</p>}
+        </article>)}
+        <h4>Unallocated approved / payable records</h4>
+        {!review.settlements.length && <p>No unallocated payable records.</p>}
+        {review.settlements.map(row=><article className="plp-enquiry" key={row.affiliateId+row.currency}>
+          <p>{row.currency} {row.amount} · {row.records} records · Partner {row.affiliateId}</p>
+        </article>)}
+      </section>}
       <div className="plp-task-list">{(data.rows || []).length === 0 ? <p className="plp-disclosure">No payouts recorded.</p>
         : data.rows.map((row) => <article className="plp-enquiry" key={row.id}>
           <header><h4>{row.currency} {row.amount}</h4><time>{String(row.created_at || '').slice(0, 10)}</time></header>
