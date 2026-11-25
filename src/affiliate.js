@@ -95,7 +95,7 @@ function signup(message = '') {
 function verifyForm() {
   show('Check your email for the secure sign-in link or verification code.');
   app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">'+(enrollment.email?'We sent a sign-in email to '+escape(enrollment.email)+'.':'We sent a sign-in email to your invited address.')+' Copy the confirmation link from the email (press and hold the link if needed) and paste it below, or enter the code if provided. Do not share the link with anyone.</p><form id="verify"><label>Verification link or code <input name="code" type="password" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
-  app.querySelector('#back').addEventListener('click', () => signup());
+  app.querySelector('#back').addEventListener('click', async () => {try{await request('enroll-cancel',{});enrollment={};signup();}catch(error){show(error.message,true);}});
   app.querySelector('#verify').addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
