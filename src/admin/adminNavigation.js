@@ -49,8 +49,8 @@ export const TILES = {
   growth: [
     // Official social accounts, from lib/site-config.js only.
     ...socialProfiles().map(p => ({ id: p.key, label: p.label, perm: 'growth', href: p.url })),
-    { id: 'partners', label: 'Partners', perm: 'growth' },
-    { id: 'payouts', label: 'Payouts', perm: 'growth' },
+    { id: 'partners', label: 'Partners', perm: 'affiliate.manage' },
+    { id: 'payouts', label: 'Payouts', perm: 'affiliate.manage' },
   ],
   reports: [
     { id: 'month', label: 'Month in review', perm: 'finance.read' },

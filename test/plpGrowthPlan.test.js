@@ -36,7 +36,7 @@ test('Growth & Marketing shows official social links and the four owner confirma
   assert.deepEqual(socialTiles.map(t => t.id), socialProfiles().map(p => p.key));
   assert.deepEqual(programTiles.map(t => t.id), ['partners', 'payouts']);
   for (const tile of TILES.growth) {
-    assert.equal(tile.perm, 'growth');
+    assert.equal(tile.perm, tile.href ? 'growth' : 'affiliate.manage');
     if (tile.href) {
       assert.match(tile.href, /^https:\/\//);
       assert.ok(!tile.href.includes('plp-growth-plan'));
