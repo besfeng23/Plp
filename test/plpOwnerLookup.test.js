@@ -19,7 +19,9 @@ const owner = {
   email_confirmed_at: '2026-01-01T00:00:00Z',
   is_anonymous: false,
 };
-const substring = { ...owner, email: EMAIL + '.evil' };
+const substring = { ...owner, id: 'bbbbbbbb-bbbb-4ccc-8ddd-eeeeeeeeeeee', email: EMAIL + '.evil' };
+const prefix = { ...owner, id: 'cccccccc-bbbb-4ccc-8ddd-eeeeeeeeeeee', email: 'x' + EMAIL };
+const caseVariant = { ...owner, email: EMAIL.toUpperCase() };
 
 function mockFetch(...replies) {
   const calls = [];
@@ -44,20 +46,37 @@ function assertListRequest(call, page) {
 
 test('owner lookup filters by email and validates an exact match by ID', async () => {
   const { fetcher, calls } = mockFetch(
-    { body: { users: [substring, owner] } },
+    { body: { users: [substring, prefix, owner] } },
     { body: { user: owner } },
   );
-  assert.deepEqual(await lookupOwnerUser(env, fetcher), owner);
+  const result = await lookupOwnerUser(env, fetcher);
+  assert.deepEqual(result, owner);
+  assert.equal(result.id, UID);
   assert.equal(calls.length, 2);
   assertListRequest(calls[0], 1);
   assert.equal(calls[1].url.href, BASE + '/auth/v1/admin/users/' + UID);
 });
 
-test('owner lookup rejects a substring-only email match', async () => {
-  const { fetcher, calls } = mockFetch({ body: { users: [substring] } });
-  assert.equal(await lookupOwnerUser(env, fetcher), null);
-  assert.equal(calls.length, 1);
+test('owner lookup rejects prefix-only and suffix-only email matches', async () => {
+  for (const candidate of [substring, prefix]) {
+    const { fetcher, calls } = mockFetch({ body: { users: [candidate] } });
+    assert.equal(await lookupOwnerUser(env, fetcher), null);
+    assert.equal(calls.length, 1);
+    assertListRequest(calls[0], 1);
+  }
+});
+
+test('owner lookup accepts an exact case-normalized email match', async () => {
+  const { fetcher, calls } = mockFetch(
+    { body: { users: [substring, prefix, caseVariant] } },
+    { body: { user: owner } },
+  );
+  const result = await lookupOwnerUser(env, fetcher);
+  assert.deepEqual(result, owner);
+  assert.equal(result.id, UID);
+  assert.equal(calls.length, 2);
   assertListRequest(calls[0], 1);
+  assert.equal(calls[1].url.href, BASE + '/auth/v1/admin/users/' + UID);
 });
 
 test('owner lookup continues after a full page and stops at a short page', async () => {
@@ -130,6 +149,16 @@ test('owner lookup rejects an unset designation with two allow-listed owners', a
   delete multiOwnerEnv.PLP_OWNER_EMAIL;
   assert.equal(await lookupOwnerUser(multiOwnerEnv, fetcher), null);
   assert.equal(calls.length, 0);
+});
+
+test('owner lookup rejects an invalid-format designation without HTTP calls', async () => {
+  const designated = 'not-an-email';
+  for (const list of ['other@x.com,' + EMAIL, EMAIL + ',' + designated]) {
+    const { fetcher, calls } = mockFetch();
+    const multiOwnerEnv = { ...env, PLP_OWNER_EMAILS: list, PLP_OWNER_EMAIL: designated };
+    assert.equal(await lookupOwnerUser(multiOwnerEnv, fetcher), null);
+    assert.equal(calls.length, 0);
+  }
 });
 
 test('god owner revalidation rejects missing or outside-list designations', async () => {
