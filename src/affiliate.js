@@ -46,7 +46,7 @@ const list = data => Array.isArray(data) ? data : [];
 const date = value => value ? escape(String(value).slice(0,10)) : '—';
 const pill = value => {
   const s = String(value || 'Unknown').toLowerCase();
-  return '<span class="pill '+(['active','approved','paid','payable','completed','recorded','paid_deposit','confirmed'].includes(s)?'good':['declined','paused','cancelled','reversed','failed'].includes(s)?'bad':'')+'">'+escape(label(value))+'</span>';
+  return '<span class="pill '+(['active','approved','paid','payable','checked_out','completed','recorded','paid_deposit','confirmed'].includes(s)?'good':['declined','paused','cancelled','reversed','failed'].includes(s)?'bad':'')+'">'+escape(label(value))+'</span>';
 };
 const cash = (amount,currency) => {
   try { return new Intl.NumberFormat('en-US',{style:'currency',currency:String(currency || 'USD'),currencyDisplay:'code',maximumFractionDigits:2}).format(Number(amount)||0); }
@@ -240,7 +240,7 @@ function mobileRender(data, requested) {
   if(view==='overview'){
     body='<section class="m-welcome"><div><p class="eyebrow">Partner workspace</p><h1>Welcome, '+escape(first)+'.</h1></div>'+pill(partner.status)+'</section>'
       +'<section class="m-share">'+linkTools+'</section>'
-      +'<section class="m-stats" aria-label="Partner activity"><button type="button" data-view="referrals" data-ref="enquiries"><small>Enquiries</small><strong>'+escape(enquiries===null?'—':enquiries.length)+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Bookings</small><strong>'+bookings.length+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Completed stays</small><strong>'+bookings.filter(r=>String(r.status).toLowerCase()==='completed').length+'</strong></button></section>'
+      +'<section class="m-stats" aria-label="Partner activity"><button type="button" data-view="referrals" data-ref="enquiries"><small>Enquiries</small><strong>'+escape(enquiries===null?'—':enquiries.length)+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Bookings</small><strong>'+bookings.length+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Completed stays</small><strong>'+bookings.filter(r=>['checked_out','completed'].includes(String(r.status).toLowerCase())).length+'</strong></button></section>'
       +'<button type="button" class="m-earn" data-view="commissions"><div><small>Approved / payable</small><strong>'+escape(available?mobileAmount(due,'commission_amount'):'Not active')+'</strong><span>'+escape(demo?'Sample earnings · not payable':available?'See your earnings':'Rates pending approval')+'</span></div><span aria-hidden="true">›</span></button>'
       +mobileSection('Recent bookings',mobileBookings(bookings.slice(0,2)),'<button class="text-button" type="button" data-view="referrals" data-ref="bookings">View all</button>')
       +'<details class="m-disclosure"><summary>Program details</summary><p>Pre-launch · Resort website private.</p><p>Rates: '+escape(demo?'Sample only':rateLabel(partner))+'</p><p>Payouts: Recorded settlements only.</p></details>';
@@ -286,7 +286,7 @@ function render(data, view = 'overview') {
   if(view==='overview') {
     const available = demo||data.commissionsActive;
     const earnings = available?total(due,'commission_amount'):'—';
-    const windowComplete=periodReferrals.filter(r=>String(r.status).toLowerCase()==='completed').length;
+    const windowComplete=periodReferrals.filter(r=>['checked_out','completed'].includes(String(r.status).toLowerCase())).length;
     const filter='<div class="report-control"><label for="reportPeriod">Reporting period</label><select id="reportPeriod">'+[7,30,90].map(n=>'<option value="'+n+'" '+(period===n?'selected':'')+'>Last '+n+' days</option>').join('')+'</select></div>';
     const capNote=hasMore(data)?'Totals reflect loaded records only. Load older records below.':'Based on available records.';
     body='<section class="partner-brief" aria-label="Financial position and partner details"><div class="brief-financial"><p class="eyebrow">Approved / payable</p><strong class="brief-amount">'+escape(earnings)+'</strong><p>'+escape(demo?'Illustrative · Not payable':available?'Latest approved and payable entries':'Commission posting not active')+'</p><button class="text-button" type="button" data-view="commissions">Commission ledger</button></div><div class="brief-financial"><p class="eyebrow">Recorded payouts</p><strong class="brief-amount">'+escape(total(paid,'amount'))+'</strong><p>'+escape(demo?'Illustrative settlements':'Latest recorded settlements')+'</p><button class="text-button" type="button" data-view="payouts">Payout history</button></div><div class="brief-account"><p class="eyebrow">Partner account</p><strong>'+escape(partner.name||'Partner')+'</strong><small>'+escape(label(partner.tier))+' · '+escape(demo?'Demo account':label(partner.status))+'</small><div class="brief-details"><span>Referral code <strong class="code">'+escape(partner.referral_code||'—')+'</strong></span><span>Rate <strong>'+escape(demo?'Simulation only':rateLabel(partner))+'</strong></span></div></div></section>'
