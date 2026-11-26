@@ -73,6 +73,7 @@ function demoDashboard() {
 function authShell(content) {
   return '<div class="auth"><section class="auth-brand">'+brand()+'<div><p class="eyebrow">PLP Boracay</p><h1>Exceptional stays.<br>Meaningful partnerships.</h1><p>A dedicated workspace for our travel, creator and referral partners.</p></div><footer>Pueblo La Perla · Partner relations</footer></section><main class="auth-main"><div class="auth-form">'+content+'</div></main></div>';
 }
+function isCompletedStay(row) { return ['completed','checked_out'].includes(String(row?.status||'').toLowerCase()); }
 function signup(message = '') {
   activeData=null; mobileReferrals='bookings'; mobileEarnings='commissions';
   demo = false;
@@ -93,8 +94,8 @@ function signup(message = '') {
 }
 function verifyForm() {
   show('Check your email for the secure sign-in link or verification code.');
-  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">'+(enrollment.email?'We sent a sign-in email to '+escape(enrollment.email)+'.':'We sent a sign-in email to your invited address.')+' Copy its confirmation link here, or enter the code if provided. Keep this page open.</p><form id="verify"><label>Verification link or code <input name="code" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
-  app.querySelector('#back').addEventListener('click', () => signup());
+  app.innerHTML = authShell('<p class="eyebrow">Secure verification</p><h2>Check your email.</h2><p class="muted">'+(enrollment.email?'We sent a sign-in email to '+escape(enrollment.email)+'.':'We sent a sign-in email to your invited address.')+' Copy the confirmation link from the email (press and hold the link if needed) and paste it below, or enter the code if provided. Do not share the link with anyone.</p><form id="verify"><label>Verification link or code <input name="code" type="password" autocomplete="one-time-code" spellcheck="false" autocapitalize="off" maxlength="2048" placeholder="Paste the email link or code" required></label><button class="button" type="submit">Open my dashboard</button></form><button class="button secondary" type="button" id="back">Change email</button>');
+  app.querySelector('#back').addEventListener('click', async () => {try{await request('enroll-cancel',{});enrollment={};signup();}catch(error){show(error.message,true);}});
   app.querySelector('#verify').addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -240,7 +241,7 @@ function mobileRender(data, requested) {
   if(view==='overview'){
     body='<section class="m-welcome"><div><p class="eyebrow">Partner workspace</p><h1>Welcome, '+escape(first)+'.</h1></div>'+pill(partner.status)+'</section>'
       +'<section class="m-share">'+linkTools+'</section>'
-      +'<section class="m-stats" aria-label="Partner activity"><button type="button" data-view="referrals" data-ref="enquiries"><small>Enquiries</small><strong>'+escape(enquiries===null?'—':enquiries.length)+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Bookings</small><strong>'+bookings.length+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Completed stays</small><strong>'+bookings.filter(r=>String(r.status).toLowerCase()==='completed').length+'</strong></button></section>'
+      +'<section class="m-stats" aria-label="Partner activity"><button type="button" data-view="referrals" data-ref="enquiries"><small>Enquiries</small><strong>'+escape(enquiries===null?'—':enquiries.length)+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Bookings</small><strong>'+bookings.length+'</strong></button><button type="button" data-view="referrals" data-ref="bookings"><small>Completed stays</small><strong>'+bookings.filter(isCompletedStay).length+'</strong></button></section>'
       +'<button type="button" class="m-earn" data-view="commissions"><div><small>Approved / payable</small><strong>'+escape(available?mobileAmount(due,'commission_amount'):'Not active')+'</strong><span>'+escape(demo?'Sample earnings · not payable':available?'See your earnings':'Rates pending approval')+'</span></div><span aria-hidden="true">›</span></button>'
       +mobileSection('Recent bookings',mobileBookings(bookings.slice(0,2)),'<button class="text-button" type="button" data-view="referrals" data-ref="bookings">View all</button>')
       +'<details class="m-disclosure"><summary>Program details</summary><p>Pre-launch · Resort website private.</p><p>Rates: '+escape(demo?'Sample only':rateLabel(partner))+'</p><p>Payouts: Recorded settlements only.</p></details>';
@@ -286,7 +287,7 @@ function render(data, view = 'overview') {
   if(view==='overview') {
     const available = demo||data.commissionsActive;
     const earnings = available?total(due,'commission_amount'):'—';
-    const windowComplete=periodReferrals.filter(r=>String(r.status).toLowerCase()==='completed').length;
+    const windowComplete=periodReferrals.filter(isCompletedStay).length;
     const filter='<div class="report-control"><label for="reportPeriod">Reporting period</label><select id="reportPeriod">'+[7,30,90].map(n=>'<option value="'+n+'" '+(period===n?'selected':'')+'>Last '+n+' days</option>').join('')+'</select></div>';
     const capNote=hasMore(data)?'Totals reflect loaded records only. Load older records below.':'Based on available records.';
     body='<section class="partner-brief" aria-label="Financial position and partner details"><div class="brief-financial"><p class="eyebrow">Approved / payable</p><strong class="brief-amount">'+escape(earnings)+'</strong><p>'+escape(demo?'Illustrative · Not payable':available?'Latest approved and payable entries':'Commission posting not active')+'</p><button class="text-button" type="button" data-view="commissions">Commission ledger</button></div><div class="brief-financial"><p class="eyebrow">Recorded payouts</p><strong class="brief-amount">'+escape(total(paid,'amount'))+'</strong><p>'+escape(demo?'Illustrative settlements':'Latest recorded settlements')+'</p><button class="text-button" type="button" data-view="payouts">Payout history</button></div><div class="brief-account"><p class="eyebrow">Partner account</p><strong>'+escape(partner.name||'Partner')+'</strong><small>'+escape(label(partner.tier))+' · '+escape(demo?'Demo account':label(partner.status))+'</small><div class="brief-details"><span>Referral code <strong class="code">'+escape(partner.referral_code||'—')+'</strong></span><span>Rate <strong>'+escape(demo?'Simulation only':rateLabel(partner))+'</strong></span></div></div></section>'
@@ -348,6 +349,9 @@ async function start() {
     }
     render(await request('me'));
   } catch (error) {
+    if(!invite && error.status===401){
+      try { const pending=await request('enroll-pending'); if(pending.pending){enrollment={};verifyForm();return;} } catch { /* Show sign-in if pending verification cannot be resumed. */ }
+    }
     signup(invite || error.status !== 401 ? error.message : '');
   }
 }

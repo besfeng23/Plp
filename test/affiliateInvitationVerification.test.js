@@ -48,6 +48,13 @@ test('invitation needs verified recipient email before consumption or session cr
     assert.match(result[2],/^__Host-plp_affiliate_enroll=/);
     assert.equal(partner,null);assert.equal(accepted,0);assert.equal(otp,1);
     const pending=result[2].split(';')[0];
+    const pendingStatus=await handleAffiliatePortal({method:'GET',headers:{cookie:pending}},{action:'enroll-pending'});
+    assert.deepEqual(pendingStatus[1],{ok:true,pending:true});
+    const absent=await handleAffiliatePortal({method:'GET',headers:{}},{action:'enroll-pending'});
+    assert.deepEqual(absent[1],{ok:true,pending:false});
+    const cancelled=await request('enroll-cancel',{},pending);
+    assert.equal(cancelled[0],200);
+    assert.match(cancelled[2],/^__Host-plp_affiliate_enroll=;.*Max-Age=0/);
     assert.equal((await request('enroll-verify',{code:'123456'},pending))[0],401);
     assert.equal(partner,null);assert.equal(accepted,0);
     verifiedEmail=invite.email;
