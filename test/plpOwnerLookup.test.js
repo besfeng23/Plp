@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lookupOwnerUser } from '../lib/owner-god-code.js';
+import { lookupOwnerUser, issueOwnerGodSession } from '../lib/owner-god-code.js';
+import { readOwnerCookie, validateGodOwner } from '../lib/owner-auth.js';
+import { readStaffTicket } from '../lib/access-control.js';
 
 const EMAIL = 'owner@x.com';
 const UID = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
@@ -81,25 +83,60 @@ test('owner lookup returns null on a non-OK list response', async () => {
   assertListRequest(calls[0], 1);
 });
 
-test('owner lookup selects the designated owner but main still rejects multi-owner sessions', async () => {
+test('owner lookup selects the designated owner in a two-owner allow-list', async () => {
   const { fetcher, calls } = mockFetch(
     { body: { users: [owner] } },
     { body: owner },
   );
   const multiOwnerEnv = { ...env, PLP_OWNER_EMAILS: 'other@x.com,' + EMAIL };
-  // bbe099c6: validateGodOwner still resolves an empty supplied email.
-  // Preserve fail-closed behavior until owner-auth.js also honors the designation.
-  assert.equal(await lookupOwnerUser(multiOwnerEnv, fetcher), null);
+  assert.deepEqual(await lookupOwnerUser(multiOwnerEnv, fetcher), owner);
   assert.equal(calls.length, 2);
   assertListRequest(calls[0], 1);
   assert.equal(calls[1].url.href, BASE + '/auth/v1/admin/users/' + UID);
 });
 
-test.todo('multi-owner god sign-in succeeds once validateGodOwner honors PLP_OWNER_EMAIL');
+test('multi-owner god sign-in issues valid owner and staff code sessions', async () => {
+  const { fetcher, calls } = mockFetch(
+    { body: { users: [owner] } },
+    { body: owner },
+  );
+  const multiOwnerEnv = {
+    ...env, PLP_OWNER_EMAILS: 'other@x.com,' + EMAIL,
+    PLP_OWNER_SESSION_SECRET: 'o'.repeat(64),
+    PLP_STAFF_SESSION_SECRET: 's'.repeat(64),
+    PLP_OWNER_GOD_CODE_HASH: 'a'.repeat(64),
+  };
+  const issued = await issueOwnerGodSession(multiOwnerEnv, { fetcher });
+  assert.equal(issued.ok, true);
+  assert.equal(issued.cookies.length, 2);
+  const req = { headers: { cookie: issued.cookies.map(c => c.split(';')[0]).join('; ') } };
+  for (const ticket of [readOwnerCookie(req, multiOwnerEnv), readStaffTicket(req, multiOwnerEnv)]) {
+    assert.equal(ticket?.uid, UID);
+    assert.equal(ticket?.authMethod, 'god-code');
+  }
+  assert.equal(calls.length, 2);
+});
 
 test('owner lookup rejects a designated email outside the allow-list', async () => {
   const { fetcher, calls } = mockFetch();
   const multiOwnerEnv = { ...env, PLP_OWNER_EMAILS: 'a@x.com,b@x.com' };
   assert.equal(await lookupOwnerUser(multiOwnerEnv, fetcher), null);
   assert.equal(calls.length, 0);
+});
+
+test('owner lookup rejects an unset designation with two allow-listed owners', async () => {
+  const { fetcher, calls } = mockFetch();
+  const multiOwnerEnv = { ...env, PLP_OWNER_EMAILS: 'other@x.com,' + EMAIL };
+  delete multiOwnerEnv.PLP_OWNER_EMAIL;
+  assert.equal(await lookupOwnerUser(multiOwnerEnv, fetcher), null);
+  assert.equal(calls.length, 0);
+});
+
+test('god owner revalidation rejects missing or outside-list designations', async () => {
+  for (const designated of [undefined, 'outside@x.com']) {
+    const multiOwnerEnv = { ...env, PLP_OWNER_EMAILS: 'other@x.com,' + EMAIL, PLP_OWNER_EMAIL: designated };
+    const { fetcher, calls } = mockFetch({ body: owner });
+    assert.equal(await validateGodOwner(UID, multiOwnerEnv, fetcher), null);
+    assert.equal(calls.length, 1);
+  }
 });
